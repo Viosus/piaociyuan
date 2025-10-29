@@ -1,0 +1,286 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+
+type Order = {
+  id: string;
+  eventId: number;
+  tierId: number;
+  qty: number;
+  holdId: string;
+  status: "PENDING" | "PAID";
+  createdAt: number;
+  paidAt?: number;
+};
+
+type EventInfo = {
+  id: number;
+  name: string;
+  city: string;
+  date: string;
+  time: string;
+};
+
+type TierInfo = {
+  id: number;
+  name: string;
+  price: number;
+};
+
+// ✅ 扩展订单类型，包含活动和票档信息
+type OrderWithDetails = Order & {
+  event?: EventInfo;
+  tier?: TierInfo;
+};
+
+export default function OrdersPage() {
+  const [orders, setOrders] = useState<OrderWithDetails[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [status, setStatus] = useState<"" | "PENDING" | "PAID">("");
+  const [q, setQ] = useState("");
+  const [error, setError] = useState<string | null>(null);
+
+  async function load() {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const url = status ? `/api/orders?status=${status}` : `/api/orders`;
+      console.log("🔍 [ORDERS_PAGE] 正在请求:", url);
+      
+      const res = await fetch(url, { cache: "no-store" });
+      console.log("📡 [ORDERS_PAGE] 响应状态:", res.status);
+      
+      if (!res.ok) {
+        throw new Error(`请求失败: ${res.status}`);
+      }
+      
+      const data = await res.json();
+      console.log("📦 [ORDERS_PAGE] 响应数据:", data);
+      
+      // ✅ 兼容多种返回格式
+      let orderList: Order[] = [];
+      
+      if (Array.isArray(data)) {
+        orderList = data;
+      } else if (data.data && Array.isArray(data.data)) {
+        orderList = data.data;
+      } else if (data.ok === true && Array.isArray(data.data)) {
+        orderList = data.data;
+      }
+      
+      console.log("✅ [ORDERS_PAGE] 解析后的订单数量:", orderList.length);
+      
+      // ✅ 为每个订单加载活动和票档信息
+      const ordersWithDetails = await Promise.all(
+        orderList.map(async (order) => {
+          try {
+            // 并行请求活动和票档信息
+            const [eventRes, tiersRes] = await Promise.all([
+              fetch(`/api/events/${order.eventId}`).catch(() => null),
+              fetch(`/api/tiers?eventId=${order.eventId}`).catch(() => null),
+            ]);
+
+            let event: EventInfo | undefined;
+            let tier: TierInfo | undefined;
+
+            if (eventRes?.ok) {
+              const eventData = await eventRes.json();
+              event = eventData;
+            }
+
+            if (tiersRes?.ok) {
+              const tiersData = await tiersRes.json();
+              const tiers = Array.isArray(tiersData) ? tiersData : tiersData.data || [];
+              tier = tiers.find((t: TierInfo) => t.id === order.tierId);
+            }
+
+            return { ...order, event, tier };
+          } catch (err) {
+            console.error("加载订单详情失败:", order.id, err);
+            return { ...order };
+          }
+        })
+      );
+      
+      console.log("✅ [ORDERS_PAGE] 订单详情加载完成");
+      setOrders(ordersWithDetails);
+    } catch (err: any) {
+      console.error("❌ [ORDERS_PAGE] 请求失败:", err);
+      setError(err.message || "加载失败");
+      setOrders([]);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    console.log("🔄 [ORDERS_PAGE] 组件挂载或 status 变化，重新加载");
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status]);
+
+  const filtered = useMemo(() => {
+    const key = q.trim().toLowerCase();
+    if (!key) return orders;
+    return orders.filter(o => o.id.toLowerCase().includes(key));
+  }, [orders, q]);
+
+  console.log("🎨 [ORDERS_PAGE] 当前渲染状态:", {
+    loading,
+    error,
+    ordersCount: orders.length,
+    filteredCount: filtered.length,
+  });
+
+  return (
+    <main className="min-h-screen p-8 bg-gray-50">
+      <div className="max-w-5xl mx-auto bg-white rounded-2xl shadow p-6">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+          <h1 className="text-2xl font-bold">我的订单</h1>
+          <div className="flex gap-2">
+            <input
+              value={q}
+              onChange={e => setQ(e.target.value)}
+              placeholder="搜索订单号"
+              className="px-3 py-2 border rounded-lg w-56"
+            />
+            <select
+              value={status}
+              onChange={e => setStatus(e.target.value as any)}
+              className="px-3 py-2 border rounded-lg"
+            >
+              <option value="">全部状态</option>
+              <option value="PENDING">待支付</option>
+              <option value="PAID">已支付</option>
+            </select>
+            <button
+              onClick={load}
+              className="px-3 py-2 border rounded-lg hover:bg-gray-50"
+            >
+              刷新
+            </button>
+          </div>
+        </div>
+
+        {/* 调试信息 */}
+        <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded text-xs">
+          <div className="font-mono">
+            <div>📊 调试信息:</div>
+            <div>• 加载状态: {loading ? "加载中..." : "已完成"}</div>
+            <div>• 错误信息: {error || "无"}</div>
+            <div>• 订单总数: {orders.length}</div>
+            <div>• 筛选后数量: {filtered.length}</div>
+            <div>• 当前筛选: {status || "全部"}</div>
+          </div>
+        </div>
+
+        {error && (
+          <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded text-red-700">
+            <div className="font-semibold">加载失败</div>
+            <div className="text-sm mt-1">{error}</div>
+            <button
+              onClick={load}
+              className="mt-2 px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
+            >
+              重试
+            </button>
+          </div>
+        )}
+
+        <div className="mt-6 overflow-x-auto">
+          <table className="min-w-full">
+            <thead>
+              <tr className="text-left text-sm text-gray-500">
+                <th className="py-2 pr-4">订单号</th>
+                <th className="py-2 pr-4">活动</th>
+                <th className="py-2 pr-4">票档/数量</th>
+                <th className="py-2 pr-4">金额</th>
+                <th className="py-2 pr-4">状态</th>
+                <th className="py-2 pr-4">操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan={6} className="py-10 text-center text-gray-400">
+                    加载中...
+                  </td>
+                </tr>
+              ) : filtered.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="py-10 text-center">
+                    <div className="text-gray-400 mb-2">
+                      {orders.length === 0 ? "暂无订单" : "没有找到匹配的订单"}
+                    </div>
+                    {orders.length === 0 && (
+                      <Link
+                        href="/events"
+                        className="inline-block px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                      >
+                        去购票
+                      </Link>
+                    )}
+                  </td>
+                </tr>
+              ) : (
+                filtered.map((o) => {
+                  const total = o.tier ? o.tier.price * o.qty : 0;
+                  return (
+                    <tr key={o.id} className="border-t text-sm">
+                      <td className="py-3 pr-4 font-mono text-xs">{o.id}</td>
+                      <td className="py-3 pr-4">
+                        <div className="font-medium">
+                          {o.event?.name ?? `活动 ${o.eventId}`}
+                        </div>
+                        <div className="text-gray-500 text-xs">
+                          {o.event ? `${o.event.city} · ${o.event.date} ${o.event.time}` : ""}
+                        </div>
+                      </td>
+                      <td className="py-3 pr-4">
+                        {o.tier ? `${o.tier.name} × ${o.qty}` : `票档 ${o.tierId} × ${o.qty}`}
+                      </td>
+                      <td className="py-3 pr-4">¥ {total}</td>
+                      <td className="py-3 pr-4">
+                        {o.status === "PAID" ? (
+                          <span className="px-2 py-1 rounded bg-green-50 text-green-700 text-xs">已支付</span>
+                        ) : (
+                          <span className="px-2 py-1 rounded bg-amber-50 text-amber-700 text-xs">待支付</span>
+                        )}
+                      </td>
+                      <td className="py-3 pr-4">
+                        <div className="flex gap-2">
+                          <Link
+                            href={`/order/${o.id}`}
+                            className="px-3 py-1.5 rounded bg-indigo-600 text-white hover:bg-indigo-700 text-xs"
+                          >
+                            查看
+                          </Link>
+                          {o.status === "PAID" && (
+                            <Link
+                              href={`/account/badges?orderId=${encodeURIComponent(o.id)}`}
+                              className="px-3 py-1.5 rounded bg-emerald-600 text-white hover:bg-emerald-700 text-xs"
+                            >
+                              纪念品
+                            </Link>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="mt-6 text-sm">
+          <Link href="/events" className="text-indigo-600 underline">
+            返回活动列表
+          </Link>
+        </div>
+      </div>
+    </main>
+  );
+}

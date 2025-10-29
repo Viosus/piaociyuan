@@ -1,19 +1,13 @@
 // app/api/pay/mock/route.ts
-// 修复内容：
-// 1. 优化操作顺序（先释放 hold，再更新订单）
-// 2. 统一使用 normalizeId 处理 ID
-// 3. 统一错误响应格式
-// 4. 增强日志输出
-// 5. 添加幂等性日志
-
 import { NextResponse } from "next/server";
-import { ordersMap, holdsMap, normalizeId } from "@/lib/store";
+import { getDB, getOrderById, getHoldById, updateOrderStatus } from "@/lib/database";
+import { normalizeId } from "@/lib/store";
 import { purgeExpiredHolds, ApiError } from "@/lib/inventory";
 
 export async function POST(req: Request) {
   try {
     const now = Date.now();
-    purgeExpiredHolds(now);
+    await purgeExpiredHolds(now);
 
     const body = await req.json().catch(() => ({}));
     const { orderId } = body || {};
@@ -30,15 +24,13 @@ export async function POST(req: Request) {
       );
     }
 
-    // 2️⃣ 统一 ID 处理
     const normalizedOrderId = normalizeId(orderId);
 
-    // 3️⃣ 验证订单存在性
-    const order = ordersMap.get(normalizedOrderId);
+    // 2️⃣ 查询订单
+    const order = getOrderById(normalizedOrderId);
+
     if (!order) {
-      console.warn(
-        `[PAY_FAIL] 订单不存在：orderId=${normalizedOrderId}`
-      );
+      console.warn(`[PAY_FAIL] 订单不存在：orderId=${normalizedOrderId}`);
       return NextResponse.json(
         {
           ok: false,
@@ -49,28 +41,25 @@ export async function POST(req: Request) {
       );
     }
 
-    // 4️⃣ 幂等性：若已支付，直接返回成功
+    // 3️⃣ 幂等性：若已支付
     if (order.status === "PAID") {
-      console.log(
-        `[PAY_IDEMPOTENT] 订单已支付，幂等返回成功：orderId=${normalizedOrderId}`
-      );
+      console.log(`[PAY_IDEMPOTENT] 订单已支付：orderId=${normalizedOrderId}`);
       return NextResponse.json({
         ok: true,
         code: "ORDER_ALREADY_PAID",
         message: "订单已支付",
         data: {
           status: "PAID",
-          paidAt: order.paidAt,
+          paidAt: Number(order.paidAt),
         },
       });
     }
 
-    // 5️⃣ 验证来源 hold 是否仍有效
-    const hold = holdsMap.get(order.holdId);
-    if (!hold || hold.expireAt <= now) {
-      console.warn(
-        `[PAY_FAIL] hold 已过期或不存在：orderId=${normalizedOrderId}, holdId=${order.holdId}`
-      );
+    // 4️⃣ 验证 hold
+    const hold = getHoldById(order.holdId);
+
+    if (!hold || Number(hold.expireAt) <= now) {
+      console.warn(`[PAY_FAIL] hold 已过期：orderId=${normalizedOrderId}`);
       return NextResponse.json(
         {
           ok: false,
@@ -81,25 +70,19 @@ export async function POST(req: Request) {
       );
     }
 
-    // 6️⃣ 执行支付（优化操作顺序：先释放 hold，再更新订单）
-    // 优点：即使更新订单失败，hold 也被释放，不会锁死库存
-    console.log(
-      `[PAY_START] orderId=${normalizedOrderId}, holdId=${order.holdId}, eventId=${order.eventId}, tierId=${order.tierId}, qty=${order.qty}`
-    );
+    // 5️⃣ 执行支付（先释放 hold，再更新订单）
+    console.log(`[PAY_START] orderId=${normalizedOrderId}`);
 
-    // ✅ 第一步：先释放 hold（防止库存锁死）
-    holdsMap.delete(order.holdId);
+    const db = getDB();
+    
+    // 删除 hold
+    db.prepare('DELETE FROM holds WHERE id = ?').run(order.holdId);
 
-    // ✅ 第二步：再更新订单状态
-    order.status = "PAID";
-    order.paidAt = now;
-    ordersMap.set(normalizedOrderId, order);
+    // 更新订单
+    updateOrderStatus(normalizedOrderId, "PAID", now);
 
-    console.log(
-      `[PAY_SUCCESS] orderId=${normalizedOrderId}, paidAt=${now}, 已释放 holdId=${order.holdId}`
-    );
+    console.log(`[PAY_SUCCESS] orderId=${normalizedOrderId}`);
 
-    // 7️⃣ 返回成功
     return NextResponse.json({
       ok: true,
       code: "PAY_SUCCESS",

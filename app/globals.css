@@ -12,10 +12,11 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* ✅ 强制明暗模式都使用浅色背景 */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #ffffff;
+    --foreground: #171717;
   }
 }
 
@@ -23,4 +24,53 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* ✅ 强制覆盖所有文本颜色，确保可读性 */
+* {
+  color: inherit;
+}
+
+/* ✅ 确保表格文字清晰 */
+table {
+  color: #171717;
+}
+
+th {
+  color: #6b7280 !important; /* gray-500 */
+  font-weight: 500;
+}
+
+td {
+  color: #171717 !important;
+}
+
+/* ✅ 确保链接可见 */
+a {
+  color: inherit;
+}
+
+a.text-indigo-600 {
+  color: #4f46e5 !important;
+}
+
+/* ✅ 确保按钮文字清晰 */
+button {
+  color: inherit;
+}
+
+/* ✅ 确保输入框文字清晰 */
+input, select, textarea {
+  color: #171717 !important;
+}
+
+/* ✅ 确保占位符可见 */
+input::placeholder,
+textarea::placeholder {
+  color: #9ca3af !important; /* gray-400 */
+}
+
+/* ✅ 确保标题清晰 */
+h1, h2, h3, h4, h5, h6 {
+  color: #171717 !important;
 }

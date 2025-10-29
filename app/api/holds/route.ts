@@ -1,12 +1,9 @@
 // app/api/holds/route.ts
-// 修复内容：
-// 1. 使用 createHoldWithLock 乐观锁机制（防止并发超卖）
-// 2. 统一使用 normalizeId 处理 ID
-// 3. 统一错误响应格式
-// 4. 增强日志输出
-
 import { NextResponse } from "next/server";
-import { holdsMap, normalizeId } from "@/lib/store";
+import { 
+  getDB
+} from "@/lib/database";
+import { normalizeId } from "@/lib/store";
 import {
   getTierCapacity,
   getPaidQty,
@@ -30,7 +27,7 @@ export async function POST(req: Request) {
     const now = Date.now();
 
     // 1️⃣ 惰性清理过期 hold
-    const purged = purgeExpiredHolds(now);
+    const purged = await purgeExpiredHolds(now);
     if (purged > 0) {
       console.log(`[HOLD_POST] 清理了 ${purged} 个过期锁票`);
     }
@@ -50,14 +47,14 @@ export async function POST(req: Request) {
       );
     }
 
-    assertPositiveInt(qty, 10); // 单次最多 10 张
+    assertPositiveInt(qty, 10);
 
     // 3️⃣ 统一 ID 处理
     const normalizedEventId = normalizeId(eventId);
     const normalizedTierId = normalizeId(tierId);
 
-    // 4️⃣ 使用乐观锁创建 hold（防止并发超卖）
-    const result = createHoldWithLock(
+    // 4️⃣ 使用乐观锁创建 hold
+    const result = await createHoldWithLock(
       normalizedEventId,
       normalizedTierId,
       qty,
@@ -65,8 +62,7 @@ export async function POST(req: Request) {
     );
 
     if (!result) {
-      // 库存不足（可能被并发请求抢占）
-      const available = getAvailableQty(normalizedEventId, normalizedTierId, now);
+      const available = await getAvailableQty(normalizedEventId, normalizedTierId, now);
       return NextResponse.json(
         {
           ok: false,
@@ -87,7 +83,6 @@ export async function POST(req: Request) {
       },
     });
   } catch (e: any) {
-    // 6️⃣ 统一错误处理
     console.error("[HOLD_ERROR]", e);
 
     if (e instanceof ApiError) {
@@ -113,7 +108,7 @@ export async function POST(req: Request) {
   }
 }
 
-// ✅ 诊断接口（查看库存状态）
+// ✅ 诊断接口
 export async function GET(req: Request) {
   try {
     const url = new URL(req.url);
@@ -132,32 +127,22 @@ export async function GET(req: Request) {
       );
     }
 
-    // 统一 ID 处理
     const normalizedEventId = normalizeId(eventId);
     const normalizedTierId = normalizeId(tierId);
 
-    // 惰性清理一次
-    purgeExpiredHolds(now);
+    await purgeExpiredHolds(now);
 
-    // 逐项计算
-    const capacity = getTierCapacity(normalizedEventId, normalizedTierId);
-    const paid = getPaidQty(normalizedEventId, normalizedTierId);
-    const activeHolds = getActiveHoldQty(normalizedEventId, normalizedTierId, now);
+    const capacity = await getTierCapacity(normalizedEventId, normalizedTierId);
+    const paid = await getPaidQty(normalizedEventId, normalizedTierId);
+    const activeHolds = await getActiveHoldQty(normalizedEventId, normalizedTierId, now);
     const available = Math.max(0, capacity - paid - activeHolds);
 
-    // 列出当前有效 holds
-    const holds = Array.from(holdsMap.values())
-      .filter(
-        (h) =>
-          h.eventId === normalizedEventId && h.tierId === normalizedTierId
-      )
-      .map((h) => ({
-        holdId: h.holdId,
-        qty: h.qty,
-        expireAt: h.expireAt,
-        expired: h.expireAt <= now,
-        createdAt: h.createdAt,
-      }));
+    // 查询所有相关的 holds（不用 Prisma）
+    const db = getDB();
+    const holds = db.prepare(`
+      SELECT * FROM holds 
+      WHERE eventId = ? AND tierId = ?
+    `).all(normalizedEventId, normalizedTierId) as any[];
 
     return NextResponse.json({
       ok: true,
@@ -171,7 +156,13 @@ export async function GET(req: Request) {
         now,
         timestamp: new Date(now).toISOString(),
       },
-      holds,
+      holds: holds.map((h) => ({
+        holdId: h.id,
+        qty: h.qty,
+        expireAt: Number(h.expireAt),
+        expired: Number(h.expireAt) <= now,
+        createdAt: Number(h.createdAt),
+      })),
     });
   } catch (e: any) {
     console.error("[HOLD_DIAGNOSTIC_ERROR]", e);

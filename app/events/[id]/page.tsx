@@ -1,44 +1,19 @@
 // app/events/[id]/page.tsx
 import Link from "next/link";
-import { mockEvents, getTiersByEventId } from "@/lib/mock";
+import { getEventById, getTiersByEventId } from "@/lib/database";
 
-// 注意：params 是 Promise，需要先 await
 type Props = { params: Promise<{ id: string }> };
 
 export default async function EventDetailPage({ params }: Props) {
-  const { id } = await params; // ✅ 关键修复
-  const rawId = decodeURIComponent(String(id || "")).trim();
+  const { id } = await params;
+  const eventId = Number(id);
 
-  // 先用字符串比对，再兜底数字比对
-  let event = mockEvents.find(e => String(e.id) === rawId);
-  if (!event) {
-    const asNumber = Number(rawId);
-    if (!Number.isNaN(asNumber)) {
-      event = mockEvents.find(e => Number(e.id) === asNumber);
-    }
-  }
-
-  const debugBlock = (
-    <div className="mt-4 text-xs text-gray-500">
-      <div>
-        调试：当前 URL id = "<span className="font-mono">{rawId}</span>"
-      </div>
-      <div>
-        调试：已有活动 id 列表 ={" "}
-        <span className="font-mono">
-          [{mockEvents.map(e => String(e.id)).join(", ")}]
-        </span>
-      </div>
-    </div>
-  );
-
-  if (!event) {
+  if (isNaN(eventId)) {
     return (
       <main className="min-h-screen flex items-center justify-center p-8">
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-2">活动不存在</h1>
-          {debugBlock}
-          <Link href="/events" className="mt-4 inline-block text-indigo-600 underline">
+          <h1 className="text-2xl font-bold mb-2">活动 ID 无效</h1>
+          <Link href="/events" className="text-indigo-600 underline">
             返回活动列表
           </Link>
         </div>
@@ -46,7 +21,21 @@ export default async function EventDetailPage({ params }: Props) {
     );
   }
 
-  const tiers = getTiersByEventId(Number(event.id));
+  const event = await getEventById(eventId);
+  const tiers = await getTiersByEventId(eventId);
+
+  if (!event) {
+    return (
+      <main className="min-h-screen flex items-center justify-center p-8">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-2">活动不存在</h1>
+          <Link href="/events" className="text-indigo-600 underline">
+            返回活动列表
+          </Link>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-white">
@@ -74,7 +63,6 @@ export default async function EventDetailPage({ params }: Props) {
           <div className="mt-6 p-4 bg-indigo-50 rounded-lg text-indigo-800 text-sm">
             温馨提示：本场支持实名电子票入场；每个手机号限购 2 张；锁票 10 分钟未支付将自动释放。
           </div>
-          {debugBlock}
         </div>
 
         <aside className="md:col-span-1">

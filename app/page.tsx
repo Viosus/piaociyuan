@@ -1,16 +1,18 @@
-// app/events/page.tsx
+// app/page.tsx
 import Link from "next/link";
-import { mockEvents } from "@/lib/mock";
+import { getAllEvents } from "@/lib/database";
 
-export default function EventsPage() {
+export default async function HomePage() {
+  const events = await getAllEvents();
+
   return (
     <main className="min-h-screen p-8 bg-gray-50">
       <h1 className="text-3xl font-bold text-indigo-600 mb-6 text-center">
         热门活动
       </h1>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {mockEvents.map((event) => (
+      <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+        {events.map((event) => (
           <Link
             key={event.id}
             href={`/events/${event.id}`}

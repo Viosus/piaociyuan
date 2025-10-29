@@ -1,0 +1,75 @@
+// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ✅ 活动表
+model Event {
+  id        Int      @id @default(autoincrement())
+  name      String
+  city      String
+  venue     String
+  date      String
+  time      String
+  cover     String
+  artist    String
+  desc      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  tiers     Tier[]
+  
+  @@map("events")
+}
+
+// ✅ 票档表
+model Tier {
+  id        Int      @id @default(autoincrement())
+  eventId   Int
+  name      String
+  price     Int
+  capacity  Int
+  remaining Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  
+  @@map("tiers")
+  @@index([eventId])
+}
+
+// ✅ 锁票表
+model Hold {
+  id        String   @id
+  eventId   String
+  tierId    String
+  qty       Int
+  expireAt  BigInt
+  createdAt BigInt
+  
+  @@map("holds")
+  @@index([eventId, tierId])
+  @@index([expireAt])
+}
+
+// ✅ 订单表
+model Order {
+  id        String   @id
+  eventId   String
+  tierId    String
+  qty       Int
+  holdId    String
+  status    String
+  createdAt BigInt
+  paidAt    BigInt?
+  
+  @@map("orders")
+  @@index([status])
+  @@index([createdAt])
+}

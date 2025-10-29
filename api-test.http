@@ -207,3 +207,32 @@ Content-Type: application/json
 ###     "paidAt": 1730000000000
 ###   }
 ### }
+
+### 1. 创建 Hold
+# @name createHold
+POST http://localhost:3000/api/holds
+Content-Type: application/json
+
+{
+  "eventId": 1,
+  "tierId": 101,
+  "qty": 1
+}
+
+### 2. 创建订单（自动引用上一步的 holdId）
+# @name createOrder
+POST http://localhost:3000/api/orders
+Content-Type: application/json
+
+{
+  "eventId": 1,
+  "tierId": 101,
+  "qty": 1,
+  "holdId": "{{createHold.response.body.$.data.holdId}}"
+}
+
+### 3. 查询订单（手动替换 orderId）
+GET http://localhost:3000/api/orders/O_1730212345_abc123
+
+### 4. 或者使用变量自动引用
+GET http://localhost:3000/api/orders/{{createOrder.response.body.$.data.orderId}}
