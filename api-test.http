@@ -1,0 +1,209 @@
+### 票次元 M1 修复版 - API 测试文件
+### 使用方法：
+### 1. 在 VS Code 中安装 REST Client 插件
+### 2. 点击每个请求上方的 "Send Request" 按钮
+### 3. 按顺序执行测试用例
+
+### ============================================
+### 测试 1：创建锁票（正常流程）
+### ============================================
+# @name createHold
+POST http://localhost:3000/api/holds
+Content-Type: application/json
+
+{
+  "eventId": 1,
+  "tierId": 101,
+  "qty": 1
+}
+
+### 期望返回：
+### {
+###   "ok": true,
+###   "data": {
+###     "holdId": "H_xxx",
+###     "expireAt": 1730000000000
+###   }
+### }
+
+### ============================================
+### 测试 2：查看库存诊断信息
+### ============================================
+GET http://localhost:3000/api/holds?eventId=1&tierId=101
+
+### 期望返回：
+### {
+###   "ok": true,
+###   "eventId": "1",
+###   "tierId": "101",
+###   "diagnostics": {
+###     "capacity": 100,
+###     "paid": 0,
+###     "activeHolds": 1,
+###     "available": 99
+###   },
+###   "holds": [...]
+### }
+
+### ============================================
+### 测试 3：创建订单（自动引用上一步的 holdId）
+### ============================================
+# @name createOrder
+POST http://localhost:3000/api/orders
+Content-Type: application/json
+
+{
+  "eventId": 1,
+  "tierId": 101,
+  "qty": 1,
+  "holdId": "{{createHold.response.body.$.data.holdId}}"
+}
+
+### 期望返回：
+### {
+###   "ok": true,
+###   "data": {
+###     "orderId": "O_xxx",
+###     "status": "PENDING"
+###   }
+### }
+
+### ============================================
+### 测试 4：支付订单（自动引用上一步的 orderId）
+### ============================================
+POST http://localhost:3000/api/pay/mock
+Content-Type: application/json
+
+{
+  "orderId": "{{createOrder.response.body.$.data.orderId}}"
+}
+
+### 期望返回：
+### {
+###   "ok": true,
+###   "code": "PAY_SUCCESS",
+###   "message": "支付成功",
+###   "data": {
+###     "status": "PAID",
+###     "paidAt": 1730000000000
+###   }
+### }
+
+### ============================================
+### 测试 5：查看已支付订单
+### ============================================
+GET http://localhost:3000/api/orders?status=PAID
+
+### 期望返回：
+### {
+###   "ok": true,
+###   "data": [
+###     {
+###       "orderId": "O_xxx",
+###       "status": "PAID",
+###       ...
+###     }
+###   ]
+### }
+
+### ============================================
+### 测试 6：并发测试（模拟超卖场景）
+### ============================================
+### 说明：快速连续发送多个请求，测试乐观锁是否生效
+### 手动执行：快速点击 3 次 Send Request
+
+POST http://localhost:3000/api/holds
+Content-Type: application/json
+
+{
+  "eventId": 1,
+  "tierId": 101,
+  "qty": 1
+}
+
+### 期望行为：
+### - 如果剩余库存 < 3，部分请求应返回 409 库存不足
+### - 检查诊断接口确认 activeHolds 数量正确
+
+### ============================================
+### 测试 7：库存不足场景
+### ============================================
+POST http://localhost:3000/api/holds
+Content-Type: application/json
+
+{
+  "eventId": 1,
+  "tierId": 101,
+  "qty": 9999
+}
+
+### 期望返回：
+### {
+###   "ok": false,
+###   "code": "HOLD_NOT_ENOUGH_STOCK",
+###   "message": "当前可售 X 张，请调整数量后重试。",
+###   "data": { "available": X }
+### }
+
+### ============================================
+### 测试 8：参数校验
+### ============================================
+POST http://localhost:3000/api/holds
+Content-Type: application/json
+
+{
+  "eventId": 1,
+  "tierId": 101,
+  "qty": -1
+}
+
+### 期望返回：
+### {
+###   "ok": false,
+###   "code": "INVALID_QTY",
+###   "message": "购买数量必须为正整数"
+### }
+
+### ============================================
+### 测试 9：超过单次购买限制
+### ============================================
+POST http://localhost:3000/api/holds
+Content-Type: application/json
+
+{
+  "eventId": 1,
+  "tierId": 101,
+  "qty": 11
+}
+
+### 期望返回：
+### {
+###   "ok": false,
+###   "code": "QTY_LIMIT_EXCEEDED",
+###   "message": "单次最多购买 10 张"
+### }
+
+### ============================================
+### 测试 10：幂等性测试（重复支付）
+### ============================================
+### 说明：使用同一个 orderId 重复支付
+### 先创建订单并支付，然后再次支付
+
+# @name testIdempotency
+POST http://localhost:3000/api/pay/mock
+Content-Type: application/json
+
+{
+  "orderId": "{{createOrder.response.body.$.data.orderId}}"
+}
+
+### 期望返回：
+### {
+###   "ok": true,
+###   "code": "ORDER_ALREADY_PAID",
+###   "message": "订单已支付",
+###   "data": {
+###     "status": "PAID",
+###     "paidAt": 1730000000000
+###   }
+### }
