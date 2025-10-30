@@ -1,8 +1,10 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0f0f14;
+  --foreground: #ffffff;
+  --card-bg: #1a1a1f;
+  --border: rgba(255, 255, 255, 0.1);
 }
 
 @theme inline {
@@ -12,65 +14,187 @@
   --font-mono: var(--font-geist-mono);
 }
 
-/* ✅ 强制明暗模式都使用浅色背景 */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #ffffff;
-    --foreground: #171717;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
 }
 
-/* ✅ 强制覆盖所有文本颜色，确保可读性 */
+/* 深色主题样式 */
 * {
   color: inherit;
 }
 
-/* ✅ 确保表格文字清晰 */
-table {
-  color: #171717;
+/* 自定义滚动条 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
 }
 
-th {
-  color: #6b7280 !important; /* gray-500 */
-  font-weight: 500;
+::-webkit-scrollbar-track {
+  background: transparent;
 }
 
-td {
-  color: #171717 !important;
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
 }
 
-/* ✅ 确保链接可见 */
-a {
-  color: inherit;
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
 }
 
-a.text-indigo-600 {
-  color: #4f46e5 !important;
-}
-
-/* ✅ 确保按钮文字清晰 */
-button {
-  color: inherit;
-}
-
-/* ✅ 确保输入框文字清晰 */
+/* 输入框样式 */
 input, select, textarea {
-  color: #171717 !important;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #ffffff;
 }
 
-/* ✅ 确保占位符可见 */
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: rgba(147, 51, 234, 0.5);
+  box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.1);
+}
+
 input::placeholder,
 textarea::placeholder {
-  color: #9ca3af !important; /* gray-400 */
+  color: rgba(255, 255, 255, 0.3);
 }
 
-/* ✅ 确保标题清晰 */
-h1, h2, h3, h4, h5, h6 {
-  color: #171717 !important;
+/* 禁用元素 */
+input:disabled, select:disabled, textarea:disabled, button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 卡片样式 */
+.card-dark {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+}
+
+/* 渐变文字效果 */
+.gradient-text {
+  background: linear-gradient(135deg, #a855f7 0%, #ec4899 50%, #3b82f6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* 深色主题全局覆盖 - 使用更高优先级 */
+html.dark .bg-white,
+html.dark [class*="bg-white"] {
+  background-color: #1a1a1f !important;
+}
+
+html.dark .bg-gray-50,
+html.dark [class*="bg-gray-50"] {
+  background-color: transparent !important;
+}
+
+html.dark .bg-gray-100,
+html.dark [class*="bg-gray-100"] {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+html.dark .text-gray-800,
+html.dark .text-gray-900,
+html.dark [class*="text-gray-8"],
+html.dark [class*="text-gray-9"] {
+  color: #ffffff !important;
+}
+
+html.dark .text-gray-700,
+html.dark [class*="text-gray-7"] {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+html.dark .text-gray-600,
+html.dark [class*="text-gray-6"] {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+html.dark .text-gray-500,
+html.dark [class*="text-gray-5"] {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+html.dark .text-gray-400,
+html.dark [class*="text-gray-4"] {
+  color: rgba(255, 255, 255, 0.4) !important;
+}
+
+html.dark .border-gray-200,
+html.dark .border-gray-300,
+html.dark [class*="border-gray-2"],
+html.dark [class*="border-gray-3"] {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+html.dark .border-b,
+html.dark .border-t,
+html.dark [class*="border-"] {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+html.dark .hover\:bg-gray-50:hover {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+html.dark .hover\:bg-gray-100:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* 保持特定颜色 */
+html.dark .bg-indigo-50 {
+  background-color: rgba(99, 102, 241, 0.1) !important;
+}
+
+html.dark .bg-purple-50 {
+  background-color: rgba(168, 85, 247, 0.1) !important;
+}
+
+html.dark .bg-red-50 {
+  background-color: rgba(239, 68, 68, 0.1) !important;
+}
+
+html.dark .bg-green-50 {
+  background-color: rgba(34, 197, 94, 0.1) !important;
+}
+
+html.dark .bg-amber-50,
+html.dark .bg-yellow-50 {
+  background-color: rgba(245, 158, 11, 0.1) !important;
+}
+
+/* 表格样式 */
+html.dark table {
+  color: #ffffff;
+}
+
+html.dark thead tr {
+  border-bottom-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+html.dark tbody tr {
+  border-top-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+html.dark tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.03) !important;
+}
+
+/* 卡片阴影 */
+html.dark .shadow,
+html.dark .shadow-sm {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3) !important;
+}
+
+html.dark .shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5) !important;
+}
+
+html.dark .hover\:shadow-lg:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 0 20px rgba(147, 51, 234, 0.3) !important;
 }

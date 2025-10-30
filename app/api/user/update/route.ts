@@ -1,11 +1,9 @@
-// app/api/user/update/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/auth';
-import { getDB } from '@/lib/database';
+import prisma from '@/lib/prisma';
 
 export async function POST(req: NextRequest) {
   try {
-    // 验证 token
     const authHeader = req.headers.get('Authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return NextResponse.json(
@@ -29,40 +27,27 @@ export async function POST(req: NextRequest) {
 
     console.log('[USER_UPDATE] 用户更新请求:', { userId: payload.id, avatar, nickname });
 
-    const db = getDB();
-    const now = new Date().toISOString();
-
-    // 构建更新字段
-    const updates: string[] = [];
-    const values: any[] = [];
+    const updateData: any = {};
 
     if (avatar !== undefined) {
-      updates.push('avatar = ?');
-      values.push(avatar);
+      updateData.avatar = avatar;
     }
 
     if (nickname !== undefined) {
-      updates.push('nickname = ?');
-      values.push(nickname);
+      updateData.nickname = nickname;
     }
 
-    if (updates.length === 0) {
+    if (Object.keys(updateData).length === 0) {
       return NextResponse.json(
         { ok: false, error: '没有要更新的内容' },
         { status: 400 }
       );
     }
 
-    updates.push('updatedAt = ?');
-    values.push(now);
-    values.push(payload.id);
-
-    // 更新数据库
-    const sql = `UPDATE users SET ${updates.join(', ')} WHERE id = ?`;
-    db.prepare(sql).run(...values);
-
-    // 获取更新后的用户信息
-    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(payload.id) as any;
+    const user = await prisma.user.update({
+      where: { id: payload.id },
+      data: updateData,
+    });
 
     console.log('[USER_UPDATE] 更新成功');
 

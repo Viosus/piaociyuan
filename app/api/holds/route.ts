@@ -1,8 +1,6 @@
 // app/api/holds/route.ts
 import { NextResponse } from "next/server";
-import { 
-  getDB
-} from "@/lib/database";
+import prisma from "@/lib/prisma";
 import { normalizeId } from "@/lib/store";
 import {
   getTierCapacity,
@@ -137,12 +135,13 @@ export async function GET(req: Request) {
     const activeHolds = await getActiveHoldQty(normalizedEventId, normalizedTierId, now);
     const available = Math.max(0, capacity - paid - activeHolds);
 
-    // 查询所有相关的 holds（不用 Prisma）
-    const db = getDB();
-    const holds = db.prepare(`
-      SELECT * FROM holds 
-      WHERE eventId = ? AND tierId = ?
-    `).all(normalizedEventId, normalizedTierId) as any[];
+    // 查询所有相关的 holds
+    const holds = await prisma.hold.findMany({
+      where: {
+        eventId: normalizedEventId,
+        tierId: normalizedTierId,
+      },
+    });
 
     return NextResponse.json({
       ok: true,

@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
     }
 
     // 从数据库获取最新用户信息
-    const user = findUserById(payload.id);
+    const user = await findUserById(payload.id);
     if (!user) {
       return NextResponse.json(
         { ok: false, error: '用户不存在' },

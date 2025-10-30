@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { randomUUID } from 'crypto';
 import {
   hashPassword,
-  generateToken,
+  generateTokenPair,
   findUserByEmail,
   findUserByPhone,
   createUser,
@@ -12,6 +12,7 @@ import {
   isValidPassword,
 } from '@/lib/auth';
 import { verifyCode } from '@/lib/verification';
+import { createUserSession, createLoginLog, extractDeviceInfo, getClientIP } from '@/lib/session';
 
 export async function POST(req: NextRequest) {
   try {
@@ -71,7 +72,7 @@ export async function POST(req: NextRequest) {
 
     // 检查用户是否已存在
     if (email) {
-      const existingUser = findUserByEmail(email);
+      const existingUser = await findUserByEmail(email);
       if (existingUser) {
         return NextResponse.json(
           { ok: false, error: '该邮箱已被注册' },
@@ -81,7 +82,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (phone) {
-      const existingUser = findUserByPhone(phone);
+      const existingUser = await findUserByPhone(phone);
       if (existingUser) {
         return NextResponse.json(
           { ok: false, error: '该手机号已被注册' },
@@ -95,22 +96,50 @@ export async function POST(req: NextRequest) {
 
     // 创建用户
     const userId = randomUUID();
-    createUser({
+    const userNickname = nickname || (email ? email.split('@')[0] : `用户${phone?.slice(-4)}`);
+
+    await createUser({
       id: userId,
       email: email || undefined,
       phone: phone || undefined,
       password: hashedPassword,
-      nickname: nickname || (email ? email.split('@')[0] : `用户${phone?.slice(-4)}`),
+      nickname: userNickname,
       authProvider: 'local',
     });
 
-    // 生成 token
-    const token = generateToken({
+    // 生成双 Token
+    const { accessToken, refreshToken } = generateTokenPair({
       id: userId,
       email,
       phone,
-      nickname: nickname || (email ? email.split('@')[0] : `用户${phone?.slice(-4)}`),
+      nickname: userNickname,
       authProvider: 'local',
+      role: 'user', // 新注册用户默认为普通用户
+    });
+
+    // 获取请求信息
+    const ipAddress = getClientIP(req.headers);
+    const userAgent = req.headers.get('user-agent') || undefined;
+    const deviceInfo = extractDeviceInfo(userAgent);
+
+    // 创建会话（存储 Refresh Token）
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7); // 7天后过期
+
+    await createUserSession({
+      userId,
+      refreshToken,
+      deviceInfo,
+      ipAddress,
+      expiresAt,
+    });
+
+    // 记录首次登录（注册即登录）
+    await createLoginLog({
+      userId,
+      ipAddress,
+      userAgent,
+      success: true,
     });
 
     return NextResponse.json({
@@ -118,7 +147,10 @@ export async function POST(req: NextRequest) {
       message: '注册成功',
       data: {
         userId,
-        token,
+        accessToken,
+        refreshToken,
+        // 向后兼容：保留 token 字段
+        token: accessToken,
       },
     });
   } catch (error: any) {

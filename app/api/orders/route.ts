@@ -1,151 +1,162 @@
 // app/api/orders/route.ts
-import { NextResponse } from "next/server";
-import { genId, normalizeId } from "@/lib/store";
-import { 
-  getOrders, 
-  getOrderById, 
-  createOrder, 
-  getHoldById, 
-  deleteExpiredHolds,
-  getAllEvents,
-  getTierById 
-} from "@/lib/database";
+import { NextResponse } from 'next/server';
+import prisma from '@/lib/prisma';
+import { normalizeId } from '@/lib/store';
 
 // ✅ 订单列表查询（支持分页、筛选、搜索、排序）
 export async function GET(req: Request) {
   try {
-    console.log("[ORDER_LIST] 📋 开始查询订单列表");
-    
+    console.log('[ORDER_LIST] 📋 开始查询订单列表');
+
     const { searchParams } = new URL(req.url);
-    
+
     // 📄 分页参数
-    const page = Math.max(1, parseInt(searchParams.get("page") || "1"));
-    const pageSize = Math.max(1, Math.min(100, parseInt(searchParams.get("pageSize") || "10")));
-    
+    const page = Math.max(1, parseInt(searchParams.get('page') || '1'));
+    const pageSize = Math.max(1, Math.min(100, parseInt(searchParams.get('pageSize') || '10')));
+
     // 🔍 筛选参数
-    const statusFilter = searchParams.get("status");
-    const eventIdFilter = searchParams.get("eventId");
-    const searchQuery = searchParams.get("q")?.trim();
-    
-    // 📅 购票日期范围（订单创建时间）
-    const orderStartDateStr = searchParams.get("orderStartDate");
-    const orderEndDateStr = searchParams.get("orderEndDate");
-    
-    // 🎭 活动日期范围（活动举办日期）
-    const eventStartDateStr = searchParams.get("eventStartDate");
-    const eventEndDateStr = searchParams.get("eventEndDate");
-    
-    // 💰 金额范围
-    const minAmountStr = searchParams.get("minAmount");
-    const maxAmountStr = searchParams.get("maxAmount");
-    
-    // 📊 排序参数
-    const sortBy = searchParams.get("sortBy") || "createdAt";
-    const sortOrder = searchParams.get("sortOrder") || "desc";
-    
-    console.log(`[ORDER_LIST] 查询参数:`, {
-      page,
-      pageSize,
-      status: statusFilter || "全部",
-      eventId: eventIdFilter || "全部",
-      search: searchQuery || "无",
-      orderDateRange: orderStartDateStr || orderEndDateStr ? `${orderStartDateStr || '不限'} ~ ${orderEndDateStr || '不限'}` : "不限",
-      eventDateRange: eventStartDateStr || eventEndDateStr ? `${eventStartDateStr || '不限'} ~ ${eventEndDateStr || '不限'}` : "不限",
+    const statusFilter = searchParams.get('status');
+    const eventIdFilter = searchParams.get('eventId');
+    const userIdFilter = searchParams.get('userId'); // 用户筛选
+    const qFilter = searchParams.get('q'); // 订单号搜索
+    const orderStartDate = searchParams.get('orderStartDate'); // 购票开始日期
+    const orderEndDate = searchParams.get('orderEndDate'); // 购票结束日期
+    const eventStartDate = searchParams.get('eventStartDate'); // 活动开始日期
+    const eventEndDate = searchParams.get('eventEndDate'); // 活动结束日期
+    const minAmount = searchParams.get('minAmount'); // 最低金额
+    const maxAmount = searchParams.get('maxAmount'); // 最高金额
+
+    // 排序参数
+    const sortBy = searchParams.get('sortBy') || 'createdAt';
+    const sortOrder = searchParams.get('sortOrder') || 'desc';
+
+    console.log('[ORDER_LIST] 筛选参数:', {
+      statusFilter,
+      eventIdFilter,
+      userIdFilter,
+      qFilter,
+      orderStartDate,
+      orderEndDate,
+      minAmount,
+      maxAmount,
       sortBy,
       sortOrder,
     });
 
-    // 构建查询条件
-    const filter: any = {
-      page,
-      pageSize,
-      sortBy,
-      sortOrder,
-    };
-    
+    // 构建 where 条件
+    const where: any = {};
+
     if (statusFilter) {
-      filter.status = statusFilter;
+      where.status = statusFilter;
     }
-    
+
     if (eventIdFilter) {
-      filter.eventId = normalizeId(eventIdFilter);
+      where.eventId = normalizeId(eventIdFilter);
     }
-    
-    if (searchQuery) {
-      filter.searchQuery = searchQuery;
+
+    if (userIdFilter) {
+      where.userId = userIdFilter;
     }
-    
-    // 购票日期范围筛选（UTC 时间）
-    if (orderStartDateStr) {
-      const startTimestamp = Date.UTC(
-        parseInt(orderStartDateStr.split('-')[0]),
-        parseInt(orderStartDateStr.split('-')[1]) - 1,
-        parseInt(orderStartDateStr.split('-')[2]),
-        0, 0, 0, 0
-      );
-      filter.orderStartDate = startTimestamp;
-      console.log(`[ORDER_LIST] 购票开始日期: ${orderStartDateStr} -> ${new Date(startTimestamp).toISOString()} (${startTimestamp})`);
+
+    if (qFilter) {
+      where.id = {
+        contains: qFilter,
+      };
     }
-    
-    if (orderEndDateStr) {
-      const endTimestamp = Date.UTC(
-        parseInt(orderEndDateStr.split('-')[0]),
-        parseInt(orderEndDateStr.split('-')[1]) - 1,
-        parseInt(orderEndDateStr.split('-')[2]),
-        23, 59, 59, 999
-      );
-      filter.orderEndDate = endTimestamp;
-      console.log(`[ORDER_LIST] 购票结束日期: ${orderEndDateStr} -> ${new Date(endTimestamp).toISOString()} (${endTimestamp})`);
-    }
-    
-    // 活动日期范围筛选
-    if (eventStartDateStr || eventEndDateStr) {
-      const allEvents = getAllEvents();
-      const matchingEvents = allEvents.filter(e => {
-        if (eventStartDateStr && e.date < eventStartDateStr) return false;
-        if (eventEndDateStr && e.date > eventEndDateStr) return false;
-        return true;
-      });
-      
-      const eventIds = matchingEvents.map(e => String(e.id));
-      console.log(`[ORDER_LIST] 活动日期筛选: 找到 ${eventIds.length} 个符合条件的活动`);
-      
-      if (eventIds.length === 0) {
-        return NextResponse.json({
-          ok: true,
-          data: [],
-          pagination: { page, pageSize, total: 0, totalPages: 0 },
-        });
+
+    // 购票日期范围
+    if (orderStartDate || orderEndDate) {
+      where.createdAt = {};
+      if (orderStartDate) {
+        where.createdAt.gte = BigInt(new Date(orderStartDate).getTime());
       }
-      
-      filter.eventIds = eventIds;
+      if (orderEndDate) {
+        // 结束日期包含当天，所以加1天
+        where.createdAt.lte = BigInt(new Date(orderEndDate).getTime() + 86400000 - 1);
+      }
     }
-    
-    // 查询订单
-    const { orders, total, totalPages } = getOrders(filter);
-    
-    console.log(`[ORDER_LIST] ✅ 查询结果: ${orders.length}/${total} 条`);
-    
+
+    // 构建排序条件
+    const orderBy: any = {};
+    if (sortBy === 'createdAt' || sortBy === 'paidAt') {
+      orderBy[sortBy] = sortOrder;
+    } else if (sortBy === 'amount') {
+      // 金额排序需要在后端处理，因为amount是计算字段
+      orderBy.createdAt = 'desc'; // 先按创建时间排序，后面会在内存中按金额排序
+    } else {
+      orderBy.createdAt = 'desc';
+    }
+
+    // 如果有活动日期或金额筛选，需要查询所有数据后在内存中筛选
+    // 否则可以直接使用数据库分页
+    const needsMemoryFiltering = eventStartDate || eventEndDate || minAmount || maxAmount || sortBy === 'amount';
+
+    let orders: any[];
+    if (needsMemoryFiltering) {
+      // 查询所有满足基础条件的订单（不分页）
+      orders = await prisma.order.findMany({
+        where,
+        orderBy,
+        include: {
+          tickets: {
+            select: {
+              id: true,
+              ticketCode: true,
+              status: true,
+              price: true,
+              refundedAt: true,
+            },
+          },
+        },
+      });
+    } else {
+      // 使用数据库分页
+      orders = await prisma.order.findMany({
+        where,
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        orderBy,
+        include: {
+          tickets: {
+            select: {
+              id: true,
+              ticketCode: true,
+              status: true,
+              price: true,
+              refundedAt: true,
+            },
+          },
+        },
+      });
+    }
+
+    console.log(`[ORDER_LIST] ✅ 初始查询结果: ${orders.length} 条`);
+
     // 批量获取活动和票档信息
-    const eventIds = [...new Set(orders.map(o => parseInt(o.eventId)))];
-    const tierIds = [...new Set(orders.map(o => parseInt(o.tierId)))];
-    
-    const allEvents = getAllEvents();
-    const events = allEvents.filter(e => eventIds.includes(e.id));
-    
-    const tiers = tierIds.map(id => getTierById(id)).filter(Boolean);
-    
-    const eventMap = new Map(events.map(e => [String(e.id), e]));
-    const tierMap = new Map(tiers.map(t => [String(t!.id), t]));
-    
+    const eventIds = [...new Set(orders.map((o) => parseInt(o.eventId)))];
+    const tierIds = [...new Set(orders.map((o) => parseInt(o.tierId)))];
+
+    const [events, tiers] = await Promise.all([
+      prisma.event.findMany({
+        where: { id: { in: eventIds } },
+      }),
+      prisma.tier.findMany({
+        where: { id: { in: tierIds } },
+      }),
+    ]);
+
+    const eventMap = new Map(events.map((e) => [String(e.id), e]));
+    const tierMap = new Map(tiers.map((t) => [String(t.id), t]));
+
     // 组装数据
     let result = orders.map((order) => {
       const event = eventMap.get(order.eventId);
       const tier = tierMap.get(order.tierId);
       const amount = tier ? tier.price * order.qty : 0;
-      
+
       return {
         id: order.id,
+        userId: order.userId,
         eventId: Number(order.eventId),
         tierId: Number(order.tierId),
         qty: order.qty,
@@ -153,44 +164,89 @@ export async function GET(req: Request) {
         createdAt: Number(order.createdAt),
         paidAt: order.paidAt ? Number(order.paidAt) : null,
         holdId: order.holdId,
-        event: event ? {
-          id: event.id,
-          name: event.name,
-          city: event.city,
-          date: event.date,
-          time: event.time,
-        } : undefined,
-        tier: tier ? {
-          id: tier.id,
-          name: tier.name,
-          price: tier.price,
-        } : undefined,
+        event: event
+          ? {
+              id: event.id,
+              name: event.name,
+              city: event.city,
+              date: event.date,
+              time: event.time,
+            }
+          : undefined,
+        tier: tier
+          ? {
+              id: tier.id,
+              name: tier.name,
+              price: tier.price,
+            }
+          : undefined,
         amount,
+        tickets: order.tickets ? order.tickets.map((t: any) => ({
+          id: t.id,
+          ticketCode: t.ticketCode,
+          status: t.status,
+          price: t.price,
+          refundedAt: t.refundedAt,
+        })) : [],
       };
     });
-    
-    // 金额筛选
-    if (minAmountStr || maxAmountStr) {
-      const minAmount = minAmountStr ? parseFloat(minAmountStr) : -Infinity;
-      const maxAmount = maxAmountStr ? parseFloat(maxAmountStr) : Infinity;
-      
-      result = result.filter(order => {
-        return order.amount >= minAmount && order.amount <= maxAmount;
+
+    // 活动日期筛选（需要在数据组装后进行）
+    if (eventStartDate || eventEndDate) {
+      result = result.filter((order) => {
+        if (!order.event?.date) return false;
+        const eventDate = new Date(order.event.date).getTime();
+        if (eventStartDate && eventDate < new Date(eventStartDate).getTime()) {
+          return false;
+        }
+        if (eventEndDate && eventDate > new Date(eventEndDate).getTime() + 86400000 - 1) {
+          return false;
+        }
+        return true;
       });
     }
-    
-    // 金额排序
-    if (sortBy === "amount") {
+
+    // 金额筛选（需要在数据组装后进行）
+    if (minAmount || maxAmount) {
+      result = result.filter((order) => {
+        if (minAmount && order.amount < parseFloat(minAmount)) {
+          return false;
+        }
+        if (maxAmount && order.amount > parseFloat(maxAmount)) {
+          return false;
+        }
+        return true;
+      });
+    }
+
+    // 金额排序（需要在数据组装后进行）
+    if (sortBy === 'amount') {
       result.sort((a, b) => {
-        return sortOrder === "asc" 
-          ? a.amount - b.amount 
-          : b.amount - a.amount;
+        return sortOrder === 'asc' ? a.amount - b.amount : b.amount - a.amount;
       });
     }
-    
+
+    // 如果进行了内存筛选，需要手动分页
+    let finalResult = result;
+    let total = result.length;
+    let totalPages = Math.ceil(total / pageSize);
+
+    if (needsMemoryFiltering) {
+      // 手动分页
+      const startIndex = (page - 1) * pageSize;
+      const endIndex = startIndex + pageSize;
+      finalResult = result.slice(startIndex, endIndex);
+      console.log(`[ORDER_LIST] 内存筛选后: ${total} 条，返回第 ${page} 页 (${finalResult.length} 条)`);
+    } else {
+      // 数据库分页，需要重新查询总数
+      total = await prisma.order.count({ where });
+      totalPages = Math.ceil(total / pageSize);
+      console.log(`[ORDER_LIST] 数据库分页: 共 ${total} 条，返回第 ${page} 页 (${finalResult.length} 条)`);
+    }
+
     return NextResponse.json({
       ok: true,
-      data: result,
+      data: finalResult,
       pagination: {
         page,
         pageSize,
@@ -199,12 +255,12 @@ export async function GET(req: Request) {
       },
     });
   } catch (e: any) {
-    console.error("[ORDER_LIST_ERROR] ❌", e);
+    console.error('[ORDER_LIST_ERROR] ❌', e);
     return NextResponse.json(
       {
         ok: false,
-        code: "SERVER_ERROR",
-        message: "查询订单失败",
+        code: 'SERVER_ERROR',
+        message: '查询订单失败',
       },
       { status: 500 }
     );
@@ -215,19 +271,19 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     const now = Date.now();
-    deleteExpiredHolds(now);
 
     const body = await req.json().catch(() => ({}));
-    const { eventId, tierId, qty, holdId } = body || {};
+    const { eventId, tierId, qty, holdId, userId } = body || {};
 
-    console.log(`[ORDER_CREATE] 📝 收到创建请求:`, { eventId, tierId, qty, holdId });
+    console.log(`[ORDER_CREATE] 📝 收到创建请求:`, { eventId, tierId, qty, holdId, userId });
 
     // 参数校验
     if (
       eventId == null ||
       tierId == null ||
       !holdId ||
-      typeof qty !== "number" ||
+      !userId ||
+      typeof qty !== 'number' ||
       !Number.isInteger(qty) ||
       qty <= 0
     ) {
@@ -235,8 +291,8 @@ export async function POST(req: Request) {
       return NextResponse.json(
         {
           ok: false,
-          code: "BAD_REQUEST",
-          message: "请求参数错误，请检查后重试。",
+          code: 'BAD_REQUEST',
+          message: '请求参数错误，请检查后重试。',
         },
         { status: 400 }
       );
@@ -248,15 +304,17 @@ export async function POST(req: Request) {
     const normalizedHoldId = normalizeId(holdId);
 
     // 验证 hold 存在性
-    const hold = getHoldById(normalizedHoldId);
+    const hold = await prisma.hold.findUnique({
+      where: { id: normalizedHoldId },
+    });
 
     if (!hold) {
       console.warn(`[ORDER_CREATE] ❌ hold 不存在：holdId=${normalizedHoldId}`);
       return NextResponse.json(
         {
           ok: false,
-          code: "HOLD_NOT_FOUND",
-          message: "锁票不存在，请重新选择票档并下单。",
+          code: 'HOLD_NOT_FOUND',
+          message: '锁票不存在，请重新选择票档并下单。',
         },
         { status: 404 }
       );
@@ -268,41 +326,58 @@ export async function POST(req: Request) {
       return NextResponse.json(
         {
           ok: false,
-          code: "HOLD_EXPIRED",
-          message: "锁票已过期，请重新选择票档并下单。",
+          code: 'HOLD_EXPIRED',
+          message: '锁票已过期，请重新选择票档并下单。',
         },
         { status: 410 }
       );
     }
 
     // 一致性校验
-    if (
-      hold.eventId !== normalizedEventId ||
-      hold.tierId !== normalizedTierId ||
-      hold.qty !== qty
-    ) {
+    if (hold.eventId !== normalizedEventId || hold.tierId !== normalizedTierId || hold.qty !== qty) {
       console.warn(`[ORDER_CREATE] ❌ 订单与锁票不一致`);
       return NextResponse.json(
         {
           ok: false,
-          code: "ORDER_HOLD_MISMATCH",
-          message: "订单信息与锁票不一致，请返回重新下单。",
+          code: 'ORDER_HOLD_MISMATCH',
+          message: '订单信息与锁票不一致，请返回重新下单。',
         },
         { status: 400 }
       );
     }
 
-    // 创建订单
-    const orderId = genId("O");
-    createOrder({
-      id: orderId,
-      eventId: normalizedEventId,
-      tierId: normalizedTierId,
-      qty: qty,
-      status: "PENDING",
-      createdAt: now.toString(),
-      paidAt: null,
-      holdId: normalizedHoldId,
+    // 创建订单（事务）
+    const orderId = `O_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+
+    await prisma.$transaction(async (tx) => {
+      // 1. 创建订单
+      const newOrder = await tx.order.create({
+        data: {
+          id: orderId,
+          userId,
+          eventId: normalizedEventId,
+          tierId: normalizedTierId,
+          qty,
+          status: 'PENDING',
+          createdAt: BigInt(now),
+          paidAt: null,
+          holdId: normalizedHoldId,
+        },
+      });
+
+      // 2. 将 hold 锁定的票关联到订单（更新 orderId，清除 holdId）
+      await tx.ticket.updateMany({
+        where: {
+          holdId: normalizedHoldId, // 通过 holdId 查找被锁定的票
+          status: 'locked',
+        },
+        data: {
+          orderId, // 更新为真实的订单ID
+          holdId: null, // 清除临时的 holdId
+        },
+      });
+
+      return newOrder;
     });
 
     console.log(`[ORDER_CREATE] ✅ 订单创建成功：orderId=${orderId}`);
@@ -311,18 +386,18 @@ export async function POST(req: Request) {
       ok: true,
       data: {
         orderId,
-        status: "PENDING",
+        status: 'PENDING',
         createdAt: now,
       },
     });
   } catch (err: any) {
-    console.error("[ORDER_CREATE_ERROR] ❌", err);
-    
+    console.error('[ORDER_CREATE_ERROR] ❌', err);
+
     return NextResponse.json(
       {
         ok: false,
-        code: "INTERNAL_ERROR",
-        message: "服务繁忙，请稍后重试。",
+        code: 'INTERNAL_ERROR',
+        message: '服务繁忙，请稍后重试。',
       },
       { status: 500 }
     );

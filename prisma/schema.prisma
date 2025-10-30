@@ -4,7 +4,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"  // 从 sqlite 切换到 postgresql
   url      = env("DATABASE_URL")
 }
 
@@ -21,9 +21,11 @@ model Event {
   desc      String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   tiers     Tier[]
-  
+  badges    Badge[] // 活动的数字纪念品
+  posts     Post[]  // 关联的帖子
+
   @@map("events")
 }
 
@@ -61,17 +63,56 @@ model Hold {
 // ✅ 订单表
 model Order {
   id        String   @id
+  userId    String   // 订单所属用户
   eventId   String
   tierId    String
   qty       Int
   holdId    String
-  status    String
+  status    String   // pending, paid, cancelled, refunded
   createdAt BigInt
   paidAt    BigInt?
 
+  user       User        @relation(fields: [userId], references: [id], onDelete: Restrict) // 改为 Restrict，不能直接删除有订单的用户
+  tickets    Ticket[]    // 订单包含的票
+  userBadges UserBadge[] // 订单生成的纪念品
+
   @@map("orders")
+  @@index([userId])
   @@index([status])
   @@index([createdAt])
+}
+
+// ✅ 票表（每张票都是独立实体）
+model Ticket {
+  id          String   @id @default(uuid())
+  ticketCode  String   @unique  // 票号（二维码/条形码）
+  eventId     Int
+  tierId      Int
+  holdId      String?  // 锁票ID（临时持有，可为空）
+  orderId     String?  // 所属订单（可为空，库存中的票没有订单）
+  userId      String?  // 所属用户（可为空，库存中的票没有用户）
+  status      String   // available, locked, sold, used, refunded
+  price       Int      // 购买时的价格
+
+  purchasedAt DateTime? // 购买时间
+  usedAt      DateTime? // 使用时间
+  refundedAt  DateTime? // 退款时间
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // 关联
+  order       Order?      @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  user        User?       @relation(fields: [userId], references: [id], onDelete: SetNull) // SetNull：删除用户时票回到库存
+  userBadges  UserBadge[] // 这张票生成的纪念品
+
+  @@map("tickets")
+  @@index([eventId])
+  @@index([tierId])
+  @@index([holdId])
+  @@index([orderId])
+  @@index([userId])
+  @@index([status])
+  @@index([ticketCode])
 }
 
 // ✅ 用户表
@@ -90,12 +131,302 @@ model User {
   // 登录方式标识
   authProvider  String   @default("local") // local, wechat, qq
 
+  // 用户角色权限
+  role          String   @default("user") // user(普通用户), staff(工作人员), admin(管理员)
+
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+
+  // 关联
+  orders        Order[]        // 用户的订单
+  tickets       Ticket[]       // 用户的票
+  userBadges    UserBadge[]    // 用户的数字纪念品
+  loginLogs     LoginLog[]
+  sessions      UserSession[]
+
+  // 社交系统关联
+  posts         Post[]         // 用户发布的帖子
+  likes         PostLike[]     // 用户点赞的帖子
+  comments      Comment[]      // 用户的评论
+  sentMessages  Message[]      @relation("SentMessages")  // 发送的消息
+  receivedMessages Message[]   @relation("ReceivedMessages") // 接收的消息
+  conversations ConversationParticipant[] // 参与的会话
 
   @@map("users")
   @@index([email])
   @@index([phone])
   @@index([wechatOpenId])
   @@index([qqOpenId])
+}
+
+// ✅ 登录日志表
+model LoginLog {
+  id         String   @id @default(uuid())
+  userId     String
+  ipAddress  String?
+  userAgent  String?
+  location   String?  // IP地址对应的地理位置
+  success    Boolean  @default(true)
+  failReason String?  // 失败原因
+  createdAt  DateTime @default(now())
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("login_logs")
+  @@index([userId])
+  @@index([createdAt])
+  @@index([success])
+}
+
+// ✅ 用户会话表（用于 Refresh Token 管理）
+model UserSession {
+  id            String   @id @default(uuid())
+  userId        String
+  refreshToken  String   @unique
+  deviceInfo    String?  // 设备信息 JSON
+  ipAddress     String?
+  expiresAt     DateTime
+  revoked       Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_sessions")
+  @@index([userId])
+  @@index([expiresAt])
+  @@index([refreshToken])
+}
+
+// ✅ 验证码表
+model VerificationCode {
+  id        String   @id @default(uuid())
+  email     String
+  code      String
+  type      String   @default("register") // register, login, reset_password
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@map("verification_codes")
+  @@index([email, type])
+  @@index([expiresAt])
+}
+
+// ✅ 数字纪念品表（徽章、票根等）
+model Badge {
+  id          String   @id @default(uuid())
+  eventId     Int      // 所属活动
+  tierId      Int?     // 所属票档（可选，有些纪念品是活动级别的）
+  name        String   // 纪念品名称
+  description String   @db.Text // 描述
+  imageUrl    String   // 2D图片URL
+  rarity      String   @default("common") // 稀有度: common, rare, epic, legendary
+  type        String   @default("badge") // 类型: badge(徽章), ticket_stub(票根), certificate(证书), poster(海报)
+  isActive    Boolean  @default(true) // 是否启用
+
+  // 🎨 3D/AR 相关字段
+  has3DModel  Boolean  @default(false) // 是否有3D模型
+  model3DUrl  String?  // 3D模型文件URL (glb/gltf格式)
+  modelFormat String?  // 模型格式: glb, gltf, usdz等
+  hasAR       Boolean  @default(false) // 是否支持AR
+  arUrl       String?  // AR快速查看URL (iOS Quick Look / Android Scene Viewer)
+
+  // 🎬 动画相关
+  hasAnimation Boolean @default(false) // 是否有动画
+  animationUrl String? // 动画文件URL
+
+  // 📐 3D模型配置 (JSON格式)
+  modelConfig  String? @db.Text // 模型配置: 初始位置、缩放、旋转、灯光等
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // 关联
+  event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  userBadges  UserBadge[] // 被哪些用户拥有
+
+  @@map("badges")
+  @@index([eventId])
+  @@index([tierId])
+  @@index([type])
+  @@index([rarity])
+  @@index([has3DModel])
+  @@index([hasAR])
+}
+
+// ✅ 用户拥有的纪念品（中间表，记录用户获得纪念品的详情）
+model UserBadge {
+  id          String   @id @default(uuid())
+  userId      String   // 用户ID
+  badgeId     String   // 纪念品ID
+  ticketId    String?  // 通过哪张票获得（可选）
+  orderId     String?  // 通过哪个订单获得（可选）
+  obtainedAt  DateTime @default(now()) // 获得时间
+  metadata    String?  @db.Text // JSON格式的额外数据（如座位号、序列号等）
+
+  // 关联
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badge       Badge    @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+  ticket      Ticket?  @relation(fields: [ticketId], references: [id], onDelete: SetNull)
+  order       Order?   @relation(fields: [orderId], references: [id], onDelete: SetNull)
+
+  @@map("user_badges")
+  @@unique([userId, badgeId, ticketId]) // 同一个用户+纪念品+票的组合唯一
+  @@index([userId])
+  @@index([badgeId])
+  @@index([ticketId])
+  @@index([orderId])
+  @@index([obtainedAt])
+}
+
+// ==================== 社交系统 ====================
+
+// ✅ 帖子表（安可区内容）
+model Post {
+  id          String   @id @default(uuid())
+  userId      String   // 发布者ID
+  content     String   @db.Text  // 帖子内容
+  eventId     Int?     // 关联的活动（可选）
+  location    String?  // 地点标签
+  viewCount   Int      @default(0) // 浏览次数
+  likeCount   Int      @default(0) // 点赞数
+  commentCount Int     @default(0) // 评论数
+  isVisible   Boolean  @default(true) // 是否可见（软删除）
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // 关联
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event       Event?     @relation(fields: [eventId], references: [id], onDelete: SetNull)
+  images      PostImage[] // 帖子图片
+  likes       PostLike[]  // 点赞
+  comments    Comment[]   // 评论
+
+  @@map("posts")
+  @@index([userId])
+  @@index([eventId])
+  @@index([createdAt])
+  @@index([likeCount])
+  @@index([isVisible])
+}
+
+// ✅ 帖子图片表
+model PostImage {
+  id        String   @id @default(uuid())
+  postId    String   // 所属帖子
+  imageUrl  String   // 图片URL
+  width     Int?     // 图片宽度（用于瀑布流布局）
+  height    Int?     // 图片高度
+  order     Int      @default(0) // 显示顺序
+  createdAt DateTime @default(now())
+
+  // 关联
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@map("post_images")
+  @@index([postId])
+  @@index([order])
+}
+
+// ✅ 点赞表
+model PostLike {
+  id        String   @id @default(uuid())
+  postId    String   // 帖子ID
+  userId    String   // 用户ID
+  createdAt DateTime @default(now())
+
+  // 关联
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("post_likes")
+  @@unique([postId, userId]) // 每个用户只能点赞一次
+  @@index([postId])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+// ✅ 评论表
+model Comment {
+  id        String   @id @default(uuid())
+  postId    String   // 帖子ID
+  userId    String   // 评论者ID
+  content   String   @db.Text  // 评论内容
+  parentId  String?  // 父评论ID（用于回复功能）
+  likeCount Int      @default(0) // 点赞数
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // 关联
+  post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parent    Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   Comment[] @relation("CommentReplies") // 子评论
+
+  @@map("comments")
+  @@index([postId])
+  @@index([userId])
+  @@index([parentId])
+  @@index([createdAt])
+}
+
+// ==================== 私聊系统 ====================
+
+// ✅ 会话表
+model Conversation {
+  id          String   @id @default(uuid())
+  lastMessageAt DateTime @default(now()) // 最后消息时间（用于排序）
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // 关联
+  participants ConversationParticipant[] // 会话参与者
+  messages     Message[] // 会话消息
+
+  @@map("conversations")
+  @@index([lastMessageAt])
+}
+
+// ✅ 会话参与者表（支持群聊扩展）
+model ConversationParticipant {
+  id             String   @id @default(uuid())
+  conversationId String   // 会话ID
+  userId         String   // 用户ID
+  unreadCount    Int      @default(0) // 未读消息数
+  lastReadAt     DateTime @default(now()) // 最后阅读时间
+  joinedAt       DateTime @default(now())
+
+  // 关联
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("conversation_participants")
+  @@unique([conversationId, userId]) // 每个用户在一个会话中只能有一条记录
+  @@index([conversationId])
+  @@index([userId])
+}
+
+// ✅ 消息表
+model Message {
+  id             String   @id @default(uuid())
+  conversationId String   // 所属会话
+  senderId       String   // 发送者ID
+  receiverId     String   // 接收者ID
+  content        String   @db.Text // 消息内容
+  messageType    String   @default("text") // 消息类型：text, image, link
+  isRead         Boolean  @default(false) // 是否已读
+  createdAt      DateTime @default(now())
+
+  // 关联
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender         User         @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver       User         @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@map("messages")
+  @@index([conversationId])
+  @@index([senderId])
+  @@index([receiverId])
+  @@index([createdAt])
+  @@index([isRead])
 }

@@ -23,6 +23,7 @@ export default function Navbar() {
     { name: "分类", href: "/categories" },
     { name: "我的账户", href: "/account" },
     { name: "我的订单", href: "/account/orders" },
+    { name: "我的收藏", href: "/account/collection" },
     { name: "安可区", href: "/encore" },
     { name: "宇宙信号", href: "/signals" },
   ];
@@ -134,6 +135,13 @@ export default function Navbar() {
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                     >
                       我的订单
+                    </Link>
+                    <Link
+                      href="/account/collection"
+                      onClick={() => setShowUserMenu(false)}
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      🎨 我的收藏
                     </Link>
                     <hr className="my-2" />
                     <button

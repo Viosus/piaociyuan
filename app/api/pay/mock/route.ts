@@ -1,8 +1,8 @@
 // app/api/pay/mock/route.ts
-import { NextResponse } from "next/server";
-import { getDB, getOrderById, getHoldById, updateOrderStatus } from "@/lib/database";
-import { normalizeId } from "@/lib/store";
-import { purgeExpiredHolds, ApiError } from "@/lib/inventory";
+import { NextResponse } from 'next/server';
+import prisma from '@/lib/prisma';
+import { normalizeId } from '@/lib/store';
+import { purgeExpiredHolds, ApiError } from '@/lib/inventory';
 
 export async function POST(req: Request) {
   try {
@@ -17,8 +17,8 @@ export async function POST(req: Request) {
       return NextResponse.json(
         {
           ok: false,
-          code: "BAD_REQUEST",
-          message: "请求参数错误，请检查后重试。",
+          code: 'BAD_REQUEST',
+          message: '请求参数错误，请检查后重试。',
         },
         { status: 400 }
       );
@@ -27,73 +27,107 @@ export async function POST(req: Request) {
     const normalizedOrderId = normalizeId(orderId);
 
     // 2️⃣ 查询订单
-    const order = getOrderById(normalizedOrderId);
+    const order = await prisma.order.findUnique({
+      where: { id: normalizedOrderId },
+      include: {
+        tickets: {
+          select: {
+            id: true,
+            ticketCode: true,
+          },
+        },
+      },
+    });
 
     if (!order) {
       console.warn(`[PAY_FAIL] 订单不存在：orderId=${normalizedOrderId}`);
       return NextResponse.json(
         {
           ok: false,
-          code: "ORDER_NOT_FOUND",
-          message: "订单不存在或已被删除。",
+          code: 'ORDER_NOT_FOUND',
+          message: '订单不存在或已被删除。',
         },
         { status: 404 }
       );
     }
 
     // 3️⃣ 幂等性：若已支付
-    if (order.status === "PAID") {
+    if (order.status === 'PAID') {
       console.log(`[PAY_IDEMPOTENT] 订单已支付：orderId=${normalizedOrderId}`);
       return NextResponse.json({
         ok: true,
-        code: "ORDER_ALREADY_PAID",
-        message: "订单已支付",
+        code: 'ORDER_ALREADY_PAID',
+        message: '订单已支付',
         data: {
-          status: "PAID",
+          status: 'PAID',
           paidAt: Number(order.paidAt),
         },
       });
     }
 
     // 4️⃣ 验证 hold
-    const hold = getHoldById(order.holdId);
+    const hold = await prisma.hold.findUnique({
+      where: { id: order.holdId },
+    });
 
     if (!hold || Number(hold.expireAt) <= now) {
       console.warn(`[PAY_FAIL] hold 已过期：orderId=${normalizedOrderId}`);
       return NextResponse.json(
         {
           ok: false,
-          code: "HOLD_EXPIRED",
-          message: "锁票已过期，请重新选择票档并下单。",
+          code: 'HOLD_EXPIRED',
+          message: '锁票已过期，请重新选择票档并下单。',
         },
         { status: 410 }
       );
     }
 
-    // 5️⃣ 执行支付（先释放 hold，再更新订单）
+    // 5️⃣ 执行支付（事务）
     console.log(`[PAY_START] orderId=${normalizedOrderId}`);
 
-    const db = getDB();
-    
-    // 删除 hold
-    db.prepare('DELETE FROM holds WHERE id = ?').run(order.holdId);
+    await prisma.$transaction(async (tx) => {
+      // a. 更新订单状态为 PAID
+      await tx.order.update({
+        where: { id: normalizedOrderId },
+        data: {
+          status: 'PAID',
+          paidAt: BigInt(now),
+        },
+      });
 
-    // 更新订单
-    updateOrderStatus(normalizedOrderId, "PAID", now);
+      // b. 更新票的状态为 'sold'，分配给用户
+      await tx.ticket.updateMany({
+        where: {
+          orderId: normalizedOrderId,
+          status: 'locked',
+        },
+        data: {
+          status: 'sold',
+          userId: order.userId, // 分配给用户
+          purchasedAt: new Date(now),
+        },
+      });
 
-    console.log(`[PAY_SUCCESS] orderId=${normalizedOrderId}`);
+      // c. 删除 hold
+      await tx.hold.delete({
+        where: { id: order.holdId },
+      });
+    });
+
+    console.log(`[PAY_SUCCESS] orderId=${normalizedOrderId}, userId=${order.userId}`);
 
     return NextResponse.json({
       ok: true,
-      code: "PAY_SUCCESS",
-      message: "支付成功",
+      code: 'PAY_SUCCESS',
+      message: '支付成功',
       data: {
-        status: "PAID",
+        status: 'PAID',
         paidAt: now,
+        tickets: order.tickets,
       },
     });
   } catch (err: any) {
-    console.error("[PAY_ERROR]", err);
+    console.error('[PAY_ERROR]', err);
 
     if (err instanceof ApiError) {
       return NextResponse.json(
@@ -110,8 +144,8 @@ export async function POST(req: Request) {
     return NextResponse.json(
       {
         ok: false,
-        code: "INTERNAL_ERROR",
-        message: "服务繁忙，请稍后重试。",
+        code: 'INTERNAL_ERROR',
+        message: '服务繁忙，请稍后重试。',
       },
       { status: 500 }
     );

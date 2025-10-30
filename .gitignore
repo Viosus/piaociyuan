@@ -8,3 +8,14 @@ dist/
 .vscode/
 .idea/
 /lib/generated/prisma
+
+# Database files
+prisma/*.db
+prisma/*.db-shm
+prisma/*.db-wal
+
+# Local settings
+.claude/settings.local.json
+
+# Build cache
+tsconfig.tsbuildinfo

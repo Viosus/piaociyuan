@@ -1,10 +1,10 @@
 // lib/auth.ts
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { getDB } from './database';
+import prisma from './prisma';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-this-in-production';
-const SALT_ROUNDS = 10;
+const SALT_ROUNDS = 12; // 从 10 提升到 12，增强安全性
 
 export type UserPayload = {
   id: string;
@@ -12,6 +12,7 @@ export type UserPayload = {
   phone?: string;
   nickname?: string;
   authProvider: string;
+  role: string; // 'user' | 'staff' | 'admin'
 };
 
 // 密码加密
@@ -24,9 +25,33 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
   return bcrypt.compare(password, hash);
 }
 
-// 生成 JWT token
+// 生成 Access Token（短期，1天 - 方便测试）
+export function generateAccessToken(user: UserPayload): string {
+  const expiresIn = process.env.JWT_ACCESS_EXPIRES || '1d';
+  return jwt.sign(user, JWT_SECRET, { expiresIn } as jwt.SignOptions);
+}
+
+// 生成 Refresh Token（长期，7天）
+export function generateRefreshToken(user: UserPayload): string {
+  const expiresIn = process.env.JWT_REFRESH_EXPIRES || '7d';
+  return jwt.sign(
+    { id: user.id, type: 'refresh' },
+    JWT_SECRET,
+    { expiresIn } as jwt.SignOptions
+  );
+}
+
+// 生成双 Token（向后兼容的包装函数）
 export function generateToken(user: UserPayload): string {
-  return jwt.sign(user, JWT_SECRET, { expiresIn: '7d' });
+  return generateAccessToken(user);
+}
+
+// 生成完整的 Token 对
+export function generateTokenPair(user: UserPayload): { accessToken: string; refreshToken: string } {
+  return {
+    accessToken: generateAccessToken(user),
+    refreshToken: generateRefreshToken(user),
+  };
 }
 
 // 验证 JWT token
@@ -39,25 +64,28 @@ export function verifyToken(token: string): UserPayload | null {
 }
 
 // 通过邮箱查找用户
-export function findUserByEmail(email: string) {
-  const db = getDB();
-  return db.prepare('SELECT * FROM users WHERE email = ?').get(email) as any;
+export async function findUserByEmail(email: string) {
+  return await prisma.user.findUnique({
+    where: { email },
+  });
 }
 
 // 通过手机号查找用户
-export function findUserByPhone(phone: string) {
-  const db = getDB();
-  return db.prepare('SELECT * FROM users WHERE phone = ?').get(phone) as any;
+export async function findUserByPhone(phone: string) {
+  return await prisma.user.findUnique({
+    where: { phone },
+  });
 }
 
 // 通过 ID 查找用户
-export function findUserById(id: string) {
-  const db = getDB();
-  return db.prepare('SELECT * FROM users WHERE id = ?').get(id) as any;
+export async function findUserById(id: string) {
+  return await prisma.user.findUnique({
+    where: { id },
+  });
 }
 
 // 创建用户
-export function createUser(data: {
+export async function createUser(data: {
   id: string;
   email?: string;
   phone?: string;
@@ -65,20 +93,16 @@ export function createUser(data: {
   nickname?: string;
   authProvider?: string;
 }) {
-  const db = getDB();
-  const stmt = db.prepare(`
-    INSERT INTO users (id, email, phone, password, nickname, authProvider, createdAt, updatedAt)
-    VALUES (?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
-  `);
-
-  return stmt.run(
-    data.id,
-    data.email || null,
-    data.phone || null,
-    data.password || null,
-    data.nickname || null,
-    data.authProvider || 'local'
-  );
+  return await prisma.user.create({
+    data: {
+      id: data.id,
+      email: data.email || null,
+      phone: data.phone || null,
+      password: data.password || null,
+      nickname: data.nickname || null,
+      authProvider: data.authProvider || 'local',
+    },
+  });
 }
 
 // 验证邮箱格式

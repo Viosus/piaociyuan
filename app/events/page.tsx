@@ -6,9 +6,11 @@ export default async function EventsPage() {
   const events = await getAllEvents();
 
   return (
-    <main className="min-h-screen p-8 bg-gray-50">
+    <main className="min-h-screen p-8">
       <div className="max-w-6xl mx-auto mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">热门活动</h1>
+        <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
+          热门活动
+        </h1>
       </div>
 
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -16,18 +18,18 @@ export default async function EventsPage() {
           <Link
             key={event.id}
             href={`/events/${encodeURIComponent(String(event.id))}`}
-            className="bg-white rounded-xl shadow hover:shadow-lg transition p-3 block"
+            className="bg-[#1a1a1f] border border-white/10 rounded-xl hover:border-white/20 transition p-3 block group"
           >
             <img
               src={event.cover}
               alt={event.name}
-              className="rounded-lg w-full h-48 object-cover mb-3"
+              className="rounded-lg w-full h-48 object-cover mb-3 group-hover:scale-105 transition-transform"
             />
-            <h2 className="text-lg font-semibold">{event.name}</h2>
-            <p className="text-gray-500">
+            <h2 className="text-lg font-semibold text-white">{event.name}</h2>
+            <p className="text-white/60">
               {event.city} · {event.date} {event.time}
             </p>
-            <p className="mt-2 text-sm text-gray-400">{event.venue}</p>
+            <p className="mt-2 text-sm text-white/40">{event.venue}</p>
           </Link>
         ))}
       </div>

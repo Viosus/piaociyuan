@@ -5,7 +5,7 @@ import {
   generateCode,
   saveVerificationCode,
   sendVerificationEmail,
-  canSendCode,
+  checkSendFrequency,
 } from '@/lib/verification';
 
 export async function POST(req: NextRequest) {
@@ -21,10 +21,10 @@ export async function POST(req: NextRequest) {
     }
 
     // 检查发送频率
-    const rateCheck = canSendCode(email);
-    if (!rateCheck.ok) {
+    const canSend = await checkSendFrequency(email, type);
+    if (!canSend) {
       return NextResponse.json(
-        { ok: false, error: rateCheck.message, waitTime: rateCheck.waitTime },
+        { ok: false, error: '发送过于频繁，请稍后再试' },
         { status: 429 }
       );
     }
@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
     const code = generateCode();
 
     // 保存到数据库
-    const { expiresAt } = saveVerificationCode(email, code, type);
+    const { expiresAt } = await saveVerificationCode(email, code, type);
 
     // 发送邮件
     const sent = await sendVerificationEmail(email, code);

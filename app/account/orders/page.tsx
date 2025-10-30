@@ -10,7 +10,7 @@ type Order = {
   tierId: number;
   qty: number;
   holdId: string;
-  status: "PENDING" | "PAID";
+  status: "PENDING" | "PAID" | "refunded";
   createdAt: number;
   paidAt?: number;
   amount: number;
@@ -26,6 +26,13 @@ type Order = {
     name: string;
     price: number;
   };
+  tickets?: Array<{
+    id: string;
+    ticketCode: string;
+    status: string;
+    price: number;
+    refundedAt?: Date | string | null;
+  }>;
 };
 
 type EventOption = {
@@ -524,10 +531,18 @@ export default function OrdersPage() {
   };
 
   return (
-    <main className="min-h-screen p-4 md:p-8 bg-gray-50">
-      <div className="max-w-7xl mx-auto bg-white rounded-2xl shadow p-4 md:p-6">
-        {/* 标题 */}
-        <h1 className="text-2xl font-bold mb-6">我的订单</h1>
+    <main className="min-h-screen p-4 md:p-8">
+      <div className="max-w-7xl mx-auto bg-[#1a1a1f] border border-white/10 rounded-2xl shadow p-4 md:p-6">
+        {/* 标题和导航 */}
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-bold text-white">我的订单</h1>
+          <Link
+            href="/account/collection"
+            className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all flex items-center gap-2"
+          >
+            🎨 我的收藏
+          </Link>
+        </div>
 
         {/* 筛选器区域 */}
         <div className="mb-6 space-y-3">
@@ -694,57 +709,82 @@ export default function OrdersPage() {
                   </td>
                 </tr>
               ) : (
-                orders.map((o) => (
-                  <tr key={o.id} className="border-t text-sm hover:bg-gray-50">
-                    <td className="py-3 pr-4 font-mono text-xs">{o.id}</td>
-                    <td className="py-3 pr-4">
-                      <div className="font-medium">
-                        {o.event?.name ?? `活动 ${o.eventId}`}
-                      </div>
-                      {o.event && (
-                        <div className="text-gray-500 text-xs">
-                          {o.event.city} · {o.event.date} {o.event.time}
+                orders.map((o) => {
+                  // 检查是否所有票都已退款
+                  // 1. 订单状态本身是 refunded
+                  // 2. 或者有票且所有票都有 refundedAt
+                  const allTicketsRefunded =
+                    o.status === 'refunded' ||
+                    (o.tickets && o.tickets.length > 0 && o.tickets.every(t => t.refundedAt !== null && t.refundedAt !== undefined));
+
+                  return (
+                    <tr key={o.id} className={`border-t text-sm hover:bg-gray-50 ${allTicketsRefunded ? 'opacity-60' : ''}`}>
+                      <td className="py-3 pr-4 font-mono text-xs">{o.id}</td>
+                      <td className="py-3 pr-4">
+                        <div className="font-medium">
+                          {o.event?.name ?? `活动 ${o.eventId}`}
                         </div>
-                      )}
-                    </td>
-                    <td className="py-3 pr-4">
-                      {o.tier ? `${o.tier.name} × ${o.qty}` : `票档 ${o.tierId} × ${o.qty}`}
-                    </td>
-                    <td className="py-3 pr-4 font-medium">¥ {o.amount.toFixed(2)}</td>
-                    <td className="py-3 pr-4">
-                      {o.status === "PAID" ? (
-                        <span className="px-2 py-1 rounded bg-green-50 text-green-700 text-xs">
-                          已支付
-                        </span>
-                      ) : (
-                        <span className="px-2 py-1 rounded bg-amber-50 text-amber-700 text-xs">
-                          待支付
-                        </span>
-                      )}
-                    </td>
-                    <td className="py-3 pr-4 text-xs text-gray-500">
-                      {new Date(o.createdAt).toLocaleString("zh-CN")}
-                    </td>
-                    <td className="py-3 pr-4">
-                      <div className="flex gap-2">
-                        <Link
-                          href={`/order/${o.id}`}
-                          className="px-3 py-1.5 rounded bg-indigo-600 text-white hover:bg-indigo-700 text-xs"
-                        >
-                          查看
-                        </Link>
-                        {o.status === "PAID" && (
-                          <Link
-                            href={`/account/badges?orderId=${encodeURIComponent(o.id)}`}
-                            className="px-3 py-1.5 rounded bg-emerald-600 text-white hover:bg-emerald-700 text-xs"
-                          >
-                            纪念品
-                          </Link>
+                        {o.event && (
+                          <div className="text-gray-500 text-xs">
+                            {o.event.city} · {o.event.date} {o.event.time}
+                          </div>
                         )}
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                      </td>
+                      <td className="py-3 pr-4">
+                        {o.tier ? `${o.tier.name} × ${o.qty}` : `票档 ${o.tierId} × ${o.qty}`}
+                      </td>
+                      <td className="py-3 pr-4 font-medium">¥ {o.amount.toFixed(2)}</td>
+                      <td className="py-3 pr-4">
+                        {allTicketsRefunded ? (
+                          <span className="px-2 py-1 rounded bg-gray-100 text-gray-600 text-xs">
+                            已全部退票
+                          </span>
+                        ) : o.status === "PAID" ? (
+                          <span className="px-2 py-1 rounded bg-green-50 text-green-700 text-xs">
+                            已支付
+                          </span>
+                        ) : o.status === "refunded" ? (
+                          <span className="px-2 py-1 rounded bg-gray-100 text-gray-600 text-xs">
+                            已退票
+                          </span>
+                        ) : (
+                          <span className="px-2 py-1 rounded bg-amber-50 text-amber-700 text-xs">
+                            待支付
+                          </span>
+                        )}
+                      </td>
+                      <td className="py-3 pr-4 text-xs text-gray-500">
+                        {new Date(o.createdAt).toLocaleString("zh-CN")}
+                      </td>
+                      <td className="py-3 pr-4">
+                        <div className="flex gap-2">
+                          {!allTicketsRefunded ? (
+                            <>
+                              <Link
+                                href={`/order/${o.id}`}
+                                className="px-3 py-1.5 rounded bg-indigo-600 text-white hover:bg-indigo-700 text-xs"
+                              >
+                                查看详情
+                              </Link>
+                              {o.status === "PAID" && (
+                                <Link
+                                  href={`/account/collection?orderId=${encodeURIComponent(o.id)}`}
+                                  className="px-3 py-1.5 rounded bg-emerald-600 text-white hover:bg-emerald-700 text-xs"
+                                >
+                                  纪念品
+                                </Link>
+                              )}
+                            </>
+                          ) : (
+                            <span className="px-3 py-1.5 rounded bg-gray-300 text-gray-500 text-xs cursor-not-allowed">
+                              已失效
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>

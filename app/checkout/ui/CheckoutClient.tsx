@@ -241,16 +241,51 @@ export default function CheckoutClient({ event, tier, initialQty, urlLimit }: Pr
   }
 
   async function createOrder(holdId: string) {
-    const res = await fetch("/api/orders", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ eventId: event.id, tierId: tier.id, qty, holdId }),
+    // 获取当前用户信息
+    const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
+    if (!token) {
+      // 清理localStorage并跳转到登录页
+      localStorage.removeItem('token');
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      router.push('/auth/login?redirect=/checkout');
+      throw new Error('请先登录');
+    }
+
+    // 获取用户 ID
+    const meRes = await fetch('/api/auth/me', {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!meRes.ok) {
+      // 登录过期，清理localStorage并跳转到登录页
+      localStorage.removeItem('token');
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      router.push('/auth/login?redirect=/checkout');
+      throw new Error('登录已过期，请重新登录');
+    }
+
+    const meData = await meRes.json();
+    const userId = meData.data?.id;
+
+    if (!userId) {
+      throw new Error('无法获取用户信息');
+    }
+
+    // 创建订单
+    const res = await fetch('/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ eventId: event.id, tierId: tier.id, qty, holdId, userId }),
     });
 
     const data = await res.json().catch(() => ({}));
 
     if (!res.ok) {
-      const errorMessage = data?.message || data?.error || "ORDER_FAILED";
+      const errorMessage = data?.message || data?.error || 'ORDER_FAILED';
       throw new Error(errorMessage);
     }
 

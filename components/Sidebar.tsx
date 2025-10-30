@@ -1,0 +1,238 @@
+// components/Sidebar.tsx
+"use client";
+
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+
+type User = {
+  id: string;
+  nickname?: string;
+  email?: string;
+  phone?: string;
+  avatar?: string;
+};
+
+export default function Sidebar() {
+  const pathname = usePathname();
+  const router = useRouter();
+  const [user, setUser] = useState<User | null>(null);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+
+  // 导航项配置
+  const navItems = [
+    {
+      name: "主页",
+      href: "/events",
+      icon: "🏠",
+      gradient: "from-purple-500 to-pink-500"
+    },
+    {
+      name: "我的订单",
+      href: "/account/orders",
+      icon: "🎫",
+      gradient: "from-orange-500 to-red-500"
+    },
+    {
+      name: "我的收藏",
+      href: "/account/collection",
+      icon: "🎨",
+      gradient: "from-yellow-500 to-orange-500"
+    },
+    {
+      name: "安可区",
+      href: "/encore",
+      icon: "🔥",
+      gradient: "from-red-500 to-pink-500"
+    },
+    {
+      name: "宇宙信号",
+      href: "/signals",
+      icon: "📡",
+      gradient: "from-indigo-500 to-purple-500"
+    },
+  ];
+
+  // 获取用户信息
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    fetch("/api/auth/me", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.ok) {
+          setUser(data.data);
+        } else {
+          localStorage.removeItem("token");
+        }
+      })
+      .catch(() => {
+        localStorage.removeItem("token");
+      });
+  }, []);
+
+  // 登出
+  const handleLogout = () => {
+    const confirmed = window.confirm("确定要退出登录吗？");
+    if (!confirmed) return;
+
+    localStorage.removeItem("token");
+    setUser(null);
+    setShowUserMenu(false);
+    router.push("/events");
+  };
+
+  return (
+    <aside className="group fixed left-0 top-0 h-screen w-20 hover:w-64 bg-[#1a1a1f] border-r border-white/10 flex flex-col z-50 transition-all duration-300 ease-in-out">
+      {/* Logo */}
+      <Link
+        href="/events"
+        className="h-20 border-b border-white/10 flex items-center justify-center group-hover:justify-start group-hover:px-6 transition-all duration-300 relative"
+      >
+        {/* Logo图标 - 仅收起时显示 */}
+        <div className="group-hover:opacity-0 group-hover:scale-0 opacity-100 scale-100 transition-all duration-300 absolute">
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 via-pink-500 to-blue-500 flex items-center justify-center shadow-lg shadow-purple-500/30">
+            <span className="text-3xl">🎫</span>
+          </div>
+        </div>
+
+        {/* 文字 - 仅展开时显示 */}
+        <div className="opacity-0 scale-0 group-hover:opacity-100 group-hover:scale-100 transition-all duration-300 whitespace-nowrap">
+          <h1 className="text-xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
+            票次元
+          </h1>
+          <p className="text-xs text-white/40">Ticketing Reimagined</p>
+        </div>
+      </Link>
+
+      {/* 导航菜单 */}
+      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+        {navItems.map((item) => {
+          const isActive = pathname === item.href || pathname?.startsWith(item.href + "/");
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`
+                relative flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 justify-center group-hover:justify-start
+                ${
+                  isActive
+                    ? "bg-white/10 text-white"
+                    : "text-white/60 hover:text-white hover:bg-white/5"
+                }
+              `}
+            >
+              {/* 激活指示器 */}
+              {isActive && (
+                <div className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-gradient-to-b ${item.gradient} rounded-r-full`}></div>
+              )}
+
+              {/* 图标 - 始终显示 */}
+              <span className="text-2xl min-w-[2rem] shrink-0 flex items-center justify-center">{item.icon}</span>
+
+              {/* 文字 - 展开时显示 */}
+              <span className="font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300 overflow-hidden">{item.name}</span>
+
+              {/* 悬浮光效 */}
+              {!isActive && (
+                <div className={`absolute inset-0 rounded-xl opacity-0 hover:opacity-20 transition-opacity bg-gradient-to-r ${item.gradient} -z-10`}></div>
+              )}
+            </Link>
+          );
+        })}
+      </nav>
+
+      {/* 用户信息 */}
+      <div className="px-3 py-4 border-t border-white/10">
+        {user ? (
+          <div className="relative">
+            <button
+              onClick={() => setShowUserMenu(!showUserMenu)}
+              className="w-full flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-white/5 transition-all justify-center group-hover:justify-start"
+            >
+              {/* 头像 */}
+              {user.avatar ? (
+                <img
+                  src={user.avatar}
+                  alt="头像"
+                  className="w-10 h-10 rounded-full object-cover ring-2 ring-white/10 min-w-[2.5rem] shrink-0"
+                />
+              ) : (
+                <div className="w-10 h-10 min-w-[2.5rem] shrink-0 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-lg ring-2 ring-white/10">
+                  {user.nickname?.[0] || user.email?.[0] || "U"}
+                </div>
+              )}
+
+              {/* 用户名 */}
+              <div className="flex-1 text-left opacity-0 group-hover:opacity-100 transition-opacity duration-300 overflow-hidden">
+                <p className="text-white text-sm font-medium truncate whitespace-nowrap">
+                  {user.nickname || user.email || user.phone}
+                </p>
+                <p className="text-white/40 text-xs whitespace-nowrap">在线</p>
+              </div>
+
+              {/* 箭头 */}
+              <svg
+                className={`w-4 h-4 shrink-0 text-white/40 transition-all opacity-0 group-hover:opacity-100 ${showUserMenu ? "rotate-180" : ""}`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+
+            {/* 用户菜单 */}
+            {showUserMenu && (
+              <div className="absolute bottom-full left-0 w-56 mb-2 bg-[#25252a] rounded-xl border border-white/10 shadow-2xl overflow-hidden z-50">
+                <Link
+                  href="/account"
+                  onClick={() => setShowUserMenu(false)}
+                  className="block px-4 py-3 text-sm text-white/80 hover:bg-white/5 hover:text-white transition"
+                >
+                  👤 个人中心
+                </Link>
+                <Link
+                  href="/account/settings"
+                  onClick={() => setShowUserMenu(false)}
+                  className="block px-4 py-3 text-sm text-white/80 hover:bg-white/5 hover:text-white transition"
+                >
+                  ⚙️ 偏好设置
+                </Link>
+                <hr className="border-white/10" />
+                <button
+                  onClick={handleLogout}
+                  className="w-full text-left px-4 py-3 text-sm text-red-400 hover:bg-white/5 transition"
+                >
+                  🚪 退出登录
+                </button>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="space-y-2 flex flex-col items-center group-hover:items-stretch">
+            <Link
+              href="/auth/login"
+              className="w-10 h-10 group-hover:w-full flex items-center justify-center group-hover:px-4 group-hover:py-2.5 text-center text-sm font-medium text-white bg-white/10 hover:bg-white/15 rounded-xl transition-all overflow-hidden"
+            >
+              <span className="group-hover:hidden">👤</span>
+              <span className="hidden group-hover:inline">登录</span>
+            </Link>
+            <Link
+              href="/auth/register"
+              className="w-10 h-10 group-hover:w-full flex items-center justify-center group-hover:px-4 group-hover:py-2.5 text-center text-sm font-medium text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-xl transition-all shadow-lg shadow-purple-500/20 overflow-hidden"
+            >
+              <span className="group-hover:hidden">✨</span>
+              <span className="hidden group-hover:inline">注册</span>
+            </Link>
+          </div>
+        )}
+      </div>
+    </aside>
+  );
+}
