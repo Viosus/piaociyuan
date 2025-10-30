@@ -7,16 +7,8 @@ export default async function EventsPage() {
 
   return (
     <main className="min-h-screen p-8 bg-gray-50">
-      <div className="max-w-6xl mx-auto mb-6 flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-indigo-600">热门活动</h1>
-        <div className="flex items-center gap-3">
-          <Link
-            href="/account/orders"
-            className="px-3 py-1.5 text-sm rounded-lg border hover:bg-white"
-          >
-            我的订单
-          </Link>
-        </div>
+      <div className="max-w-6xl mx-auto mb-6">
+        <h1 className="text-3xl font-bold text-gray-800">热门活动</h1>
       </div>
 
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">

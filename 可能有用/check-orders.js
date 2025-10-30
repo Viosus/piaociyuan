@@ -1,3 +1,10 @@
+/**
+ * 原始位置：C:\piaoyuzhou\check-orders.js
+ * 用途：调试脚本 - 查询最近订单的创建时间信息
+ * 功能：查询最近10个订单，显示其 createdAt 时间戳并转换为可读日期格式
+ * 使用方法：node check-orders.js
+ */
+
 process.env.DATABASE_URL = 'file:C:/piaoyuzhou/prisma/dev.db';const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 

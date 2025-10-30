@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(npx prisma:*)",
+      "Bash(sqlite3:*)",
+      "Bash(node scripts/create-users-table.js:*)",
+      "Bash(node scripts/create-verification-table.js:*)",
+      "Bash(node scripts/view-users.js:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

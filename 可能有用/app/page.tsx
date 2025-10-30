@@ -1,3 +1,10 @@
+/**
+ * 原始位置：C:\piaoyuzhou\app\page.tsx
+ * 用途：根路径页面（可能重复）
+ * 功能：显示热门活动列表，与 app/events/page.tsx 功能重复
+ * 说明：现在主页已改为 /events，此文件可能不再需要
+ */
+
 // app/page.tsx
 import Link from "next/link";
 import { getAllEvents } from "@/lib/database";

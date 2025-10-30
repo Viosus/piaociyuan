@@ -1,3 +1,10 @@
+/**
+ * 原始位置：C:\piaoyuzhou\test-filter.js
+ * 用途：调试脚本 - 测试订单日期筛选逻辑
+ * 功能：测试 UTC 时间戳计算方法，验证订单是否在指定日期范围内
+ * 使用方法：node test-filter.js
+ */
+
 process.env.DATABASE_URL = 'file:C:/piaoyuzhou/prisma/dev.db';
 
 // 测试时间戳计算

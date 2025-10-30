@@ -1,3 +1,10 @@
+/**
+ * 原始位置：C:\piaoyuzhou\check-tables.js
+ * 用途：调试脚本 - 查看数据库表结构
+ * 功能：使用 better-sqlite3 直接查询数据库，列出所有表名和字段信息
+ * 使用方法：node check-tables.js
+ */
+
 const Database = require('better-sqlite3');
 const path = require('path');
 

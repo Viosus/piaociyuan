@@ -170,10 +170,10 @@ export default function BadgesPage() {
                   重新生成
                 </button>
                 <Link
-                  href={`/order/${order.id}`}
+                  href="/events"
                   className="px-4 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700"
                 >
-                  返回订单
+                  返回主页
                 </Link>
               </div>
             </>

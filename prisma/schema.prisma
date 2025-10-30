@@ -68,8 +68,34 @@ model Order {
   status    String
   createdAt BigInt
   paidAt    BigInt?
-  
+
   @@map("orders")
   @@index([status])
   @@index([createdAt])
+}
+
+// ✅ 用户表
+model User {
+  id            String   @id @default(uuid())
+  email         String?  @unique
+  phone         String?  @unique
+  password      String?  // 本地登录密码（加密存储）
+  nickname      String?
+  avatar        String?
+
+  // 第三方登录字段
+  wechatOpenId  String?  @unique
+  qqOpenId      String?  @unique
+
+  // 登录方式标识
+  authProvider  String   @default("local") // local, wechat, qq
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("users")
+  @@index([email])
+  @@index([phone])
+  @@index([wechatOpenId])
+  @@index([qqOpenId])
 }
