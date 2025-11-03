@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { apiGet } from '@/lib/api';
 
 type Order = {
   id: string;
@@ -57,11 +58,13 @@ type FilterType =
   | "amount"
   | "sortBy";
 
+type FilterValue = string | number | null | { start: string; end: string } | { min: string; max: string };
+
 type FilterItem = {
   id: string;
   type: FilterType;
   label: string;
-  value: any;
+  value: FilterValue;
 };
 
 // 可用的筛选项配置
@@ -77,7 +80,7 @@ const FILTER_OPTIONS = [
 export default function OrdersPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  
+
   const [orders, setOrders] = useState<Order[]>([]);
   const [pagination, setPagination] = useState<Pagination>({
     page: 1,
@@ -88,12 +91,33 @@ export default function OrdersPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [events, setEvents] = useState<EventOption[]>([]);
-  
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
   // 活动筛选器
   const [activeFilters, setActiveFilters] = useState<FilterItem[]>([]);
   const [showFilterMenu, setShowFilterMenu] = useState(false);
-  
+
   const currentPage = parseInt(searchParams.get("page") || "1");
+
+  // 验证用户登录状态
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      router.push("/auth/login");
+      return;
+    }
+
+    // 验证 token 有效性
+    apiGet("/api/auth/me")
+      .then((data) => {
+        if (data.ok) {
+          setIsAuthenticated(true);
+        }
+      })
+      .catch(() => {
+        // API helper already handles 401 redirects
+      });
+  }, [router]);
 
   // 从 URL 初始化筛选器
   useEffect(() => {
@@ -170,25 +194,31 @@ export default function OrdersPage() {
     filters.forEach((filter) => {
       switch (filter.type) {
         case "status":
-          params.set("status", filter.value);
+          if (typeof filter.value === 'string') params.set("status", filter.value);
           break;
         case "eventId":
-          params.set("eventId", filter.value);
+          if (typeof filter.value === 'string') params.set("eventId", filter.value);
           break;
         case "q":
-          params.set("q", filter.value);
+          if (typeof filter.value === 'string') params.set("q", filter.value);
           break;
         case "orderDate":
-          if (filter.value.start) params.set("orderStartDate", filter.value.start);
-          if (filter.value.end) params.set("orderEndDate", filter.value.end);
+          if (filter.value && typeof filter.value === 'object' && 'start' in filter.value) {
+            if (filter.value.start) params.set("orderStartDate", filter.value.start);
+            if (filter.value.end) params.set("orderEndDate", filter.value.end);
+          }
           break;
         case "eventDate":
-          if (filter.value.start) params.set("eventStartDate", filter.value.start);
-          if (filter.value.end) params.set("eventEndDate", filter.value.end);
+          if (filter.value && typeof filter.value === 'object' && 'start' in filter.value) {
+            if (filter.value.start) params.set("eventStartDate", filter.value.start);
+            if (filter.value.end) params.set("eventEndDate", filter.value.end);
+          }
           break;
         case "amount":
-          if (filter.value.min) params.set("minAmount", filter.value.min);
-          if (filter.value.max) params.set("maxAmount", filter.value.max);
+          if (filter.value && typeof filter.value === 'object' && 'min' in filter.value) {
+            if (filter.value.min) params.set("minAmount", filter.value.min);
+            if (filter.value.max) params.set("maxAmount", filter.value.max);
+          }
           break;
       }
     });
@@ -224,23 +254,19 @@ export default function OrdersPage() {
 
   // 加载订单列表
   const loadOrders = useCallback(async (page: number) => {
+    if (!isAuthenticated) return;
+
     setLoading(true);
     setError(null);
-    
+
     try {
       const params = buildURLParams(activeFilters, page);
       const url = `/api/orders?${params.toString()}`;
       console.log("🔍 [ORDERS_PAGE] 请求:", url);
-      
-      const res = await fetch(url, { cache: "no-store" });
-      
-      if (!res.ok) {
-        throw new Error(`请求失败: ${res.status}`);
-      }
-      
-      const data = await res.json();
+
+      const data = await apiGet(url);
       console.log("📦 [ORDERS_PAGE] 响应数据:", data);
-      
+
       if (data.ok && data.data) {
         setOrders(data.data);
         if (data.pagination) {
@@ -249,14 +275,14 @@ export default function OrdersPage() {
       } else {
         throw new Error(data.message || "数据格式错误");
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("❌ [ORDERS_PAGE] 请求失败:", err);
-      setError(err.message || "加载失败");
+      setError(err instanceof Error ? err.message : String(err) || "加载失败");
       setOrders([]);
     } finally {
       setLoading(false);
     }
-  }, [activeFilters, buildURLParams]);
+  }, [activeFilters, buildURLParams, isAuthenticated, router]);
 
   // 初始化
   useEffect(() => {
@@ -279,7 +305,7 @@ export default function OrdersPage() {
     }
     
     // 创建默认值
-    let defaultValue: any = "";
+    let defaultValue: FilterValue = "";
     if (type === "orderDate" || type === "eventDate") {
       defaultValue = { start: "", end: "" };
     } else if (type === "amount") {
@@ -298,7 +324,7 @@ export default function OrdersPage() {
   };
 
   // 更新筛选项值
-  const updateFilterValue = (id: string, value: any) => {
+  const updateFilterValue = (id: string, value: FilterValue) => {
     setActiveFilters(
       activeFilters.map((f) => (f.id === id ? { ...f, value } : f))
     );
@@ -335,7 +361,7 @@ export default function OrdersPage() {
       case "status":
         return (
           <select
-            value={filter.value}
+            value={(filter.value || '') as string}
             onChange={(e) => updateFilterValue(filter.id, e.target.value)}
             className="flex-1 px-3 py-2 border rounded-lg"
           >
@@ -344,11 +370,11 @@ export default function OrdersPage() {
             <option value="PAID">已支付</option>
           </select>
         );
-      
+
       case "eventId":
         return (
           <select
-            value={filter.value}
+            value={(filter.value || '') as string}
             onChange={(e) => updateFilterValue(filter.id, e.target.value)}
             className="flex-1 px-3 py-2 border rounded-lg"
           >
@@ -360,12 +386,12 @@ export default function OrdersPage() {
             ))}
           </select>
         );
-      
+
       case "q":
         return (
           <input
             type="text"
-            value={filter.value}
+            value={(filter.value || '') as string}
             onChange={(e) => updateFilterValue(filter.id, e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && applyFilters()}
             placeholder="输入订单号"
@@ -374,55 +400,59 @@ export default function OrdersPage() {
         );
       
       case "orderDate":
-      case "eventDate":
+      case "eventDate": {
+        const dateValue = (filter.value || { start: '', end: '' }) as { start: string; end: string };
         return (
           <div className="flex-1 flex gap-2">
             <input
               type="date"
-              value={filter.value.start}
+              value={dateValue.start}
               onChange={(e) =>
-                updateFilterValue(filter.id, { ...filter.value, start: e.target.value })
+                updateFilterValue(filter.id, { ...dateValue, start: e.target.value })
               }
               className="flex-1 px-3 py-2 border rounded-lg"
               placeholder="开始日期"
             />
-            <span className="self-center text-gray-400">~</span>
+            <span className="self-center text-[#282828] opacity-60">~</span>
             <input
               type="date"
-              value={filter.value.end}
+              value={dateValue.end}
               onChange={(e) =>
-                updateFilterValue(filter.id, { ...filter.value, end: e.target.value })
+                updateFilterValue(filter.id, { ...dateValue, end: e.target.value })
               }
               className="flex-1 px-3 py-2 border rounded-lg"
               placeholder="结束日期"
             />
           </div>
         );
-      
-      case "amount":
+      }
+
+      case "amount": {
+        const amountValue = (filter.value || { min: '', max: '' }) as { min: string; max: string };
         return (
           <div className="flex-1 flex gap-2">
             <input
               type="number"
-              value={filter.value.min}
+              value={amountValue.min}
               onChange={(e) =>
-                updateFilterValue(filter.id, { ...filter.value, min: e.target.value })
+                updateFilterValue(filter.id, { ...amountValue, min: e.target.value })
               }
               placeholder="最低金额"
               className="flex-1 px-3 py-2 border rounded-lg"
             />
-            <span className="self-center text-gray-400">~</span>
+            <span className="self-center text-[#282828] opacity-60">~</span>
             <input
               type="number"
-              value={filter.value.max}
+              value={amountValue.max}
               onChange={(e) =>
-                updateFilterValue(filter.id, { ...filter.value, max: e.target.value })
+                updateFilterValue(filter.id, { ...amountValue, max: e.target.value })
               }
               placeholder="最高金额"
               className="flex-1 px-3 py-2 border rounded-lg"
             />
           </div>
         );
+      }
       
       default:
         return null;
@@ -440,10 +470,14 @@ export default function OrdersPage() {
       case "q":
         return `"${filter.value}"`;
       case "orderDate":
-      case "eventDate":
-        return `${filter.value.start || "不限"} ~ ${filter.value.end || "不限"}`;
-      case "amount":
-        return `¥${filter.value.min || "0"} ~ ¥${filter.value.max || "∞"}`;
+      case "eventDate": {
+        const dateVal = filter.value as { start: string; end: string };
+        return `${dateVal?.start || "不限"} ~ ${dateVal?.end || "不限"}`;
+      }
+      case "amount": {
+        const amountVal = filter.value as { min: string; max: string };
+        return `¥${amountVal?.min || "0"} ~ ¥${amountVal?.max || "∞"}`;
+      }
       default:
         return "";
     }
@@ -499,7 +533,7 @@ export default function OrdersPage() {
             onClick={() => goToPage(p)}
             className={`px-3 py-2 border rounded-lg ${
               currentPage === p
-                ? "bg-indigo-600 text-white"
+                ? "bg-[#EAF353] text-white"
                 : "hover:bg-gray-50"
             }`}
           >
@@ -531,16 +565,16 @@ export default function OrdersPage() {
   };
 
   return (
-    <main className="min-h-screen p-4 md:p-8">
-      <div className="max-w-7xl mx-auto bg-[#1a1a1f] border border-white/10 rounded-2xl shadow p-4 md:p-6">
+    <main className="min-h-screen p-4 md:p-8 bg-gray-50">
+      <div className="max-w-7xl mx-auto bg-white/80 backdrop-blur-sm border border-white/40 rounded-2xl shadow p-4 md:p-6">
         {/* 标题和导航 */}
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-white">我的订单</h1>
+          <h1 className="text-2xl font-bold text-[#EAF353]">我的订单</h1>
           <Link
             href="/account/collection"
-            className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all flex items-center gap-2"
+            className="px-4 py-2 bg-gradient-to-r from-purple-500 to-[#EAF353] text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all flex items-center gap-2"
           >
-            🎨 我的收藏
+            🎨 我的次元
           </Link>
         </div>
 
@@ -552,7 +586,7 @@ export default function OrdersPage() {
             return (
               <div key={filter.id} className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
                 <span className="text-lg">{option?.icon}</span>
-                <span className="text-sm font-medium text-gray-700 min-w-[80px]">
+                <span className="text-sm font-medium text-[#282828] min-w-[80px]">
                   {filter.label}
                 </span>
                 {renderFilterEditor(filter)}
@@ -572,7 +606,7 @@ export default function OrdersPage() {
             <div className="relative">
               <button
                 onClick={() => setShowFilterMenu(!showFilterMenu)}
-                className="px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg hover:border-indigo-400 hover:bg-indigo-50 text-gray-600 hover:text-indigo-600 transition-colors"
+                className="px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg hover:border-[#FFE3F0] hover:bg-[#FFFAFD] text-[#282828] hover:text-[#EAF353] transition-colors"
               >
                 {activeFilters.length === 0 ? "+ 添加筛选" : "+ 添加更多筛选"}
               </button>
@@ -581,9 +615,9 @@ export default function OrdersPage() {
               {showFilterMenu && (
                 <div className="absolute top-full left-0 mt-2 w-64 bg-white border rounded-lg shadow-lg z-10">
                   <div className="p-2">
-                    <div className="text-xs text-gray-500 px-2 py-1">选择筛选项</div>
+                    <div className="text-xs text-[#282828] px-2 py-1">选择筛选项</div>
                     {availableFilters.length === 0 ? (
-                      <div className="px-2 py-3 text-sm text-gray-400 text-center">
+                      <div className="px-2 py-3 text-sm text-[#282828] opacity-60 text-center">
                         所有筛选项已添加
                       </div>
                     ) : (
@@ -607,7 +641,7 @@ export default function OrdersPage() {
               <>
                 <button
                   onClick={applyFilters}
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                  className="px-4 py-2 bg-[#EAF353] text-white rounded-lg hover:bg-[#FFC9E0]"
                 >
                   应用筛选
                 </button>
@@ -630,9 +664,9 @@ export default function OrdersPage() {
         </div>
 
         {/* 排序栏 - 独立显示 */}
-        <div className="mb-6 flex items-center gap-3 p-3 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border border-indigo-200">
+        <div className="mb-6 flex items-center gap-3 p-3 bg-gradient-to-r from-[#FFFAFD] to-[#FFF5FB] rounded-lg border border-[#FFF0F8]">
           <span className="text-lg">📊</span>
-          <span className="text-sm font-medium text-gray-700 min-w-[60px]">排序</span>
+          <span className="text-sm font-medium text-[#282828] min-w-[60px]">排序</span>
           <select
             value={`${searchParams.get("sortBy") || "createdAt"}-${searchParams.get("sortOrder") || "desc"}`}
             onChange={(e) => {
@@ -643,7 +677,7 @@ export default function OrdersPage() {
               params.set("page", "1");
               router.push(`?${params.toString()}`);
             }}
-            className="flex-1 px-3 py-2 border border-indigo-300 rounded-lg bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            className="flex-1 px-3 py-2 border border-[#FFEBF5] rounded-lg bg-white focus:ring-2 focus:ring-[#EAF353] focus:border-transparent"
           >
             <option value="createdAt-desc">📅 创建时间（新→旧）</option>
             <option value="createdAt-asc">📅 创建时间（旧→新）</option>
@@ -655,7 +689,7 @@ export default function OrdersPage() {
         </div>
 
         {/* 统计信息 */}
-        <div className="text-sm text-gray-600 mb-4">
+        <div className="text-sm text-[#282828] mb-4">
           共 <span className="font-semibold">{pagination.total}</span> 条订单，
           当前第 <span className="font-semibold">{currentPage}</span> /
           <span className="font-semibold"> {pagination.totalPages}</span> 页
@@ -679,7 +713,7 @@ export default function OrdersPage() {
         <div className="overflow-x-auto">
           <table className="min-w-full">
             <thead>
-              <tr className="text-left text-sm text-gray-500 border-b">
+              <tr className="text-left text-sm text-[#282828] border-b">
                 <th className="py-3 pr-4">订单号</th>
                 <th className="py-3 pr-4">活动</th>
                 <th className="py-3 pr-4">票档/数量</th>
@@ -692,17 +726,17 @@ export default function OrdersPage() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={7} className="py-10 text-center text-gray-400">
+                  <td colSpan={7} className="py-10 text-center text-[#282828] opacity-60">
                     加载中...
                   </td>
                 </tr>
               ) : orders.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="py-10 text-center">
-                    <div className="text-gray-400 mb-2">暂无订单</div>
+                    <div className="text-[#282828] opacity-60 mb-2">暂无订单</div>
                     <Link
                       href="/events"
-                      className="inline-block px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                      className="inline-block px-4 py-2 bg-[#EAF353] text-white rounded-lg hover:bg-[#FFC9E0]"
                     >
                       去购票
                     </Link>
@@ -725,7 +759,7 @@ export default function OrdersPage() {
                           {o.event?.name ?? `活动 ${o.eventId}`}
                         </div>
                         {o.event && (
-                          <div className="text-gray-500 text-xs">
+                          <div className="text-[#282828] text-xs">
                             {o.event.city} · {o.event.date} {o.event.time}
                           </div>
                         )}
@@ -736,7 +770,7 @@ export default function OrdersPage() {
                       <td className="py-3 pr-4 font-medium">¥ {o.amount.toFixed(2)}</td>
                       <td className="py-3 pr-4">
                         {allTicketsRefunded ? (
-                          <span className="px-2 py-1 rounded bg-gray-100 text-gray-600 text-xs">
+                          <span className="px-2 py-1 rounded bg-gray-100 text-[#282828] text-xs">
                             已全部退票
                           </span>
                         ) : o.status === "PAID" ? (
@@ -744,7 +778,7 @@ export default function OrdersPage() {
                             已支付
                           </span>
                         ) : o.status === "refunded" ? (
-                          <span className="px-2 py-1 rounded bg-gray-100 text-gray-600 text-xs">
+                          <span className="px-2 py-1 rounded bg-gray-100 text-[#282828] text-xs">
                             已退票
                           </span>
                         ) : (
@@ -753,7 +787,7 @@ export default function OrdersPage() {
                           </span>
                         )}
                       </td>
-                      <td className="py-3 pr-4 text-xs text-gray-500">
+                      <td className="py-3 pr-4 text-xs text-[#282828]">
                         {new Date(o.createdAt).toLocaleString("zh-CN")}
                       </td>
                       <td className="py-3 pr-4">
@@ -762,7 +796,7 @@ export default function OrdersPage() {
                             <>
                               <Link
                                 href={`/order/${o.id}`}
-                                className="px-3 py-1.5 rounded bg-indigo-600 text-white hover:bg-indigo-700 text-xs"
+                                className="px-3 py-1.5 rounded bg-[#EAF353] text-white hover:bg-[#FFC9E0] text-xs"
                               >
                                 查看详情
                               </Link>
@@ -776,7 +810,7 @@ export default function OrdersPage() {
                               )}
                             </>
                           ) : (
-                            <span className="px-3 py-1.5 rounded bg-gray-300 text-gray-500 text-xs cursor-not-allowed">
+                            <span className="px-3 py-1.5 rounded bg-gray-300 text-[#282828] text-xs cursor-not-allowed">
                               已失效
                             </span>
                           )}
@@ -795,7 +829,7 @@ export default function OrdersPage() {
 
         {/* 返回链接 */}
         <div className="mt-6 text-sm">
-          <Link href="/events" className="text-indigo-600 hover:underline">
+          <Link href="/events" className="text-[#EAF353] hover:underline">
             ← 返回活动列表
           </Link>
         </div>

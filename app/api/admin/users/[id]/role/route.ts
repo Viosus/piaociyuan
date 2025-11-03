@@ -119,7 +119,7 @@ export async function PUT(req: NextRequest, { params }: Props) {
         newRole: role,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[ADMIN_UPDATE_ROLE_ERROR]', error);
     return NextResponse.json(
       {

@@ -35,7 +35,7 @@ export async function GET(_req: Request, { params }: Props) {
     }
 
     return NextResponse.json(event);
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('[EVENT_GET_ERROR]', err);
     return NextResponse.json(
       { error: 'Internal server error' },

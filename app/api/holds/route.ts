@@ -80,7 +80,7 @@ export async function POST(req: Request) {
         expireAt: result.expireAt,
       },
     });
-  } catch (e: any) {
+  } catch (e: unknown) {
     console.error("[HOLD_ERROR]", e);
 
     if (e instanceof ApiError) {
@@ -163,7 +163,7 @@ export async function GET(req: Request) {
         createdAt: Number(h.createdAt),
       })),
     });
-  } catch (e: any) {
+  } catch (e: unknown) {
     console.error("[HOLD_DIAGNOSTIC_ERROR]", e);
 
     if (e instanceof ApiError) {

@@ -10,7 +10,7 @@ export default function SettingsPage() {
     <main className="min-h-screen py-12 px-4">
       <div className="max-w-4xl mx-auto">
         <div className="bg-[#1a1a1f] border border-white/10 rounded-2xl shadow-lg p-8">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent mb-2">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 via-[#FFE3F0] to-blue-400 bg-clip-text text-transparent mb-2">
             ⚙️ 偏好设置
           </h1>
           <p className="text-white/60 mb-8">个性化你的票次元体验</p>
@@ -62,7 +62,7 @@ export default function SettingsPage() {
             <div className="flex gap-4">
               <Link
                 href="/account"
-                className="flex-1 py-3 text-center bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-medium hover:from-purple-600 hover:to-pink-600 transition"
+                className="flex-1 py-3 text-center bg-gradient-to-r from-purple-500 to-[#EAF353] text-white rounded-lg font-medium hover:from-purple-600 hover:to-pink-600 transition"
               >
                 👤 返回个人中心
               </Link>

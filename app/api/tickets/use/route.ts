@@ -9,7 +9,7 @@
  * 2. 演出当天，工作人员扫描二维码
  * 3. 工作人员系统调用验票API（需要工作人员权限）
  * 4. 验票成功后自动发放纪念品
- * 5. 用户在"我的收藏"中查看纪念品
+ * 5. 用户在"我的次元"中查看纪念品
  *
  * 当前测试功能：
  * - 用户可自行点击检票按钮（生产环境应移除）
@@ -142,98 +142,27 @@ export async function POST(req: Request) {
     //   );
     // }
 
-    // 6️⃣ 执行检票和发放纪念品（事务）
-    const result = await prisma.$transaction(async (tx) => {
-      // a. 更新票的状态为 used
-      await tx.ticket.update({
-        where: { id: ticketId },
-        data: {
-          status: 'used',
-          usedAt: new Date(),
-        },
-      });
-
-      // b. 查找可获得的纪念品
-      // 1) 查找票档对应的纪念品（票根、海报等）
-      const tierBadges = await tx.badge.findMany({
-        where: {
-          eventId: ticket.eventId,
-          tierId: ticket.tierId,
-          isActive: true,
-        },
-      });
-
-      // 2) 查找活动通用纪念品（参与纪念等，tierId为null）
-      const eventBadges = await tx.badge.findMany({
-        where: {
-          eventId: ticket.eventId,
-          tierId: null,
-          isActive: true,
-        },
-      });
-
-      const allBadges = [...tierBadges, ...eventBadges];
-
-      if (allBadges.length === 0) {
-        console.warn(`[USE_TICKET] 没有找到纪念品: eventId=${ticket.eventId}, tierId=${ticket.tierId}`);
-      }
-
-      // c. 发放纪念品（去重，避免重复发放）
-      const awardedBadges = [];
-      for (const badge of allBadges) {
-        // 检查是否已经拥有该纪念品
-        const existing = await tx.userBadge.findFirst({
-          where: {
-            userId,
-            badgeId: badge.id,
-            ticketId, // 同一张票不会重复发放
-          },
-        });
-
-        if (!existing) {
-          const userBadge = await tx.userBadge.create({
-            data: {
-              userId,
-              badgeId: badge.id,
-              ticketId,
-              orderId: ticket.orderId,
-              obtainedAt: new Date(),
-              metadata: JSON.stringify({
-                eventId: ticket.eventId,
-                tierId: ticket.tierId,
-                ticketCode: ticket.ticketCode,
-              }),
-            },
-            include: {
-              badge: true,
-            },
-          });
-          awardedBadges.push(userBadge);
-        }
-      }
-
-      return { awardedBadges };
+    // 6️⃣ 执行检票（标记票为已使用）
+    await prisma.ticket.update({
+      where: { id: ticketId },
+      data: {
+        status: 'used',
+        usedAt: new Date(),
+      },
     });
 
-    console.log(`[USE_TICKET_SUCCESS] ticketId=${ticketId}, userId=${userId}, badges=${result.awardedBadges.length}`);
+    console.log(`[USE_TICKET_SUCCESS] ticketId=${ticketId}, userId=${userId}`);
 
     return NextResponse.json({
       ok: true,
-      message: `检票成功${result.awardedBadges.length > 0 ? `，获得 ${result.awardedBadges.length} 个纪念品` : ''}`,
+      message: '检票成功',
       data: {
         ticketId,
         ticketCode: ticket.ticketCode,
         usedAt: new Date().toISOString(),
-        badges: result.awardedBadges.map(ub => ({
-          id: ub.badge.id,
-          name: ub.badge.name,
-          description: ub.badge.description,
-          rarity: ub.badge.rarity,
-          type: ub.badge.type,
-        })),
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[USE_TICKET_ERROR]', error);
     return NextResponse.json(
       {

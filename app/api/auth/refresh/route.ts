@@ -1,73 +1,102 @@
 // app/api/auth/refresh/route.ts
-import { NextRequest, NextResponse } from 'next/server';
-import { generateAccessToken, verifyToken, findUserById } from '@/lib/auth';
-import { findSessionByRefreshToken } from '@/lib/session';
-
 /**
- * 刷新 Access Token
- * POST /api/auth/refresh
- * Body: { refreshToken: string }
+ * Token 刷新 API
+ *
+ * 功能：使用 Refresh Token 获取新的 Access Token
  */
-export async function POST(req: NextRequest) {
+
+import { NextResponse } from 'next/server';
+import { verifyToken, generateAccessToken } from '@/lib/auth';
+import prisma from '@/lib/prisma';
+
+export async function POST(req: Request) {
   try {
-    const { refreshToken } = await req.json();
+    const body = await req.json();
+    const { refreshToken } = body;
 
     if (!refreshToken) {
       return NextResponse.json(
-        { ok: false, error: '缺少 Refresh Token' },
+        {
+          ok: false,
+          code: 'BAD_REQUEST',
+          message: '缺少 refresh token',
+        },
         { status: 400 }
       );
     }
 
-    // 验证 Refresh Token 格式
-    const payload = verifyToken(refreshToken) as any;
-    if (!payload || payload.type !== 'refresh') {
+    // 验证 refresh token
+    const payload = verifyToken(refreshToken);
+    if (!payload || !payload.id) {
       return NextResponse.json(
-        { ok: false, error: '无效的 Refresh Token' },
+        {
+          ok: false,
+          code: 'INVALID_REFRESH_TOKEN',
+          message: 'Refresh token 无效或已过期',
+        },
         { status: 401 }
       );
     }
 
-    // 检查会话是否存在且有效
-    const session = await findSessionByRefreshToken(refreshToken);
-    if (!session) {
-      return NextResponse.json(
-        { ok: false, error: 'Refresh Token 已过期或已撤销' },
-        { status: 401 }
-      );
-    }
+    // 查询用户是否仍然存在
+    const user = await prisma.user.findUnique({
+      where: { id: payload.id },
+      select: {
+        id: true,
+        phone: true,
+        email: true,
+        nickname: true,
+        avatar: true,
+        role: true,
+        authProvider: true,
+      },
+    });
 
-    // 获取最新的用户信息
-    const user = await findUserById(session.userId);
     if (!user) {
       return NextResponse.json(
-        { ok: false, error: '用户不存在' },
+        {
+          ok: false,
+          code: 'USER_NOT_FOUND',
+          message: '用户不存在',
+        },
         { status: 404 }
       );
     }
 
-    // 生成新的 Access Token
+    // 生成新的 access token
     const newAccessToken = generateAccessToken({
       id: user.id,
-      email: user.email ?? undefined,
-      phone: user.phone ?? undefined,
-      nickname: user.nickname ?? undefined,
+      phone: user.phone || undefined,
+      email: user.email || undefined,
+      role: user.role,
       authProvider: user.authProvider,
     });
+
+    console.log('[TOKEN_REFRESH_SUCCESS]', { userId: user.id });
 
     return NextResponse.json({
       ok: true,
       message: 'Token 刷新成功',
       data: {
         accessToken: newAccessToken,
-        // 向后兼容
-        token: newAccessToken,
+        user: {
+          id: user.id,
+          phone: user.phone,
+          email: user.email,
+          nickname: user.nickname,
+          avatar: user.avatar,
+          role: user.role,
+        },
       },
     });
-  } catch (error: any) {
-    console.error('Token 刷新失败:', error);
+  } catch (error: unknown) {
+    console.error('[TOKEN_REFRESH_ERROR]', error);
     return NextResponse.json(
-      { ok: false, error: 'Token 刷新失败' },
+      {
+        ok: false,
+        code: 'SERVER_ERROR',
+        message: 'Token 刷新失败',
+      },
       { status: 500 }
     );
   }

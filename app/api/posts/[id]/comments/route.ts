@@ -1,4 +1,5 @@
 // app/api/posts/[id]/comments/route.ts
+import { Prisma } from "@prisma/client";
 /**
  * 帖子评论 API
  *
@@ -41,7 +42,7 @@ export async function GET(req: NextRequest, { params }: Props) {
     }
 
     // 2️⃣ 构建查询条件
-    const where: any = {
+    const where: Prisma.CommentWhereInput = {
       postId,
     };
 
@@ -124,14 +125,14 @@ export async function GET(req: NextRequest, { params }: Props) {
         totalPages: Math.ceil(total / pageSize),
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[COMMENTS_LIST_ERROR]', error);
     return NextResponse.json(
       {
         ok: false,
         code: 'SERVER_ERROR',
         message: '获取评论列表失败',
-        error: error.message,
+        error: (error instanceof Error ? error.message : String(error)),
       },
       { status: 500 }
     );
@@ -334,14 +335,14 @@ export async function POST(req: NextRequest, { params }: Props) {
       },
       { status: 201 }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[COMMENT_CREATE_ERROR]', error);
     return NextResponse.json(
       {
         ok: false,
         code: 'SERVER_ERROR',
         message: '评论失败',
-        error: error.message,
+        error: (error instanceof Error ? error.message : String(error)),
       },
       { status: 500 }
     );

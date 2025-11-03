@@ -116,7 +116,7 @@ export async function POST(req: NextRequest) {
         token: accessToken,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('登录失败:', error);
     return NextResponse.json(
       { ok: false, error: '登录失败，请稍后重试' },

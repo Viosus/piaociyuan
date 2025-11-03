@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
 
     console.log('[USER_UPDATE] 用户更新请求:', { userId: payload.id, avatar, nickname });
 
-    const updateData: any = {};
+    const updateData: { avatar?: string; nickname?: string } = {};
 
     if (avatar !== undefined) {
       updateData.avatar = avatar;
@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
         authProvider: user.authProvider,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('用户信息更新失败:', error);
     return NextResponse.json(
       { ok: false, error: '更新失败，请稍后重试' },

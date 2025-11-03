@@ -70,7 +70,7 @@ export async function GET(_req: Request, { params }: Props) {
       paidAt: order.paidAt ? Number(order.paidAt) : null,
       tickets: order.tickets,
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('[ORDER_GET_ERROR]', err);
 
     if (err instanceof ApiError) {

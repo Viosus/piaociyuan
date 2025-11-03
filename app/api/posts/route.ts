@@ -1,4 +1,5 @@
 // app/api/posts/route.ts
+import { Prisma } from "@prisma/client";
 /**
  * 帖子列表 API
  */
@@ -17,7 +18,7 @@ export async function GET(req: NextRequest) {
     const skip = (page - 1) * pageSize;
 
     // 构建查询条件
-    const where: any = {
+    const where: Prisma.PostWhereInput = {
       isVisible: true, // 只显示可见的帖子
     };
 
@@ -91,8 +92,8 @@ export async function GET(req: NextRequest) {
       images: post.images.map((img) => ({
         id: img.id,
         imageUrl: img.imageUrl,
-        width: img.width || null,
-        height: img.height || null,
+        width: img.width || 0 || null,
+        height: img.height || 0 || null,
       })),
     }));
 
@@ -106,7 +107,7 @@ export async function GET(req: NextRequest) {
         totalPages: Math.ceil(total / pageSize),
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[POSTS_LIST_ERROR]', error);
     return NextResponse.json(
       {
@@ -216,10 +217,10 @@ export async function POST(req: NextRequest) {
         location: location || null,
         images: images
           ? {
-              create: images.map((img: any, index: number) => ({
+              create: images.map((img: { url?: string; imageUrl?: string; width?: number; height?: number }, index: number) => ({
                 imageUrl: img.imageUrl,
-                width: img.width || null,
-                height: img.height || null,
+                width: img.width || 0 || null,
+                height: img.height || 0 || null,
                 order: index,
               })),
             }
@@ -280,8 +281,8 @@ export async function POST(req: NextRequest) {
       images: post.images.map((img) => ({
         id: img.id,
         imageUrl: img.imageUrl,
-        width: img.width || null,
-        height: img.height || null,
+        width: img.width || 0 || null,
+        height: img.height || 0 || null,
       })),
     };
 
@@ -293,14 +294,14 @@ export async function POST(req: NextRequest) {
       },
       { status: 201 }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[POST_CREATE_ERROR]', error);
     return NextResponse.json(
       {
         ok: false,
         code: 'SERVER_ERROR',
         message: '发布失败',
-        error: error.message,
+        error: (error instanceof Error ? error.message : String(error)),
       },
       { status: 500 }
     );

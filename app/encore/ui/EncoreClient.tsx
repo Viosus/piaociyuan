@@ -58,9 +58,9 @@ export default function EncoreClient() {
       }
 
       setHasMore(data.pagination.page < data.pagination.totalPages);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Load posts error:", err);
-      setError(err.message || "加载失败");
+      setError(err instanceof Error ? err.message : String(err) || "加载失败");
     } finally {
       setLoading(false);
     }
@@ -138,7 +138,7 @@ export default function EncoreClient() {
         <div className="text-6xl mb-4">📭</div>
         <h2 className="text-xl font-semibold text-white mb-2">还没有内容</h2>
         <p className="text-white/60 mb-6">成为第一个分享演出时刻的人吧！</p>
-        <button className="px-6 py-3 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-lg font-medium hover:from-red-600 hover:to-pink-600 transition">
+        <button className="px-6 py-3 bg-gradient-to-r from-red-500 to-[#EAF353] text-white rounded-lg font-medium hover:from-red-600 hover:to-pink-600 transition">
           📝 发布第一篇帖子
         </button>
       </div>
@@ -185,9 +185,9 @@ export default function EncoreClient() {
 
                 {/* 活动标签 */}
                 {post.event && (
-                  <div className="mb-3 flex items-center gap-1 text-xs text-white/60">
+                  <div className="mb-3 flex items-center gap-1 text-xs">
                     <span>🎪</span>
-                    <span className="truncate">{post.event.name}</span>
+                    <span className="truncate item-name">{post.event.name}</span>
                   </div>
                 )}
 
@@ -208,7 +208,7 @@ export default function EncoreClient() {
                       className="w-6 h-6 rounded-full object-cover"
                     />
                   ) : (
-                    <div className="w-6 h-6 bg-gradient-to-br from-red-500 to-pink-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                    <div className="w-6 h-6 bg-gradient-to-br from-red-500 to-[#EAF353] rounded-full flex items-center justify-center text-white text-xs font-bold">
                       {post.user.nickname[0]}
                     </div>
                   )}
@@ -259,7 +259,7 @@ export default function EncoreClient() {
 
       {/* 发布按钮（悬浮） */}
       <button
-        className="fixed bottom-8 right-8 w-14 h-14 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-full shadow-lg hover:shadow-xl hover:scale-110 transition-all flex items-center justify-center text-2xl"
+        className="fixed bottom-8 right-8 w-14 h-14 bg-gradient-to-r from-red-500 to-[#EAF353] text-white rounded-full shadow-lg hover:shadow-xl hover:scale-110 transition-all flex items-center justify-center text-2xl"
         onClick={() => alert("发布功能即将上线！")}
       >
         ✏️

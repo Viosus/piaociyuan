@@ -1,20 +1,6 @@
 // lib/database.ts
-import Database from 'better-sqlite3';
-import path from 'path';
-
-// 数据库文件路径
-const DB_PATH = path.join(process.cwd(), 'prisma', 'dev.db');
-
-// 创建数据库连接
-let db: Database.Database | null = null;
-
-export function getDB() {
-  if (!db) {
-    db = new Database(DB_PATH);
-    db.pragma('journal_mode = WAL'); // 提升性能
-  }
-  return db;
-}
+// 🔥 已迁移到 PostgreSQL + Prisma，保留此文件以向后兼容
+import prisma from './prisma';
 
 // 类型定义
 export type Event = {
@@ -44,6 +30,7 @@ export type Tier = {
 
 export type Order = {
   id: string;
+  userId: string;
   eventId: string;
   tierId: string;
   qty: number;
@@ -64,72 +51,140 @@ export type Hold = {
 
 // ========== Event 操作 ==========
 
-export function getAllEvents(): Event[] {
-  const db = getDB();
-  const stmt = db.prepare('SELECT * FROM events ORDER BY date ASC');
-  return stmt.all() as Event[];
+export async function getAllEvents(): Promise<Event[]> {
+  const events = await prisma.event.findMany({
+    orderBy: { date: 'asc' },
+  });
+
+  return events.map(e => ({
+    id: e.id,
+    name: e.name,
+    city: e.city,
+    venue: e.venue,
+    date: e.date,
+    time: e.time,
+    cover: e.cover,
+    artist: e.artist,
+    desc: e.desc,
+    createdAt: e.createdAt.toISOString(),
+    updatedAt: e.updatedAt.toISOString(),
+  }));
 }
 
-export function getEventById(id: number): Event | undefined {
-  const db = getDB();
-  const stmt = db.prepare('SELECT * FROM events WHERE id = ?');
-  return stmt.get(id) as Event | undefined;
+export async function getEventById(id: number): Promise<Event | undefined> {
+  const event = await prisma.event.findUnique({
+    where: { id },
+  });
+
+  if (!event) return undefined;
+
+  return {
+    id: event.id,
+    name: event.name,
+    city: event.city,
+    venue: event.venue,
+    date: event.date,
+    time: event.time,
+    cover: event.cover,
+    artist: event.artist,
+    desc: event.desc,
+    createdAt: event.createdAt.toISOString(),
+    updatedAt: event.updatedAt.toISOString(),
+  };
 }
 
 // ========== Tier 操作 ==========
 
-export function getTiersByEventId(eventId: number): Tier[] {
-  const db = getDB();
-  const stmt = db.prepare('SELECT * FROM tiers WHERE eventId = ? ORDER BY price ASC');
-  return stmt.all(eventId) as Tier[];
+export async function getTiersByEventId(eventId: number): Promise<Tier[]> {
+  const tiers = await prisma.tier.findMany({
+    where: { eventId },
+    orderBy: { price: 'asc' },
+  });
+
+  return tiers.map(t => ({
+    id: t.id,
+    eventId: t.eventId,
+    name: t.name,
+    price: t.price,
+    capacity: t.capacity,
+    remaining: t.remaining,
+    createdAt: t.createdAt.toISOString(),
+    updatedAt: t.updatedAt.toISOString(),
+  }));
 }
 
-export function getTierById(id: number): Tier | undefined {
-  const db = getDB();
-  const stmt = db.prepare('SELECT * FROM tiers WHERE id = ?');
-  return stmt.get(id) as Tier | undefined;
+export async function getTierById(id: number): Promise<Tier | undefined> {
+  const tier = await prisma.tier.findUnique({
+    where: { id },
+  });
+
+  if (!tier) return undefined;
+
+  return {
+    id: tier.id,
+    eventId: tier.eventId,
+    name: tier.name,
+    price: tier.price,
+    capacity: tier.capacity,
+    remaining: tier.remaining,
+    createdAt: tier.createdAt.toISOString(),
+    updatedAt: tier.updatedAt.toISOString(),
+  };
 }
 
-export function updateTierRemaining(id: number, remaining: number): void {
-  const db = getDB();
-  const stmt = db.prepare('UPDATE tiers SET remaining = ? WHERE id = ?');
-  stmt.run(remaining, id);
+export async function updateTierRemaining(id: number, remaining: number): Promise<void> {
+  await prisma.tier.update({
+    where: { id },
+    data: { remaining },
+  });
 }
 
 // ========== Hold 操作 ==========
 
-export function createHold(hold: Omit<Hold, 'createdAt'>): void {
-  const db = getDB();
-  const stmt = db.prepare(`
-    INSERT INTO holds (id, eventId, tierId, qty, expireAt, createdAt)
-    VALUES (?, ?, ?, ?, ?, ?)
-  `);
-  stmt.run(
-    hold.id,
-    hold.eventId,
-    hold.tierId,
-    hold.qty,
-    hold.expireAt,
-    Date.now().toString()
-  );
+export async function createHold(hold: Omit<Hold, 'createdAt'>): Promise<void> {
+  await prisma.hold.create({
+    data: {
+      id: hold.id,
+      eventId: hold.eventId,
+      tierId: hold.tierId,
+      qty: hold.qty,
+      expireAt: BigInt(hold.expireAt),
+      createdAt: BigInt(Date.now()),
+    },
+  });
 }
 
-export function getHoldById(id: string): Hold | undefined {
-  const db = getDB();
-  const stmt = db.prepare('SELECT * FROM holds WHERE id = ?');
-  return stmt.get(id) as Hold | undefined;
+export async function getHoldById(id: string): Promise<Hold | undefined> {
+  const hold = await prisma.hold.findUnique({
+    where: { id },
+  });
+
+  if (!hold) return undefined;
+
+  return {
+    id: hold.id,
+    eventId: hold.eventId,
+    tierId: hold.tierId,
+    qty: hold.qty,
+    expireAt: hold.expireAt.toString(),
+    createdAt: hold.createdAt.toString(),
+  };
 }
 
-export function deleteExpiredHolds(now: number): void {
-  const db = getDB();
-  const stmt = db.prepare('DELETE FROM holds WHERE CAST(expireAt AS INTEGER) <= ?');
-  stmt.run(now);
+export async function deleteExpiredHolds(now: number): Promise<void> {
+  await prisma.hold.deleteMany({
+    where: {
+      expireAt: {
+        lte: BigInt(now),
+      },
+    },
+  });
 }
 
-export function deleteHold(id: string): void {
-  const db = getDB();
-  const stmt = db.prepare('DELETE FROM holds WHERE id = ?');
-  stmt.run(id);
+export async function deleteHold(id: string): Promise<void> {
+  await prisma.hold.delete({
+    where: { id },
+  });
 }
 
 // ========== Order 操作 ==========
@@ -147,9 +202,7 @@ export type OrderFilter = {
   sortOrder?: string;
 };
 
-export function getOrders(filter: OrderFilter = {}) {
-  const db = getDB();
-  
+export async function getOrders(filter: OrderFilter = {}) {
   const {
     status,
     eventId,
@@ -162,118 +215,122 @@ export function getOrders(filter: OrderFilter = {}) {
     sortBy = 'createdAt',
     sortOrder = 'desc',
   } = filter;
-  
+
   // 构建 WHERE 条件
-  const conditions: string[] = [];
-  const params: any[] = [];
-  
+  const where: any = {};
+
   if (status) {
-    conditions.push('status = ?');
-    params.push(status);
+    where.status = status;
   }
-  
+
   if (eventId) {
-    conditions.push('eventId = ?');
-    params.push(eventId);
+    where.eventId = eventId;
   }
-  
+
   if (searchQuery) {
-    conditions.push('id LIKE ?');
-    params.push(`%${searchQuery}%`);
+    where.id = {
+      contains: searchQuery,
+    };
   }
-  
-  if (orderStartDate !== undefined) {
-    conditions.push('CAST(createdAt AS INTEGER) >= ?');
-    params.push(orderStartDate);
+
+  if (orderStartDate !== undefined || orderEndDate !== undefined) {
+    where.createdAt = {};
+    if (orderStartDate !== undefined) {
+      where.createdAt.gte = BigInt(orderStartDate);
+    }
+    if (orderEndDate !== undefined) {
+      where.createdAt.lte = BigInt(orderEndDate);
+    }
   }
-  
-  if (orderEndDate !== undefined) {
-    conditions.push('CAST(createdAt AS INTEGER) <= ?');
-    params.push(orderEndDate);
-  }
-  
+
   if (eventIds && eventIds.length > 0) {
-    const placeholders = eventIds.map(() => '?').join(',');
-    conditions.push(`eventId IN (${placeholders})`);
-    params.push(...eventIds);
+    where.eventId = {
+      in: eventIds,
+    };
   }
-  
-  const whereClause = conditions.length > 0 ? 'WHERE ' + conditions.join(' AND ') : '';
-  
-  // 排序（只支持数据库字段）
-  let orderByClause = 'ORDER BY createdAt DESC';
+
+  // 排序
+  const orderBy: any = {};
   if (sortBy === 'paidAt') {
-    orderByClause = `ORDER BY paidAt ${sortOrder.toUpperCase()}`;
-  } else if (sortBy === 'createdAt') {
-    orderByClause = `ORDER BY createdAt ${sortOrder.toUpperCase()}`;
+    orderBy.paidAt = sortOrder;
+  } else {
+    orderBy.createdAt = sortOrder;
   }
-  // amount 排序在内存中处理
-  
+
   // 分页
-  const offset = (page - 1) * pageSize;
-  
+  const skip = (page - 1) * pageSize;
+
   // 查询订单
-  const ordersStmt = db.prepare(`
-    SELECT * FROM orders
-    ${whereClause}
-    ${orderByClause}
-    LIMIT ? OFFSET ?
-  `);
-  const orders = ordersStmt.all(...params, pageSize, offset) as Order[];
-  
-  // 查询总数
-  const countStmt = db.prepare(`
-    SELECT COUNT(*) as total FROM orders
-    ${whereClause}
-  `);
-  const { total } = countStmt.get(...params) as { total: number };
-  
+  const [orders, total] = await Promise.all([
+    prisma.order.findMany({
+      where,
+      orderBy,
+      skip,
+      take: pageSize,
+    }),
+    prisma.order.count({ where }),
+  ]);
+
   return {
-    orders,
+    orders: orders.map(order => ({
+      id: order.id,
+      eventId: order.eventId,
+      tierId: order.tierId,
+      qty: order.qty,
+      status: order.status,
+      createdAt: order.createdAt.toString(),
+      paidAt: order.paidAt?.toString() || null,
+      holdId: order.holdId,
+    })),
     total,
     totalPages: Math.ceil(total / pageSize),
   };
 }
 
-export function getOrderById(id: string): Order | undefined {
-  const db = getDB();
-  const stmt = db.prepare('SELECT * FROM orders WHERE id = ?');
-  return stmt.get(id) as Order | undefined;
+export async function getOrderById(id: string): Promise<Order | undefined> {
+  const order = await prisma.order.findUnique({
+    where: { id },
+  });
+
+  if (!order) return undefined;
+
+  return {
+    id: order.id,
+    userId: order.userId,
+    eventId: order.eventId,
+    tierId: order.tierId,
+    qty: order.qty,
+    status: order.status,
+    createdAt: order.createdAt.toString(),
+    paidAt: order.paidAt?.toString() || null,
+    holdId: order.holdId,
+  };
 }
 
-export function createOrder(order: Order): void {
-  const db = getDB();
-  const stmt = db.prepare(`
-    INSERT INTO orders (id, eventId, tierId, qty, status, createdAt, paidAt, holdId)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-  `);
-  stmt.run(
-    order.id,
-    order.eventId,
-    order.tierId,
-    order.qty,
-    order.status,
-    order.createdAt,
-    order.paidAt,
-    order.holdId
-  );
+export async function createOrder(order: Order): Promise<void> {
+  await prisma.order.create({
+    data: {
+      id: order.id,
+      userId: order.userId,
+      eventId: order.eventId,
+      tierId: order.tierId,
+      qty: order.qty,
+      status: order.status,
+      createdAt: BigInt(order.createdAt),
+      paidAt: order.paidAt ? BigInt(order.paidAt) : null,
+      holdId: order.holdId,
+    },
+  });
 }
 
-export function updateOrderStatus(id: string, status: string, paidAt?: number): void {
-  const db = getDB();
-  const stmt = db.prepare(`
-    UPDATE orders 
-    SET status = ?, paidAt = ?
-    WHERE id = ?
-  `);
-  stmt.run(status, paidAt?.toString() || null, id);
+export async function updateOrderStatus(id: string, status: string, paidAt?: number): Promise<void> {
+  await prisma.order.update({
+    where: { id },
+    data: {
+      status,
+      paidAt: paidAt ? BigInt(paidAt) : null,
+    },
+  });
 }
 
-// ========== 关闭数据库 ==========
-
-export function closeDB() {
-  if (db) {
-    db.close();
-    db = null;
-  }
-}
+// ========== Prisma 自动管理连接，无需手动关闭 ==========

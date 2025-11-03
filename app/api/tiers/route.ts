@@ -24,7 +24,7 @@ export async function GET(req: Request) {
     });
 
     return NextResponse.json(tiers);
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('[TIERS_GET_ERROR]', err);
     return NextResponse.json(
       { error: 'Internal server error' },

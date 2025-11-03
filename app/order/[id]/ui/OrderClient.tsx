@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { apiPost } from '@/lib/api';
+import { MintNFTButton } from '@/components/MintNFTButton';
 
 type Ticket = {
   id: string;
@@ -11,6 +13,8 @@ type Ticket = {
   price: number;
   refundedAt?: string | null; // 退票时间，用于判断是否已退票
   usedAt?: string | null; // 使用时间
+  nftMintStatus?: string | null; // NFT铸造状态
+  nftTokenId?: number | null; // NFT Token ID
 };
 
 type Order = {
@@ -23,6 +27,7 @@ type Order = {
   createdAt: number;
   paidAt?: number;
   tickets?: Ticket[];
+  nftStatus?: string; // NFT状态
 };
 
 function StatusBadge({ status }: { status: Order["status"] }) {
@@ -59,8 +64,8 @@ export default function OrderClient({ id }: { id: string }) {
       const data = (await res.json()) as Order;
       setOrder(data);
       setErr(null);
-    } catch (e: any) {
-      setErr(e?.message || "加载失败");
+    } catch (e: unknown) {
+      setErr(e instanceof Error ? e.message : "加载失败");
     } finally {
       setLoading(false);
     }
@@ -94,8 +99,8 @@ export default function OrderClient({ id }: { id: string }) {
       if (!res.ok) throw new Error((await res.json()).error || "PAY_FAIL");
       // 立即刷新订单状态
       await fetchOrder();
-    } catch (e: any) {
-      alert(`支付失败：${e?.message || "未知错误"}`);
+    } catch (e: unknown) {
+      alert(`支付失败：${e instanceof Error ? e.message : "未知错误"}`);
     } finally {
       setPaying(false);
     }
@@ -136,37 +141,23 @@ export default function OrderClient({ id }: { id: string }) {
 
     setUsingTicket(ticketId);
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        alert('请先登录');
-        return;
-      }
+      const data = await apiPost("/api/tickets/use", { ticketId });
 
-      const res = await fetch("/api/tickets/use", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify({ ticketId }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
+      if (!data.ok) {
         throw new Error(data.message || "使用票失败");
       }
 
       // 显示获得的纪念品
       if (data.data.badges && data.data.badges.length > 0) {
-        const badgeNames = data.data.badges.map((b: any) => b.name).join('\n');
-        alert(`检票成功！🎉\n\n获得纪念品:\n${badgeNames}\n\n可在"我的收藏"中查看`);
+        const badgeNames = data.data.badges.map((b: { name: string }) => b.name).join('\n');
+        alert(`检票成功！🎉\n\n获得纪念品:\n${badgeNames}\n\n可在"我的次元"中查看`);
       } else {
         alert('检票成功！');
       }
 
       await fetchOrder();
-    } catch (e: any) {
-      alert(`检票失败：${e?.message || "未知错误"}`);
+    } catch (e: unknown) {
+      alert(`检票失败：${e instanceof Error ? e.message : "未知错误"}`);
     } finally {
       setUsingTicket(null);
     }
@@ -183,29 +174,13 @@ export default function OrderClient({ id }: { id: string }) {
 
     setRefunding(true);
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        alert('请先登录');
-        setRefunding(false);
-        return;
-      }
-
       let successCount = 0;
       let failCount = 0;
 
       for (const ticketId of ticketsToRefund) {
         try {
-          const res = await fetch("/api/tickets/refund", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${token}`
-            },
-            body: JSON.stringify({ ticketId }),
-          });
-
-          const data = await res.json();
-          if (!res.ok) throw new Error(data.message || "退票失败");
+          const data = await apiPost("/api/tickets/refund", { ticketId });
+          if (!data.ok) throw new Error(data.message || "退票失败");
           successCount++;
         } catch (e) {
           failCount++;
@@ -223,8 +198,8 @@ export default function OrderClient({ id }: { id: string }) {
       } else {
         alert('退票失败，请稍后重试');
       }
-    } catch (e: any) {
-      alert(`退票失败：${e?.message || "未知错误"}`);
+    } catch (e: unknown) {
+      alert(`退票失败：${e instanceof Error ? e.message : "未知错误"}`);
     } finally {
       setRefunding(false);
     }
@@ -234,7 +209,7 @@ export default function OrderClient({ id }: { id: string }) {
     return (
       <main className="min-h-screen p-8 bg-gray-50">
         <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow p-6">
-          <div className="animate-pulse text-gray-400">加载中...</div>
+          <div className="animate-pulse text-[#282828] opacity-60">加载中...</div>
         </div>
       </main>
     );
@@ -244,9 +219,9 @@ export default function OrderClient({ id }: { id: string }) {
     return (
       <main className="min-h-screen p-8 bg-gray-50">
         <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow p-6 text-center">
-          <h1 className="text-2xl font-bold mb-2">订单不存在</h1>
-          <p className="text-gray-500">{err || "请返回重试"}</p>
-          <Link href="/events" className="mt-6 inline-block text-indigo-600 underline">
+          <h1 className="text-2xl font-bold mb-2 text-[#EAF353]">订单不存在</h1>
+          <p className="text-[#282828]">{err || "请返回重试"}</p>
+          <Link href="/events" className="mt-6 inline-block text-[#EAF353] underline">
             返回活动列表
           </Link>
         </div>
@@ -262,9 +237,9 @@ export default function OrderClient({ id }: { id: string }) {
       <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow p-6">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-bold">订单详情</h1>
-            <div className="mt-1 text-gray-500 text-sm">订单号：{order.id}</div>
-            <div className="mt-1 text-gray-500 text-sm">下单时间：{createdAtText}</div>
+            <h1 className="text-2xl font-bold text-[#EAF353]">订单详情</h1>
+            <div className="mt-1 text-[#282828] text-sm">订单号：{order.id}</div>
+            <div className="mt-1 text-[#282828] text-sm">下单时间：{createdAtText}</div>
           </div>
           <StatusBadge status={order.status} />
         </div>
@@ -272,21 +247,21 @@ export default function OrderClient({ id }: { id: string }) {
         {/* 占位二维码区域 */}
         <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="border rounded-xl p-4">
-            <div className="text-sm text-gray-600 mb-3">入场二维码（占位）</div>
+            <div className="text-sm text-[#282828] mb-3">入场二维码（占位）</div>
             <div className="aspect-square border rounded-lg flex items-center justify-center bg-gray-50">
               <div className="text-center">
-                <div className="font-mono text-xs text-gray-400 mb-2">ORDER</div>
+                <div className="font-mono text-xs text-[#282828] opacity-60 mb-2">ORDER</div>
                 <div className="font-mono text-sm break-all px-4">{order.id}</div>
               </div>
             </div>
-            <div className="mt-2 text-xs text-gray-400">
+            <div className="mt-2 text-xs text-[#282828] opacity-60">
               * 支付成功后二维码才会生效（当前为占位图）
             </div>
           </div>
 
           {/* 操作区 */}
           <div className="border rounded-xl p-4">
-            <div className="text-sm text-gray-600 mb-3">支付与票务</div>
+            <div className="text-sm text-[#282828] mb-3">支付与票务</div>
             {!isPaid && !allTicketsRefunded ? (
               <>
                 <div className="p-3 rounded bg-amber-50 text-amber-800 text-sm mb-3">
@@ -295,17 +270,17 @@ export default function OrderClient({ id }: { id: string }) {
                 <button
                   onClick={payNow}
                   disabled={paying}
-                  className="w-full py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50"
+                  className="w-full py-3 bg-[#EAF353] text-white rounded-lg hover:bg-[#FFC9E0] disabled:opacity-50"
                 >
                   {paying ? "支付中..." : "去支付（模拟）"}
                 </button>
-                <div className="mt-3 text-xs text-gray-500">
+                <div className="mt-3 text-xs text-[#282828]">
                   支付成功后，页面会自动更新为"已支付"状态。
                 </div>
               </>
             ) : allTicketsRefunded ? (
               <>
-                <div className="p-3 rounded bg-gray-100 text-gray-700 text-sm mb-3">
+                <div className="p-3 rounded bg-gray-100 text-[#282828] text-sm mb-3">
                   所有票已退票，订单已失效。
                 </div>
                 <Link
@@ -324,7 +299,7 @@ export default function OrderClient({ id }: { id: string }) {
                   href="/account/collection"
                   className="w-full inline-flex items-center justify-center py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 mb-3"
                 >
-                  🎨 我的收藏
+                  🎨 我的次元
                 </Link>
                 {hasRefundableTickets && (
                   <button
@@ -334,7 +309,7 @@ export default function OrderClient({ id }: { id: string }) {
                     退票
                   </button>
                 )}
-                <div className="mt-3 text-xs text-gray-500">
+                <div className="mt-3 text-xs text-[#282828]">
                   你可以在电子纪念品页保存 PNG 图片作为留念。
                 </div>
               </>
@@ -345,8 +320,8 @@ export default function OrderClient({ id }: { id: string }) {
         {/* 票列表 */}
         {isPaid && order.tickets && order.tickets.length > 0 && (
           <div className="mt-6 border rounded-xl p-4">
-            <h2 className="text-lg font-semibold mb-4">我的票 ({order.tickets.length})</h2>
-            <div className="space-y-2">
+            <h2 className="text-lg font-semibold text-[#EAF353] mb-4">我的票 ({order.tickets.length})</h2>
+            <div className="space-y-3">
               {order.tickets.map((ticket) => {
                 const isRefunded = ticket.status === 'refunded' || (ticket.refundedAt !== null && ticket.refundedAt !== undefined);
                 return (
@@ -356,12 +331,12 @@ export default function OrderClient({ id }: { id: string }) {
                       isRefunded ? 'bg-gray-50 opacity-60' : ''
                     }`}
                   >
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-start justify-between gap-3">
                       <div className="flex-1">
                         <div className="font-mono text-sm font-semibold">
                           {ticket.ticketCode}
                         </div>
-                        <div className="text-xs text-gray-500 mt-1">
+                        <div className="text-xs text-[#282828] mt-1">
                           状态: {
                             isRefunded ? '🔄 已退票' :
                             ticket.status === 'sold' ? '✅ 已售出' :
@@ -371,7 +346,7 @@ export default function OrderClient({ id }: { id: string }) {
                         </div>
                       </div>
                       {!isRefunded && (
-                        <div className="flex gap-2 ml-3">
+                        <div className="flex flex-col gap-2 min-w-[100px]">
                           {ticket.status === 'sold' && (
                             <button
                               onClick={() => useTicket(ticket.id)}
@@ -381,12 +356,11 @@ export default function OrderClient({ id }: { id: string }) {
                               {usingTicket === ticket.id ? '检票中...' : '🎫 检票'}
                             </button>
                           )}
-                          <Link
-                            href={`/account/collection?ticketId=${ticket.id}`}
-                            className="px-3 py-1.5 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all whitespace-nowrap"
-                          >
-                            🎨 纪念品
-                          </Link>
+                          <MintNFTButton
+                            ticketId={ticket.id}
+                            ticketStatus={ticket.status}
+                            nftMintStatus={ticket.nftMintStatus}
+                          />
                         </div>
                       )}
                     </div>
@@ -401,7 +375,7 @@ export default function OrderClient({ id }: { id: string }) {
         {showRefundModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
-              <h2 className="text-xl font-bold mb-4">选择要退的票</h2>
+              <h2 className="text-xl font-bold text-[#EAF353] mb-4">选择要退的票</h2>
 
               <div className="mb-4 space-y-2 max-h-96 overflow-y-auto">
                 {soldTickets.map((ticket) => (
@@ -419,7 +393,7 @@ export default function OrderClient({ id }: { id: string }) {
                       <div className="font-mono text-sm font-semibold">
                         {ticket.ticketCode}
                       </div>
-                      <div className="text-xs text-gray-500">
+                      <div className="text-xs text-[#282828]">
                         ¥{ticket.price}
                       </div>
                     </div>
@@ -442,7 +416,7 @@ export default function OrderClient({ id }: { id: string }) {
                 </button>
               </div>
 
-              <div className="text-sm text-gray-600 mb-4">
+              <div className="text-sm text-[#282828] mb-4">
                 已选择 {selectedTickets.size} / {soldTickets.length} 张票
               </div>
 
@@ -467,7 +441,7 @@ export default function OrderClient({ id }: { id: string }) {
         )}
 
         <div className="mt-6">
-          <Link href="/events" className="text-indigo-600 underline text-sm">
+          <Link href="/events" className="text-[#EAF353] underline text-sm">
             返回活动列表
           </Link>
         </div>

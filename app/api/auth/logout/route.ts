@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
         message: '登出成功',
       });
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('登出失败:', error);
     return NextResponse.json(
       { ok: false, error: '登出失败' },

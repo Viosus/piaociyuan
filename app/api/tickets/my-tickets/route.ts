@@ -122,7 +122,7 @@ export async function GET(req: Request) {
       data: result,
       total: result.length,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[MY_TICKETS_ERROR]', error);
     return NextResponse.json(
       {

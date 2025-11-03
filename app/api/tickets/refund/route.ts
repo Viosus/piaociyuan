@@ -124,7 +124,7 @@ export async function POST(req: Request) {
         ticketCode: ticket.ticketCode,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[REFUND_ERROR]', error);
     return NextResponse.json(
       {

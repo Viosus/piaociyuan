@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
         expiresIn: 300, // 5分钟
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('发送验证码失败:', error);
     return NextResponse.json(
       { ok: false, error: '发送失败，请稍后重试' },

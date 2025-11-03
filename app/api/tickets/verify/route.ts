@@ -136,7 +136,7 @@ export async function POST(req: Request) {
         user: ticket.user,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[VERIFY_ERROR]', error);
     return NextResponse.json(
       {

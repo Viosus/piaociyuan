@@ -126,7 +126,7 @@ export async function POST(req: Request) {
         tickets: order.tickets,
       },
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('[PAY_ERROR]', err);
 
     if (err instanceof ApiError) {

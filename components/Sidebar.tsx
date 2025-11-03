@@ -4,6 +4,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { apiGet } from '@/lib/api';
 
 type User = {
   id: string;
@@ -25,31 +26,37 @@ export default function Sidebar() {
       name: "主页",
       href: "/events",
       icon: "🏠",
-      gradient: "from-purple-500 to-pink-500"
+      gradient: "from-purple-500 to-[#EAF353]"
+    },
+    {
+      name: "宇宙信号",
+      href: "/signals",
+      icon: "📡",
+      gradient: "from-[#EAF353] to-[#FFF5FB]0"
+    },
+    {
+      name: "安可区",
+      href: "/encore",
+      icon: "🔥",
+      gradient: "from-red-500 to-[#EAF353]"
+    },
+    {
+      name: "我关注的",
+      href: "/account/favorites",
+      icon: "⭐",
+      gradient: "from-[#EAF353] to-[#FFC9E0]"
+    },
+    {
+      name: "我的次元",
+      href: "/account/nfts",
+      icon: "💎",
+      gradient: "from-purple-500 to-blue-500"
     },
     {
       name: "我的订单",
       href: "/account/orders",
       icon: "🎫",
       gradient: "from-orange-500 to-red-500"
-    },
-    {
-      name: "我的收藏",
-      href: "/account/collection",
-      icon: "🎨",
-      gradient: "from-yellow-500 to-orange-500"
-    },
-    {
-      name: "安可区",
-      href: "/encore",
-      icon: "🔥",
-      gradient: "from-red-500 to-pink-500"
-    },
-    {
-      name: "宇宙信号",
-      href: "/signals",
-      icon: "📡",
-      gradient: "from-indigo-500 to-purple-500"
     },
   ];
 
@@ -58,21 +65,14 @@ export default function Sidebar() {
     const token = localStorage.getItem("token");
     if (!token) return;
 
-    fetch("/api/auth/me", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then((res) => res.json())
+    apiGet("/api/auth/me")
       .then((data) => {
         if (data.ok) {
           setUser(data.data);
-        } else {
-          localStorage.removeItem("token");
         }
       })
       .catch(() => {
-        localStorage.removeItem("token");
+        // API helper already handles 401 redirects
       });
   }, []);
 
@@ -88,11 +88,11 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="group fixed left-0 top-0 h-screen w-20 hover:w-64 bg-[#1a1a1f] border-r border-white/10 flex flex-col z-50 transition-all duration-300 ease-in-out">
+    <aside className="group fixed left-0 top-0 h-screen w-20 hover:w-64 bg-[#EAF353] border-r border-[#FFE3F0] flex flex-col z-50 transition-all duration-300 ease-in-out">
       {/* Logo */}
       <Link
         href="/events"
-        className="h-20 border-b border-white/10 flex items-center justify-center group-hover:justify-start group-hover:px-6 transition-all duration-300 relative"
+        className="h-20 border-b border-[#FFE3F0]/30 flex items-center justify-center group-hover:justify-start group-hover:px-6 transition-all duration-300 relative"
       >
         {/* Logo图标 - 仅收起时显示 */}
         <div className="group-hover:opacity-0 group-hover:scale-0 opacity-100 scale-100 transition-all duration-300 absolute">
@@ -103,7 +103,7 @@ export default function Sidebar() {
 
         {/* 文字 - 仅展开时显示 */}
         <div className="opacity-0 scale-0 group-hover:opacity-100 group-hover:scale-100 transition-all duration-300 whitespace-nowrap">
-          <h1 className="text-xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
+          <h1 className="text-xl font-bold bg-gradient-to-r from-purple-400 via-[#FFE3F0] to-blue-400 bg-clip-text text-transparent">
             票次元
           </h1>
           <p className="text-xs text-white/40">Ticketing Reimagined</p>
@@ -119,7 +119,7 @@ export default function Sidebar() {
               key={item.href}
               href={item.href}
               className={`
-                relative flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 justify-center group-hover:justify-start
+                relative flex items-center py-3 rounded-xl transition-all duration-200 justify-center group-hover:justify-start group-hover:gap-3 group-hover:px-3
                 ${
                   isActive
                     ? "bg-white/10 text-white"
@@ -132,11 +132,11 @@ export default function Sidebar() {
                 <div className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-gradient-to-b ${item.gradient} rounded-r-full`}></div>
               )}
 
-              {/* 图标 - 始终显示 */}
+              {/* 图标 - 始终显示，收起时完全居中 */}
               <span className="text-2xl min-w-[2rem] shrink-0 flex items-center justify-center">{item.icon}</span>
 
               {/* 文字 - 展开时显示 */}
-              <span className="font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300 overflow-hidden">{item.name}</span>
+              <span className="font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300 overflow-hidden w-0 group-hover:w-auto">{item.name}</span>
 
               {/* 悬浮光效 */}
               {!isActive && (
@@ -148,12 +148,12 @@ export default function Sidebar() {
       </nav>
 
       {/* 用户信息 */}
-      <div className="px-3 py-4 border-t border-white/10">
+      <div className="px-3 py-4 border-t border-[#FFE3F0]/30">
         {user ? (
           <div className="relative">
             <button
               onClick={() => setShowUserMenu(!showUserMenu)}
-              className="w-full flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-white/5 transition-all justify-center group-hover:justify-start"
+              className="w-full flex items-center py-3 rounded-xl hover:bg-white/5 transition-all justify-center group-hover:justify-start group-hover:gap-3 group-hover:px-3"
             >
               {/* 头像 */}
               {user.avatar ? (
@@ -163,14 +163,14 @@ export default function Sidebar() {
                   className="w-10 h-10 rounded-full object-cover ring-2 ring-white/10 min-w-[2.5rem] shrink-0"
                 />
               ) : (
-                <div className="w-10 h-10 min-w-[2.5rem] shrink-0 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-lg ring-2 ring-white/10">
+                <div className="w-10 h-10 min-w-[2.5rem] shrink-0 rounded-full bg-gradient-to-br from-purple-500 to-[#EAF353] flex items-center justify-center text-white font-bold text-lg ring-2 ring-white/10">
                   {user.nickname?.[0] || user.email?.[0] || "U"}
                 </div>
               )}
 
               {/* 用户名 */}
-              <div className="flex-1 text-left opacity-0 group-hover:opacity-100 transition-opacity duration-300 overflow-hidden">
-                <p className="text-white text-sm font-medium truncate whitespace-nowrap">
+              <div className="text-left opacity-0 group-hover:opacity-100 transition-opacity duration-300 overflow-hidden w-0 group-hover:w-auto">
+                <p className="text-white text-sm font-medium whitespace-nowrap">
                   {user.nickname || user.email || user.phone}
                 </p>
                 <p className="text-white/40 text-xs whitespace-nowrap">在线</p>
@@ -178,7 +178,7 @@ export default function Sidebar() {
 
               {/* 箭头 */}
               <svg
-                className={`w-4 h-4 shrink-0 text-white/40 transition-all opacity-0 group-hover:opacity-100 ${showUserMenu ? "rotate-180" : ""}`}
+                className={`shrink-0 text-white/40 transition-all opacity-0 group-hover:opacity-100 w-0 h-0 group-hover:w-4 group-hover:h-4 ${showUserMenu ? "rotate-180" : ""}`}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -189,7 +189,7 @@ export default function Sidebar() {
 
             {/* 用户菜单 */}
             {showUserMenu && (
-              <div className="absolute bottom-full left-0 w-56 mb-2 bg-[#25252a] rounded-xl border border-white/10 shadow-2xl overflow-hidden z-50">
+              <div className="absolute bottom-full left-0 w-56 mb-2 bg-[#FFE3F0] rounded-xl border border-[#FFEBF5] shadow-2xl overflow-hidden z-50">
                 <Link
                   href="/account"
                   onClick={() => setShowUserMenu(false)}
@@ -204,7 +204,7 @@ export default function Sidebar() {
                 >
                   ⚙️ 偏好设置
                 </Link>
-                <hr className="border-white/10" />
+                <hr className="border-[#FFEBF5]" />
                 <button
                   onClick={handleLogout}
                   className="w-full text-left px-4 py-3 text-sm text-red-400 hover:bg-white/5 transition"
@@ -225,7 +225,7 @@ export default function Sidebar() {
             </Link>
             <Link
               href="/auth/register"
-              className="w-10 h-10 group-hover:w-full flex items-center justify-center group-hover:px-4 group-hover:py-2.5 text-center text-sm font-medium text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-xl transition-all shadow-lg shadow-purple-500/20 overflow-hidden"
+              className="w-10 h-10 group-hover:w-full flex items-center justify-center group-hover:px-4 group-hover:py-2.5 text-center text-sm font-medium text-white bg-gradient-to-r from-purple-500 to-[#EAF353] hover:from-purple-600 hover:to-pink-600 rounded-xl transition-all shadow-lg shadow-purple-500/20 overflow-hidden"
             >
               <span className="group-hover:hidden">✨</span>
               <span className="hidden group-hover:inline">注册</span>

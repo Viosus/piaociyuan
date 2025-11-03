@@ -1,12 +1,36 @@
 // app/api/orders/route.ts
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { normalizeId } from '@/lib/store';
+import { verifyToken } from '@/lib/auth';
+import { Prisma } from '@prisma/client';
 
 // ✅ 订单列表查询（支持分页、筛选、搜索、排序）
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   try {
     console.log('[ORDER_LIST] 📋 开始查询订单列表');
+
+    // 验证用户身份
+    const authHeader = req.headers.get('authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json(
+        { ok: false, code: 'UNAUTHORIZED', message: '未提供认证信息' },
+        { status: 401 }
+      );
+    }
+
+    const token = authHeader.substring(7);
+    const payload = verifyToken(token);
+
+    if (!payload) {
+      return NextResponse.json(
+        { ok: false, code: 'INVALID_TOKEN', message: '认证信息无效或已过期' },
+        { status: 401 }
+      );
+    }
+
+    const currentUserId = payload.id;
+    console.log('[ORDER_LIST] 当前用户ID:', currentUserId);
 
     const { searchParams } = new URL(req.url);
 
@@ -17,7 +41,7 @@ export async function GET(req: Request) {
     // 🔍 筛选参数
     const statusFilter = searchParams.get('status');
     const eventIdFilter = searchParams.get('eventId');
-    const userIdFilter = searchParams.get('userId'); // 用户筛选
+    // userIdFilter 不再从 URL 读取，而是强制使用当前登录用户的 ID
     const qFilter = searchParams.get('q'); // 订单号搜索
     const orderStartDate = searchParams.get('orderStartDate'); // 购票开始日期
     const orderEndDate = searchParams.get('orderEndDate'); // 购票结束日期
@@ -31,9 +55,9 @@ export async function GET(req: Request) {
     const sortOrder = searchParams.get('sortOrder') || 'desc';
 
     console.log('[ORDER_LIST] 筛选参数:', {
+      currentUserId,
       statusFilter,
       eventIdFilter,
-      userIdFilter,
       qFilter,
       orderStartDate,
       orderEndDate,
@@ -44,7 +68,10 @@ export async function GET(req: Request) {
     });
 
     // 构建 where 条件
-    const where: any = {};
+    const where: Prisma.OrderWhereInput = {
+      // 强制过滤：只查询当前登录用户的订单
+      userId: currentUserId,
+    };
 
     if (statusFilter) {
       where.status = statusFilter;
@@ -52,10 +79,6 @@ export async function GET(req: Request) {
 
     if (eventIdFilter) {
       where.eventId = normalizeId(eventIdFilter);
-    }
-
-    if (userIdFilter) {
-      where.userId = userIdFilter;
     }
 
     if (qFilter) {
@@ -77,9 +100,9 @@ export async function GET(req: Request) {
     }
 
     // 构建排序条件
-    const orderBy: any = {};
+    let orderBy: Prisma.OrderOrderByWithRelationInput = {};
     if (sortBy === 'createdAt' || sortBy === 'paidAt') {
-      orderBy[sortBy] = sortOrder;
+      orderBy[sortBy] = sortOrder as 'asc' | 'desc';
     } else if (sortBy === 'amount') {
       // 金额排序需要在后端处理，因为amount是计算字段
       orderBy.createdAt = 'desc'; // 先按创建时间排序，后面会在内存中按金额排序
@@ -91,7 +114,20 @@ export async function GET(req: Request) {
     // 否则可以直接使用数据库分页
     const needsMemoryFiltering = eventStartDate || eventEndDate || minAmount || maxAmount || sortBy === 'amount';
 
-    let orders: any[];
+    type OrderWithRelations = Prisma.OrderGetPayload<{
+      include: {
+        tickets: {
+          select: {
+            id: true;
+            ticketCode: true;
+            status: true;
+            price: true;
+            refundedAt: true;
+          }
+        }
+      }
+    }>;
+    let orders: OrderWithRelations[];
     if (needsMemoryFiltering) {
       // 查询所有满足基础条件的订单（不分页）
       orders = await prisma.order.findMany({
@@ -181,7 +217,7 @@ export async function GET(req: Request) {
             }
           : undefined,
         amount,
-        tickets: order.tickets ? order.tickets.map((t: any) => ({
+        tickets: order.tickets ? order.tickets.map((t) => ({
           id: t.id,
           ticketCode: t.ticketCode,
           status: t.status,
@@ -254,7 +290,7 @@ export async function GET(req: Request) {
         totalPages,
       },
     });
-  } catch (e: any) {
+  } catch (e: unknown) {
     console.error('[ORDER_LIST_ERROR] ❌', e);
     return NextResponse.json(
       {
@@ -390,7 +426,7 @@ export async function POST(req: Request) {
         createdAt: now,
       },
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('[ORDER_CREATE_ERROR] ❌', err);
 
     return NextResponse.json(

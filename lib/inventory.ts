@@ -141,7 +141,8 @@ export async function getTierCapacity(eventId: string, tierId: string): Promise<
   return tier.capacity;
 }
 
-// ✅ 创建 hold（带乐观锁，锁定具体的票）
+// ✅ 创建 hold（使用悲观锁防止并发问题）
+// 🔥 高并发优化：使用 FOR UPDATE SKIP LOCKED
 export async function createHoldWithLock(
   eventId: string,
   tierId: string,
@@ -153,21 +154,23 @@ export async function createHoldWithLock(
   const expireAt = nowMs + HOLD_MS;
 
   try {
-    // 使用事务保证原子性
+    // 使用事务 + 悲观锁保证原子性和并发安全
     const result = await prisma.$transaction(async (tx) => {
-      // 1️⃣ 查找可用的票
-      const availableTickets = await tx.ticket.findMany({
-        where: {
-          eventId: Number(eventId),
-          tierId: Number(tierId),
-          status: 'available',
-        },
-        take: qty,
-        select: {
-          id: true,
-        },
-      });
+      // 1️⃣ 使用原生 SQL + FOR UPDATE SKIP LOCKED 查找并锁定可用的票
+      // FOR UPDATE: 对选中的行加排他锁，其他事务无法修改
+      // SKIP LOCKED: 跳过已被其他事务锁定的行，避免死锁和等待
+      const availableTickets: { id: string; ticketCode: string }[] = await tx.$queryRaw`
+        SELECT id, "ticketCode"
+        FROM tickets
+        WHERE "eventId" = ${Number(eventId)}
+          AND "tierId" = ${Number(tierId)}
+          AND status = 'available'
+        ORDER BY id
+        LIMIT ${qty}
+        FOR UPDATE SKIP LOCKED
+      `;
 
+      // 检查库存是否充足
       if (availableTickets.length < qty) {
         console.warn(
           `[HOLD_REJECT] 库存不足`,
@@ -191,16 +194,12 @@ export async function createHoldWithLock(
         },
       });
 
-      // 3️⃣ 锁定票（更新状态为 locked，关联 hold）
-      await tx.ticket.updateMany({
-        where: {
-          id: { in: ticketIds },
-        },
-        data: {
-          status: 'locked',
-          holdId: holdId, // 关联 hold ID
-        },
-      });
+      // 3️⃣ 使用原生 SQL 批量更新票状态（性能更好）
+      await tx.$executeRaw`
+        UPDATE tickets
+        SET status = 'locked', "holdId" = ${holdId}
+        WHERE id = ANY(${ticketIds}::text[])
+      `;
 
       return { ticketIds };
     });
@@ -210,7 +209,7 @@ export async function createHoldWithLock(
     }
 
     console.log(
-      `[HOLD_CREATE] ✅ 创建成功`,
+      `[HOLD_CREATE] ✅ 创建成功（高并发安全）`,
       `holdId=${holdId}`,
       `eventId=${eventId}, tierId=${tierId}`,
       `qty=${qty}`,

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { apiGet, apiPost } from '@/lib/api';
 
 type User = {
   id: string;
@@ -47,12 +48,7 @@ export default function AccountPage() {
       return;
     }
 
-    fetch("/api/auth/me", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then((res) => res.json())
+    apiGet("/api/auth/me")
       .then((data) => {
         if (data.ok) {
           setUser(data.data);
@@ -61,14 +57,10 @@ export default function AccountPage() {
           if (presetAvatars.includes(data.data.avatar)) {
             setSelectedPreset(data.data.avatar);
           }
-        } else {
-          localStorage.removeItem("token");
-          router.push("/auth/login");
         }
       })
       .catch(() => {
-        localStorage.removeItem("token");
-        router.push("/auth/login");
+        // API helper already handles 401 redirects
       })
       .finally(() => {
         setLoading(false);
@@ -88,27 +80,12 @@ export default function AccountPage() {
     setSaving(true);
 
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        router.push("/auth/login");
-        return;
-      }
-
-      const res = await fetch("/api/user/update", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          nickname,
-          avatar: avatarUrl,
-        }),
+      const data = await apiPost("/api/user/update", {
+        nickname,
+        avatar: avatarUrl,
       });
 
-      const data = await res.json();
-
-      if (!res.ok) {
+      if (!data.ok) {
         setError(data.error || "保存失败");
         return;
       }
@@ -139,7 +116,7 @@ export default function AccountPage() {
     <main className="min-h-screen py-12 px-4">
       <div className="max-w-3xl mx-auto">
         <div className="bg-[#1a1a1f] border border-white/10 rounded-2xl shadow-lg p-8">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent mb-2">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 via-[#FFE3F0] to-blue-400 bg-clip-text text-transparent mb-2">
             👤 个人中心
           </h1>
           <p className="text-white/60 mb-8">管理你的个人信息和偏好设置</p>
@@ -179,7 +156,7 @@ export default function AccountPage() {
                   className="w-20 h-20 rounded-full object-cover border-2 border-white/20"
                 />
               ) : (
-                <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-2xl">
+                <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-[#EAF353] rounded-full flex items-center justify-center text-white font-bold text-2xl">
                   {user?.nickname?.[0] || user?.email?.[0] || "U"}
                 </div>
               )}
@@ -215,8 +192,8 @@ export default function AccountPage() {
                   onClick={() => handleSelectPreset(url)}
                   className={`w-full aspect-square rounded-full overflow-hidden border-2 transition ${
                     selectedPreset === url
-                      ? "border-purple-500 ring-2 ring-purple-500/30"
-                      : "border-white/20 hover:border-purple-400"
+                      ? "border-[#EAF353] ring-2 ring-[#EAF353]/30"
+                      : "border-white/20 hover:border-[#FFE3F0]"
                   }`}
                 >
                   <img
@@ -268,7 +245,7 @@ export default function AccountPage() {
             <button
               onClick={handleSave}
               disabled={saving}
-              className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white py-3 rounded-lg font-medium hover:from-purple-600 hover:to-pink-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 bg-gradient-to-r from-purple-500 to-[#EAF353] text-white py-3 rounded-lg font-medium hover:from-purple-600 hover:to-pink-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {saving ? "保存中..." : "保存设置"}
             </button>

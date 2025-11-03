@@ -153,7 +153,7 @@ export async function POST(req: NextRequest) {
         token: accessToken,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('注册失败:', error);
     return NextResponse.json(
       { ok: false, error: '注册失败，请稍后重试' },

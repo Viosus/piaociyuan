@@ -44,7 +44,7 @@ export async function GET(req: NextRequest) {
         authProvider: user.authProvider,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('获取用户信息失败:', error);
     return NextResponse.json(
       { ok: false, error: '获取用户信息失败' },

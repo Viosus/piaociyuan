@@ -144,14 +144,14 @@ export async function POST(req: NextRequest, { params }: Props) {
       },
       message: isLiked ? '点赞成功' : '取消点赞',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[LIKE_TOGGLE_ERROR]', error);
     return NextResponse.json(
       {
         ok: false,
         code: 'SERVER_ERROR',
         message: '操作失败',
-        error: error.message,
+        error: (error instanceof Error ? error.message : String(error)),
       },
       { status: 500 }
     );
@@ -213,14 +213,14 @@ export async function GET(req: NextRequest, { params }: Props) {
         likeCount: post?.likeCount || 0,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[LIKE_STATUS_ERROR]', error);
     return NextResponse.json(
       {
         ok: false,
         code: 'SERVER_ERROR',
         message: '查询失败',
-        error: error.message,
+        error: (error instanceof Error ? error.message : String(error)),
       },
       { status: 500 }
     );

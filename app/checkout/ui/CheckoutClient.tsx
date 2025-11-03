@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { apiGet, apiPost } from '@/lib/api';
 
 type Event = {
   id: number;
@@ -182,7 +183,23 @@ export default function CheckoutClient({ event, tier, initialQty, urlLimit }: Pr
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+
+    // 检查登录状态
+    const checkAuth = async () => {
+      try {
+        const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+        if (!token) {
+          // 未登录，保存当前 URL 并跳转到登录页
+          const currentUrl = window.location.pathname + window.location.search;
+          router.push(`/auth/login?returnUrl=${encodeURIComponent(currentUrl)}`);
+        }
+      } catch (error) {
+        console.error('Auth check failed:', error);
+      }
+    };
+
+    checkAuth();
+  }, [router]);
 
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 500);
@@ -240,35 +257,17 @@ export default function CheckoutClient({ event, tier, initialQty, urlLimit }: Pr
     };
   }
 
-  async function createOrder(holdId: string) {
-    // 获取当前用户信息
-    const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
-    if (!token) {
-      // 清理localStorage并跳转到登录页
-      localStorage.removeItem('token');
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
-      router.push('/auth/login?redirect=/checkout');
-      throw new Error('请先登录');
-    }
-
+  async function createOrder(holdId: string): Promise<{ orderId: string; status: string } | null> {
     // 获取用户 ID
-    const meRes = await fetch('/api/auth/me', {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-    });
+    const meData = await apiGet('/api/auth/me');
 
-    if (!meRes.ok) {
-      // 登录过期，清理localStorage并跳转到登录页
-      localStorage.removeItem('token');
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
-      router.push('/auth/login?redirect=/checkout');
-      throw new Error('登录已过期，请重新登录');
+    if (!meData.ok) {
+      // 如果获取用户信息失败，lib/api.ts 会处理重定向到登录页
+      // 返回 null 停止后续流程
+      console.log('用户未登录或认证失败，将由 lib/api.ts 处理重定向');
+      return null;
     }
 
-    const meData = await meRes.json();
     const userId = meData.data?.id;
 
     if (!userId) {
@@ -276,15 +275,15 @@ export default function CheckoutClient({ event, tier, initialQty, urlLimit }: Pr
     }
 
     // 创建订单
-    const res = await fetch('/api/orders', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ eventId: event.id, tierId: tier.id, qty, holdId, userId }),
+    const data = await apiPost('/api/orders', {
+      eventId: event.id,
+      tierId: tier.id,
+      qty,
+      holdId,
+      userId
     });
 
-    const data = await res.json().catch(() => ({}));
-
-    if (!res.ok) {
+    if (!data.ok) {
       const errorMessage = data?.message || data?.error || 'ORDER_FAILED';
       throw new Error(errorMessage);
     }
@@ -305,11 +304,17 @@ export default function CheckoutClient({ event, tier, initialQty, urlLimit }: Pr
     setErrorMsg(null);
     try {
       const { holdId } = await createHold();
-      const { orderId } = await createOrder(holdId);
-      router.push(`/order/${orderId}`);
-    } catch (err: any) {
+      const orderResult = await createOrder(holdId);
+
+      // 如果返回 null，说明需要登录，已经重定向了，直接返回
+      if (!orderResult) {
+        return;
+      }
+
+      router.push(`/order/${orderResult.orderId}`);
+    } catch (err: unknown) {
       console.error(err);
-      setErrorMsg(err?.message || "提交失败，请稍后重试");
+      setErrorMsg(err instanceof Error ? err.message : "提交失败，请稍后重试");
     } finally {
       setSubmitting(false);
     }
@@ -319,13 +324,13 @@ export default function CheckoutClient({ event, tier, initialQty, urlLimit }: Pr
     <main className="min-h-screen p-8 bg-gray-50">
       <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow p-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
-          <h1 className="text-2xl font-bold">确认订单</h1>
+          <h1 className="text-2xl font-bold text-[#EAF353]">确认订单</h1>
 
           <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-500">锁票剩余</span>
+            <span className="text-sm text-[#282828]">锁票剩余</span>
             <span
               className={`px-2 py-1 rounded font-mono text-sm
-                ${msLeft < 60_000 ? "bg-red-50 text-red-600" : "bg-indigo-50 text-indigo-700"}`}
+                ${mounted && msLeft < 60_000 ? "bg-red-50 text-red-600" : "bg-[#FFFAFD] text-[#FFB6D9]"}`}
               aria-live="polite"
             >
               {mounted ? formatMMSS(msLeft) : "10:00"}
@@ -344,22 +349,22 @@ export default function CheckoutClient({ event, tier, initialQty, urlLimit }: Pr
 
         <div className="border rounded-xl p-4 mb-6">
           <div className="font-medium">{event.name}</div>
-          <div className="text-sm text-gray-500">
+          <div className="text-sm text-[#282828]">
             {event.city} · {event.venue} · {event.date} {event.time}
           </div>
 
           <div className="mt-4 flex items-center justify-between">
-            <div className="text-gray-700">
+            <div className="text-[#282828]">
               票档：<span className="font-medium">{tier.name}</span>
             </div>
             <QuantityPicker value={qty} onChange={setQty} min={1} max={maxQty} />
           </div>
 
-          <div className="mt-2 text-sm text-gray-500">
+          <div className="mt-2 text-sm text-[#282828]">
             单价：¥ {tier.price} · 库存：{tier.remaining} · 限购：每人最多 {maxQty} 张
           </div>
 
-          <div className="mt-3 text-indigo-700 font-semibold">合计：¥ {total}</div>
+          <div className="mt-3 text-[#FFB6D9] font-semibold">合计：¥ {total}</div>
         </div>
 
         {errorMsg && (
@@ -367,14 +372,14 @@ export default function CheckoutClient({ event, tier, initialQty, urlLimit }: Pr
         )}
 
         <button
-          className="w-full py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50"
+          className="w-full py-3 bg-[#EAF353] text-white rounded-lg hover:bg-[#FFC9E0] disabled:opacity-50"
           disabled={isExpired || submitting}
           onClick={handleSubmit}
         >
           {submitting ? "提交中..." : "提交订单"}
         </button>
 
-        <div className="mt-4 p-3 rounded bg-indigo-50 text-indigo-800 text-sm leading-relaxed">
+        <div className="mt-4 p-3 rounded bg-[#FFFAFD] text-[#FFA8CC] text-sm leading-relaxed">
           说明：进入结算页即开始 10 分钟锁票倒计时（演示），刷新页面会延续本事件/票档的剩余时间。
           若倒计时结束，系统会释放锁票并跳回活动页。
         </div>

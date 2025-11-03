@@ -27,7 +27,7 @@ export default function RootLayout({
   return (
     <html lang="zh-CN" className="dark">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#0f0f14] text-white`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Sidebar />
         <main className="ml-20 min-h-screen transition-all duration-300">
