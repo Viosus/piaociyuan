@@ -53,7 +53,7 @@ export async function GET(req: NextRequest) {
 
     // 3️⃣ 丰富数据
     const enrichedAssets = await Promise.all(
-      userNFTs.map(async (userNFT) => {
+      userNFTs.map(async (userNFT: typeof userNFTs[number]) => {
         // 获取活动信息（如果有关联）
         let event = null;
         if (userNFT.nft.eventId) {

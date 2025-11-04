@@ -54,7 +54,7 @@ export async function GET() {
     });
 
     // 格式化返回数据
-    const conversations = participants.map((p) => ({
+    const conversations = participants.map((p: typeof participants[number]) => ({
       id: p.conversation.id,
       otherUser: p.conversation.participants[0]?.user,
       lastMessage: p.conversation.messages[0],
@@ -124,7 +124,7 @@ export async function POST(request: NextRequest) {
     if (existingConversation) {
       // 返回已存在的对话
       const otherParticipant = existingConversation.participants.find(
-        (p) => p.userId !== user.id
+        (p: typeof existingConversation.participants[number]) => p.userId !== user.id
       );
       return NextResponse.json({
         id: existingConversation.id,
@@ -159,7 +159,7 @@ export async function POST(request: NextRequest) {
     });
 
     const otherParticipant = conversation.participants.find(
-      (p) => p.userId !== user.id
+      (p: typeof conversation.participants[number]) => p.userId !== user.id
     );
 
     return NextResponse.json({

@@ -1,14 +1,47 @@
-# 票次元 (Piaociyuan)
+# 票次元 (Piaociyuan) - Monorepo
 
 一个现代化的票务平台，支持演唱会、音乐节等活动的在线购票。
 
+> 本项目采用 **Turborepo** Monorepo 架构，支持多应用和共享代码管理。
+
 ## 技术栈
 
+- **架构**: Turborepo Monorepo
 - **前端**: Next.js 16 (App Router), React 19, Tailwind CSS 4
 - **后端**: Next.js API Routes
 - **数据库**: PostgreSQL 18 + Prisma ORM 6.18
 - **认证**: JWT (JSON Web Token)
 - **高并发优化**: FOR UPDATE SKIP LOCKED 悲观锁机制
+- **包管理**: npm workspaces
+
+## 项目结构
+
+```
+piaoyuzhou/                    # Monorepo 根目录
+├── apps/                      # 应用目录
+│   └── web/                   # Web 应用（Next.js）
+│       ├── app/               # Next.js App Router 页面
+│       ├── components/        # React 组件
+│       ├── lib/               # 工具库
+│       ├── hooks/             # React Hooks
+│       ├── prisma/            # 数据库配置
+│       │   ├── schema.prisma  # 数据库模型
+│       │   └── migrations/    # 迁移文件
+│       ├── scripts/           # 工具脚本
+│       └── package.json       # Web 应用依赖
+├── packages/                  # 共享包目录
+│   └── shared/                # 共享代码包
+│       ├── src/
+│       │   ├── types/         # 共享类型定义
+│       │   └── constants/     # 共享常量
+│       ├── dist/              # 编译输出
+│       └── package.json       # 共享包配置
+├── docs/                      # 项目文档
+│   └── migration-status.md    # Monorepo 迁移状态
+├── package.json               # Monorepo 根配置
+├── turbo.json                 # Turborepo 配置
+└── README.md                  # 本文件
+```
 
 ## 功能特性
 
@@ -17,15 +50,16 @@
 - ✅ 座位选择（自动分配 + 手动选座混合模式）
 - ✅ 购票流程（锁票 → 支付 → 出票）
 - ✅ 订单管理（查看、退款）
-- ✅ 数字纪念品收藏系统
+- ✅ NFT 数字藏品系统
 - ✅ 社交功能（帖子、评论、点赞）
+- ✅ 实时通讯（Socket.io）
 - ✅ 高并发抢票支持（千人级并发测试通过）
 
 ## 开发环境要求
 
-- Node.js 20+
-- PostgreSQL 12+ （或使用 SQLite 作为替代）
-- npm / yarn / pnpm
+- Node.js 18+
+- PostgreSQL 12+
+- npm 9+
 
 ## 快速开始
 
@@ -39,23 +73,20 @@ cd piaoyuzhou
 ### 2. 安装依赖
 
 ```bash
+# 安装所有 workspace 的依赖
 npm install
-# 或
-yarn install
-# 或
-pnpm install
 ```
 
 ### 3. 配置环境变量
 
 ```bash
-# 复制环境变量模板
-cp .env.example .env
+# 复制 Web 应用的环境变量模板
+cp apps/web/.env.example apps/web/.env
 
-# 编辑 .env 文件，填写您的配置：
+# 编辑 apps/web/.env 文件，填写配置：
 # - DATABASE_URL: 数据库连接字符串
-# - JWT_SECRET: JWT 密钥（生成方法见下文）
-# - ENCRYPTION_KEY: 加密密钥（生成方法见下文）
+# - JWT_SECRET: JWT 密钥
+# - ENCRYPTION_KEY: 加密密钥
 ```
 
 #### 生成密钥
@@ -70,77 +101,103 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 
 ### 4. 设置数据库
 
-#### 选项 A：使用 PostgreSQL（推荐）
+#### 使用 PostgreSQL（推荐）
 
 ```bash
-# 1. 安装 PostgreSQL
-# Windows: https://www.postgresql.org/download/windows/
-# Mac: brew install postgresql
-# Linux: sudo apt-get install postgresql
+# 1. 创建数据库 "piaociyuan"
 
-# 2. 创建数据库
-# 使用 psql 命令行或 pgAdmin 创建数据库 "piaociyuan"
+# 2. 修改 apps/web/.env 中的 DATABASE_URL
+# 示例：DATABASE_URL="postgresql://postgres:password@localhost:5432/piaociyuan"
 
-# 3. 修改 .env 文件中的 DATABASE_URL
-# 示例：DATABASE_URL="postgresql://postgres:your_password@localhost:5432/piaociyuan?connection_limit=20&pool_timeout=10&connect_timeout=10"
-
-# 4. 运行数据库迁移
-npx prisma migrate dev
-
-# 5. 生成 Prisma Client
-npx prisma generate
-
-# 6. 填充种子数据（可选）
-npm run db:seed
-npm run db:create-tickets
-```
-
-#### 选项 B：使用 SQLite（仅开发/测试）
-
-```bash
-# 1. 修改 .env 文件，取消注释 SQLite 配置：
-# DATABASE_URL="file:./prisma/dev.db"
-
-# 2. 运行迁移和生成客户端
+# 3. 运行数据库迁移
+cd apps/web
 npx prisma migrate dev
 npx prisma generate
 
-# 3. 填充种子数据
+# 4. 填充种子数据（可选）
 npm run db:seed
-npm run db:create-tickets
+
+# 5. 返回根目录
+cd ../..
 ```
 
 ### 5. 启动开发服务器
 
 ```bash
+# 方式 1: 使用 Turborepo 启动所有应用
 npm run dev
+
+# 方式 2: 只启动 Web 应用
+npm run dev:web
+# 或
+cd apps/web && npm run dev
 ```
 
 打开 [http://localhost:3000](http://localhost:3000) 查看应用。
+
+## Monorepo 工作流
+
+### 可用脚本
+
+```bash
+# 构建所有应用和包
+npm run build
+
+# 只构建 Web 应用
+npm run build:web
+
+# 启动所有应用的开发服务器
+npm run dev
+
+# 只启动 Web 应用
+npm run dev:web
+
+# Lint 所有代码
+npm run lint
+
+# 安装所有依赖
+npm run install-all
+```
+
+### 在单个应用中工作
+
+```bash
+# 进入 Web 应用目录
+cd apps/web
+
+# 运行特定脚本
+npm run dev          # 启动开发服务器
+npm run build        # 构建生产版本
+npm run db:seed      # 填充种子数据
+npm run db:studio    # 启动 Prisma Studio
+```
+
+### 使用共享包
+
+Web 应用已配置使用 `@piaoyuzhou/shared` 共享包：
+
+```typescript
+// 在 apps/web 中导入共享类型
+import { ApiResponse, UserRole, TicketStatus } from '@piaoyuzhou/shared';
+
+// 使用共享常量
+import { ErrorCode, TICKET_HOLD_DURATION } from '@piaoyuzhou/shared';
+```
 
 ## 数据库管理
 
 ### Prisma Studio（数据库可视化工具）
 
 ```bash
+cd apps/web
 npm run db:studio
-# 或
-npx prisma studio
-```
-
-### 种子数据脚本
-
-```bash
-# 填充活动、票档、用户等基础数据
-npm run db:seed
-
-# 生成票务数据
-npm run db:create-tickets
 ```
 
 ### 数据库迁移
 
 ```bash
+cd apps/web
+
 # 创建新的迁移
 npx prisma migrate dev --name 迁移名称
 
@@ -149,35 +206,6 @@ npx prisma migrate deploy
 
 # 重置数据库（⚠️ 会删除所有数据）
 npx prisma migrate reset
-```
-
-## 项目结构
-
-```
-piaoyuzhou/
-├── app/                    # Next.js App Router 页面
-│   ├── account/           # 用户账户相关页面
-│   ├── auth/              # 登录/注册页面
-│   ├── checkout/          # 购票结算页面
-│   ├── events/            # 活动详情页面
-│   ├── order/             # 订单管理页面
-│   ├── api/               # API 路由
-│   └── layout.tsx         # 全局布局
-├── lib/                   # 工具库
-│   ├── auth.ts            # JWT 认证逻辑
-│   ├── database.ts        # 数据库操作（向后兼容层）
-│   ├── inventory.ts       # 库存管理（高并发锁票逻辑）
-│   ├── ticket-strategy.ts # 智能选座策略
-│   └── prisma.ts          # Prisma 客户端
-├── prisma/                # Prisma 配置
-│   ├── schema.prisma      # 数据库模型定义
-│   ├── migrations/        # 数据库迁移文件
-│   └── seed.ts            # 种子数据脚本
-├── scripts/               # 工具脚本
-│   ├── create-tickets.ts  # 生成票务数据
-│   └── test-concurrency.ts # 并发测试脚本
-├── docs/                  # 项目文档
-└── components/            # 可复用组件（如果有的话）
 ```
 
 ## 核心功能说明
@@ -199,34 +227,15 @@ piaoyuzhou/
 - ✅ 平均响应时间 1.84ms
 - ✅ 支持千人级并发
 
-## 可用脚本
-
-```bash
-npm run dev          # 启动开发服务器（带 Turbopack）
-npm run build        # 构建生产版本
-npm run start        # 启动生产服务器
-npm run lint         # 运行 ESLint 检查
-npm run db:seed      # 填充种子数据
-npm run db:create-tickets  # 生成票务数据
-npm run db:studio    # 启动 Prisma Studio
-```
-
 ## 部署
 
 ### Vercel 部署（推荐）
 
 1. 推送代码到 GitHub
 2. 在 Vercel 导入项目
-3. 配置环境变量（DATABASE_URL, JWT_SECRET, ENCRYPTION_KEY）
-4. 部署
-
-详见：[Next.js 部署文档](https://nextjs.org/docs/app/building-your-application/deploying)
-
-### Docker 部署
-
-```bash
-# TODO: 添加 Dockerfile
-```
+3. 设置 Root Directory 为 `apps/web`
+4. 配置环境变量（DATABASE_URL, JWT_SECRET, ENCRYPTION_KEY）
+5. 部署
 
 ## 环境变量说明
 
@@ -240,36 +249,57 @@ npm run db:studio    # 启动 Prisma Studio
 
 ## 常见问题
 
+### Q: 如何添加新的应用？
+
+```bash
+# 1. 在 apps/ 目录下创建新应用
+mkdir apps/mobile
+
+# 2. 在新应用的 package.json 中添加 workspace 依赖
+{
+  "name": "@piaoyuzhou/mobile",
+  "dependencies": {
+    "@piaoyuzhou/shared": "*"
+  }
+}
+
+# 3. 在根目录重新安装依赖
+npm install
+```
+
+### Q: 如何添加共享代码？
+
+在 `packages/shared/src/` 目录下添加代码，然后在 `packages/shared/src/index.ts` 中导出。
+
+### Q: Turborepo 缓存如何工作？
+
+Turborepo 会缓存构建结果。如需清除缓存：
+
+```bash
+rm -rf .turbo
+rm -rf apps/web/.next
+rm -rf packages/shared/dist
+```
+
 ### Q: 如何重置数据库？
 
 ```bash
+cd apps/web
 npx prisma migrate reset
 npm run db:seed
-npm run db:create-tickets
 ```
-
-### Q: 如何查看数据库内容？
-
-```bash
-npm run db:studio
-```
-
-在浏览器打开 http://localhost:5555
 
 ### Q: PostgreSQL 连接失败怎么办？
 
 1. 检查 PostgreSQL 服务是否启动
-2. 确认 .env 中的 DATABASE_URL 配置正确
+2. 确认 `apps/web/.env` 中的 DATABASE_URL 配置正确
 3. 密码中的特殊字符需要 URL 编码（如 @ → %40）
 4. 确认数据库已创建
 
-### Q: 如何添加测试用户？
+## 文档
 
-运行种子脚本会自动创建测试用户：
-- 手机号: `17701790343`, 密码: `password123`
-- 手机号: `13800138001`, 密码: `password123`
-
-或手动注册新用户。
+- [Monorepo 迁移状态](docs/migration-status.md) - 详细的迁移记录和回退方案
+- [高并发优化总结](docs/高并发优化总结.md) - 票务系统并发优化方案
 
 ## 贡献指南
 
@@ -278,10 +308,6 @@ npm run db:studio
 ## 许可证
 
 [MIT License](LICENSE)
-
-## 联系方式
-
-如有问题，请提交 Issue 或联系项目维护者。
 
 ---
 

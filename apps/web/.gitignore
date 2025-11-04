@@ -1,0 +1,22 @@
+node_modules/
+.next/
+.env.local
+.env
+dist/
+.DS_Store
+*.log
+.vscode/
+.idea/
+/lib/generated/prisma
+
+# Database files
+prisma/*.db
+prisma/*.db-shm
+prisma/*.db-wal
+
+# Local settings
+.claude/settings.local.json
+
+# Build cache
+tsconfig.tsbuildinfo
+nul

@@ -155,7 +155,7 @@ export async function GET(req: Request) {
         now,
         timestamp: new Date(now).toISOString(),
       },
-      holds: holds.map((h) => ({
+      holds: holds.map((h: any) => ({
         holdId: h.id,
         qty: h.qty,
         expireAt: Number(h.expireAt),

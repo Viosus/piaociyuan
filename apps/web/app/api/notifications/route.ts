@@ -54,9 +54,9 @@ export async function GET(req: NextRequest) {
     console.log('[NOTIFICATIONS] 查询参数:', { userId, type, isRead, limit, offset });
 
     // 3️⃣ 构建查询条件
-    const where: Prisma.NotificationWhereInput = {
+    const where = {
       userId,
-    };
+    } as any;
 
     if (type) {
       where.type = type;

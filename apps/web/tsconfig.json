@@ -25,6 +25,9 @@
     "paths": {
       "@/*": [
         "./*"
+      ],
+      "@piaoyuzhou/shared": [
+        "../../packages/shared/src"
       ]
     }
   },
