@@ -6,7 +6,7 @@ export default async function EventsPage() {
   const events = await getAllEvents();
 
   return (
-    <main className="min-h-screen p-8">
+    <div className="min-h-screen p-8">
       <div className="max-w-6xl mx-auto mb-6">
         <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 via-[#FFE3F0] to-blue-400 bg-clip-text text-transparent">
           热门活动
@@ -33,6 +33,6 @@ export default async function EventsPage() {
           </Link>
         ))}
       </div>
-    </main>
+    </div>
   );
 }

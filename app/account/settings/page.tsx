@@ -7,7 +7,7 @@ export default function SettingsPage() {
   const router = useRouter();
 
   return (
-    <main className="min-h-screen py-12 px-4">
+    <div className="min-h-screen bg-[#C72471] py-12 px-4">
       <div className="max-w-4xl mx-auto">
         <div className="bg-[#1a1a1f] border border-white/10 rounded-2xl shadow-lg p-8">
           <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 via-[#FFE3F0] to-blue-400 bg-clip-text text-transparent mb-2">
@@ -76,6 +76,6 @@ export default function SettingsPage() {
           </div>
         </div>
       </div>
-    </main>
+    </div>
   );
 }

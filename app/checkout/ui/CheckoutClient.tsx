@@ -321,8 +321,8 @@ export default function CheckoutClient({ event, tier, initialQty, urlLimit }: Pr
   }
 
   return (
-    <main className="min-h-screen p-8 bg-gray-50">
-      <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow p-6">
+    <main className="min-h-screen p-8 bg-[#C72471]">
+      <div className="max-w-3xl mx-auto bg-white/80 backdrop-blur-sm rounded-2xl shadow p-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
           <h1 className="text-2xl font-bold text-[#EAF353]">确认订单</h1>
 

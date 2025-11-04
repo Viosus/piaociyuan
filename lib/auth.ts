@@ -1,6 +1,7 @@
 // lib/auth.ts
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { headers } from 'next/headers';
 import prisma from './prisma';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-this-in-production';
@@ -120,4 +121,29 @@ export function isValidPhone(phone: string): boolean {
 // 验证密码强度（至少6位）
 export function isValidPassword(password: string): boolean {
   return password.length >= 6;
+}
+
+// 从请求头获取当前用户
+export async function getCurrentUser() {
+  try {
+    const headersList = await headers();
+    const authHeader = headersList.get('Authorization');
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return null;
+    }
+
+    const token = authHeader.substring(7);
+    const payload = verifyToken(token);
+
+    if (!payload) {
+      return null;
+    }
+
+    // 从数据库获取完整的用户信息
+    const user = await findUserById(payload.id);
+    return user;
+  } catch {
+    return null;
+  }
 }

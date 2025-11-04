@@ -140,8 +140,8 @@ export default function NFTDetailClient({
 
   if (loading) {
     return (
-      <main className="min-h-screen p-4 md:p-8 bg-gray-50">
-        <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow p-6">
+      <main className="min-h-screen p-4 md:p-8 bg-[#C72471]">
+        <div className="max-w-6xl mx-auto bg-white/80 backdrop-blur-sm rounded-2xl shadow p-6">
           <div className="animate-pulse">
             <div className="h-8 bg-gray-200 rounded w-1/3 mb-4"></div>
             <div className="h-64 bg-gray-200 rounded mb-4"></div>
@@ -154,8 +154,8 @@ export default function NFTDetailClient({
 
   if (error || !nft) {
     return (
-      <main className="min-h-screen p-4 md:p-8 bg-gray-50">
-        <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow p-6 text-center">
+      <main className="min-h-screen p-4 md:p-8 bg-[#C72471]">
+        <div className="max-w-6xl mx-auto bg-white/80 backdrop-blur-sm rounded-2xl shadow p-6 text-center">
           <h1 className="text-2xl font-bold mb-2 text-red-600">NFT不存在</h1>
           <p className="text-gray-600 mb-4">{error || "请返回重试"}</p>
           <Link
@@ -175,7 +175,7 @@ export default function NFTDetailClient({
   ) || "/placeholder-nft.png";
 
   return (
-    <main className="min-h-screen p-4 md:p-8 bg-gray-50">
+    <main className="min-h-screen p-4 md:p-8 bg-[#C72471]">
       <div className="max-w-6xl mx-auto">
         {/* 返回按钮 */}
         <Link

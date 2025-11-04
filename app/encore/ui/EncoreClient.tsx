@@ -125,7 +125,7 @@ export default function EncoreClient() {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#EAF353] mx-auto mb-4"></div>
           <p className="text-white/60">加载中...</p>
         </div>
       </div>
@@ -138,7 +138,7 @@ export default function EncoreClient() {
         <div className="text-6xl mb-4">📭</div>
         <h2 className="text-xl font-semibold text-white mb-2">还没有内容</h2>
         <p className="text-white/60 mb-6">成为第一个分享演出时刻的人吧！</p>
-        <button className="px-6 py-3 bg-gradient-to-r from-red-500 to-[#EAF353] text-white rounded-lg font-medium hover:from-red-600 hover:to-pink-600 transition">
+        <button className="px-6 py-3 bg-[#EAF353] text-white rounded-lg font-medium hover:bg-[#FFC9E0] transition">
           📝 发布第一篇帖子
         </button>
       </div>
@@ -156,11 +156,11 @@ export default function EncoreClient() {
           >
             <Link
               href={`/encore/${post.id}`}
-              className="block bg-[#1a1a1f] border border-white/10 rounded-2xl overflow-hidden hover:border-white/20 transition-all group"
+              className="block bg-white border border-[#FFEBF5] rounded-xl overflow-hidden hover:border-[#FFE3F0] hover:shadow-lg transition-all group"
             >
               {/* 图片 */}
               {post.images.length > 0 && (
-                <div className="relative overflow-hidden bg-black/20">
+                <div className="relative overflow-hidden">
                   <img
                     src={post.images[0].imageUrl}
                     alt={post.content.substring(0, 50)}
@@ -179,7 +179,7 @@ export default function EncoreClient() {
               {/* 内容 */}
               <div className="p-4">
                 {/* 标题/内容 */}
-                <p className="text-white text-sm line-clamp-2 mb-3">
+                <p className="text-[#282828] text-sm line-clamp-2 mb-3">
                   {post.content}
                 </p>
 
@@ -193,7 +193,7 @@ export default function EncoreClient() {
 
                 {/* 地点标签 */}
                 {post.location && (
-                  <div className="mb-3 flex items-center gap-1 text-xs text-white/60">
+                  <div className="mb-3 flex items-center gap-1 text-xs text-[#282828]/60">
                     <span>📍</span>
                     <span className="truncate">{post.location}</span>
                   </div>
@@ -208,17 +208,17 @@ export default function EncoreClient() {
                       className="w-6 h-6 rounded-full object-cover"
                     />
                   ) : (
-                    <div className="w-6 h-6 bg-gradient-to-br from-red-500 to-[#EAF353] rounded-full flex items-center justify-center text-white text-xs font-bold">
+                    <div className="w-6 h-6 bg-gradient-to-br from-purple-400 to-[#EAF353] rounded-full flex items-center justify-center text-white text-xs font-bold">
                       {post.user.nickname[0]}
                     </div>
                   )}
-                  <span className="text-xs text-white/80 truncate">
+                  <span className="text-xs text-[#282828]/80 truncate">
                     {post.user.nickname}
                   </span>
                 </div>
 
                 {/* 统计信息 */}
-                <div className="flex items-center gap-4 text-xs text-white/40">
+                <div className="flex items-center gap-4 text-xs text-[#282828]/60">
                   <div className="flex items-center gap-1">
                     <span>❤️</span>
                     <span>{post.likeCount > 0 ? post.likeCount : ''}</span>
@@ -243,7 +243,7 @@ export default function EncoreClient() {
         <div ref={loadMoreRef} className="py-8 text-center">
           {loading && (
             <div className="flex items-center justify-center gap-2 text-white/60">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-red-500"></div>
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#EAF353]"></div>
               <span>加载更多...</span>
             </div>
           )}
@@ -257,9 +257,10 @@ export default function EncoreClient() {
         </div>
       )}
 
-      {/* 发布按钮（悬浮） */}
+      {/* 发布按钮（悬浮） - 根据右侧边栏宽度调整位置 */}
       <button
-        className="fixed bottom-8 right-8 w-14 h-14 bg-gradient-to-r from-red-500 to-[#EAF353] text-white rounded-full shadow-lg hover:shadow-xl hover:scale-110 transition-all flex items-center justify-center text-2xl"
+        className="fixed bottom-8 w-14 h-14 bg-[#EAF353] text-white rounded-full shadow-lg hover:shadow-xl hover:scale-110 hover:bg-[#FFC9E0] transition-all flex items-center justify-center text-2xl z-40"
+        style={{ right: 'calc(var(--right-sidebar-width, 64px) + 2rem)' }}
         onClick={() => alert("发布功能即将上线！")}
       >
         ✏️

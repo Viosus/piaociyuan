@@ -16,7 +16,7 @@ export default async function CheckoutPage({ searchParams }: Props) {
 
   if (isNaN(eventId) || isNaN(tierId)) {
     return (
-      <main className="min-h-screen flex items-center justify-center p-8">
+      <div className="min-h-screen bg-[#C72471] flex items-center justify-center p-8">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-2 text-[#EAF353]">订单信息不完整</h1>
           <p className="text-[#282828]">请从活动详情页重新选择票档。</p>
@@ -24,7 +24,7 @@ export default async function CheckoutPage({ searchParams }: Props) {
             返回活动列表
           </Link>
         </div>
-      </main>
+      </div>
     );
   }
 
@@ -34,7 +34,7 @@ export default async function CheckoutPage({ searchParams }: Props) {
 
   if (!event || !tier) {
     return (
-      <main className="min-h-screen flex items-center justify-center p-8">
+      <div className="min-h-screen bg-[#C72471] flex items-center justify-center p-8">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-2 text-[#EAF353]">订单信息不完整</h1>
           <p className="text-[#282828]">请从活动详情页重新选择票档。</p>
@@ -42,7 +42,7 @@ export default async function CheckoutPage({ searchParams }: Props) {
             返回活动列表
           </Link>
         </div>
-      </main>
+      </div>
     );
   }
 

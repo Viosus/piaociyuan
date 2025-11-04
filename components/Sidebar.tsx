@@ -77,14 +77,41 @@ export default function Sidebar() {
   }, []);
 
   // 登出
-  const handleLogout = () => {
+  const handleLogout = async () => {
     const confirmed = window.confirm("确定要退出登录吗？");
     if (!confirmed) return;
 
+    try {
+      const refreshToken = localStorage.getItem("refreshToken");
+      if (refreshToken) {
+        // 调用登出API撤销会话
+        await fetch('/api/auth/logout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ refreshToken }),
+        }).catch(() => {
+          // 即使API调用失败也继续登出
+        });
+      }
+    } catch (error) {
+      console.error('登出API调用失败:', error);
+    }
+
+    // 清除所有本地存储的数据
     localStorage.removeItem("token");
+    localStorage.removeItem("refreshToken");
+
+    // 清空用户状态
     setUser(null);
     setShowUserMenu(false);
+
+    // 跳转到首页并刷新页面以清除所有状态
     router.push("/events");
+
+    // 延迟刷新，确保路由跳转完成
+    setTimeout(() => {
+      window.location.reload();
+    }, 100);
   };
 
   return (

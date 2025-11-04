@@ -4,13 +4,15 @@ import { WalletConnectButton, MyNFTList } from "@/components/NFTComponents";
 
 export default function NFTsClient() {
   return (
-    <main className="min-h-screen p-4 md:p-8 bg-gray-50">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-[#C72471] p-8">
+      <div className="max-w-6xl mx-auto">
         {/* 头部 */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-[#EAF353]">我的次元收藏</h1>
-            <p className="text-gray-600 mt-1">
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 via-[#FFE3F0] to-blue-400 bg-clip-text text-transparent">
+              我的次元收藏
+            </h1>
+            <p className="text-white/60 mt-1">
               区块链数字资产，永久保存，可在OpenSea等平台交易
             </p>
           </div>
@@ -54,6 +56,6 @@ export default function NFTsClient() {
           <MyNFTList />
         </div>
       </div>
-    </main>
+    </div>
   );
 }

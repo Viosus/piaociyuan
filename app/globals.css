@@ -6,6 +6,7 @@
   --card-bg: #EAF353;
   --border: rgba(234, 243, 83, 0.5);
   --primary: #EAF353;
+  --right-sidebar-width: 64px;
 }
 
 @theme inline {

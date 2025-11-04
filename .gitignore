@@ -19,3 +19,4 @@ prisma/*.db-wal
 
 # Build cache
 tsconfig.tsbuildinfo
+nul

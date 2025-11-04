@@ -126,12 +126,14 @@ export default function FavoritesClient() {
   };
 
   return (
-    <main className="min-h-screen bg-[#C72471] p-4 md:p-8">
+    <div className="min-h-screen bg-[#C72471] p-8">
       <div className="max-w-6xl mx-auto">
         {/* 页面标题 */}
         <div className="mb-6">
-          <h1 className="text-3xl font-bold mb-2 text-[#EAF353]">⭐ 我关注的活动</h1>
-          <p className="text-[#282828]">
+          <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-purple-400 via-[#FFE3F0] to-blue-400 bg-clip-text text-transparent">
+            ⭐ 我关注的活动
+          </h1>
+          <p className="text-white/60">
             随时关注你喜欢的活动，第一时间获得开售通知
           </p>
         </div>
@@ -139,19 +141,19 @@ export default function FavoritesClient() {
         {/* 统计信息 */}
         {stats && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-white rounded-lg p-4 border border-gray-200">
+            <div className="bg-white rounded-lg p-4 border border-[#FFEBF5]">
               <div className="text-2xl font-bold text-[#EAF353]">{stats.total}</div>
               <div className="text-sm text-[#282828]">全部关注</div>
             </div>
-            <div className="bg-white rounded-lg p-4 border border-gray-200">
+            <div className="bg-white rounded-lg p-4 border border-[#FFEBF5]">
               <div className="text-2xl font-bold text-blue-500">{stats.upcoming}</div>
               <div className="text-sm text-[#282828]">即将开售</div>
             </div>
-            <div className="bg-white rounded-lg p-4 border border-gray-200">
+            <div className="bg-white rounded-lg p-4 border border-[#FFEBF5]">
               <div className="text-2xl font-bold text-green-500">{stats.onsale}</div>
               <div className="text-sm text-[#282828]">热卖中</div>
             </div>
-            <div className="bg-white rounded-lg p-4 border border-gray-200">
+            <div className="bg-white rounded-lg p-4 border border-[#FFEBF5]">
               <div className="text-2xl font-bold text-[#282828]">{stats.ended}</div>
               <div className="text-sm text-[#282828]">已结束</div>
             </div>
@@ -206,13 +208,13 @@ export default function FavoritesClient() {
         {loading && (
           <div className="text-center py-12">
             <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#EAF353]"></div>
-            <p className="mt-4 text-[#282828]">加载中...</p>
+            <p className="mt-4 text-white/60">加载中...</p>
           </div>
         )}
 
         {/* 活动列表 */}
         {!loading && followedEvents.length === 0 && (
-          <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
+          <div className="text-center py-12 bg-white rounded-lg border border-[#FFEBF5]">
             <div className="text-6xl mb-4">🔍</div>
             <p className="text-[#282828] mb-4">
               {filter === 'all'
@@ -235,7 +237,7 @@ export default function FavoritesClient() {
               return (
                 <div
                   key={item.followId}
-                  className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-lg transition"
+                  className="bg-white rounded-lg border border-[#FFEBF5] overflow-hidden hover:border-[#FFE3F0] hover:shadow-lg transition"
                 >
                   {/* 活动封面 */}
                   <Link href={`/events/${item.event.id}`}>
@@ -312,6 +314,6 @@ export default function FavoritesClient() {
           </div>
         )}
       </div>
-    </main>
+    </div>
   );
 }

@@ -233,8 +233,8 @@ export default function OrderClient({ id }: { id: string }) {
   const allTicketsRefunded = order.tickets && order.tickets.length > 0 && order.tickets.every(t => t.refundedAt !== null && t.refundedAt !== undefined);
 
   return (
-    <main className="min-h-screen p-8 bg-gray-50">
-      <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow p-6">
+    <main className="min-h-screen p-8 bg-[#C72471]">
+      <div className="max-w-2xl mx-auto bg-white/80 backdrop-blur-sm rounded-2xl shadow p-6">
         <div className="flex items-start justify-between gap-3">
           <div>
             <h1 className="text-2xl font-bold text-[#EAF353]">订单详情</h1>

@@ -8,11 +8,11 @@ import EncoreClient from './ui/EncoreClient';
 
 export default function EncorePage() {
   return (
-    <main className="min-h-screen py-6 px-4">
+    <div className="min-h-screen py-6 px-4">
       <div className="max-w-7xl mx-auto">
         {/* 头部 */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-red-400 via-orange-400 to-pink-400 bg-clip-text text-transparent mb-2">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 via-[#FFE3F0] to-blue-400 bg-clip-text text-transparent mb-2">
             🔥 安可区
           </h1>
           <p className="text-white/60">分享你的演出时刻，发现更多精彩瞬间</p>
@@ -23,7 +23,7 @@ export default function EncorePage() {
           fallback={
             <div className="flex items-center justify-center min-h-[400px]">
               <div className="text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500 mx-auto mb-4"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#EAF353] mx-auto mb-4"></div>
                 <p className="text-white/60">加载中...</p>
               </div>
             </div>
@@ -32,6 +32,6 @@ export default function EncorePage() {
           <EncoreClient />
         </Suspense>
       </div>
-    </main>
+    </div>
   );
 }

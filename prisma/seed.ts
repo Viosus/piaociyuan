@@ -2,6 +2,7 @@
 import { PrismaClient } from '@prisma/client';
 import * as fs from 'fs';
 import * as path from 'path';
+import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
@@ -226,14 +227,19 @@ async function main() {
 
   // 7. 创建测试用户（用于帖子）
   console.log('\n👥 创建测试用户...');
+
+  // 所有测试用户的默认密码: password123
+  const defaultPassword = await bcrypt.hash('password123', 10);
+
   const testUsers = await prisma.$transaction([
     prisma.user.upsert({
       where: { phone: '13800138001' },
       update: {},
       create: {
         phone: '13800138001',
+        password: defaultPassword,
         nickname: '音乐狂热者',
-        avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200',
+        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=user1',
         authProvider: 'local',
       },
     }),
@@ -242,8 +248,9 @@ async function main() {
       update: {},
       create: {
         phone: '13800138002',
-        nickname: '演唱会收藏家',
-        avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200',
+        password: defaultPassword,
+        nickname: '演唱会达人',
+        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=user2',
         authProvider: 'local',
       },
     }),
@@ -252,8 +259,9 @@ async function main() {
       update: {},
       create: {
         phone: '13800138003',
-        nickname: '摇滚青年',
-        avatar: 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=200',
+        password: defaultPassword,
+        nickname: '追星少女',
+        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=user3',
         authProvider: 'local',
       },
     }),
@@ -262,8 +270,9 @@ async function main() {
       update: {},
       create: {
         phone: '13800138004',
-        nickname: '流行音乐迷',
-        avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200',
+        password: defaultPassword,
+        nickname: '现场控',
+        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=user4',
         authProvider: 'local',
       },
     }),
@@ -272,13 +281,14 @@ async function main() {
       update: {},
       create: {
         phone: '13800138005',
-        nickname: '现场王者',
-        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200',
+        password: defaultPassword,
+        nickname: '潮玩收藏家',
+        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=user5',
         authProvider: 'local',
       },
     }),
   ]);
-  console.log(`✅ 创建了 ${testUsers.length} 个测试用户`);
+  console.log(`✅ 创建了 ${testUsers.length} 个测试用户（密码: password123）`);
 
   // 8. 创建帖子
   console.log('\n📝 创建测试帖子...');
