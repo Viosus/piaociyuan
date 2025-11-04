@@ -13,6 +13,7 @@
  */
 
 import prisma from './prisma';
+import { TicketStatus } from '@piaoyuzhou/shared';
 
 // ✅ 清理过期 hold（释放锁定的票）
 export async function purgeExpiredHolds(nowMs: number): Promise<number> {
@@ -38,10 +39,10 @@ export async function purgeExpiredHolds(nowMs: number): Promise<number> {
   await prisma.ticket.updateMany({
     where: {
       holdId: { in: holdIds },
-      status: 'locked',
+      status: TicketStatus.HELD,
     },
     data: {
-      status: 'available',
+      status: TicketStatus.AVAILABLE,
       holdId: null,
     },
   });
@@ -71,7 +72,7 @@ export async function getActiveHoldQty(
     where: {
       eventId: Number(eventId),
       tierId: Number(tierId),
-      status: 'locked',
+      status: TicketStatus.HELD,
     },
   });
 
@@ -85,7 +86,7 @@ export async function getPaidQty(eventId: string, tierId: string): Promise<numbe
       eventId: Number(eventId),
       tierId: Number(tierId),
       status: {
-        in: ['sold', 'used'],
+        in: [TicketStatus.SOLD, TicketStatus.USED],
       },
     },
   });
@@ -107,7 +108,7 @@ export async function getAvailableQty(
     where: {
       eventId: Number(eventId),
       tierId: Number(tierId),
-      status: 'available',
+      status: TicketStatus.AVAILABLE,
     },
   });
 

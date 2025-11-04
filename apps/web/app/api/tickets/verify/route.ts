@@ -10,6 +10,7 @@
 
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { TicketStatus, ErrorCode } from '@piaoyuzhou/shared';
 
 export async function POST(req: Request) {
   try {
@@ -63,11 +64,11 @@ export async function POST(req: Request) {
     }
 
     // 验证票的状态
-    if (ticket.status === 'used') {
+    if (ticket.status === TicketStatus.USED) {
       return NextResponse.json(
         {
           ok: false,
-          code: 'TICKET_ALREADY_USED',
+          code: ErrorCode.TICKET_ALREADY_USED,
           message: '票已使用',
           data: {
             usedAt: ticket.usedAt,
@@ -77,11 +78,11 @@ export async function POST(req: Request) {
       );
     }
 
-    if (ticket.status !== 'sold') {
+    if (ticket.status !== TicketStatus.SOLD) {
       return NextResponse.json(
         {
           ok: false,
-          code: 'TICKET_INVALID_STATUS',
+          code: ErrorCode.INVALID_INPUT,
           message: `票状态异常（${ticket.status}），无法核销`,
         },
         { status: 400 }
@@ -102,7 +103,7 @@ export async function POST(req: Request) {
     await prisma.ticket.update({
       where: { id: ticket.id },
       data: {
-        status: 'used',
+        status: TicketStatus.USED,
         usedAt: new Date(),
       },
     });

@@ -11,6 +11,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
+import { UserRole, ErrorCode } from '@piaoyuzhou/shared';
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -44,11 +45,11 @@ export async function PUT(req: NextRequest, { params }: Props) {
     }
 
     // 检查是否为管理员
-    if (payload.role !== 'admin') {
+    if (payload.role !== UserRole.ADMIN) {
       return NextResponse.json(
         {
           ok: false,
-          code: 'PERMISSION_DENIED',
+          code: ErrorCode.FORBIDDEN,
           message: '仅管理员可以修改用户角色',
         },
         { status: 403 }
@@ -61,12 +62,13 @@ export async function PUT(req: NextRequest, { params }: Props) {
     const { role } = body;
 
     // 验证角色值
-    if (!['user', 'staff', 'admin'].includes(role)) {
+    const validRoles = [UserRole.USER, UserRole.ADMIN];
+    if (!validRoles.includes(role)) {
       return NextResponse.json(
         {
           ok: false,
-          code: 'INVALID_ROLE',
-          message: '无效的角色类型，仅支持: user, staff, admin',
+          code: ErrorCode.INVALID_INPUT,
+          message: `无效的角色类型，仅支持: ${validRoles.join(', ')}`,
         },
         { status: 400 }
       );
