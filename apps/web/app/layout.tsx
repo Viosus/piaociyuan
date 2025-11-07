@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Sidebar from "@/components/Sidebar";
 import RightSidebar from "@/components/RightSidebar";
+import SearchBar from "@/components/SearchBar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,7 +33,11 @@ export default function RootLayout({
       >
         <Sidebar />
         <RightSidebar />
-        <div className="ml-20 h-screen overflow-y-auto transition-all duration-300" style={{ marginRight: 'var(--right-sidebar-width, 64px)' }}>
+        {/* 搜索栏 - 固定在右上角 */}
+        <div className="fixed top-6 z-40 transition-all duration-300" style={{ right: 'calc(var(--right-sidebar-width, 64px) + 1.5rem)' }}>
+          <SearchBar />
+        </div>
+        <div className="ml-20 h-screen overflow-y-auto transition-all duration-300 pt-20" style={{ marginRight: 'var(--right-sidebar-width, 64px)' }}>
           {children}
         </div>
       </body>

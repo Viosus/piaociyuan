@@ -8,7 +8,7 @@ import EncoreClient from './ui/EncoreClient';
 
 export default function EncorePage() {
   return (
-    <div className="min-h-screen py-6 px-4">
+    <div className="min-h-screen pb-6 px-4">
       <div className="max-w-7xl mx-auto">
         {/* 头部 */}
         <div className="mb-8">

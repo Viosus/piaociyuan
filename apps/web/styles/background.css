@@ -1,0 +1,77 @@
+/* 全局背景样式配置文件 */
+/*
+ * 使用方法：
+ * 1. 所有页面使用 .app-background 类
+ * 2. 修改背景只需要在这个文件中更改
+ * 3. 支持纯色、渐变、图片背景
+ */
+
+/* 背景配置变量 */
+:root {
+  /* 当前背景：深粉色 #C72471 */
+  --app-bg-color: #C72471;
+
+  /* 备用：背景图片（当需要使用图片时取消注释） */
+  /* --app-bg-image: url('/images/background.jpg'); */
+
+  /* 背景图片配置 */
+  --app-bg-size: cover;
+  --app-bg-position: center;
+  --app-bg-attachment: fixed;
+  --app-bg-repeat: no-repeat;
+}
+
+/* 全局应用背景 - 应用到 body */
+body {
+  background-color: var(--app-bg-color);
+
+  /* 当使用背景图片时，这行会生效 */
+  /* background-image: var(--app-bg-image); */
+  background-size: var(--app-bg-size);
+  background-position: var(--app-bg-position);
+  background-attachment: var(--app-bg-attachment);
+  background-repeat: var(--app-bg-repeat);
+}
+
+/* 主应用容器背景类 */
+.app-background {
+  /* 继承 body 的背景，或者可以自定义 */
+  background: transparent;
+  min-height: 100vh;
+}
+
+/* 页面主容器背景（用于管理后台等独立页面） */
+.page-background {
+  background-color: var(--app-bg-color);
+  /* background-image: var(--app-bg-image); */
+  background-size: var(--app-bg-size);
+  background-position: var(--app-bg-position);
+  background-attachment: var(--app-bg-attachment);
+  background-repeat: var(--app-bg-repeat);
+  min-height: 100vh;
+}
+
+/* 内容区域背景（半透明白色卡片） */
+.content-card {
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+}
+
+/*
+ * 使用示例：
+ *
+ * 1. 普通页面（有侧边栏）：
+ *    <main className="app-background">
+ *      <div className="content-card">内容</div>
+ *    </main>
+ *
+ * 2. 独立页面（管理后台、登录页）：
+ *    <div className="page-background">
+ *      <div className="content-card">内容</div>
+ *    </div>
+ *
+ * 3. 切换到背景图片：
+ *    - 在 :root 中取消注释 --app-bg-image
+ *    - 在 body 和 .page-background 中取消注释 background-image 行
+ *    - 上传图片到 public/images/background.jpg
+ */

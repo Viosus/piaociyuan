@@ -12,6 +12,7 @@ type User = {
   email?: string;
   phone?: string;
   avatar?: string;
+  role?: string;
 };
 
 export default function Sidebar() {
@@ -41,10 +42,10 @@ export default function Sidebar() {
       gradient: "from-red-500 to-[#EAF353]"
     },
     {
-      name: "我关注的",
-      href: "/account/favorites",
+      name: "我的收藏",
+      href: "/favorites",
       icon: "⭐",
-      gradient: "from-[#EAF353] to-[#FFC9E0]"
+      gradient: "from-yellow-500 to-orange-500"
     },
     {
       name: "我的次元",
@@ -231,6 +232,18 @@ export default function Sidebar() {
                 >
                   ⚙️ 偏好设置
                 </Link>
+                {user.role === 'admin' && (
+                  <>
+                    <hr className="border-[#FFEBF5]" />
+                    <Link
+                      href="/admin"
+                      onClick={() => setShowUserMenu(false)}
+                      className="block px-4 py-3 text-sm text-purple-400 hover:bg-white/5 hover:text-purple-300 transition font-medium"
+                    >
+                      🛡️ 管理后台
+                    </Link>
+                  </>
+                )}
                 <hr className="border-[#FFEBF5]" />
                 <button
                   onClick={handleLogout}

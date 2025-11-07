@@ -63,3 +63,16 @@ tmp/
 temp/
 *.tmp
 nul
+
+# Expo
+.expo/
+__generated__/
+web-build/
+
+# React Native
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*

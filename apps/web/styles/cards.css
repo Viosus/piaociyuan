@@ -1,0 +1,222 @@
+/* 卡片样式统一配置文件 */
+/*
+ * 使用方法：
+ * 1. 所有卡片使用预定义的类名
+ * 2. 修改卡片样式只需要在这个文件中更改
+ * 3. 支持多种卡片风格
+ */
+
+/* ========================================
+   卡片配置变量
+   ======================================== */
+:root {
+  /* 卡片背景色 - 统一配置 */
+  --card-bg: rgba(255, 255, 255, 0.8);               /* 所有卡片统一使用此颜色 */
+
+  /* 卡片边框色 */
+  --card-border: rgba(255, 235, 245, 1);             /* #FFEBF5 */
+  --card-border-hover: rgba(255, 227, 240, 1);       /* #FFE3F0 */
+  --card-border-subtle: rgba(255, 235, 245, 0.5);
+
+  /* 卡片圆角 */
+  --card-radius-sm: 0.5rem;   /* 8px */
+  --card-radius-md: 0.75rem;  /* 12px */
+  --card-radius-lg: 1rem;     /* 16px */
+  --card-radius-xl: 1.5rem;   /* 24px */
+
+  /* 卡片阴影 */
+  --card-shadow-sm: 0 1px 3px 0 rgba(234, 243, 83, 0.3);
+  --card-shadow-md: 0 4px 6px -1px rgba(234, 243, 83, 0.3);
+  --card-shadow-lg: 0 10px 15px -3px rgba(234, 243, 83, 0.4);
+  --card-shadow-hover: 0 10px 15px -3px rgba(234, 243, 83, 0.4), 0 0 20px rgba(234, 243, 83, 0.5);
+
+  /* 卡片间距 */
+  --card-padding-sm: 1rem;    /* 16px */
+  --card-padding-md: 1.5rem;  /* 24px */
+  --card-padding-lg: 2rem;    /* 32px */
+}
+
+/* ========================================
+   基础卡片样式
+   ======================================== */
+
+/* 统一卡片样式 */
+.card,
+.card-glass,
+.card-light,
+.card-subtle {
+  background-color: var(--card-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--card-border);
+  border-radius: var(--card-radius-lg);
+  box-shadow: var(--card-shadow-md);
+  padding: var(--card-padding-md);
+  transition: all 0.2s ease;
+}
+
+.card:hover,
+.card-glass:hover,
+.card-light:hover {
+  box-shadow: var(--card-shadow-hover);
+  border-color: var(--card-border-hover);
+}
+
+/* ========================================
+   卡片尺寸变体
+   ======================================== */
+
+/* 小号卡片 */
+.card-sm,
+.card-glass-sm {
+  padding: var(--card-padding-sm);
+  border-radius: var(--card-radius-md);
+}
+
+/* 大号卡片 */
+.card-lg,
+.card-glass-lg {
+  padding: var(--card-padding-lg);
+  border-radius: var(--card-radius-xl);
+}
+
+/* ========================================
+   特殊卡片样式
+   ======================================== */
+
+/* 可点击卡片 */
+.card-clickable {
+  cursor: pointer;
+}
+
+.card-clickable:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--card-shadow-hover);
+  border-color: var(--card-border-hover);
+}
+
+/* 管理后台卡片 */
+.card-admin {
+  background-color: var(--card-bg);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--card-border);
+  border-radius: var(--card-radius-lg);
+  box-shadow: var(--card-shadow-md);
+  padding: var(--card-padding-md);
+}
+
+/* 表单卡片 */
+.card-form {
+  background-color: var(--card-bg);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--card-border);
+  border-radius: var(--card-radius-xl);
+  box-shadow: var(--card-shadow-lg);
+  padding: var(--card-padding-lg);
+}
+
+/* 列表项卡片 */
+.card-list-item {
+  background-color: var(--card-bg);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--card-border);
+  border-radius: var(--card-radius-lg);
+  padding: var(--card-padding-md);
+  transition: all 0.2s ease;
+}
+
+.card-list-item:hover {
+  box-shadow: var(--card-shadow-lg);
+  border-color: var(--card-border-hover);
+}
+
+/* ========================================
+   卡片组件部分
+   ======================================== */
+
+/* 卡片头部 */
+.card-header {
+  padding-bottom: var(--card-padding-sm);
+  border-bottom: 1px solid var(--card-border-subtle);
+  margin-bottom: var(--card-padding-md);
+}
+
+/* 卡片标题 */
+.card-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #282828;
+  margin: 0;
+}
+
+/* 卡片副标题 */
+.card-subtitle {
+  font-size: 0.875rem;
+  color: rgba(40, 40, 40, 0.6);
+  margin-top: 0.25rem;
+}
+
+/* 卡片内容 */
+.card-body {
+  color: #282828;
+}
+
+/* 卡片底部 */
+.card-footer {
+  padding-top: var(--card-padding-sm);
+  border-top: 1px solid var(--card-border-subtle);
+  margin-top: var(--card-padding-md);
+}
+
+/* ========================================
+   覆盖 Tailwind 默认样式
+   ======================================== */
+
+/* 确保 Tailwind 类使用我们的统一配置 */
+.bg-white,
+.bg-white\/80,
+.bg-gray-50,
+.bg-gray-100 {
+  background-color: var(--card-bg) !important;
+}
+
+/* ========================================
+   使用示例
+   ======================================== */
+
+/*
+ * 示例 1: 标准卡片
+ * <div className="card">
+ *   <h3 className="card-title">标题</h3>
+ *   <p className="card-body">内容</p>
+ * </div>
+ *
+ * 示例 2: 毛玻璃卡片
+ * <div className="card-glass">
+ *   <h3 className="card-title">标题</h3>
+ *   <p className="card-body">内容</p>
+ * </div>
+ *
+ * 示例 3: 可点击的卡片
+ * <div className="card card-clickable" onClick={...}>
+ *   内容
+ * </div>
+ *
+ * 示例 4: 带头部和底部的卡片
+ * <div className="card">
+ *   <div className="card-header">
+ *     <h3 className="card-title">标题</h3>
+ *     <p className="card-subtitle">副标题</p>
+ *   </div>
+ *   <div className="card-body">
+ *     主要内容
+ *   </div>
+ *   <div className="card-footer">
+ *     底部内容或操作按钮
+ *   </div>
+ * </div>
+ *
+ * 示例 5: 小号/大号卡片
+ * <div className="card card-sm">小卡片</div>
+ * <div className="card card-lg">大卡片</div>
+ */

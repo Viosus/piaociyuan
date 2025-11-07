@@ -138,4 +138,56 @@ app.prepare().then(() => {
       console.log(`> Ready on http://${hostname}:${port}`);
       console.log(`> Socket.io server is running`);
     });
+
+  // 优雅关闭处理
+  const gracefulShutdown = async (signal) => {
+    console.log(`\n${signal} received, starting graceful shutdown...`);
+
+    // 标记关闭状态
+    let httpClosed = false;
+    let ioClosed = false;
+
+    // 设置超时，如果10秒内没有关闭完成，强制退出
+    const forceExitTimer = setTimeout(() => {
+      console.error('Forcing shutdown after timeout');
+      process.exit(1);
+    }, 10000);
+
+    const checkAndExit = () => {
+      if (httpClosed && ioClosed) {
+        console.log('Graceful shutdown completed');
+        clearTimeout(forceExitTimer);
+        process.exit(0);
+      }
+    };
+
+    // 关闭所有 Socket.io 连接
+    io.close(() => {
+      console.log('Socket.io server closed');
+      ioClosed = true;
+      checkAndExit();
+    });
+
+    // 关闭 HTTP 服务器，不再接受新连接
+    httpServer.close(() => {
+      console.log('HTTP server closed');
+      httpClosed = true;
+      checkAndExit();
+    });
+  };
+
+  // 监听终止信号
+  process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+  process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+
+  // 监听未捕获的异常和 Promise 拒绝
+  process.on('uncaughtException', (err) => {
+    console.error('Uncaught Exception:', err);
+    gracefulShutdown('uncaughtException');
+  });
+
+  process.on('unhandledRejection', (reason, promise) => {
+    console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+    // 对于未处理的 Promise 拒绝，不强制关闭，只记录错误
+  });
 });

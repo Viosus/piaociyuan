@@ -146,11 +146,18 @@ export async function POST(req: NextRequest) {
       ok: true,
       message: '注册成功',
       data: {
-        userId,
         accessToken,
         refreshToken,
         // 向后兼容：保留 token 字段
         token: accessToken,
+        // 用户信息
+        user: {
+          id: userId,
+          phone: phone || undefined,
+          email: email || undefined,
+          nickname: userNickname,
+          role: 'user',
+        },
       },
     });
   } catch (error: unknown) {

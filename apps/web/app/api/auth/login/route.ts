@@ -106,14 +106,18 @@ export async function POST(req: NextRequest) {
       ok: true,
       message: '登录成功',
       data: {
-        userId: user.id,
-        nickname: user.nickname,
-        email: user.email,
-        phone: user.phone,
         accessToken,
         refreshToken,
         // 向后兼容：保留 token 字段
         token: accessToken,
+        // 用户信息
+        user: {
+          id: user.id,
+          phone: user.phone,
+          email: user.email,
+          nickname: user.nickname,
+          role: user.role,
+        },
       },
     });
   } catch (error: unknown) {

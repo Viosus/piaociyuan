@@ -42,6 +42,7 @@ export async function GET(req: NextRequest) {
         nickname: user.nickname,
         avatar: user.avatar,
         authProvider: user.authProvider,
+        role: user.role,
       },
     });
   } catch (error: unknown) {

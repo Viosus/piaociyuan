@@ -147,3 +147,18 @@ export async function getCurrentUser() {
     return null;
   }
 }
+
+// 检查用户是否为管理员
+export async function requireAdmin() {
+  const user = await getCurrentUser();
+
+  if (!user) {
+    return { error: 'UNAUTHORIZED', message: '请先登录', status: 401 };
+  }
+
+  if (user.role !== 'admin') {
+    return { error: 'FORBIDDEN', message: '需要管理员权限', status: 403 };
+  }
+
+  return { user };
+}

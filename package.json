@@ -14,7 +14,10 @@
     "build": "turbo run build",
     "build:web": "cd apps/web && npm run build",
     "lint": "turbo run lint",
-    "install-all": "npm install"
+    "install-all": "npm install",
+    "mobile": "cd apps/mobile && npm start",
+    "mobile:android": "cd apps/mobile && npm run android",
+    "mobile:ios": "cd apps/mobile && npm run ios"
   },
   "devDependencies": {
     "turbo": "^2.0.0"
@@ -22,5 +25,9 @@
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=9.0.0"
+  },
+  "overrides": {
+    "react": "19.1.0",
+    "react-native": "0.81.5"
   }
 }

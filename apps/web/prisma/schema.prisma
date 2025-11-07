@@ -12,12 +12,19 @@ datasource db {
 model Event {
   id        Int      @id @default(autoincrement())
   name      String
+  category  String   @default("concert")  // concert(演唱会), festival(音乐节), exhibition(展览), musicale(音乐会), show(演出), sports(体育赛事), other(其他)
   city      String
   venue     String
-  date      String
-  time      String
+  date      String   // 演出日期
+  time      String   // 演出时间
+
+  // 售票状态和时间控制
+  saleStatus    String   @default("on_sale")  // not_started(未开售), on_sale(售票中), paused(暂停售票), sold_out(已售罄), ended(已结束)
+  saleStartTime DateTime @default(now())      // 开售时间
+  saleEndTime   DateTime @default(now())      // 停售时间（通常为演出前1天）
+
   cover     String
-  artist    String
+  artist    String   // 艺人/主办方/策展人
   desc      String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -27,8 +34,11 @@ model Event {
   posts     Post[]
   followers EventFollow[]
   notifications Notification[]
+  homepageSections HomepageSectionEvent[]
 
   @@map("events")
+  @@index([category])
+  @@index([date])
 }
 
 // ✅ 票档表
@@ -178,6 +188,8 @@ model User {
   posts         Post[]
   likes         PostLike[]
   comments      Comment[]
+  reports       PostReport[]
+  favoritePosts PostFavorite[]
   sentMessages  Message[]      @relation("SentMessages")
   receivedMessages Message[]   @relation("ReceivedMessages")
   conversations ConversationParticipant[]
@@ -192,6 +204,9 @@ model User {
 
   // NFT
   nftMintQueue   NFTMintQueue[]
+
+  // 认证申请
+  verificationRequests VerificationRequest[]
 
   @@map("users")
   @@index([email])
@@ -384,6 +399,8 @@ model Post {
   likes       PostLike[]
   comments    Comment[]
   views       PostView[]
+  reports     PostReport[]
+  favorites   PostFavorite[]
 
   @@map("posts")
   @@index([userId])
@@ -460,6 +477,42 @@ model Comment {
   @@index([postId])
   @@index([userId])
   @@index([parentId])
+  @@index([createdAt])
+}
+
+model PostReport {
+  id        String   @id @default(uuid())
+  postId    String
+  userId    String
+  reason    String   @db.Text
+  status    String   @default("pending")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("post_reports")
+  @@unique([postId, userId])
+  @@index([postId])
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model PostFavorite {
+  id        String   @id @default(uuid())
+  postId    String
+  userId    String
+  createdAt DateTime @default(now())
+
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("post_favorites")
+  @@unique([postId, userId])
+  @@index([postId])
+  @@index([userId])
   @@index([createdAt])
 }
 
@@ -627,4 +680,91 @@ model UserFollow {
   @@index([followerId])
   @@index([followingId])
   @@index([createdAt])
+}
+
+// ✅ 身份认证申请表
+model VerificationRequest {
+  id              String   @id @default(uuid())
+  userId          String
+  verifiedType    String   // celebrity, artist, organizer, official
+  realName        String   // 真实姓名
+  idCard          String?  // 身份证号（加密存储）
+  organization    String?  // 所属机构/公司
+  proofImages     String   @db.Text // 证明材料图片URLs（JSON数组）
+  reason          String   @db.Text // 申请理由
+  status          String   @default("pending") // pending, approved, rejected
+  reviewedBy      String?  // 审核人ID
+  reviewedAt      DateTime?
+  rejectReason    String?  @db.Text // 拒绝理由
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("verification_requests")
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+// ==================== 首页栏目管理 ====================
+
+// 首页栏目表
+model HomepageSection {
+  id          String   @id @default(uuid())
+  title       String   // 栏目标题，如"猜你喜欢"、"演唱会专区"
+  subtitle    String?  // 副标题，如"根据你的兴趣为你推荐"
+  icon        String?  // 图标emoji，如"✨"、"🎤"
+  bgGradient  String   @default("from-purple-50 to-pink-50") // Tailwind渐变类
+  moreLink    String?  // "查看更多"链接
+  order       Int      // 显示顺序
+  isActive    Boolean  @default(true) // 是否启用
+  type        String   @default("manual") // manual(手动), auto_category(自动按分类), auto_status(自动按状态)
+  autoConfig  String?  @db.Text // 自动配置（JSON），如 {"category": "concert", "limit": 6}
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  events      HomepageSectionEvent[]
+
+  @@map("homepage_sections")
+  @@index([order])
+  @@index([isActive])
+}
+
+// 首页栏目活动关联表
+model HomepageSectionEvent {
+  id        String   @id @default(uuid())
+  sectionId String   // 所属栏目
+  eventId   Int      // 活动ID
+  order     Int      // 在栏目中的显示顺序
+  createdAt DateTime @default(now())
+
+  section   HomepageSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  event     Event           @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@map("homepage_section_events")
+  @@unique([sectionId, eventId])
+  @@index([sectionId])
+  @@index([eventId])
+  @@index([order])
+}
+
+// ==================== 首页轮播广告栏 ====================
+
+// 首页 Hero Banner 轮播图
+model HeroBanner {
+  id        String   @id @default(uuid())
+  title     String   // 标题，如"音乐节狂欢季"
+  subtitle  String   // 副标题，如"感受音乐的力量，释放青春的激情"
+  image     String   // 图片URL
+  link      String   // 点击跳转链接
+  color     String   @default("from-purple-600/80 to-pink-600/80") // Tailwind渐变遮罩类
+  order     Int      // 显示顺序
+  isActive  Boolean  @default(true) // 是否启用
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("hero_banners")
+  @@index([order])
+  @@index([isActive])
 }

@@ -3,6 +3,8 @@
 
 import { useEffect, useState, useRef, useCallback } from "react";
 import Link from "next/link";
+import CreatePostDialog from "./CreatePostDialog";
+import FavoriteButton from "./FavoriteButton";
 
 type Post = {
   id: string;
@@ -37,6 +39,7 @@ export default function EncoreClient() {
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
@@ -217,19 +220,27 @@ export default function EncoreClient() {
                   </span>
                 </div>
 
-                {/* 统计信息 */}
-                <div className="flex items-center gap-4 text-xs text-[#282828]/60">
-                  <div className="flex items-center gap-1">
-                    <span>❤️</span>
-                    <span>{post.likeCount > 0 ? post.likeCount : ''}</span>
+                {/* 底部操作栏 */}
+                <div className="flex items-center justify-between">
+                  {/* 统计信息 */}
+                  <div className="flex items-center gap-4 text-xs text-[#282828]/60">
+                    <div className="flex items-center gap-1">
+                      <span>❤️</span>
+                      <span>{post.likeCount > 0 ? post.likeCount : ''}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <span>💬</span>
+                      <span>{post.commentCount > 0 ? post.commentCount : ''}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <span>👁️</span>
+                      <span>{post.viewCount > 0 ? post.viewCount : ''}</span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <span>💬</span>
-                    <span>{post.commentCount > 0 ? post.commentCount : ''}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <span>👁️</span>
-                    <span>{post.viewCount > 0 ? post.viewCount : ''}</span>
+
+                  {/* 收藏按钮 */}
+                  <div onClick={(e) => e.preventDefault()}>
+                    <FavoriteButton postId={post.id} />
                   </div>
                 </div>
               </div>
@@ -261,10 +272,21 @@ export default function EncoreClient() {
       <button
         className="fixed bottom-8 w-14 h-14 bg-[#EAF353] text-white rounded-full shadow-lg hover:shadow-xl hover:scale-110 hover:bg-[#FFC9E0] transition-all flex items-center justify-center text-2xl z-40"
         style={{ right: 'calc(var(--right-sidebar-width, 64px) + 2rem)' }}
-        onClick={() => alert("发布功能即将上线！")}
+        onClick={() => setIsCreateDialogOpen(true)}
+        title="发布新帖子"
       >
         ✏️
       </button>
+
+      {/* 发帖对话框 */}
+      <CreatePostDialog
+        isOpen={isCreateDialogOpen}
+        onClose={() => setIsCreateDialogOpen(false)}
+        onSuccess={() => {
+          setPage(1);
+          loadPosts(1); // 刷新列表
+        }}
+      />
     </div>
   );
 }

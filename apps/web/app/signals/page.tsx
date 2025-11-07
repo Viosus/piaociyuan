@@ -1,0 +1,179 @@
+// app/signals/page.tsx
+"use client";
+
+import Link from "next/link";
+import { useState, useEffect } from "react";
+import { getSaleStatusInfo, EVENT_CATEGORY_LABELS, EVENT_CATEGORY_ICONS, EVENT_CATEGORY_COLORS, EventCategory, SALE_STATUS_LABELS, SALE_STATUS_COLORS, SaleStatus } from "@/lib/eventUtils";
+
+type Event = {
+  id: number;
+  name: string;
+  category: string;
+  city: string;
+  venue: string;
+  date: string;
+  time: string;
+  saleStatus: string;
+  saleStartTime: string;
+  saleEndTime: string;
+  cover: string;
+  artist: string;
+};
+
+export default function SignalsPage() {
+  const [allEvents, setAllEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const response = await fetch("/api/events");
+        const data = await response.json();
+        if (data.ok) {
+          setAllEvents(data.events);
+        }
+      } catch (error) {
+        console.error("Failed to load events:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEvents();
+  }, []);
+
+  // 只显示可售票的活动（未开售 + 售票中）
+  const activeEvents = allEvents.filter((event) => {
+    const saleInfo = getSaleStatusInfo(event.saleStatus, event.saleStartTime, event.saleEndTime);
+    return saleInfo.saleStatus !== 'ended';
+  });
+
+  // 根据选中的分类筛选活动
+  const filteredEvents = selectedCategory === "all"
+    ? activeEvents
+    : activeEvents.filter((event) => event.category === selectedCategory);
+
+  // 分类选项
+  const categories: { value: string; label: string; icon: string }[] = [
+    { value: "all", label: "全部", icon: "🎯" },
+    { value: "concert", label: "演唱会", icon: "🎤" },
+    { value: "festival", label: "音乐节", icon: "🎪" },
+    { value: "exhibition", label: "展览", icon: "🎨" },
+    { value: "musicale", label: "音乐会", icon: "🎻" },
+    { value: "show", label: "演出", icon: "🎭" },
+    { value: "sports", label: "体育赛事", icon: "⚽" },
+    { value: "other", label: "其他", icon: "📅" },
+  ];
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-lg text-gray-600">加载中...</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen px-8 pb-8">
+      <div className="max-w-6xl mx-auto mb-6">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 via-[#FFE3F0] to-blue-400 bg-clip-text text-transparent mb-2">
+            宇宙信号 📡
+          </h1>
+          <p className="text-gray-500 text-sm">探索所有进行中的精彩活动</p>
+        </div>
+
+        {/* 分类筛选器 */}
+        <div className="flex flex-wrap gap-2 mb-4">
+          {categories.map((category) => {
+            const count = activeEvents.filter(e => e.category === category.value).length;
+            return (
+              <button
+                key={category.value}
+                onClick={() => setSelectedCategory(category.value)}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                  selectedCategory === category.value
+                    ? "bg-[#EAF353] text-white shadow-md"
+                    : "bg-white border border-[#FFEBF5] text-gray-700 hover:border-[#FFE3F0] hover:shadow"
+                }`}
+              >
+                <span className="mr-1">{category.icon}</span>
+                {category.label}
+                {category.value === "all" ? (
+                  <span className="ml-2 text-xs opacity-75">({activeEvents.length})</span>
+                ) : (
+                  count > 0 && <span className="ml-2 text-xs opacity-75">({count})</span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* 当前筛选信息 */}
+        <div className="text-sm text-gray-600 mb-4">
+          {selectedCategory === "all" ? (
+            <span>显示全部 {filteredEvents.length} 个活动</span>
+          ) : (
+            <span>
+              显示 {EVENT_CATEGORY_LABELS[selectedCategory as EventCategory]} 分类的 {filteredEvents.length} 个活动
+            </span>
+          )}
+        </div>
+      </div>
+
+      {filteredEvents.length === 0 ? (
+        <div className="max-w-6xl mx-auto text-center py-12">
+          <p className="text-gray-500 text-lg">
+            {selectedCategory === "all"
+              ? "暂无进行中的活动"
+              : `暂无${EVENT_CATEGORY_LABELS[selectedCategory as EventCategory]}类活动`}
+          </p>
+        </div>
+      ) : (
+        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+          {filteredEvents.map((event) => {
+            const saleInfo = getSaleStatusInfo(event.saleStatus, event.saleStartTime, event.saleEndTime);
+
+            return (
+              <Link
+                key={event.id}
+                href={`/events/${encodeURIComponent(String(event.id))}`}
+                className="bg-white border border-[#FFEBF5] rounded-xl hover:border-[#FFE3F0] hover:shadow-lg transition p-3 block group relative"
+              >
+                {/* 售票状态标签 */}
+                {saleInfo.saleStatus !== 'on_sale' && (
+                  <div className="absolute top-5 right-5 z-10">
+                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${saleInfo.color}`}>
+                      {saleInfo.label}
+                    </span>
+                  </div>
+                )}
+
+                <img
+                  src={event.cover}
+                  alt={event.name}
+                  className="rounded-lg w-full h-48 object-cover mb-3 group-hover:scale-105 transition-transform"
+                />
+
+                {/* 活动类型标签 */}
+                <div className="mb-2">
+                  <span className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full ${EVENT_CATEGORY_COLORS[event.category as EventCategory]}`}>
+                    <span>{EVENT_CATEGORY_ICONS[event.category as EventCategory]}</span>
+                    <span>{EVENT_CATEGORY_LABELS[event.category as EventCategory]}</span>
+                  </span>
+                </div>
+
+                <h2 className="text-lg font-bold item-name">{event.name}</h2>
+                <p className="text-[#282828]">
+                  {event.city} · {event.date} {event.time}
+                </p>
+                <p className="mt-2 text-sm text-[#282828] opacity-80">{event.venue}</p>
+              </Link>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}

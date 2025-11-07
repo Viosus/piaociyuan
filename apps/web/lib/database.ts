@@ -6,10 +6,14 @@ import prisma from './prisma';
 export type Event = {
   id: number;
   name: string;
+  category: string;
   city: string;
   venue: string;
   date: string;
   time: string;
+  saleStatus: string;
+  saleStartTime: string;
+  saleEndTime: string;
   cover: string;
   artist: string;
   desc: string;
@@ -59,10 +63,14 @@ export async function getAllEvents(): Promise<Event[]> {
   return events.map(e => ({
     id: e.id,
     name: e.name,
+    category: e.category,
     city: e.city,
     venue: e.venue,
     date: e.date,
     time: e.time,
+    saleStatus: e.saleStatus,
+    saleStartTime: e.saleStartTime.toISOString(),
+    saleEndTime: e.saleEndTime.toISOString(),
     cover: e.cover,
     artist: e.artist,
     desc: e.desc,
@@ -81,10 +89,14 @@ export async function getEventById(id: number): Promise<Event | undefined> {
   return {
     id: event.id,
     name: event.name,
+    category: event.category,
     city: event.city,
     venue: event.venue,
     date: event.date,
     time: event.time,
+    saleStatus: event.saleStatus,
+    saleStartTime: event.saleStartTime.toISOString(),
+    saleEndTime: event.saleEndTime.toISOString(),
     cover: event.cover,
     artist: event.artist,
     desc: event.desc,

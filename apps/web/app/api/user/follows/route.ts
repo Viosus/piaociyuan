@@ -12,6 +12,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
+import { getSaleStatusInfo } from '@/lib/eventUtils';
 
 export async function GET(req: NextRequest) {
   try {
@@ -75,21 +76,23 @@ export async function GET(req: NextRequest) {
       take: limit,
     });
 
-    // 4️⃣ 根据状态筛选活动
-    const now = new Date();
+    // 4️⃣ 根据状态筛选活动（使用新的 saleStatus）
     let filteredFollows = follows;
 
     if (status) {
       filteredFollows = follows.filter((follow) => {
         const event = follow.event;
-        const eventDate = new Date(event.date);
+        const saleInfo = getSaleStatusInfo(event.saleStatus, event.saleStartTime, event.saleEndTime);
 
-        if (status === 'onsale') {
-          // 热卖中：活动还没举办
-          return eventDate >= now;
+        if (status === 'upcoming') {
+          // 即将开售：not_started
+          return saleInfo.saleStatus === 'not_started';
+        } else if (status === 'onsale') {
+          // 热卖中：on_sale
+          return saleInfo.saleStatus === 'on_sale';
         } else if (status === 'ended') {
-          // 已结束：活动已举办
-          return eventDate < now;
+          // 已结束：ended, paused, sold_out
+          return ['ended', 'paused', 'sold_out'].includes(saleInfo.saleStatus);
         }
         return true;
       });
@@ -99,10 +102,19 @@ export async function GET(req: NextRequest) {
     const eventsWithStatus = await Promise.all(
       filteredFollows.map(async (follow) => {
         const event = follow.event;
-        const eventDate = new Date(event.date);
 
-        // 计算活动状态
-        const eventStatus: 'onsale' | 'ended' = eventDate < now ? 'ended' : 'onsale';
+        // 使用新的 saleStatus 计算活动状态
+        const saleInfo = getSaleStatusInfo(event.saleStatus, event.saleStartTime, event.saleEndTime);
+
+        // 映射到前端期望的状态
+        let eventStatus: 'upcoming' | 'onsale' | 'ended';
+        if (saleInfo.saleStatus === 'not_started') {
+          eventStatus = 'upcoming';
+        } else if (saleInfo.saleStatus === 'on_sale') {
+          eventStatus = 'onsale';
+        } else {
+          eventStatus = 'ended';
+        }
 
         // 计算总库存和剩余库存
         const totalCapacity = event.tiers.reduce((sum, tier) => sum + tier.capacity, 0);
@@ -138,6 +150,7 @@ export async function GET(req: NextRequest) {
             time: event.time,
             cover: event.cover,
             status: eventStatus,
+            saleStartTime: event.saleStartTime ? event.saleStartTime.toISOString() : null,
             // 库存信息
             totalCapacity,
             availableCapacity,
@@ -186,9 +199,19 @@ export async function GET(req: NextRequest) {
       allEventsWithStatus = await Promise.all(
         allFollows.map(async (follow) => {
           const event = follow.event;
-          const eventDate = new Date(event.date);
 
-          const eventStatus: 'onsale' | 'ended' = eventDate < now ? 'ended' : 'onsale';
+          // 使用新的 saleStatus 计算活动状态
+          const saleInfo = getSaleStatusInfo(event.saleStatus, event.saleStartTime, event.saleEndTime);
+
+          // 映射到前端期望的状态
+          let eventStatus: 'upcoming' | 'onsale' | 'ended';
+          if (saleInfo.saleStatus === 'not_started') {
+            eventStatus = 'upcoming';
+          } else if (saleInfo.saleStatus === 'on_sale') {
+            eventStatus = 'onsale';
+          } else {
+            eventStatus = 'ended';
+          }
 
           const totalCapacity = event.tiers.reduce((sum, tier) => sum + tier.capacity, 0);
           const soldTickets = await prisma.ticket.count({
@@ -217,6 +240,7 @@ export async function GET(req: NextRequest) {
               time: event.time,
               cover: event.cover,
               status: eventStatus,
+              saleStartTime: event.saleStartTime ? event.saleStartTime.toISOString() : null,
               totalCapacity,
               availableCapacity,
               soldTickets,
@@ -236,6 +260,7 @@ export async function GET(req: NextRequest) {
 
     const stats = {
       total: totalCount,
+      upcoming: allEventsWithStatus.filter((e) => e.event.status === 'upcoming').length,
       onsale: allEventsWithStatus.filter((e) => e.event.status === 'onsale').length,
       ended: allEventsWithStatus.filter((e) => e.event.status === 'ended').length,
     };

@@ -1,37 +1,143 @@
 // app/events/page.tsx
 import Link from "next/link";
-import { getAllEvents } from "@/lib/database";
+import prisma from "@/lib/prisma";
+import { getSaleStatusInfo } from "@/lib/eventUtils";
+import HeroBanner from "./ui/HeroBanner";
+import SectionContainer from "./ui/SectionContainer";
+import EventCard from "./ui/EventCard";
+
+// 获取首页栏目数据
+async function getHomepageSections() {
+  const sections = await prisma.homepageSection.findMany({
+    where: { isActive: true },
+    orderBy: { order: 'asc' },
+    include: {
+      events: {
+        orderBy: { order: 'asc' },
+        include: {
+          event: true
+        }
+      }
+    }
+  });
+
+  // 处理自动栏目和手动栏目
+  const processedSections = await Promise.all(
+    sections.map(async (section) => {
+      let events = [];
+
+      if (section.type === 'manual') {
+        // 手动栏目：使用配置的活动
+        events = section.events
+          .map(se => se.event)
+          .filter(event => {
+            const saleInfo = getSaleStatusInfo(event.saleStatus, event.saleStartTime, event.saleEndTime);
+            return saleInfo.saleStatus === 'not_started' || saleInfo.saleStatus === 'on_sale';
+          });
+      } else if (section.type === 'auto_category' && section.autoConfig) {
+        // 自动按分类栏目
+        try {
+          const config = JSON.parse(section.autoConfig);
+          const { category, limit = 6 } = config;
+
+          const autoEvents = await prisma.event.findMany({
+            where: { category },
+            take: limit,
+            orderBy: { createdAt: 'desc' }
+          });
+
+          events = autoEvents.filter(event => {
+            const saleInfo = getSaleStatusInfo(event.saleStatus, event.saleStartTime, event.saleEndTime);
+            return saleInfo.saleStatus === 'not_started' || saleInfo.saleStatus === 'on_sale';
+          });
+        } catch (error) {
+          console.error('[HOMEPAGE_SECTIONS] Auto config parse error:', error);
+        }
+      } else if (section.type === 'auto_status' && section.autoConfig) {
+        // 自动按状态栏目
+        try {
+          const config = JSON.parse(section.autoConfig);
+          const { status, limit = 6 } = config;
+
+          const autoEvents = await prisma.event.findMany({
+            take: limit,
+            orderBy: { createdAt: 'desc' }
+          });
+
+          events = autoEvents.filter(event => {
+            const saleInfo = getSaleStatusInfo(event.saleStatus, event.saleStartTime, event.saleEndTime);
+            return saleInfo.saleStatus === status;
+          });
+        } catch (error) {
+          console.error('[HOMEPAGE_SECTIONS] Auto config parse error:', error);
+        }
+      }
+
+      return {
+        id: section.id,
+        title: section.title,
+        subtitle: section.subtitle,
+        icon: section.icon,
+        bgGradient: section.bgGradient,
+        moreLink: section.moreLink,
+        events: events
+      };
+    })
+  );
+
+  // 过滤掉没有活动的栏目
+  return processedSections.filter(section => section.events.length > 0);
+}
 
 export default async function EventsPage() {
-  const events = await getAllEvents();
+  const sections = await getHomepageSections();
 
   return (
-    <div className="min-h-screen p-8">
-      <div className="max-w-6xl mx-auto mb-6">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 via-[#FFE3F0] to-blue-400 bg-clip-text text-transparent">
-          热门活动
-        </h1>
-      </div>
+    <div className="min-h-screen pb-8">
+      <div className="max-w-7xl mx-auto px-8">
+        {/* Hero Banner */}
+        <div className="mb-8">
+          <HeroBanner />
+        </div>
 
-      <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
-        {events.map((event) => (
-          <Link
-            key={event.id}
-            href={`/events/${encodeURIComponent(String(event.id))}`}
-            className="bg-white border border-[#FFEBF5] rounded-xl hover:border-[#FFE3F0] hover:shadow-lg transition p-3 block group"
-          >
-            <img
-              src={event.cover}
-              alt={event.name}
-              className="rounded-lg w-full h-48 object-cover mb-3 group-hover:scale-105 transition-transform"
-            />
-            <h2 className="text-lg font-bold item-name">{event.name}</h2>
-            <p className="text-[#282828]">
-              {event.city} · {event.date} {event.time}
-            </p>
-            <p className="mt-2 text-sm text-[#282828] opacity-80">{event.venue}</p>
-          </Link>
-        ))}
+        {/* 动态渲染栏目 */}
+        {sections.length > 0 ? (
+          sections.map((section, sectionIndex) => (
+            <SectionContainer
+              key={section.id}
+              title={section.title}
+              subtitle={section.subtitle || undefined}
+              icon={section.icon || undefined}
+              moreLink={section.moreLink || undefined}
+              bgGradient={section.bgGradient}
+            >
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {section.events.map((event: any, index: number) => (
+                  <EventCard
+                    key={event.id}
+                    event={event}
+                    showRank={sectionIndex === 0 && index < 3}
+                    rank={index + 1}
+                  />
+                ))}
+              </div>
+            </SectionContainer>
+          ))
+        ) : (
+          /* 空状态 */
+          <div className="text-center py-20">
+            <div className="text-6xl mb-6">🎫</div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">暂无可售活动</h2>
+            <p className="text-gray-500 mb-8">敬请期待更多精彩活动</p>
+            <Link
+              href="/signals"
+              className="inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full font-medium hover:shadow-lg hover:scale-105 transition-all"
+            >
+              <span>浏览所有活动</span>
+              <span>📡</span>
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   );

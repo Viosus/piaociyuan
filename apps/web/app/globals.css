@@ -1,7 +1,8 @@
 @import "tailwindcss";
+@import "../styles/background.css";
+@import "../styles/cards.css";
 
 :root {
-  --background: #C72471;
   --foreground: #1a1a1f;
   --card-bg: #EAF353;
   --border: rgba(234, 243, 83, 0.5);
@@ -10,14 +11,14 @@
 }
 
 @theme inline {
-  --color-background: var(--background);
+  --color-background: var(--app-bg-color);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
+/* body background is now controlled by background.css */
 body {
-  background: var(--background);
   color: var(--foreground);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
 }

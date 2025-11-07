@@ -44,21 +44,35 @@ async function main() {
 
   // 2. 创建测试活动（使用upsert避免冲突）
   console.log('\n🎪 创建测试活动...');
+
+  // 计算售票时间
+  const event1Date = new Date('2025-06-15');
+  const event1SaleStart = new Date(event1Date.getTime() - 30 * 24 * 60 * 60 * 1000); // 30天前开售
+  const event1SaleEnd = new Date(event1Date.getTime() - 1 * 24 * 60 * 60 * 1000);   // 演出前1天停售
+
   const event1 = await prisma.event.upsert({
     where: { id: 1 },
     update: {},
     create: {
       id: 1,
       name: '周杰伦 2025 嘉年华世界巡回演唱会',
+      category: 'concert',
       city: '北京',
       venue: '国家体育场（鸟巢）',
       date: '2025-06-15',
       time: '19:30',
+      saleStatus: 'on_sale',
+      saleStartTime: event1SaleStart,
+      saleEndTime: event1SaleEnd,
       cover: 'https://images.unsplash.com/photo-1540039155733-5fca0c286bed?w=800',
       artist: '周杰伦',
       desc: '周杰伦2025年全新世界巡回演唱会北京站，经典歌曲全回顾，全新舞台震撼呈现！',
     },
   });
+
+  const event2Date = new Date('2025-07-20');
+  const event2SaleStart = new Date(event2Date.getTime() - 30 * 24 * 60 * 60 * 1000);
+  const event2SaleEnd = new Date(event2Date.getTime() - 1 * 24 * 60 * 60 * 1000);
 
   const event2 = await prisma.event.upsert({
     where: { id: 2 },
@@ -66,10 +80,14 @@ async function main() {
     create: {
       id: 2,
       name: 'Taylor Swift | The Eras Tour',
+      category: 'concert',
       city: '上海',
       venue: '上海体育场',
       date: '2025-07-20',
       time: '19:00',
+      saleStatus: 'on_sale',
+      saleStartTime: event2SaleStart,
+      saleEndTime: event2SaleEnd,
       cover: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800',
       artist: 'Taylor Swift',
       desc: 'Taylor Swift时代巡演中国首站，横跨所有专辑时代的音乐盛宴！',

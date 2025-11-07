@@ -106,14 +106,14 @@ export default function AccountPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#C72471] flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-white/60">加载中...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#C72471] py-12 px-4">
+    <div className="min-h-screen py-12 px-4">
       <div className="max-w-3xl mx-auto">
         <div className="bg-white border border-[#FFEBF5] rounded-2xl shadow-lg p-8">
           <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 via-[#FFE3F0] to-blue-400 bg-clip-text text-transparent mb-2">

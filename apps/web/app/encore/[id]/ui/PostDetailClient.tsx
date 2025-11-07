@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import FavoriteButton from "@/app/encore/ui/FavoriteButton";
 
 type PostDetail = {
   id: string;
@@ -72,6 +73,7 @@ export default function PostDetailClient({ postId }: { postId: string }) {
   const [isFollowLoading, setIsFollowLoading] = useState(false);
   const [commentText, setCommentText] = useState('');
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
 
   useEffect(() => {
     loadPost();
@@ -266,6 +268,46 @@ export default function PostDetailClient({ postId }: { postId: string }) {
     }
   };
 
+  const handleReport = async () => {
+    setShowMoreMenu(false);
+
+    const reason = prompt('请输入举报原因：');
+    if (!reason || !reason.trim()) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('请先登录');
+        router.push(`/auth/login?returnUrl=${encodeURIComponent(window.location.pathname)}`);
+        return;
+      }
+
+      const res = await fetch(`/api/posts/${postId}/report`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          reason: reason.trim(),
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || '举报失败');
+      }
+
+      alert('举报成功，我们会尽快处理');
+    } catch (err: unknown) {
+      console.error('Report error:', err);
+      alert(err instanceof Error ? err.message : '举报失败');
+    }
+  };
+
   const handleSubmitComment = async () => {
     if (!commentText.trim()) {
       alert('请输入评论内容');
@@ -381,25 +423,52 @@ export default function PostDetailClient({ postId }: { postId: string }) {
             <span className="font-medium">返回</span>
           </button>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 relative">
             <button
-              onClick={handleShare}
+              onClick={() => setShowMoreMenu(!showMoreMenu)}
               className="p-2 hover:bg-gray-100 rounded-full transition"
             >
               <svg
                 className="w-5 h-5 text-gray-600"
-                fill="none"
-                stroke="currentColor"
+                fill="currentColor"
                 viewBox="0 0 24 24"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
-                />
+                <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
               </svg>
             </button>
+
+            {/* 下拉菜单 */}
+            {showMoreMenu && (
+              <>
+                {/* 遮罩层 */}
+                <div
+                  className="fixed inset-0 z-40"
+                  onClick={() => setShowMoreMenu(false)}
+                />
+                {/* 菜单 */}
+                <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                  <button
+                    onClick={handleReport}
+                    className="w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100 transition flex items-center gap-2"
+                  >
+                    <svg
+                      className="w-5 h-5 text-red-500"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                      />
+                    </svg>
+                    举报
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -812,13 +881,19 @@ export default function PostDetailClient({ postId }: { postId: string }) {
             )}
           </button>
 
-          <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition">
+          <FavoriteButton postId={postId} />
+
+          <button
+            onClick={handleShare}
+            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition"
+            title="分享"
+          >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={2}
-                d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
+                d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
               />
             </svg>
           </button>
