@@ -23,7 +23,7 @@ export const SectionBlock: React.FC<SectionBlockProps> = ({ section }) => {
   const navigation = useNavigation();
 
   const handleEventPress = (eventId: number) => {
-    navigation.navigate('EventDetail' as never, { id: eventId } as never);
+    navigation.navigate('EventDetail' as never, { eventId: eventId } as never);
   };
 
   const handleMorePress = () => {
@@ -48,7 +48,7 @@ export const SectionBlock: React.FC<SectionBlockProps> = ({ section }) => {
           {event.city} · {event.date}
         </Text>
         <Text style={styles.eventPrice}>
-          ¥{event.tiers?.[0]?.price || 0}起
+          ¥{event.tiers?.length > 0 ? Math.min(...event.tiers.map((t: any) => t.price)) : 0}起
         </Text>
       </View>
     </TouchableOpacity>

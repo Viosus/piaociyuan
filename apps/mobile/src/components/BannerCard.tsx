@@ -14,6 +14,9 @@ import type { HeroBanner } from '../services/banners';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
+// 默认渐变色
+const DEFAULT_GRADIENT = ['rgba(0, 0, 0, 0.3)', 'rgba(0, 0, 0, 0.7)'];
+
 interface BannerCardProps {
   banner: HeroBanner;
   width?: number;
@@ -40,6 +43,9 @@ export const BannerCard: React.FC<BannerCardProps> = ({
 
   const Container = banner.link ? TouchableOpacity : View;
 
+  // 使用默认渐变色
+  const gradientColors = DEFAULT_GRADIENT;
+
   return (
     <Container
       style={[styles.container, { width, height }]}
@@ -47,12 +53,12 @@ export const BannerCard: React.FC<BannerCardProps> = ({
       activeOpacity={0.9}
     >
       <ImageBackground
-        source={{ uri: banner.imageUrl }}
+        source={{ uri: banner.image }}
         style={styles.imageBackground}
         imageStyle={styles.image}
       >
         <LinearGradient
-          colors={[banner.gradientFrom, banner.gradientTo]}
+          colors={gradientColors}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.gradient}

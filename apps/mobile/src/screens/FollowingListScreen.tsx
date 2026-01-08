@@ -10,8 +10,8 @@ import {
   FlatList,
   ActivityIndicator,
   RefreshControl,
-  SafeAreaView,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { colors, spacing, fontSize } from '../constants/config';
 import { getFollowing, followUser, unfollowUser, type FollowUser } from '../services/users';

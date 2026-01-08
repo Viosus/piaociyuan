@@ -1,5 +1,5 @@
 /**
- * 选择用户页面（用于新建对话）
+ * 选择用户页面（用于新建对话或添加群成员）
  */
 
 import React, { useState } from 'react';
@@ -10,19 +10,28 @@ import {
   TextInput,
   FlatList,
   ActivityIndicator,
-  SafeAreaView,
   Alert,
+  TouchableOpacity,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { colors, spacing, fontSize } from '../constants/config';
 import { UserListItem } from '../components/UserListItem';
-import { createConversation } from '../services/messages';
+import { createConversation, addGroupMembers } from '../services/messages';
 import { apiClient } from '../services/api';
 import { FollowUser } from '../services/users';
 import { useDebounce } from '../hooks/useDebounce';
 
 export default function SelectUserScreen() {
   const navigation = useNavigation();
+  const route = useRoute();
+  const { mode, groupId, existingMemberIds = [] } = (route.params as {
+    mode?: 'addToGroup';
+    groupId?: string;
+    existingMemberIds?: number[];
+  }) || {};
+
+  const isAddToGroupMode = mode === 'addToGroup' && groupId;
 
   const [searchQuery, setSearchQuery] = useState('');
   const [users, setUsers] = useState<FollowUser[]>([]);
@@ -44,12 +53,15 @@ export default function SelectUserScreen() {
       setLoading(true);
 
       // 调用搜索用户 API
-      const response = await apiClient.get<FollowUser[]>('/api/user/search', {
-        params: { q: query, limit: 20 },
-      });
+      const response = await apiClient.get<FollowUser[]>(`/api/user/search?q=${encodeURIComponent(query)}&limit=20`);
 
       if (response.ok && response.data) {
-        setUsers(response.data);
+        // 添加群成员模式：过滤掉已存在的成员
+        if (isAddToGroupMode && existingMemberIds.length > 0) {
+          setUsers(response.data.filter(u => !existingMemberIds.includes(u.id)));
+        } else {
+          setUsers(response.data);
+        }
       } else {
         setUsers([]);
       }
@@ -67,19 +79,31 @@ export default function SelectUserScreen() {
     try {
       setSelectedUserId(user.id);
 
-      // 创建对话
-      const response = await createConversation(user.id);
+      if (isAddToGroupMode) {
+        // 添加群成员
+        const response = await addGroupMembers(groupId!, [user.id.toString()]);
 
-      if (response.ok && response.data) {
-        // 跳转到聊天页面
-        navigation.navigate('Chat' as never, {
-          conversationId: response.data.id,
-        } as never);
+        if (response.ok) {
+          Alert.alert('成功', `已添加 ${user.nickname} 到群聊`);
+          navigation.goBack();
+        } else {
+          Alert.alert('错误', response.error || '添加成员失败');
+        }
       } else {
-        Alert.alert('错误', response.error || '创建对话失败');
+        // 创建对话
+        const response = await createConversation(user.id);
+
+        if (response.ok && response.data) {
+          // 跳转到聊天页面
+          navigation.navigate('Chat' as never, {
+            conversationId: response.data.id,
+          } as never);
+        } else {
+          Alert.alert('错误', response.error || '创建对话失败');
+        }
       }
     } catch (error: any) {
-      Alert.alert('错误', error.message || '创建对话失败');
+      Alert.alert('错误', error.message || isAddToGroupMode ? '添加成员失败' : '创建对话失败');
     } finally {
       setSelectedUserId(null);
     }
@@ -98,7 +122,7 @@ export default function SelectUserScreen() {
       return (
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyIcon}>🔍</Text>
-          <Text style={styles.emptyText}>搜索用户</Text>
+          <Text style={styles.emptyText}>{isAddToGroupMode ? '搜索并添加成员' : '搜索用户'}</Text>
           <Text style={styles.emptyHint}>输入昵称或手机号查找用户</Text>
         </View>
       );

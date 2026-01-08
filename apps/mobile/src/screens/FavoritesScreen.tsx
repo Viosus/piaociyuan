@@ -11,8 +11,8 @@ import {
   ActivityIndicator,
   RefreshControl,
   Alert,
-  SafeAreaView,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { colors, spacing, fontSize } from '../constants/config';
 import { getFavorites, unfavoritePost } from '../services/favorites';
@@ -116,7 +116,7 @@ export default function FavoritesScreen() {
   };
 
   const handleEventPress = (eventId: number) => {
-    navigation.navigate('EventDetail' as never, { id: eventId } as never);
+    navigation.navigate('EventDetail' as never, { eventId: eventId } as never);
   };
 
   const renderFooter = () => {

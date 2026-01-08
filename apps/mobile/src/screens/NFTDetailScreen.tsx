@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { useRoute, RouteProp } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import LoadingOverlay from '../components/LoadingOverlay';
+import { LoadingOverlay } from '../components/LoadingOverlay';
 import Button from '../components/Button';
 import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS } from '../constants/config';
 import { getNFTDetail, type UserNFT, type NFTRarity } from '../services/nft';

@@ -14,7 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import Input from '../components/Input';
 import Button from '../components/Button';
-import LoadingOverlay from '../components/LoadingOverlay';
+import { LoadingOverlay } from '../components/LoadingOverlay';
 import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS } from '../constants/config';
 import {
   submitVerificationRequest,

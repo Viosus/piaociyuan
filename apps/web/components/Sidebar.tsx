@@ -2,6 +2,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { apiGet } from '@/lib/api';
@@ -21,42 +22,42 @@ export default function Sidebar() {
   const [user, setUser] = useState<User | null>(null);
   const [showUserMenu, setShowUserMenu] = useState(false);
 
-  // 导航项配置
+  // 导航项配置 - 使用自定义图标
   const navItems = [
     {
       name: "主页",
       href: "/events",
-      icon: "🏠",
+      icon: "/icons/search.png",  // 使用搜索图标作为主页
       gradient: "from-purple-500 to-[#EAF353]"
     },
     {
       name: "宇宙信号",
       href: "/signals",
-      icon: "📡",
-      gradient: "from-[#EAF353] to-[#FFF5FB]0"
+      icon: "/icons/signals.png",
+      gradient: "from-[#EAF353] to-[#FFF5FB]"
     },
     {
       name: "安可区",
       href: "/encore",
-      icon: "🔥",
+      icon: "/icons/encore.png",
       gradient: "from-red-500 to-[#EAF353]"
     },
     {
       name: "我的收藏",
       href: "/favorites",
-      icon: "⭐",
+      icon: "/icons/favorites.png",
       gradient: "from-yellow-500 to-orange-500"
     },
     {
       name: "我的次元",
       href: "/account/nfts",
-      icon: "💎",
+      icon: "/icons/achievements.png",
       gradient: "from-purple-500 to-blue-500"
     },
     {
       name: "我的订单",
       href: "/account/orders",
-      icon: "🎫",
+      icon: "/icons/orders.png",
       gradient: "from-orange-500 to-red-500"
     },
   ];
@@ -120,21 +121,24 @@ export default function Sidebar() {
       {/* Logo */}
       <Link
         href="/events"
-        className="h-20 border-b border-[#FFE3F0]/30 flex items-center justify-center group-hover:justify-start group-hover:px-6 transition-all duration-300 relative"
+        className="h-20 border-b border-[#FFE3F0]/30 flex items-center justify-center group-hover:justify-start group-hover:px-4 transition-all duration-300 relative"
       >
-        {/* Logo图标 - 仅收起时显示 */}
-        <div className="group-hover:opacity-0 group-hover:scale-0 opacity-100 scale-100 transition-all duration-300 absolute">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 via-pink-500 to-blue-500 flex items-center justify-center shadow-lg shadow-purple-500/30">
-            <span className="text-3xl">🎫</span>
-          </div>
+        {/* Logo图标 - 始终显示 */}
+        <div className="transition-all duration-300">
+          <Image
+            src="/icons/logo-gradient.png"
+            alt="票次元"
+            width={56}
+            height={56}
+            className="object-contain"
+          />
         </div>
 
         {/* 文字 - 仅展开时显示 */}
-        <div className="opacity-0 scale-0 group-hover:opacity-100 group-hover:scale-100 transition-all duration-300 whitespace-nowrap">
-          <h1 className="text-xl font-bold bg-gradient-to-r from-purple-400 via-[#FFE3F0] to-blue-400 bg-clip-text text-transparent">
+        <div className="opacity-0 scale-0 group-hover:opacity-100 group-hover:scale-100 transition-all duration-300 whitespace-nowrap ml-3">
+          <h1 className="text-2xl font-bold text-[#282828]">
             票次元
           </h1>
-          <p className="text-xs text-white/40">Ticketing Reimagined</p>
         </div>
       </Link>
 
@@ -161,7 +165,15 @@ export default function Sidebar() {
               )}
 
               {/* 图标 - 始终显示，收起时完全居中 */}
-              <span className="text-2xl min-w-[2rem] shrink-0 flex items-center justify-center">{item.icon}</span>
+              <span className="min-w-[2rem] w-8 h-8 shrink-0 flex items-center justify-center">
+                <Image
+                  src={item.icon}
+                  alt={item.name}
+                  width={32}
+                  height={32}
+                  className="object-contain"
+                />
+              </span>
 
               {/* 文字 - 展开时显示 */}
               <span className="font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300 overflow-hidden w-0 group-hover:w-auto">{item.name}</span>

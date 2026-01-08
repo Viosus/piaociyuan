@@ -157,3 +157,22 @@ export function getWeekday(date: string | Date): string {
   const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
   return weekdays[d.getDay()];
 }
+
+/**
+ * 获取消息显示时间字符串
+ * @param date 日期对象
+ * @returns 时间字符串
+ */
+export function getTimeString(date: Date): string {
+  if (isNaN(date.getTime())) {
+    return '';
+  }
+
+  if (isToday(date)) {
+    return formatTime(date, 'HH:mm');
+  } else if (isYesterday(date)) {
+    return `昨天 ${formatTime(date, 'HH:mm')}`;
+  } else {
+    return formatDateTime(date, 'YYYY-MM-DD HH:mm');
+  }
+}

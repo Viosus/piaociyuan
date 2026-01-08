@@ -172,21 +172,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
-  header: {
-    padding: spacing.lg,
-    backgroundColor: colors.primary,
+  header: { padding: spacing.lg, backgroundColor: colors.secondary,
   },
-  title: {
-    fontSize: fontSize.xxxl,
-    fontWeight: 'bold',
-    color: '#ffffff',
+  title: { fontSize: fontSize.xxxl, fontWeight: 'bold', color: colors.primary,
     marginBottom: spacing.xs,
   },
-  subtitle: {
-    fontSize: fontSize.md,
-    color: '#ffffff',
-    opacity: 0.9,
-  },
+  subtitle: { fontSize: fontSize.md, color: colors.primary, opacity: 0.9 },
   loadingContainer: {
     flex: 1,
     alignItems: 'center',

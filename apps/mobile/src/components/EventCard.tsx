@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { COLORS, SPACING, FONT_SIZES } from '../constants/config';
-import type { Event } from '../services/events';
+import type { Event, Tier } from '../services/events';
 
 interface EventCardProps {
   event: Event;
@@ -31,6 +31,14 @@ export default function EventCard({ event, onPress }: EventCardProps) {
         return '';
     }
   };
+
+  
+  const getMinPrice = () => {
+    if (!event.tiers || event.tiers.length === 0) return null;
+    return Math.min(...event.tiers.map((t: Tier) => t.price));
+  };
+
+  const minPrice = getMinPrice();
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -69,6 +77,10 @@ export default function EventCard({ event, onPress }: EventCardProps) {
           <Text style={styles.infoText}>📍 {event.venue}</Text>
           <Text style={styles.infoText}>🕐 {formatDate(event.startTime)}</Text>
         </View>
+
+        {minPrice !== null && (
+          <Text style={styles.priceText}>¥{minPrice}起</Text>
+        )}
 
         {event.category && (
           <View style={styles.categoryBadge}>
@@ -147,6 +159,12 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.xs,
     backgroundColor: COLORS.surface,
     borderRadius: 4,
+  },
+  priceText: {
+    fontSize: FONT_SIZES.lg,
+    fontWeight: 'bold',
+    color: COLORS.error,
+    marginBottom: SPACING.sm,
   },
   categoryText: {
     fontSize: FONT_SIZES.xs,

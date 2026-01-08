@@ -27,20 +27,18 @@ export async function GET(
       return NextResponse.json({ error: '无权访问该对话' }, { status: 403 });
     }
 
-    // 获取对话信息和另一方用户信息
+    // 获取对话信息
     const conversation = await prisma.conversation.findUnique({
       where: { id: conversationId },
       include: {
         participants: {
-          where: {
-            userId: { not: user.id },
-          },
           include: {
             user: {
               select: {
                 id: true,
                 nickname: true,
                 avatar: true,
+                isVerified: true,
               },
             },
           },
@@ -64,11 +62,13 @@ export async function GET(
       return NextResponse.json({ error: '对话不存在' }, { status: 404 });
     }
 
+    const isGroup = conversation.type === 'group';
+
     // 标记消息为已读
     await prisma.message.updateMany({
       where: {
         conversationId,
-        receiverId: user.id,
+        senderId: { not: user.id },
         isRead: false,
       },
       data: {
@@ -85,9 +85,22 @@ export async function GET(
       },
     });
 
+    // 获取对方用户（私聊）
+    const otherParticipant = conversation.participants.find(
+      (p: typeof conversation.participants[number]) => p.userId !== user.id
+    );
+
     return NextResponse.json({
       id: conversation.id,
-      otherUser: conversation.participants[0]?.user,
+      type: conversation.type || 'private',
+      // 私聊信息
+      otherUser: !isGroup ? otherParticipant?.user : null,
+      // 群聊信息
+      name: isGroup ? conversation.name : null,
+      avatar: isGroup ? conversation.avatar : null,
+      memberCount: isGroup ? conversation.memberCount : null,
+      myRole: participant.role,
+      // 消息
       messages: conversation.messages,
     });
   } catch (error) {

@@ -66,8 +66,18 @@ export default function EventDetailScreen() {
       return;
     }
 
-    // TODO: 导航到购票页面
-    Alert.alert('购票', `准备购买：${selectedTier.name} - ¥${selectedTier.price}`);
+    // 导航到购票页面
+    navigation.navigate('Checkout' as never, {
+      eventId: eventId,
+      selectedTiers: [
+        {
+          tierId: selectedTier.id,
+          tierName: selectedTier.name,
+          price: selectedTier.price,
+          quantity: 1,
+        },
+      ],
+    } as never);
   };
 
   if (loading) {

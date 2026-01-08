@@ -105,13 +105,13 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   primaryText: {
-    color: '#ffffff',
+    color: '#111827', // 深色文字在黄色背景上更易读
   },
   secondaryText: {
-    color: '#ffffff',
+    color: '#111827', // 深色文字在粉色背景上更易读
   },
   outlineText: {
-    color: COLORS.primary,
+    color: COLORS.text,
   },
   smallText: {
     fontSize: FONT_SIZES.sm,

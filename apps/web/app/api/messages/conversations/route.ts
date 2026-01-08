@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 
-// 获取当前用户的所有对话列表
+// 获取当前用户的所有对话列表（包括私聊和群聊）
 export async function GET() {
   try {
     const user = await getCurrentUser();
@@ -19,9 +19,6 @@ export async function GET() {
         conversation: {
           include: {
             participants: {
-              where: {
-                userId: { not: user.id }, // 获取对话的另一方
-              },
               include: {
                 user: {
                   select: {
@@ -29,6 +26,7 @@ export async function GET() {
                     nickname: true,
                     avatar: true,
                     phone: true,
+                    isVerified: true,
                   },
                 },
               },
@@ -37,10 +35,12 @@ export async function GET() {
               orderBy: { createdAt: 'desc' },
               take: 1, // 最新一条消息
               select: {
+                id: true,
                 content: true,
                 createdAt: true,
                 senderId: true,
                 isRead: true,
+                messageType: true,
               },
             },
           },
@@ -54,13 +54,32 @@ export async function GET() {
     });
 
     // 格式化返回数据
-    const conversations = participants.map((p: typeof participants[number]) => ({
-      id: p.conversation.id,
-      otherUser: p.conversation.participants[0]?.user,
-      lastMessage: p.conversation.messages[0],
-      unreadCount: p.unreadCount,
-      lastMessageAt: p.conversation.lastMessageAt,
-    }));
+    const conversations = participants.map((p: typeof participants[number]) => {
+      const conv = p.conversation;
+      const isGroup = conv.type === 'group';
+
+      // 私聊：获取对方用户信息
+      // 群聊：返回群信息
+      const otherParticipants = conv.participants.filter(
+        (part: typeof conv.participants[number]) => part.userId !== user.id
+      );
+
+      return {
+        id: conv.id,
+        type: conv.type || 'private',
+        // 私聊信息
+        otherUser: !isGroup ? otherParticipants[0]?.user : null,
+        // 群聊信息
+        name: isGroup ? conv.name : null,
+        avatar: isGroup ? conv.avatar : null,
+        memberCount: isGroup ? conv.memberCount : null,
+        // 通用信息
+        lastMessage: conv.messages[0],
+        unreadCount: p.unreadCount,
+        lastMessageAt: conv.lastMessageAt,
+        myRole: p.role,
+      };
+    });
 
     return NextResponse.json(conversations);
   } catch (error) {

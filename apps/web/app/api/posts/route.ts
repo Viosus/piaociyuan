@@ -17,6 +17,17 @@ export async function GET(req: NextRequest) {
 
     const skip = (page - 1) * pageSize;
 
+    // 获取当前用户ID（如果已登录）
+    let currentUserId: string | null = null;
+    const authHeader = req.headers.get('Authorization');
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.substring(7);
+      const payload = verifyToken(token);
+      if (payload) {
+        currentUserId = payload.id;
+      }
+    }
+
     // 构建查询条件
     const where: Prisma.PostWhereInput = {
       isVisible: true, // 只显示可见的帖子
@@ -57,6 +68,26 @@ export async function GET(req: NextRequest) {
               comments: true,
             },
           },
+          likes: currentUserId
+            ? {
+                where: {
+                  userId: currentUserId,
+                },
+                select: {
+                  id: true,
+                },
+              }
+            : false,
+          favorites: currentUserId
+            ? {
+                where: {
+                  userId: currentUserId,
+                },
+                select: {
+                  id: true,
+                },
+              }
+            : false,
         },
         orderBy: {
           createdAt: 'desc',
@@ -70,12 +101,16 @@ export async function GET(req: NextRequest) {
     // 格式化返回数据
     const formattedPosts = posts.map((post) => ({
       id: post.id,
+      userId: post.userId,
       content: post.content,
       location: post.location || null,
       viewCount: post.viewCount,
       likeCount: post.likeCount,
       commentCount: post.commentCount,
+      isLiked: currentUserId ? (post.likes && post.likes.length > 0) : false,
+      isFavorited: currentUserId ? (post.favorites && post.favorites.length > 0) : false,
       createdAt: post.createdAt.toISOString(),
+      eventId: post.eventId,
       user: {
         id: post.user.id,
         nickname: post.user.nickname || '匿名用户',

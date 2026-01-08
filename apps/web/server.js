@@ -6,11 +6,14 @@ const { Server } = require('socket.io');
 const jwt = require('jsonwebtoken');
 
 const dev = process.env.NODE_ENV !== 'production';
-const hostname = 'localhost';
+const hostname = '0.0.0.0'; // 监听所有网络接口，允许局域网访问
 const port = process.env.PORT || 3000;
 
 const app = next({ dev, hostname, port });
 const handle = app.getRequestHandler();
+
+// 引入生产级定时任务调度器
+const scheduler = require('./lib/scheduler');
 
 app.prepare().then(() => {
   const httpServer = createServer(async (req, res) => {
@@ -29,7 +32,7 @@ app.prepare().then(() => {
     cors: {
       origin: process.env.NODE_ENV === 'production'
         ? process.env.NEXT_PUBLIC_APP_URL
-        : 'http://localhost:3000',
+        : true, // 开发环境允许所有来源（包括移动端）
       methods: ['GET', 'POST'],
       credentials: true
     },
@@ -137,11 +140,17 @@ app.prepare().then(() => {
     .listen(port, () => {
       console.log(`> Ready on http://${hostname}:${port}`);
       console.log(`> Socket.io server is running`);
+
+      // 启动定时任务调度器
+      scheduler.start();
     });
 
   // 优雅关闭处理
   const gracefulShutdown = async (signal) => {
     console.log(`\n${signal} received, starting graceful shutdown...`);
+
+    // 停止定时任务
+    scheduler.stop();
 
     // 标记关闭状态
     let httpClosed = false;

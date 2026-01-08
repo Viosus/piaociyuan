@@ -11,8 +11,8 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import NFTCard from '../components/NFTCard';
-import LoadingOverlay from '../components/LoadingOverlay';
-import EmptyState from '../components/EmptyState';
+import { LoadingOverlay } from '../components/LoadingOverlay';
+import { EmptyState } from '../components/EmptyState';
 import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS } from '../constants/config';
 import { getUserNFTs, type UserNFT, type NFTRarity } from '../services/nft';
 

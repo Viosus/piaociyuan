@@ -36,7 +36,7 @@ export function useSocket(options: UseSocketOptions = {}) {
 
     const token = localStorage.getItem('token');
     if (!token) {
-      console.warn('[Socket] 无 token，无法连接');
+      // 没有 token 时静默返回，不打印警告（避免未登录用户看到错误）
       return;
     }
 
@@ -75,15 +75,21 @@ export function useSocket(options: UseSocketOptions = {}) {
 
     // 连接错误
     socketRef.current.on('connect_error', (error) => {
+      // 如果是认证错误，静默处理（用户可能未登录或 token 过期）
+      if (error.message.includes('Authentication') || error.message.includes('Invalid token')) {
+        console.log('[Socket] 认证失败，跳过连接');
+        setIsConnecting(false);
+        // 断开连接，停止重试
+        if (socketRef.current) {
+          socketRef.current.disconnect();
+          socketRef.current = null;
+        }
+        return;
+      }
+
       console.error('[Socket] 连接错误:', error.message);
       setIsConnecting(false);
       onError?.(error);
-
-      // 如果是认证错误，可能 token 过期了
-      if (error.message.includes('Authentication')) {
-        console.log('[Socket] 认证失败，可能需要刷新 token');
-        // 可以在这里触发 token 刷新逻辑
-      }
     });
 
     // 重连尝试

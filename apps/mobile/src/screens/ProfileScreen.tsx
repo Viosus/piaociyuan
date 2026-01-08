@@ -23,7 +23,7 @@ const PRESET_AVATARS = [
 
 export default function ProfileScreen() {
   const navigation = useNavigation();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   const [stats, setStats] = useState({
     following: 0,
@@ -60,20 +60,27 @@ export default function ProfileScreen() {
 
   const menuSections = [
     {
-      title: '我的服务',
+      title: '我的资产',
       items: [
-        { icon: 'receipt-outline' as const, label: '我的订单', screen: 'Orders' },
-        { icon: 'ticket-outline' as const, label: '我的门票', screen: 'Tickets' },
-        { icon: 'heart-outline' as const, label: '我的收藏', screen: 'Favorites' },
-        { icon: 'diamond-outline' as const, label: '我的 NFT', screen: 'MyNFTs' },
+        { icon: 'receipt-outline' as const, label: '我的订单', screen: 'Orders', emoji: '📦' },
+        { icon: 'diamond-outline' as const, label: '我的 NFT', screen: 'MyNFTs', emoji: '💎' },
+        { icon: 'heart-outline' as const, label: '我的收藏', screen: 'Favorites', emoji: '⭐' },
       ],
     },
     {
-      title: '账号管理',
+      title: '社区互动',
       items: [
-        { icon: 'create-outline' as const, label: '编辑资料', screen: 'EditProfile' },
-        { icon: 'shield-checkmark-outline' as const, label: '身份认证', screen: 'Verification' },
-        { icon: 'settings-outline' as const, label: '设置', screen: 'Settings' },
+        { icon: 'flame-outline' as const, label: '安可区', screen: 'Encore', emoji: '🔥' },
+        { icon: 'people-outline' as const, label: '关注列表', screen: 'FollowingList', emoji: '👥' },
+        { icon: 'chatbubbles-outline' as const, label: '我的消息', screen: 'Conversations', emoji: '💬' },
+      ],
+    },
+    {
+      title: '账号设置',
+      items: [
+        { icon: 'create-outline' as const, label: '编辑资料', screen: 'EditProfile', emoji: '✏️' },
+        { icon: 'shield-checkmark-outline' as const, label: '身份认证', screen: 'Verification', emoji: '🛡️' },
+        { icon: 'settings-outline' as const, label: '设置', screen: 'Settings', emoji: '⚙️' },
       ],
     },
   ];
@@ -144,7 +151,9 @@ export default function ProfileScreen() {
                 onPress={() => navigation.navigate(item.screen as never)}
               >
                 <View style={styles.menuItemLeft}>
-                  <Ionicons name={item.icon} size={24} color={COLORS.text} />
+                  {item.emoji && (
+                    <Text style={styles.menuItemEmoji}>{item.emoji}</Text>
+                  )}
                   <Text style={styles.menuItemText}>{item.label}</Text>
                 </View>
                 <Ionicons
@@ -157,6 +166,20 @@ export default function ProfileScreen() {
           </View>
         </View>
       ))}
+
+      {/* 退出登录 */}
+      <View style={styles.logoutSection}>
+        <TouchableOpacity
+          style={styles.logoutButton}
+          onPress={logout}
+        >
+          <Text style={styles.logoutEmoji}>🚪</Text>
+          <Text style={styles.logoutText}>退出登录</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* 底部间距 */}
+      <View style={{ height: SPACING.xxl }} />
     </ScrollView>
   );
 }
@@ -274,9 +297,35 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
+  menuItemEmoji: {
+    fontSize: 24,
+    marginRight: SPACING.sm,
+  },
   menuItemText: {
     fontSize: FONT_SIZES.md,
     color: COLORS.text,
-    marginLeft: SPACING.md,
+  },
+  logoutSection: {
+    marginTop: SPACING.xl,
+    paddingHorizontal: SPACING.lg,
+  },
+  logoutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: SPACING.md,
+    backgroundColor: COLORS.surface,
+    borderRadius: BORDER_RADIUS.medium,
+    borderWidth: 1,
+    borderColor: COLORS.error,
+  },
+  logoutEmoji: {
+    fontSize: 20,
+    marginRight: SPACING.sm,
+  },
+  logoutText: {
+    fontSize: FONT_SIZES.md,
+    color: COLORS.error,
+    fontWeight: '600',
   },
 });

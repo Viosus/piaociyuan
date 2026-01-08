@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  SafeAreaView,
   ActivityIndicator,
   Alert,
   TouchableOpacity,
@@ -12,6 +11,7 @@ import {
   Dimensions,
   Share,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import QRCode from 'react-native-qrcode-svg';
 import * as Sharing from 'expo-sharing';
@@ -240,14 +240,16 @@ export default function TicketDetailScreen() {
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>购买时间</Text>
               <Text style={styles.infoValue}>
-                {formatDateTime(new Date(Number(ticket.createdAt)))}
+                {ticket.purchasedAt
+                  ? formatDateTime(new Date(ticket.purchasedAt))
+                  : formatDateTime(new Date(ticket.createdAt))}
               </Text>
             </View>
             {ticket.usedAt && (
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>使用时间</Text>
                 <Text style={styles.infoValue}>
-                  {formatDateTime(new Date(Number(ticket.usedAt)))}
+                  {formatDateTime(new Date(ticket.usedAt))}
                 </Text>
               </View>
             )}
@@ -255,7 +257,7 @@ export default function TicketDetailScreen() {
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>退票时间</Text>
                 <Text style={styles.infoValue}>
-                  {formatDateTime(new Date(Number(ticket.refundedAt)))}
+                  {formatDateTime(new Date(ticket.refundedAt))}
                 </Text>
               </View>
             )}
@@ -300,6 +302,13 @@ export default function TicketDetailScreen() {
       {/* 底部操作按钮 */}
       {ticket.status !== 'used' && ticket.status !== 'refunded' && (
         <View style={styles.bottomBar}>
+          <TouchableOpacity
+            style={styles.transferButton}
+            onPress={() => (navigation as any).navigate('TransferTicket', { ticketId: ticket.id })}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.transferButtonText}>🎁 转让/赠送</Text>
+          </TouchableOpacity>
           <TouchableOpacity
             style={[styles.refundButton, actionLoading && styles.refundButtonDisabled]}
             onPress={handleRefund}
@@ -427,7 +436,7 @@ const styles = StyleSheet.create({
   shareButtonText: {
     fontSize: fontSize.md,
     fontWeight: '600',
-    color: '#ffffff',
+    color: '#111827', // 深色文字在黄色背景上更易读
   },
   section: {
     marginBottom: spacing.lg,
@@ -480,6 +489,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   bottomBar: {
+    flexDirection: 'row',
     backgroundColor: colors.surface,
     padding: spacing.lg,
     borderTopWidth: 1,
@@ -489,8 +499,22 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 4,
+    gap: spacing.md,
+  },
+  transferButton: {
+    flex: 1,
+    backgroundColor: colors.primary,
+    paddingVertical: spacing.md,
+    borderRadius: 24,
+    alignItems: 'center',
+  },
+  transferButtonText: {
+    fontSize: fontSize.md,
+    fontWeight: '600',
+    color: '#111827',
   },
   refundButton: {
+    flex: 1,
     backgroundColor: colors.surface,
     paddingVertical: spacing.md,
     borderRadius: 24,

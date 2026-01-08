@@ -12,8 +12,8 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import Button from '../components/Button';
-import LoadingOverlay from '../components/LoadingOverlay';
-import EmptyState from '../components/EmptyState';
+import { LoadingOverlay } from '../components/LoadingOverlay';
+import { EmptyState } from '../components/EmptyState';
 import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS } from '../constants/config';
 import { getMintableOrders, requestMintNFT, getWalletStatus, type MintableOrder } from '../services/nft';
 

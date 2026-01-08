@@ -12,7 +12,7 @@ import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import Input from '../components/Input';
 import Button from '../components/Button';
-import LoadingOverlay from '../components/LoadingOverlay';
+import { LoadingOverlay } from '../components/LoadingOverlay';
 import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS } from '../constants/config';
 import { bindWallet, getWalletStatus, type WalletStatusResponse } from '../services/nft';
 

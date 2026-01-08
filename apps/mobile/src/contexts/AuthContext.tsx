@@ -40,11 +40,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const checkAuth = async () => {
     try {
-      const token = await getAccessToken();
+      // 初始化 API client 的 tokens（包括 accessToken 和 refreshToken）
+      await apiClient.initializeTokens();
+
       const savedUser = await getUser();
 
-      if (token && savedUser) {
-        apiClient.setAccessToken(token);
+      if (savedUser) {
         setUser(savedUser);
       }
     } catch (error) {
@@ -66,6 +67,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await saveUser(userData);
 
         apiClient.setAccessToken(accessToken);
+        apiClient.setRefreshToken(refreshToken);
         setUser(userData);
       } else {
         throw new Error(response.error || '登录失败');
@@ -98,6 +100,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await saveUser(userData);
 
         apiClient.setAccessToken(accessToken);
+        apiClient.setRefreshToken(refreshToken);
         setUser(userData);
       } else {
         throw new Error(response.error || '注册失败');
@@ -112,6 +115,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await apiLogout();
       await clearAuth();
+      apiClient.setAccessToken(null);
+      apiClient.setRefreshToken(null);
       setUser(null);
     } catch (error) {
       console.error('退出登录失败:', error);

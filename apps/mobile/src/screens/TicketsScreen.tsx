@@ -8,10 +8,12 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Image,
+  Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { colors, spacing, fontSize } from '../constants/config';
 import { getMyTickets, type Ticket } from '../services/tickets';
+import { useAuth } from '../contexts/AuthContext';
 
 const STATUS_FILTERS = [
   { label: '全部', value: '' },
@@ -29,6 +31,7 @@ const TICKET_STATUS_CONFIG = {
 
 export default function TicketsScreen() {
   const navigation = useNavigation();
+  const { logout } = useAuth();
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -46,16 +49,62 @@ export default function TicketsScreen() {
         status: selectedStatus || undefined,
       });
       if (response.ok && response.data) {
-        setTickets(response.data);
+        // 转换后端数据格式到前端格式
+        const transformedTickets = response.data.map((ticket: any) => ({
+          ...ticket,
+          event: ticket.event ? {
+            ...ticket.event,
+            startTime: ticket.event.date && ticket.event.time
+              ? `${ticket.event.date}T${ticket.event.time}`
+              : ticket.event.date,
+            coverImage: ticket.event.cover,
+          } : undefined,
+        }));
+        setTickets(transformedTickets);
       } else {
-        setError(response.error || '加载门票失败');
+        // 检查是否是登录过期错误
+        if (response.code === 'TOKEN_EXPIRED' || response.error?.includes('登录已过期')) {
+          handleTokenExpired();
+        } else {
+          setError(response.error || '加载门票失败');
+        }
       }
     } catch (err: any) {
-      setError(err.message || '加载门票失败');
+      // 检查是否是登录过期错误
+      if (err.message?.includes('登录已过期') || err.message?.includes('认证')) {
+        handleTokenExpired();
+      } else {
+        setError(err.message || '加载门票失败');
+      }
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
+  };
+
+  const handleTokenExpired = () => {
+    Alert.alert(
+      '登录已过期',
+      '您的登录状态已过期，请重新登录',
+      [
+        {
+          text: '重新登录',
+          onPress: async () => {
+            try {
+              await logout();
+              // 导航到登录页面
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'Login' as never }],
+              });
+            } catch (error) {
+              console.error('退出登录失败:', error);
+            }
+          },
+        },
+      ],
+      { cancelable: false }
+    );
   };
 
   const handleRefresh = () => {
@@ -122,6 +171,20 @@ export default function TicketsScreen() {
 
   return (
     <View style={styles.container}>
+      {/* 接收转让入口 */}
+      <TouchableOpacity
+        style={styles.receiveTransferBar}
+        onPress={() => navigation.navigate('ReceiveTransfer' as never)}
+        activeOpacity={0.7}
+      >
+        <Text style={styles.receiveTransferIcon}>🎁</Text>
+        <View style={styles.receiveTransferContent}>
+          <Text style={styles.receiveTransferTitle}>接收转让</Text>
+          <Text style={styles.receiveTransferDesc}>输入转让码接收好友的门票</Text>
+        </View>
+        <Text style={styles.receiveTransferArrow}>›</Text>
+      </TouchableOpacity>
+
       {/* 状态筛选标签 */}
       <View style={styles.filterTabs}>
         {STATUS_FILTERS.map((filter) => (
@@ -188,6 +251,37 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: colors.background,
+  },
+  receiveTransferBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: `${colors.primary}15`,
+    marginHorizontal: spacing.md,
+    marginTop: spacing.md,
+    marginBottom: spacing.sm,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
+    borderRadius: 12,
+  },
+  receiveTransferIcon: {
+    fontSize: 28,
+    marginRight: spacing.md,
+  },
+  receiveTransferContent: {
+    flex: 1,
+  },
+  receiveTransferTitle: {
+    fontSize: fontSize.md,
+    fontWeight: '600',
+    color: colors.text,
+  },
+  receiveTransferDesc: {
+    fontSize: fontSize.sm,
+    color: colors.textSecondary,
+  },
+  receiveTransferArrow: {
+    fontSize: 24,
+    color: colors.textSecondary,
   },
   filterTabs: {
     flexDirection: 'row',

@@ -13,11 +13,14 @@ type Event = {
   venue: string;
   date: string;
   time: string;
+  startTime: string;
+  endTime: string;
   saleStatus: string;
   saleStartTime: string;
   saleEndTime: string;
-  cover: string;
+  coverImage: string;
   artist: string;
+  status: string;
 };
 
 export default function SignalsPage() {
@@ -31,7 +34,7 @@ export default function SignalsPage() {
         const response = await fetch("/api/events");
         const data = await response.json();
         if (data.ok) {
-          setAllEvents(data.events);
+          setAllEvents(data.data || []);
         }
       } catch (error) {
         console.error("Failed to load events:", error);
@@ -43,10 +46,9 @@ export default function SignalsPage() {
     fetchEvents();
   }, []);
 
-  // 只显示可售票的活动（未开售 + 售票中）
-  const activeEvents = allEvents.filter((event) => {
-    const saleInfo = getSaleStatusInfo(event.saleStatus, event.saleStartTime, event.saleEndTime);
-    return saleInfo.saleStatus !== 'ended';
+  // 只显示未结束的活动
+  const activeEvents = (allEvents || []).filter((event) => {
+    return event.status !== 'ended';
   });
 
   // 根据选中的分类筛选活动
@@ -87,7 +89,7 @@ export default function SignalsPage() {
         {/* 分类筛选器 */}
         <div className="flex flex-wrap gap-2 mb-4">
           {categories.map((category) => {
-            const count = activeEvents.filter(e => e.category === category.value).length;
+            const count = category.value === 'all' ? activeEvents.length : activeEvents.filter(e => e.category === category.value).length;
             return (
               <button
                 key={category.value}
@@ -133,7 +135,10 @@ export default function SignalsPage() {
       ) : (
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
           {filteredEvents.map((event) => {
-            const saleInfo = getSaleStatusInfo(event.saleStatus, event.saleStartTime, event.saleEndTime);
+            // 格式化日期时间
+            const startDate = event.startTime ? new Date(event.startTime) : null;
+            const dateStr = startDate ? startDate.toLocaleDateString('zh-CN', { month: 'long', day: 'numeric' }) : '';
+            const timeStr = startDate ? startDate.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }) : '';
 
             return (
               <Link
@@ -141,32 +146,38 @@ export default function SignalsPage() {
                 href={`/events/${encodeURIComponent(String(event.id))}`}
                 className="bg-white border border-[#FFEBF5] rounded-xl hover:border-[#FFE3F0] hover:shadow-lg transition p-3 block group relative"
               >
-                {/* 售票状态标签 */}
-                {saleInfo.saleStatus !== 'on_sale' && (
+                {/* 活动状态标签 */}
+                {event.status && event.status !== 'on_sale' && (
                   <div className="absolute top-5 right-5 z-10">
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${saleInfo.color}`}>
-                      {saleInfo.label}
+                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                      event.status === 'upcoming' ? 'bg-blue-100 text-blue-700' :
+                      event.status === 'sold_out' ? 'bg-red-100 text-red-700' :
+                      'bg-gray-100 text-gray-700'
+                    }`}>
+                      {event.status === 'upcoming' ? '即将开售' :
+                       event.status === 'sold_out' ? '已售罄' :
+                       event.status}
                     </span>
                   </div>
                 )}
 
                 <img
-                  src={event.cover}
+                  src={event.coverImage}
                   alt={event.name}
                   className="rounded-lg w-full h-48 object-cover mb-3 group-hover:scale-105 transition-transform"
                 />
 
                 {/* 活动类型标签 */}
                 <div className="mb-2">
-                  <span className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full ${EVENT_CATEGORY_COLORS[event.category as EventCategory]}`}>
-                    <span>{EVENT_CATEGORY_ICONS[event.category as EventCategory]}</span>
-                    <span>{EVENT_CATEGORY_LABELS[event.category as EventCategory]}</span>
+                  <span className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full ${EVENT_CATEGORY_COLORS[event.category as EventCategory] || 'bg-gray-100 text-gray-700'}`}>
+                    <span>{EVENT_CATEGORY_ICONS[event.category as EventCategory] || '📅'}</span>
+                    <span>{EVENT_CATEGORY_LABELS[event.category as EventCategory] || event.category}</span>
                   </span>
                 </div>
 
                 <h2 className="text-lg font-bold item-name">{event.name}</h2>
                 <p className="text-[#282828]">
-                  {event.city} · {event.date} {event.time}
+                  {event.city || ''} {dateStr} {timeStr}
                 </p>
                 <p className="mt-2 text-sm text-[#282828] opacity-80">{event.venue}</p>
               </Link>

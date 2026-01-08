@@ -79,6 +79,7 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZES.md,
     color: COLORS.text,
     backgroundColor: '#ffffff',
+    minHeight: 48,
   },
   inputFocused: {
     borderColor: COLORS.primary,

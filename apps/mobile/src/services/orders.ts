@@ -77,7 +77,7 @@ export async function getMyOrders(params?: {
   if (params?.pageSize) query.append('pageSize', params.pageSize.toString());
 
   const queryString = query.toString();
-  return apiClient.get<Order[]>(`/api/orders/my${queryString ? `?${queryString}` : ''}`);
+  return apiClient.get<Order[]>(`/api/orders${queryString ? `?${queryString}` : ''}`);
 }
 
 /**
@@ -88,10 +88,77 @@ export async function getOrderDetail(orderId: number): Promise<ApiResponse<Order
 }
 
 /**
- * 支付订单
+ * 支付订单（模拟支付）
  */
-export async function payOrder(orderId: number): Promise<ApiResponse<{ success: boolean }>> {
-  return apiClient.post<{ success: boolean }>(`/api/orders/${orderId}/pay`);
+export async function payOrder(orderId: string | number): Promise<ApiResponse<{ success: boolean }>> {
+  return apiClient.post<{ success: boolean }>('/api/pay/mock', { orderId: String(orderId) });
+}
+
+/**
+ * 微信支付参数
+ */
+export interface WechatPayParams {
+  appid: string;
+  partnerid: string;
+  prepayid: string;
+  package: string;
+  noncestr: string;
+  timestamp: string;
+  sign: string;
+}
+
+/**
+ * 创建微信支付订单
+ */
+export async function createWechatPayOrder(
+  orderId: string | number,
+  payType: 'app' | 'native' = 'app'
+): Promise<ApiResponse<{
+  orderId: string;
+  amount: number;
+  payParams?: WechatPayParams;
+  codeUrl?: string;
+}>> {
+  return apiClient.post('/api/pay/wechat', {
+    orderId: String(orderId),
+    payType,
+  });
+}
+
+/**
+ * 创建支付宝订单
+ */
+export async function createAlipayOrder(
+  orderId: string | number,
+  payType: 'app' | 'web' = 'app'
+): Promise<ApiResponse<{
+  orderId: string;
+  amount: number;
+  orderString?: string;
+  payUrl?: string;
+}>> {
+  return apiClient.post('/api/pay/alipay', {
+    orderId: String(orderId),
+    payType,
+  });
+}
+
+/**
+ * 申请退款
+ */
+export async function requestRefund(
+  orderId: string | number,
+  reason?: string
+): Promise<ApiResponse<{
+  orderId: string;
+  refundId: string;
+  refundAmount: number;
+  status: string;
+}>> {
+  return apiClient.post('/api/pay/refund', {
+    orderId: String(orderId),
+    reason,
+  });
 }
 
 /**

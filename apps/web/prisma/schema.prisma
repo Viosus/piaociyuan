@@ -49,10 +49,12 @@ model Tier {
   price     Int
   capacity  Int
   remaining Int
+  sold      Int      @default(0) // 已售数量
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  orders    Order[]
 
   @@map("tiers")
   @@index([eventId])
@@ -74,23 +76,31 @@ model Hold {
 
 // ✅ 订单表
 model Order {
-  id        String   @id
-  userId    String
-  eventId   String
-  tierId    String
-  qty       Int
-  holdId    String
-  status    String
-  createdAt BigInt
-  paidAt    BigInt?
+  id              String   @id
+  userId          String
+  eventId         String
+  tierId          String
+  qty             Int
+  holdId          String
+  status          String
+  createdAt       BigInt
+  paidAt          BigInt?
+
+  // ============ 支付信息（新增）============
+  paymentMethod   String?  // wechat, alipay, mock
+  transactionId   String?  // 第三方支付交易号
+  refundedAt      BigInt?  // 退款时间
+  refundId        String?  // 退款单号
 
   user      User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+  tier      Tier     @relation(fields: [tierId], references: [id], onDelete: Restrict)
   tickets   Ticket[]
 
   @@map("orders")
   @@index([userId])
   @@index([status])
   @@index([createdAt])
+  @@index([transactionId])
 }
 
 // ✅ 票表（增加NFT绑定）
@@ -516,18 +526,27 @@ model PostFavorite {
   @@index([createdAt])
 }
 
-// ==================== 私聊系统 ====================
+// ==================== 聊天系统（私聊 + 群聊） ====================
 
 model Conversation {
-  id          String   @id @default(uuid())
+  id            String   @id @default(uuid())
+  type          String   @default("private") // private(私聊), group(群聊)
+  name          String?  // 群名称（群聊时使用）
+  avatar        String?  // 群头像
+  description   String?  // 群描述
+  creatorId     String?  // 群创建者ID
+  maxMembers    Int      @default(500) // 最大成员数
+  memberCount   Int      @default(0) // 当前成员数
   lastMessageAt DateTime @default(now())
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   participants ConversationParticipant[]
   messages     Message[]
 
   @@map("conversations")
+  @@index([type])
+  @@index([creatorId])
   @@index([lastMessageAt])
 }
 
@@ -535,6 +554,9 @@ model ConversationParticipant {
   id             String   @id @default(uuid())
   conversationId String
   userId         String
+  role           String   @default("member") // owner(群主), admin(管理员), member(成员)
+  nickname       String?  // 群内昵称
+  isMuted        Boolean  @default(false) // 是否被禁言
   unreadCount    Int      @default(0)
   lastReadAt     DateTime @default(now())
   joinedAt       DateTime @default(now())
@@ -546,21 +568,23 @@ model ConversationParticipant {
   @@unique([conversationId, userId])
   @@index([conversationId])
   @@index([userId])
+  @@index([role])
 }
 
 model Message {
   id             String   @id @default(uuid())
   conversationId String
   senderId       String
-  receiverId     String
+  receiverId     String?  // 私聊时为接收者ID，群聊时为空
   content        String   @db.Text
-  messageType    String   @default("text")
+  messageType    String   @default("text") // text, image, file, system
   isRead         Boolean  @default(false)
+  readBy         String?  @db.Text // 群聊时记录已读成员ID列表（JSON数组）
   createdAt      DateTime @default(now())
 
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   sender         User         @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
-  receiver       User         @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+  receiver       User?        @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
 
   @@map("messages")
   @@index([conversationId])
@@ -747,6 +771,37 @@ model HomepageSectionEvent {
   @@index([sectionId])
   @@index([eventId])
   @@index([order])
+}
+
+// ==================== 票务转让系统 ====================
+
+// 票务转让记录表
+model TicketTransfer {
+  id              String   @id @default(uuid())
+  ticketId        String   // 转让的门票ID
+  fromUserId      String   // 转让人
+  toUserId        String?  // 接收人（确认后填写）
+  toUserPhone     String?  // 接收人手机号（用于短信通知）
+  toUserEmail     String?  // 接收人邮箱（用于邮件通知）
+  transferCode    String   @unique // 转让码（用于接收）
+  message         String?  @db.Text // 转让留言
+  transferType    String   @default("gift") // gift(赠送), sale(转让)
+  price           Int?     // 转让价格（仅转让时）
+  status          String   @default("pending") // pending(待接收), accepted(已接收), rejected(已拒绝), expired(已过期), cancelled(已取消)
+  expiresAt       DateTime // 过期时间
+  acceptedAt      DateTime?
+  rejectedAt      DateTime?
+  cancelledAt     DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("ticket_transfers")
+  @@index([ticketId])
+  @@index([fromUserId])
+  @@index([toUserId])
+  @@index([transferCode])
+  @@index([status])
+  @@index([expiresAt])
 }
 
 // ==================== 首页轮播广告栏 ====================

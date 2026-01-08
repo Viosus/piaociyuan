@@ -14,6 +14,7 @@ interface EventCardProps {
     saleStatus: string;
     saleStartTime: Date | string;
     saleEndTime: Date | string;
+    tiers?: { id: number; name: string; price: number }[];
   };
   showRank?: boolean;
   rank?: number;
@@ -21,6 +22,11 @@ interface EventCardProps {
 
 export default function EventCard({ event, showRank, rank }: EventCardProps) {
   const saleInfo = getSaleStatusInfo(event.saleStatus, event.saleStartTime, event.saleEndTime);
+
+  // 计算最低价格
+  const minPrice = event.tiers && event.tiers.length > 0
+    ? Math.min(...event.tiers.map(t => t.price))
+    : null;
 
   return (
     <Link
@@ -81,6 +87,13 @@ export default function EventCard({ event, showRank, rank }: EventCardProps) {
         <h3 className="text-base font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-purple-600 transition-colors">
           {event.name}
         </h3>
+
+        {/* 价格 */}
+        {minPrice !== null && (
+          <p className="text-lg font-bold text-red-500 mb-2">
+            ¥{minPrice}<span className="text-sm font-normal text-gray-500">起</span>
+          </p>
+        )}
 
         {/* 活动详情 */}
         <div className="space-y-1 text-sm text-gray-600">

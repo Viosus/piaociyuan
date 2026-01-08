@@ -1,7 +1,12 @@
-// app/page.tsx
-import { redirect } from 'next/navigation';
+// app/page.tsx - 主页
+import { Suspense } from 'react';
+import HomePage from './ui/HomePage';
+import { HomePageSkeleton } from './ui/HomePageSkeleton';
 
 export default function Home() {
-  // 直接重定向到活动列表页
-  redirect('/events');
+  return (
+    <Suspense fallback={<HomePageSkeleton />}>
+      <HomePage />
+    </Suspense>
+  );
 }

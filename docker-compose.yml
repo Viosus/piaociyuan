@@ -1,0 +1,104 @@
+version: '3.8'
+
+services:
+  # PostgreSQL 数据库
+  postgres:
+    image: postgres:15-alpine
+    container_name: piaoyuzhou-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-your_secure_password}
+      POSTGRES_DB: ${POSTGRES_DB:-piaociyuan}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - piaoyuzhou-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Web 应用 (Next.js + Socket.io)
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    container_name: piaoyuzhou-web
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-your_secure_password}@postgres:5432/${POSTGRES_DB:-piaociyuan}?connection_limit=20&pool_timeout=10&connect_timeout=10
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_ACCESS_EXPIRES: ${JWT_ACCESS_EXPIRES:-1d}
+      JWT_REFRESH_EXPIRES: ${JWT_REFRESH_EXPIRES:-7d}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost}
+      # NFT 配置（可选）
+      NFT_ENABLED: ${NFT_ENABLED:-false}
+      BLOCKCHAIN_RPC_URL: ${BLOCKCHAIN_RPC_URL:-}
+      BLOCKCHAIN_CHAIN_ID: ${BLOCKCHAIN_CHAIN_ID:-80002}
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - piaoyuzhou-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Nginx 反向代理
+  nginx:
+    image: nginx:alpine
+    container_name: piaoyuzhou-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./nginx/logs:/var/log/nginx
+    depends_on:
+      - web
+    networks:
+      - piaoyuzhou-network
+
+  # Redis 缓存（可选，用于 session 和缓存）
+  redis:
+    image: redis:7-alpine
+    container_name: piaoyuzhou-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-redis_password}
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - piaoyuzhou-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  piaoyuzhou-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local

@@ -12,8 +12,8 @@ import {
   Image,
   ActivityIndicator,
   RefreshControl,
-  SafeAreaView,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { colors, spacing, fontSize } from '../constants/config';
 import { getConversations, type Conversation } from '../services/messages';
@@ -101,9 +101,10 @@ export default function ConversationsScreen() {
             content: message.content,
             senderId: message.senderId,
             createdAt: message.createdAt,
+            isRead: false,
           },
           unreadCount: updated[index].unreadCount + 1,
-          updatedAt: message.createdAt,
+          lastMessageAt: message.createdAt,
         };
         // 移到列表顶部
         updated.unshift(...updated.splice(index, 1));
@@ -128,16 +129,34 @@ export default function ConversationsScreen() {
   };
 
   const handleConversationPress = (conversation: Conversation) => {
-    navigation.navigate('Chat' as never, { conversationId: conversation.id } as never);
+    navigation.navigate('Chat' as never, {
+      conversationId: conversation.id,
+      isGroup: conversation.type === 'group',
+      groupName: conversation.name,
+    } as never);
   };
 
   const handleNewConversation = () => {
     navigation.navigate('SelectUser' as never);
   };
 
+  const handleCreateGroup = () => {
+    navigation.navigate('CreateGroup' as never);
+  };
+
   const renderConversationItem = ({ item }: { item: Conversation }) => {
-    // 获取对方用户信息（排除自己）
-    const otherUser = item.participants[0]; // 简化处理，假设只有两个参与者
+    const isGroup = item.type === 'group';
+
+    // 私聊：显示对方信息，群聊：显示群信息
+    const displayName = isGroup ? item.name : item.otherUser?.nickname || '未知用户';
+    const displayAvatar = isGroup ? item.avatar : item.otherUser?.avatar;
+    const isVerified = !isGroup && item.otherUser?.isVerified;
+
+    // 处理最后消息显示
+    let lastMessageText = item.lastMessage?.content || '开始聊天吧';
+    if (item.lastMessage?.messageType === 'system') {
+      lastMessageText = `[系统消息] ${lastMessageText}`;
+    }
 
     return (
       <TouchableOpacity
@@ -146,10 +165,15 @@ export default function ConversationsScreen() {
         activeOpacity={0.7}
       >
         <View style={styles.avatarContainer}>
-          <Image
-            source={{ uri: otherUser.avatar || 'https://via.placeholder.com/56' }}
-            style={styles.avatar}
-          />
+          {displayAvatar ? (
+            <Image source={{ uri: displayAvatar }} style={styles.avatar} />
+          ) : (
+            <View style={[styles.avatar, styles.defaultAvatar]}>
+              <Text style={styles.defaultAvatarText}>
+                {isGroup ? '👥' : (displayName || '?')[0]}
+              </Text>
+            </View>
+          )}
           {item.unreadCount > 0 && (
             <View style={styles.unreadBadge}>
               <Text style={styles.unreadBadgeText}>
@@ -162,17 +186,21 @@ export default function ConversationsScreen() {
         <View style={styles.conversationInfo}>
           <View style={styles.conversationHeader}>
             <View style={styles.nameRow}>
-              <Text style={styles.userName}>{otherUser.nickname}</Text>
-              {otherUser.isVerified && (
+              {isGroup && <Text style={styles.groupIcon}>👥</Text>}
+              <Text style={styles.userName}>{displayName}</Text>
+              {isVerified && (
                 <View style={styles.verifiedBadge}>
                   <Text style={styles.verifiedIcon}>✓</Text>
                 </View>
+              )}
+              {isGroup && item.memberCount && (
+                <Text style={styles.memberCount}>({item.memberCount})</Text>
               )}
             </View>
             <Text style={styles.time}>
               {item.lastMessage
                 ? getRelativeTime(new Date(item.lastMessage.createdAt))
-                : getRelativeTime(new Date(item.updatedAt))}
+                : getRelativeTime(new Date(item.lastMessageAt))}
             </Text>
           </View>
 
@@ -180,7 +208,7 @@ export default function ConversationsScreen() {
             style={[styles.lastMessage, item.unreadCount > 0 && styles.unreadMessage]}
             numberOfLines={1}
           >
-            {item.lastMessage?.content || '开始聊天吧'}
+            {lastMessageText}
           </Text>
         </View>
       </TouchableOpacity>
@@ -213,9 +241,14 @@ export default function ConversationsScreen() {
       {/* 顶部栏 */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>消息</Text>
-        <TouchableOpacity style={styles.newButton} onPress={handleNewConversation}>
-          <Text style={styles.newButtonText}>✏️</Text>
-        </TouchableOpacity>
+        <View style={styles.headerButtons}>
+          <TouchableOpacity style={styles.newButton} onPress={handleCreateGroup}>
+            <Text style={styles.newButtonText}>👥</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.newButton} onPress={handleNewConversation}>
+            <Text style={styles.newButtonText}>✏️</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Socket 连接状态提示 */}
@@ -269,6 +302,10 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: colors.text,
   },
+  headerButtons: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
   newButton: {
     width: 36,
     height: 36,
@@ -279,6 +316,25 @@ const styles = StyleSheet.create({
   },
   newButtonText: {
     fontSize: fontSize.lg,
+  },
+  defaultAvatar: {
+    backgroundColor: colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  defaultAvatarText: {
+    fontSize: fontSize.xl,
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  groupIcon: {
+    fontSize: fontSize.sm,
+    marginRight: spacing.xs,
+  },
+  memberCount: {
+    fontSize: fontSize.sm,
+    color: colors.textSecondary,
+    marginLeft: spacing.xs,
   },
   offlineBanner: {
     backgroundColor: '#FEF2F2',

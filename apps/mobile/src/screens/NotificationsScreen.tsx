@@ -10,8 +10,8 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import LoadingOverlay from '../components/LoadingOverlay';
-import EmptyState from '../components/EmptyState';
+import { LoadingOverlay } from '../components/LoadingOverlay';
+import { EmptyState } from '../components/EmptyState';
 import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS } from '../constants/config';
 import {
   getNotifications,
@@ -103,17 +103,17 @@ export default function NotificationsScreen() {
     switch (type) {
       case 'event_reminder':
         if (data?.eventId) {
-          navigation.navigate('EventDetail' as never, { id: data.eventId } as never);
+          navigation.navigate('EventDetail' as never, { eventId: data.eventId } as never);
         }
         break;
       case 'order_status':
         if (data?.orderId) {
-          navigation.navigate('OrderDetail' as never, { id: data.orderId } as never);
+          navigation.navigate('OrderDetail' as never, { orderId: data.orderId } as never);
         }
         break;
       case 'ticket_status':
         if (data?.ticketId) {
-          navigation.navigate('TicketDetail' as never, { id: data.ticketId } as never);
+          navigation.navigate('TicketDetail' as never, { ticketId: data.ticketId } as never);
         }
         break;
       case 'post_like':

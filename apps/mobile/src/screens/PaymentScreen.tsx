@@ -3,16 +3,22 @@ import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
   TouchableOpacity,
   ActivityIndicator,
   Alert,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { colors, spacing, fontSize } from '../constants/config';
 import { ErrorState } from '../components/ErrorState';
 import { formatPrice } from '../utils/format';
-import { getOrderDetail, payOrder, type Order } from '../services/orders';
+import {
+  getOrderDetail,
+  payOrder,
+  createWechatPayOrder,
+  createAlipayOrder,
+  type Order,
+} from '../services/orders';
 
 const PAYMENT_TIMEOUT = 15 * 60 * 1000; // 15分钟
 
@@ -104,19 +110,78 @@ export default function PaymentScreen() {
     try {
       setPaying(true);
 
-      // 调用支付API
-      const response = await payOrder(orderId);
-
-      if (response.ok) {
-        // 支付成功，跳转到成功页
-        navigation.replace('PaymentSuccess' as never, { orderId } as never);
+      if (selectedMethod === 'wechat') {
+        // 微信支付
+        const response = await createWechatPayOrder(orderId, 'app');
+        if (response.ok && response.data) {
+          const { payParams, codeUrl } = response.data;
+          if (payParams) {
+            // APP支付：调用微信SDK（需要安装react-native-wechat-lib）
+            // 这里展示支付参数，实际需要调用微信SDK
+            Alert.alert(
+              '微信支付',
+              '请在微信中完成支付\n\n' +
+              '注意：APP支付需要集成微信SDK\n' +
+              '当前为开发环境，请使用模拟支付测试',
+              [
+                { text: '取消', style: 'cancel' },
+                {
+                  text: '使用模拟支付',
+                  onPress: () => handleMockPay(),
+                },
+              ]
+            );
+          } else if (codeUrl) {
+            // Native支付：显示二维码
+            Alert.alert('微信支付', `请使用微信扫描二维码支付\n\n${codeUrl}`);
+          }
+        } else {
+          Alert.alert('支付失败', response.error || '创建微信支付订单失败');
+        }
+      } else if (selectedMethod === 'alipay') {
+        // 支付宝支付
+        const response = await createAlipayOrder(orderId, 'app');
+        if (response.ok && response.data) {
+          const { orderString, payUrl } = response.data;
+          if (orderString) {
+            // APP支付：调用支付宝SDK（需要安装@alipay/ariver）
+            Alert.alert(
+              '支付宝支付',
+              '请在支付宝中完成支付\n\n' +
+              '注意：APP支付需要集成支付宝SDK\n' +
+              '当前为开发环境，请使用模拟支付测试',
+              [
+                { text: '取消', style: 'cancel' },
+                {
+                  text: '使用模拟支付',
+                  onPress: () => handleMockPay(),
+                },
+              ]
+            );
+          } else if (payUrl) {
+            // 网页支付：打开浏览器
+            Alert.alert('支付宝支付', `请访问以下链接完成支付\n\n${payUrl}`);
+          }
+        } else {
+          Alert.alert('支付失败', response.error || '创建支付宝订单失败');
+        }
       } else {
-        Alert.alert('支付失败', response.error || '支付失败，请重试');
+        // 模拟支付
+        await handleMockPay();
       }
     } catch (err: any) {
       Alert.alert('支付失败', err.message || '支付失败，请重试');
     } finally {
       setPaying(false);
+    }
+  };
+
+  const handleMockPay = async () => {
+    const response = await payOrder(orderId);
+    if (response.ok) {
+      navigation.replace('PaymentSuccess' as never, { orderId } as never);
+    } else {
+      Alert.alert('支付失败', response.error || '支付失败，请重试');
     }
   };
 

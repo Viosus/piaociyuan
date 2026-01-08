@@ -7,16 +7,19 @@ import {
   View,
   Text,
   StyleSheet,
-  FlatList,
   RefreshControl,
   ActivityIndicator,
   TouchableOpacity,
-  SafeAreaView,
+  Alert,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { FlashList } from '@shopify/flash-list';
 import { colors, spacing, fontSize } from '../constants/config';
 import { PostCard } from '../components/PostCard';
 import { getPosts, likePost, unlikePost, type Post } from '../services/posts';
+import { favoritePost, unfavoritePost } from '../services/favorites';
+import { useAuth } from '../contexts/AuthContext';
 
 const SORT_TABS = [
   { label: '最新', value: 'latest' as const },
@@ -26,6 +29,7 @@ const SORT_TABS = [
 
 export default function EncoreScreen() {
   const navigation = useNavigation();
+  const { logout } = useAuth();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -161,12 +165,95 @@ export default function EncoreScreen() {
     navigation.navigate('PostDetail' as never, { postId: post.id, focusComment: true } as never);
   };
 
+  const handleTokenExpired = () => {
+    Alert.alert(
+      '登录已过期',
+      '您的登录状态已过期，请重新登录',
+      [
+        {
+          text: '重新登录',
+          onPress: async () => {
+            try {
+              await logout();
+              // 导航到登录页面
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'Login' as never }],
+              });
+            } catch (error) {
+              console.error('退出登录失败:', error);
+            }
+          },
+        },
+      ],
+      { cancelable: false }
+    );
+  };
+
+  const handleFavorite = async (post: Post) => {
+    try {
+      // 乐观更新
+      setPosts((prev) =>
+        prev.map((p) =>
+          p.id === post.id
+            ? {
+                ...p,
+                isFavorited: !p.isFavorited,
+              }
+            : p
+        )
+      );
+
+      const response = post.isFavorited
+        ? await unfavoritePost(post.id.toString())
+        : await favoritePost(post.id.toString());
+
+      if (!response.ok) {
+        // 检查是否是登录过期错误
+        if (response.code === 'TOKEN_EXPIRED' || response.error?.includes('登录已过期')) {
+          handleTokenExpired();
+          return;
+        }
+
+        // 如果失败，回滚
+        setPosts((prev) =>
+          prev.map((p) =>
+            p.id === post.id
+              ? {
+                  ...p,
+                  isFavorited: post.isFavorited,
+                }
+              : p
+          )
+        );
+      }
+    } catch (err: any) {
+      // 检查是否是登录过期错误
+      if (err.message?.includes('登录已过期') || err.message?.includes('认证')) {
+        handleTokenExpired();
+        return;
+      }
+
+      // 出错时回滚
+      setPosts((prev) =>
+        prev.map((p) =>
+          p.id === post.id
+            ? {
+                ...p,
+                isFavorited: post.isFavorited,
+              }
+            : p
+        )
+      );
+    }
+  };
+
   const handleUserPress = (userId: number) => {
     navigation.navigate('UserProfile' as never, { userId } as never);
   };
 
   const handleEventPress = (eventId: number) => {
-    navigation.navigate('EventDetail' as never, { id: eventId } as never);
+    navigation.navigate('EventDetail' as never, { eventId: eventId } as never);
   };
 
   const handleCreatePost = () => {
@@ -247,7 +334,7 @@ export default function EncoreScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <FlatList
+      <FlashList
         data={posts}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
@@ -256,10 +343,12 @@ export default function EncoreScreen() {
             onPress={() => handlePostPress(item)}
             onLike={() => handleLike(item)}
             onComment={() => handleComment(item)}
+            onFavorite={() => handleFavorite(item)}
             onUserPress={() => handleUserPress(item.userId)}
             onEventPress={() => item.eventId && handleEventPress(item.eventId)}
           />
         )}
+        estimatedItemSize={400}
         ListHeaderComponent={renderHeader}
         ListFooterComponent={renderFooter}
         ListEmptyComponent={renderEmpty}

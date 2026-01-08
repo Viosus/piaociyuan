@@ -9,6 +9,17 @@ export async function GET(
   try {
     const { id: postId } = await params;
 
+    // 获取当前用户ID（如果已登录）
+    let currentUserId: string | null = null;
+    const authHeader = req.headers.get('Authorization');
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.substring(7);
+      const payload = verifyToken(token);
+      if (payload) {
+        currentUserId = payload.id;
+      }
+    }
+
     const post = await prisma.post.findUnique({
       where: {
         id: postId,
@@ -73,6 +84,26 @@ export async function GET(
           },
           take: 10,
         },
+        likes: currentUserId
+          ? {
+              where: {
+                userId: currentUserId,
+              },
+              select: {
+                id: true,
+              },
+            }
+          : false,
+        favorites: currentUserId
+          ? {
+              where: {
+                userId: currentUserId,
+              },
+              select: {
+                id: true,
+              },
+            }
+          : false,
       },
     });
 
@@ -89,25 +120,14 @@ export async function GET(
 
     // 增加浏览量（每个用户只能增加一次）
     let viewCountIncrement = 0;
-    const authHeader = req.headers.get('Authorization');
-    let userId: string | null = null;
-
-    // 尝试获取用户ID
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      const token = authHeader.substring(7);
-      const payload = verifyToken(token);
-      if (payload) {
-        userId = payload.id;
-      }
-    }
 
     // 检查用户是否已浏览过此帖子
-    if (userId) {
+    if (currentUserId) {
       const existingView = await prisma.postView.findUnique({
         where: {
           postId_userId: {
             postId,
-            userId,
+            userId: currentUserId,
           },
         },
       });
@@ -118,7 +138,7 @@ export async function GET(
           prisma.postView.create({
             data: {
               postId,
-              userId,
+              userId: currentUserId,
             },
           }),
           prisma.post.update({
@@ -148,13 +168,17 @@ export async function GET(
 
     const formattedPost = {
       id: post.id,
+      userId: post.userId,
       content: post.content,
       location: post.location || null,
       viewCount: post.viewCount + viewCountIncrement,
       likeCount: post.likeCount,
       commentCount: post.commentCount,
+      isLiked: currentUserId ? (post.likes && post.likes.length > 0) : false,
+      isFavorited: currentUserId ? (post.favorites && post.favorites.length > 0) : false,
       createdAt: post.createdAt.toISOString(),
       updatedAt: post.updatedAt.toISOString(),
+      eventId: post.eventId,
       user: {
         id: post.user.id,
         nickname: post.user.nickname || 'Anonymous',

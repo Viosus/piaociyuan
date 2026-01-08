@@ -12,12 +12,14 @@ interface MessageBubbleProps {
   message: Message;
   isOwn: boolean;
   showTime?: boolean;
+  showSender?: boolean;
 }
 
 export const MessageBubble: React.FC<MessageBubbleProps> = ({
   message,
   isOwn,
   showTime = false,
+  showSender = false,
 }) => {
   return (
     <View style={styles.container}>
@@ -26,6 +28,11 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
         <View style={styles.timeContainer}>
           <Text style={styles.timeText}>{getTimeString(new Date(message.createdAt))}</Text>
         </View>
+      )}
+
+      {/* 发送者名称（群聊） */}
+      {showSender && message.sender && (
+        <Text style={styles.senderName}>{message.sender.nickname}</Text>
       )}
 
       {/* 消息气泡 */}
@@ -58,6 +65,12 @@ const styles = StyleSheet.create({
   timeText: {
     fontSize: fontSize.sm,
     color: colors.textSecondary,
+  },
+  senderName: {
+    fontSize: fontSize.sm,
+    color: colors.textSecondary,
+    marginLeft: spacing.md,
+    marginBottom: spacing.xs,
   },
   bubbleRow: {
     flexDirection: 'row',

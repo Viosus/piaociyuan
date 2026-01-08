@@ -40,14 +40,40 @@ export async function GET(req: Request) {
 
     const userId = payload.id;
 
+    // 解析查询参数
+    const { searchParams } = new URL(req.url);
+    const statusFilter = searchParams.get('status');
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '50');
+
+    // 构建 where 条件
+    const where: any = {
+      userId,
+    };
+
+    // 根据筛选条件设置 status
+    if (statusFilter) {
+      // 移动端发送的 status 值可能是 'available', 'used', 'refunded'
+      // 需要映射到数据库的实际值
+      const statusMap: Record<string, string[]> = {
+        'available': ['sold', 'available'], // 未使用的票
+        'used': ['used'], // 已使用
+        'refunded': ['refunded'], // 已退票
+      };
+
+      where.status = {
+        in: statusMap[statusFilter] || [statusFilter],
+      };
+    } else {
+      // 不筛选时，显示所有用户的票（已购买、已使用、已退票）
+      where.status = {
+        in: ['sold', 'available', 'used', 'refunded'],
+      };
+    }
+
     // 查询用户的票
     const tickets = await prisma.ticket.findMany({
-      where: {
-        userId,
-        status: {
-          in: ['sold', 'used'], // 已购买或已使用的票
-        },
-      },
+      where,
       include: {
         order: {
           select: {
@@ -61,6 +87,8 @@ export async function GET(req: Request) {
       orderBy: {
         purchasedAt: 'desc',
       },
+      skip: (page - 1) * limit,
+      take: limit,
     });
 
     // 批量获取活动和票档信息
@@ -87,10 +115,18 @@ export async function GET(req: Request) {
       return {
         id: ticket.id,
         ticketCode: ticket.ticketCode,
+        eventId: ticket.eventId,
+        tierId: ticket.tierId,
+        userId: ticket.userId,
+        orderId: ticket.orderId,
+        seatNumber: ticket.seatNumber,
         status: ticket.status,
         price: ticket.price,
-        purchasedAt: ticket.purchasedAt,
-        usedAt: ticket.usedAt,
+        purchasedAt: ticket.purchasedAt?.toISOString(),
+        usedAt: ticket.usedAt?.toISOString(),
+        refundedAt: ticket.refundedAt?.toISOString(),
+        createdAt: ticket.createdAt.toISOString(),
+        updatedAt: ticket.updatedAt.toISOString(),
         event: event
           ? {
               id: event.id,
@@ -106,6 +142,7 @@ export async function GET(req: Request) {
           ? {
               id: tier.id,
               name: tier.name,
+              price: tier.price,
             }
           : null,
         order: ticket.order ? {

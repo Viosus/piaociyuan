@@ -3,13 +3,13 @@ import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
   Alert,
   TouchableOpacity,
   TextInput,
   Modal,
   ActivityIndicator,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { BarCodeScanner } from 'expo-barcode-scanner';
 import { colors, spacing, fontSize } from '../constants/config';
 import { verifyTicket } from '../services/tickets';

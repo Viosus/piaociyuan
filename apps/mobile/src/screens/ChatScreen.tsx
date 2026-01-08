@@ -9,10 +9,10 @@ import {
   StyleSheet,
   FlatList,
   ActivityIndicator,
-  SafeAreaView,
   TouchableOpacity,
   Alert,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { colors, spacing, fontSize } from '../constants/config';
 import {
@@ -33,9 +33,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 export default function ChatScreen() {
   const route = useRoute();
   const navigation = useNavigation();
-  const { conversationId, userId } = route.params as {
+  const { conversationId, userId, isGroup, groupName } = route.params as {
     conversationId?: string;
     userId?: number;
+    isGroup?: boolean;
+    groupName?: string;
   };
 
   const { isConnected, sendMessage, sendTyping, sendStopTyping, joinConversation, leaveConversation, on, off } = useSocket();
@@ -151,10 +153,9 @@ export default function ChatScreen() {
       const response = await getConversation(conversationId);
       if (response.ok && response.data) {
         setConversation(response.data);
-        // 设置对方用户 ID
-        const otherUser = response.data.participants.find((p) => p.id !== currentUserId);
-        if (otherUser) {
-          setOtherUserId(otherUser.id);
+        // 设置对方用户 ID（仅私聊）
+        if (response.data.otherUser) {
+          setOtherUserId(response.data.otherUser.id);
         }
       }
     } catch (error) {
@@ -237,7 +238,17 @@ export default function ChatScreen() {
     const showTime = !prevMessage ||
       new Date(item.createdAt).getTime() - new Date(prevMessage.createdAt).getTime() > 300000; // 5分钟
 
-    return <MessageBubble message={item} isOwn={isOwn} showTime={showTime} />;
+    // 群聊时显示发送者名称（自己的消息不显示）
+    const showSender = isGroup && !isOwn && (!prevMessage || prevMessage.senderId !== item.senderId);
+
+    return (
+      <MessageBubble
+        message={item}
+        isOwn={isOwn}
+        showTime={showTime}
+        showSender={showSender}
+      />
+    );
   };
 
   const renderHeader = () => {
@@ -269,9 +280,12 @@ export default function ChatScreen() {
     );
   }
 
-  // 获取对方用户信息
-  const otherUser = conversation?.participants.find((p) => p.id !== currentUserId);
+  // 获取对方用户信息（私聊）
+  const otherUser = conversation?.otherUser;
   const isOnline = otherUserId ? isUserOnline(otherUserId) : false;
+
+  // 获取显示名称
+  const displayName = isGroup ? (groupName || conversation?.name || '群聊') : (otherUser?.nickname || '聊天');
 
   return (
     <SafeAreaView style={styles.container}>
@@ -281,14 +295,26 @@ export default function ChatScreen() {
           <Text style={styles.backButton}>← 返回</Text>
         </TouchableOpacity>
         <View style={styles.headerCenter}>
-          <Text style={styles.headerTitle}>{otherUser?.nickname || '聊天'}</Text>
-          {isConnected && (
+          <View style={styles.headerTitleRow}>
+            {isGroup && <Text style={styles.groupIcon}>👥</Text>}
+            <Text style={styles.headerTitle}>{displayName}</Text>
+          </View>
+          {!isGroup && isConnected && (
             <Text style={[styles.onlineStatus, isOnline && styles.onlineStatusActive]}>
               {isOnline ? '在线' : '离线'}
             </Text>
           )}
+          {isGroup && conversation?.memberCount && (
+            <Text style={styles.memberCount}>{conversation.memberCount}人</Text>
+          )}
         </View>
-        <View style={{ width: 50 }} />
+        {isGroup ? (
+          <TouchableOpacity onPress={() => navigation.navigate('GroupDetail' as never, { groupId: conversationId } as never)}>
+            <Text style={styles.settingsButton}>⚙️</Text>
+          </TouchableOpacity>
+        ) : (
+          <View style={{ width: 50 }} />
+        )}
       </View>
 
       {/* Socket 连接状态提示 */}
@@ -347,11 +373,29 @@ const styles = StyleSheet.create({
   },
   headerCenter: {
     alignItems: 'center',
+    flex: 1,
+  },
+  headerTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  groupIcon: {
+    fontSize: fontSize.md,
   },
   headerTitle: {
     fontSize: fontSize.lg,
     fontWeight: '600',
     color: colors.text,
+  },
+  memberCount: {
+    fontSize: fontSize.sm,
+    color: colors.textSecondary,
+    marginTop: 2,
+  },
+  settingsButton: {
+    fontSize: fontSize.lg,
+    padding: spacing.xs,
   },
   onlineStatus: {
     fontSize: fontSize.sm,

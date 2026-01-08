@@ -1,13 +1,12 @@
 import { apiClient } from './api';
 
 export interface HeroBanner {
-  id: number;
+  id: string;
   title: string;
   subtitle?: string;
-  imageUrl: string;
+  image: string;
   link?: string;
-  gradientFrom: string;
-  gradientTo: string;
+  color?: string;  // 背景颜色
   order: number;
   isActive: boolean;
 }

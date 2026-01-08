@@ -270,7 +270,17 @@ class ApiClient {
           } catch (refreshError) {
             this.processQueue(refreshError, null);
             this.isRefreshing = false;
-            throw refreshError;
+            // 抛出特殊的认证错误
+            throw {
+              response: {
+                status: 401,
+                data: {
+                  ok: false,
+                  code: 'TOKEN_EXPIRED',
+                  error: '登录已过期，请重新登录',
+                },
+              },
+            };
           }
         }
 

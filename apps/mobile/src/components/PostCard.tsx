@@ -8,9 +8,9 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  Image,
   Dimensions,
 } from 'react-native';
+import { Image } from 'expo-image';
 import { colors, spacing, fontSize } from '../constants/config';
 import { Post } from '../services/posts';
 import { getRelativeTime } from '../utils/date';
@@ -23,6 +23,7 @@ interface PostCardProps {
   onPress: () => void;
   onLike?: () => void;
   onComment?: () => void;
+  onFavorite?: () => void;
   onUserPress?: () => void;
   onEventPress?: () => void;
 }
@@ -32,6 +33,7 @@ export const PostCard: React.FC<PostCardProps> = ({
   onPress,
   onLike,
   onComment,
+  onFavorite,
   onUserPress,
   onEventPress,
 }) => {
@@ -44,7 +46,12 @@ export const PostCard: React.FC<PostCardProps> = ({
     if (imageCount === 1) {
       return (
         <TouchableOpacity style={styles.singleImageContainer} onPress={onPress} activeOpacity={0.9}>
-          <Image source={{ uri: post.images[0] }} style={styles.singleImage} />
+          <Image
+            source={post.images[0]}
+            style={styles.singleImage}
+            contentFit="cover"
+            transition={200}
+          />
         </TouchableOpacity>
       );
     }
@@ -63,7 +70,12 @@ export const PostCard: React.FC<PostCardProps> = ({
             onPress={onPress}
             activeOpacity={0.9}
           >
-            <Image source={{ uri: image }} style={styles.gridImageContent} />
+            <Image
+              source={image}
+              style={styles.gridImageContent}
+              contentFit="cover"
+              transition={200}
+            />
             {index === 8 && post.images.length > 9 && (
               <View style={styles.moreImagesOverlay}>
                 <Text style={styles.moreImagesText}>+{post.images.length - 9}</Text>
@@ -84,8 +96,10 @@ export const PostCard: React.FC<PostCardProps> = ({
         activeOpacity={0.7}
       >
         <Image
-          source={{ uri: post.user?.avatar || 'https://via.placeholder.com/40' }}
+          source={post.user?.avatar || 'https://via.placeholder.com/40'}
           style={styles.avatar}
+          contentFit="cover"
+          transition={200}
         />
         <View style={styles.userInfo}>
           <View style={styles.nameRow}>
@@ -153,6 +167,17 @@ export const PostCard: React.FC<PostCardProps> = ({
           <Text style={styles.actionIcon}>💬</Text>
           <Text style={styles.actionText}>
             {post.commentCount > 0 ? post.commentCount : '评论'}
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.actionButton}
+          onPress={onFavorite}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.actionIcon}>{post.isFavorited ? '⭐' : '☆'}</Text>
+          <Text style={[styles.actionText, post.isFavorited && styles.actionTextActive]}>
+            收藏
           </Text>
         </TouchableOpacity>
 

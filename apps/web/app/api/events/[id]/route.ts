@@ -11,7 +11,7 @@ export async function GET(_req: Request, { params }: Props) {
 
     if (isNaN(eventId)) {
       return NextResponse.json(
-        { error: 'Invalid event ID' },
+        { ok: false, error: 'Invalid event ID' },
         { status: 400 }
       );
     }
@@ -29,16 +29,39 @@ export async function GET(_req: Request, { params }: Props) {
 
     if (!event) {
       return NextResponse.json(
-        { error: 'Event not found' },
+        { ok: false, error: 'Event not found' },
         { status: 404 }
       );
     }
 
-    return NextResponse.json(event);
+    // 字段映射：统一前端字段名
+    const mappedEvent = {
+      id: event.id,
+      name: event.name,
+      description: event.desc,
+      venue: event.venue,
+      startTime: `${event.date}T${event.time}`,
+      endTime: `${event.date}T${event.time}`, // 如果没有单独的结束时间，使用相同的时间
+      coverImage: event.cover,
+      category: event.category,
+      status: event.saleStatus, // on_sale -> ongoing 等映射
+      createdAt: event.createdAt,
+      tiers: event.tiers.map(tier => ({
+        id: tier.id,
+        eventId: tier.eventId,
+        name: tier.name,
+        price: tier.price,
+        capacity: tier.capacity,
+        available: tier.remaining, // remaining -> available
+        description: '', // 如果 tier 没有 description 字段，设置为空字符串
+      })),
+    };
+
+    return NextResponse.json({ ok: true, data: mappedEvent });
   } catch (err: unknown) {
     console.error('[EVENT_GET_ERROR]', err);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { ok: false, error: 'Internal server error' },
       { status: 500 }
     );
   }

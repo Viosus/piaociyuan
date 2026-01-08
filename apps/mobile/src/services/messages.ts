@@ -5,24 +5,69 @@
 import { apiClient } from './api';
 
 /**
- * 对话接口
+ * 对话用户接口
+ */
+export interface ConversationUser {
+  id: number;
+  nickname: string;
+  avatar?: string;
+  isVerified?: boolean;
+}
+
+/**
+ * 对话接口（支持私聊和群聊）
  */
 export interface Conversation {
   id: string;
-  participants: {
-    id: number;
-    nickname: string;
-    avatar?: string;
-    isVerified: boolean;
-  }[];
+  type: 'private' | 'group';
+  // 私聊
+  otherUser?: ConversationUser;
+  // 群聊
+  name?: string;
+  avatar?: string;
+  memberCount?: number;
+  myRole?: 'owner' | 'admin' | 'member';
+  // 通用
   lastMessage?: {
     id: string;
     content: string;
-    senderId: number;
+    senderId: string;
     createdAt: string;
+    isRead: boolean;
+    messageType?: string;
   };
   unreadCount: number;
-  updatedAt: string;
+  lastMessageAt: string;
+}
+
+/**
+ * 群聊成员接口
+ */
+export interface GroupMember {
+  id: number;
+  nickname: string;
+  avatar?: string;
+  isVerified?: boolean;
+  role: 'owner' | 'admin' | 'member';
+  nickname_in_group?: string;
+  isMuted?: boolean;
+  joinedAt: string;
+}
+
+/**
+ * 群聊详情接口
+ */
+export interface GroupDetail {
+  id: string;
+  type: 'group';
+  name: string;
+  avatar?: string;
+  description?: string;
+  creatorId: string;
+  memberCount: number;
+  maxMembers: number;
+  myRole: 'owner' | 'admin' | 'member';
+  participants: GroupMember[];
   createdAt: string;
 }
 
@@ -118,4 +163,85 @@ export async function deleteConversation(conversationId: string) {
  */
 export async function getUnreadCount() {
   return apiClient.get<{ count: number }>('/api/messages/unread-count');
+}
+
+// ==================== 群聊相关 API ====================
+
+/**
+ * 创建群聊
+ */
+export async function createGroup(data: {
+  name: string;
+  memberIds: string[];
+  avatar?: string;
+  description?: string;
+}) {
+  return apiClient.post<{
+    id: string;
+    type: 'group';
+    name: string;
+    avatar?: string;
+    memberCount: number;
+    isNew: boolean;
+  }>('/api/messages/groups', data);
+}
+
+/**
+ * 获取群聊详情
+ */
+export async function getGroupDetail(groupId: string) {
+  return apiClient.get<GroupDetail>(`/api/messages/groups/${groupId}`);
+}
+
+/**
+ * 更新群聊信息
+ */
+export async function updateGroup(groupId: string, data: {
+  name?: string;
+  avatar?: string;
+  description?: string;
+}) {
+  return apiClient.put<{
+    id: string;
+    name: string;
+    avatar?: string;
+    description?: string;
+  }>(`/api/messages/groups/${groupId}`, data);
+}
+
+/**
+ * 添加群成员
+ */
+export async function addGroupMembers(groupId: string, memberIds: string[]) {
+  return apiClient.post<{
+    success: boolean;
+    addedCount: number;
+  }>(`/api/messages/groups/${groupId}/members`, { memberIds });
+}
+
+/**
+ * 移除群成员
+ */
+export async function removeGroupMember(groupId: string, memberId: string) {
+  return apiClient.delete<{ success: boolean }>(
+    `/api/messages/groups/${groupId}/members?memberId=${memberId}`
+  );
+}
+
+/**
+ * 退出群聊
+ */
+export async function leaveGroup(groupId: string) {
+  return apiClient.post<{ success: boolean; message: string }>(
+    `/api/messages/groups/${groupId}/leave`
+  );
+}
+
+/**
+ * 解散群聊
+ */
+export async function disbandGroup(groupId: string) {
+  return apiClient.delete<{ success: boolean; message: string }>(
+    `/api/messages/groups/${groupId}`
+  );
 }

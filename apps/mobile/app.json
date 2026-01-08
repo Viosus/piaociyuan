@@ -16,7 +16,9 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.piaociyuan.mobile",
-      "associatedDomains": ["applinks:piaociyuan.com"]
+      "associatedDomains": [
+        "applinks:piaociyuan.com"
+      ]
     },
     "android": {
       "adaptiveIcon": {
@@ -37,7 +39,10 @@
               "pathPrefix": "/app"
             }
           ],
-          "category": ["BROWSABLE", "DEFAULT"]
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         }
       ]
     },
@@ -46,7 +51,9 @@
     },
     "plugins": [
       "expo-secure-store",
-      "expo-barcode-scanner"
+      "expo-barcode-scanner",
+      "expo-asset",
+      "expo-font"
     ]
   }
 }
