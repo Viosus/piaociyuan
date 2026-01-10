@@ -14,6 +14,7 @@ import { useRoute, RouteProp } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { LoadingOverlay } from '../components/LoadingOverlay';
 import Button from '../components/Button';
+import NFTMediaDisplay from '../components/NFTMediaDisplay';
 import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS } from '../constants/config';
 import { getNFTDetail, type UserNFT, type NFTRarity } from '../services/nft';
 
@@ -103,22 +104,18 @@ export default function NFTDetailScreen() {
 
   return (
     <ScrollView style={styles.container}>
-      {/* NFT 图片 */}
+      {/* NFT 图片/3D 模型 */}
       <View style={styles.imageContainer}>
-        <Image
-          source={{ uri: nft.nft.imageUrl }}
-          style={styles.image}
-          resizeMode="contain"
+        <NFTMediaDisplay
+          has3DModel={nft.nft.has3DModel}
+          model3DUrl={nft.nft.model3DUrl}
+          imageUrl={nft.nft.imageUrl}
+          name={nft.nft.name}
+          style={styles.mediaDisplay}
         />
 
-        {/* 特殊标记 */}
+        {/* 特殊标记（AR/动画，3D 标记由 NFTMediaDisplay 内部处理） */}
         <View style={styles.featureBadges}>
-          {nft.nft.has3DModel && (
-            <View style={styles.featureBadge}>
-              <Ionicons name="cube-outline" size={20} color="#fff" />
-              <Text style={styles.featureBadgeText}>3D</Text>
-            </View>
-          )}
           {nft.nft.hasAR && (
             <View style={styles.featureBadge}>
               <Ionicons name="scan-outline" size={20} color="#fff" />
@@ -333,6 +330,9 @@ const styles = StyleSheet.create({
     aspectRatio: 1,
     backgroundColor: COLORS.surface,
     position: 'relative',
+  },
+  mediaDisplay: {
+    flex: 1,
   },
   image: {
     width: '100%',

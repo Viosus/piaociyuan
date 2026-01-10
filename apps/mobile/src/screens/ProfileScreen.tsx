@@ -63,7 +63,7 @@ export default function ProfileScreen() {
       title: '我的资产',
       items: [
         { icon: 'receipt-outline' as const, label: '我的订单', screen: 'Orders', emoji: '📦' },
-        { icon: 'diamond-outline' as const, label: '我的 NFT', screen: 'MyNFTs', emoji: '💎' },
+        { icon: 'diamond-outline' as const, label: '我的次元', screen: 'MyNFTs', emoji: '💎' },
         { icon: 'heart-outline' as const, label: '我的收藏', screen: 'Favorites', emoji: '⭐' },
       ],
     },

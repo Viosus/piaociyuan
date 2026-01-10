@@ -86,8 +86,12 @@ export async function GET(req: NextRequest) {
           // NFT 额外信息
           rarity: userNFT.nft.rarity,
           category: userNFT.nft.category,
+          // 3D 模型相关
           has3DModel: userNFT.nft.has3DModel,
+          model3DUrl: userNFT.nft.model3DUrl,
+          modelFormat: userNFT.nft.modelFormat,
           hasAR: userNFT.nft.hasAR,
+          hasAnimation: userNFT.nft.hasAnimation,
         };
       })
     );

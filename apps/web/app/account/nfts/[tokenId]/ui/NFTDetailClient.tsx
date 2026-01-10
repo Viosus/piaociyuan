@@ -3,6 +3,7 @@
 import { useState, useEffect, use } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import NFTMediaDisplay from "@/components/NFTMediaDisplay";
 
 type NFTAsset = {
   id: string;
@@ -11,6 +12,10 @@ type NFTAsset = {
   metadataUri: string;
   currentOwnerAddress: string;
   mintedAt: string;
+  // 3D 模型相关字段
+  has3DModel?: boolean;
+  model3DUrl?: string | null;
+  modelFormat?: string | null;
   order: {
     id: string;
     eventId: number;
@@ -202,10 +207,12 @@ export default function NFTDetailClient({
           {/* 左侧：NFT图片 */}
           <div className="bg-white rounded-2xl shadow p-6">
             <div className="aspect-square rounded-lg overflow-hidden bg-gray-100 mb-4">
-              <img
-                src={imageUrl}
-                alt={metadata?.name || `NFT #${nft.tokenId}`}
-                className="w-full h-full object-cover"
+              <NFTMediaDisplay
+                has3DModel={nft.has3DModel || false}
+                model3DUrl={nft.model3DUrl}
+                imageUrl={imageUrl}
+                name={metadata?.name || `NFT #${nft.tokenId}`}
+                className="w-full h-full"
               />
             </div>
 

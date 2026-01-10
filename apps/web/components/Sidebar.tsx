@@ -121,24 +121,17 @@ export default function Sidebar() {
       {/* Logo */}
       <Link
         href="/events"
-        className="h-20 border-b border-[#FFE3F0]/30 flex items-center justify-center group-hover:justify-start group-hover:px-4 transition-all duration-300 relative"
+        className="h-28 border-b border-[#FFE3F0]/30 flex items-center justify-center transition-all duration-300 relative overflow-hidden"
       >
-        {/* Logo图标 - 始终显示 */}
-        <div className="transition-all duration-300">
+        {/* Logo图标 - 收起时小，展开时大 */}
+        <div className="transition-all duration-300 flex justify-center w-full">
           <Image
             src="/icons/logo-gradient.png"
             alt="票次元"
-            width={56}
-            height={56}
-            className="object-contain"
+            width={288}
+            height={100}
+            className="object-contain w-16 h-20 group-hover:w-56 group-hover:h-24 transition-all duration-300"
           />
-        </div>
-
-        {/* 文字 - 仅展开时显示 */}
-        <div className="opacity-0 scale-0 group-hover:opacity-100 group-hover:scale-100 transition-all duration-300 whitespace-nowrap ml-3">
-          <h1 className="text-2xl font-bold text-[#282828]">
-            票次元
-          </h1>
         </div>
       </Link>
 

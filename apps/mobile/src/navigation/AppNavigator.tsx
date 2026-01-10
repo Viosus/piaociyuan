@@ -24,6 +24,7 @@ import OrdersScreen from '../screens/OrdersScreen';
 import OrderDetailScreen from '../screens/OrderDetailScreen';
 import FavoritesScreen from '../screens/FavoritesScreen';
 import MyNFTsScreen from '../screens/MyNFTsScreen';
+import NFTDetailScreen from '../screens/NFTDetailScreen';
 import EditProfileScreen from '../screens/EditProfileScreen';
 import VerificationScreen from '../screens/VerificationScreen';
 import SettingsScreen from '../screens/SettingsScreen';
@@ -210,7 +211,18 @@ function MainStackNavigator() {
         name="MyNFTs"
         component={MyNFTsScreen}
         options={{
-          title: '我的 NFT',
+          title: '我的次元',
+          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: COLORS.primary,
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+        }}
+      />
+      <MainStack.Screen
+        name="NFTDetail"
+        component={NFTDetailScreen}
+        options={{
+          title: '次元详情',
           headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: COLORS.primary,
           headerTitleStyle: {
             fontWeight: 'bold',
