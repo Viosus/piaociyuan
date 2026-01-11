@@ -76,3 +76,9 @@ web-build/
 *.key
 *.mobileprovision
 *.orig.*
+
+# Docker artifacts
+*.tar
+*.tar.part_*
+small_parts/
+tiny_parts/
