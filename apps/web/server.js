@@ -12,8 +12,14 @@ const port = process.env.PORT || 3000;
 const app = next({ dev, hostname, port });
 const handle = app.getRequestHandler();
 
-// 引入生产级定时任务调度器
-const scheduler = require('./lib/scheduler');
+// 尝试加载定时任务调度器
+let scheduler;
+try {
+  scheduler = require('./lib/scheduler');
+} catch (e) {
+  console.log('Scheduler not available');
+  scheduler = { start: () => {}, stop: () => {} };
+}
 
 app.prepare().then(() => {
   const httpServer = createServer(async (req, res) => {

@@ -8,6 +8,7 @@
 import { NextResponse } from 'next/server';
 import { v4 as uuidv4 } from 'uuid';
 import prisma from '@/lib/prisma';
+import { Prisma } from '@prisma/client';
 import { normalizeId } from '@/lib/store';
 import { createRefund, PaymentMethod } from '@/lib/payment';
 
@@ -34,7 +35,6 @@ export async function POST(req: Request) {
     const order = await prisma.order.findUnique({
       where: { id: normalizedOrderId },
       include: {
-        tier: true,
         tickets: true,
       },
     });
@@ -45,6 +45,22 @@ export async function POST(req: Request) {
           ok: false,
           code: 'ORDER_NOT_FOUND',
           message: '订单不存在。',
+        },
+        { status: 404 }
+      );
+    }
+
+    // 获取票档信息
+    const tier = await prisma.tier.findUnique({
+      where: { id: parseInt(order.tierId) },
+    });
+
+    if (!tier) {
+      return NextResponse.json(
+        {
+          ok: false,
+          code: 'TIER_NOT_FOUND',
+          message: '票档不存在。',
         },
         { status: 404 }
       );
@@ -88,7 +104,7 @@ export async function POST(req: Request) {
     }
 
     // 计算退款金额
-    const refundAmount = order.qty * order.tier.price;
+    const refundAmount = order.qty * tier.price;
     const refundId = `RF${Date.now()}${uuidv4().slice(0, 8).toUpperCase()}`;
 
     // 判断支付方式
@@ -125,7 +141,7 @@ export async function POST(req: Request) {
     }
 
     // 更新订单和票的状态
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       // 更新订单状态
       await tx.order.update({
         where: { id: normalizedOrderId },
@@ -149,7 +165,7 @@ export async function POST(req: Request) {
 
       // 恢复库存
       await tx.tier.update({
-        where: { id: order.tierId },
+        where: { id: parseInt(order.tierId) },
         data: {
           sold: {
             decrement: order.qty,

@@ -7,6 +7,7 @@
 
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { Prisma } from '@prisma/client';
 import { parseAlipayNotification, getPaymentConfig } from '@/lib/payment';
 
 export async function POST(req: Request) {
@@ -50,7 +51,7 @@ export async function POST(req: Request) {
     }
 
     // 更新订单状态
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       // 更新订单
       await tx.order.update({
         where: { id: notification.orderId },

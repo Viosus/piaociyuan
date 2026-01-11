@@ -13,7 +13,10 @@ export async function GET(req: Request) {
     const pageSize = parseInt(searchParams.get('pageSize') || '20');
 
     // 构建 where 条件
-    const where: any = {};
+    const where: {
+      category?: string;
+      saleStatus?: string | { in: string[] };
+    } = {};
     if (category) {
       where.category = category;
     }
@@ -50,7 +53,7 @@ export async function GET(req: Request) {
     });
 
     // 转换为前端期望的格式
-    const formattedEvents = events.map(event => ({
+    const formattedEvents = events.map((event) => ({
       id: event.id,
       name: event.name,
       description: event.desc,

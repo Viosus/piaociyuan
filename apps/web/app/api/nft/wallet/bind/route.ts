@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
 
     // 3. 验证签名
     try {
-      const recoveredAddress = ethers.utils.verifyMessage(message, signature);
+      const recoveredAddress = ethers.verifyMessage(message, signature);
       if (recoveredAddress.toLowerCase() !== walletAddress.toLowerCase()) {
         return NextResponse.json({ error: "签名验证失败" }, { status: 400 });
       }

@@ -2,9 +2,13 @@
 import Link from "next/link";
 import prisma from "@/lib/prisma";
 import { getSaleStatusInfo } from "@/lib/eventUtils";
+import type { Event } from "@prisma/client";
 import HeroBanner from "./ui/HeroBanner";
 import SectionContainer from "./ui/SectionContainer";
 import EventCard from "./ui/EventCard";
+
+// Force dynamic rendering - this page requires database access
+export const dynamic = 'force-dynamic';
 
 // 获取首页栏目数据
 async function getHomepageSections() {
@@ -24,7 +28,7 @@ async function getHomepageSections() {
   // 处理自动栏目和手动栏目
   const processedSections = await Promise.all(
     sections.map(async (section) => {
-      let events = [];
+      let events: Event[] = [];
 
       if (section.type === 'manual') {
         // 手动栏目：使用配置的活动

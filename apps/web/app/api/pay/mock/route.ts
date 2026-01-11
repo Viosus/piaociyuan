@@ -1,6 +1,7 @@
 // app/api/pay/mock/route.ts
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { Prisma } from '@prisma/client';
 import { normalizeId } from '@/lib/store';
 import { purgeExpiredHolds, ApiError } from '@/lib/inventory';
 
@@ -85,7 +86,7 @@ export async function POST(req: Request) {
     // 5️⃣ 执行支付（事务）
     console.log(`[PAY_START] orderId=${normalizedOrderId}`);
 
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       // a. 更新订单状态为 PAID
       await tx.order.update({
         where: { id: normalizedOrderId },

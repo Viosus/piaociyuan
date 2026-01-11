@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // 注意：不使用 standalone 模式以支持自定义 server.js (Socket.io)
   images: {
     remotePatterns: [
       {

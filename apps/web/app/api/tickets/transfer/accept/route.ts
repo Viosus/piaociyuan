@@ -7,6 +7,7 @@
 
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { Prisma } from '@prisma/client';
 import { verifyToken } from '@/lib/auth';
 
 /**
@@ -112,7 +113,7 @@ export async function POST(req: Request) {
     });
 
     // 接收转让 - 使用事务
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       // 1. 更新转让记录
       const updatedTransfer = await tx.ticketTransfer.update({
         where: { id: transfer.id },

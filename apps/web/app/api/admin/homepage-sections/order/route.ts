@@ -17,7 +17,7 @@ export async function PUT(req: NextRequest) {
     const token = authHeader.replace("Bearer ", "");
     const payload = verifyToken(token);
 
-    if (!payload || !payload.userId) {
+    if (!payload || !payload.id) {
       return NextResponse.json(
         { ok: false, message: "Token 无效" },
         { status: 401 }
@@ -26,7 +26,7 @@ export async function PUT(req: NextRequest) {
 
     // 检查是否是管理员
     const user = await prisma.user.findUnique({
-      where: { id: payload.userId },
+      where: { id: payload.id },
       select: { role: true }
     });
 

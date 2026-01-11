@@ -6,7 +6,7 @@ import prisma from "@/lib/prisma";
 // PUT - 更新栏目
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const authHeader = req.headers.get("authorization");
@@ -20,7 +20,7 @@ export async function PUT(
     const token = authHeader.replace("Bearer ", "");
     const payload = verifyToken(token);
 
-    if (!payload || !payload.userId) {
+    if (!payload || !payload.id) {
       return NextResponse.json(
         { ok: false, message: "Token 无效" },
         { status: 401 }
@@ -29,7 +29,7 @@ export async function PUT(
 
     // 检查是否是管理员
     const user = await prisma.user.findUnique({
-      where: { id: payload.userId },
+      where: { id: payload.id },
       select: { role: true }
     });
 
@@ -40,7 +40,7 @@ export async function PUT(
       );
     }
 
-    const { id } = params;
+    const { id } = await params;
     const body = await req.json();
     const { title, subtitle, icon, bgGradient, moreLink, type, autoConfig, isActive, order } = body;
 
@@ -91,7 +91,7 @@ export async function PUT(
 // DELETE - 删除栏目
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const authHeader = req.headers.get("authorization");
@@ -105,7 +105,7 @@ export async function DELETE(
     const token = authHeader.replace("Bearer ", "");
     const payload = verifyToken(token);
 
-    if (!payload || !payload.userId) {
+    if (!payload || !payload.id) {
       return NextResponse.json(
         { ok: false, message: "Token 无效" },
         { status: 401 }
@@ -114,7 +114,7 @@ export async function DELETE(
 
     // 检查是否是管理员
     const user = await prisma.user.findUnique({
-      where: { id: payload.userId },
+      where: { id: payload.id },
       select: { role: true }
     });
 
@@ -125,7 +125,7 @@ export async function DELETE(
       );
     }
 
-    const { id } = params;
+    const { id } = await params;
 
     // 检查栏目是否存在
     const existingSection = await prisma.homepageSection.findUnique({

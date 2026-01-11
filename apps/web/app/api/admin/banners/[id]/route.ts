@@ -6,7 +6,7 @@ import { verifyToken } from "@/lib/auth";
 // PUT /api/admin/banners/:id - 更新 banner
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const token = req.headers.get("Authorization")?.replace("Bearer ", "");
@@ -19,7 +19,7 @@ export async function PUT(
       return NextResponse.json({ ok: false, message: "需要管理员权限" }, { status: 403 });
     }
 
-    const { id } = params;
+    const { id } = await params;
     const body = await req.json();
     const { title, subtitle, image, link, color, isActive } = body;
 
@@ -61,7 +61,7 @@ export async function PUT(
 // DELETE /api/admin/banners/:id - 删除 banner
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const token = req.headers.get("Authorization")?.replace("Bearer ", "");
@@ -74,7 +74,7 @@ export async function DELETE(
       return NextResponse.json({ ok: false, message: "需要管理员权限" }, { status: 403 });
     }
 
-    const { id } = params;
+    const { id } = await params;
 
     // 检查 banner 是否存在
     const existingBanner = await prisma.heroBanner.findUnique({

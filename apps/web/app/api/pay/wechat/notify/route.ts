@@ -7,6 +7,7 @@
 
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { Prisma } from '@prisma/client';
 import { parseWechatNotification, getPaymentConfig } from '@/lib/payment';
 
 // 微信支付平台证书（需要从微信商户平台下载并配置）
@@ -64,7 +65,7 @@ export async function POST(req: Request) {
     }
 
     // 更新订单状态
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       // 更新订单
       await tx.order.update({
         where: { id: notification.orderId },

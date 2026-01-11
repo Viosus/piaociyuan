@@ -7,6 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { Prisma } from '@prisma/client';
 import { requireAdmin } from '@/lib/auth';
 
 type Props = { params: Promise<{ id: string }> };
@@ -74,7 +75,7 @@ export async function PATCH(req: NextRequest, { params }: Props) {
     // 4️⃣ 更新举报状态
     const newStatus = action === 'approve' ? 'approved' : 'rejected';
 
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       // 更新举报状态
       await tx.postReport.update({
         where: { id: reportId },

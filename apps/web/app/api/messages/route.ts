@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
 
     // 🔥 实时推送：通过 WebSocket 推送新消息给所有其他参与者
     try {
-      const otherUserIds = conversation.participants.map((p: { userId: number }) => p.userId);
+      const otherUserIds = conversation.participants.map((p: { userId: string }) => p.userId);
       for (const userId of otherUserIds) {
         emitToUser(userId, 'message:new', {
           ...message,

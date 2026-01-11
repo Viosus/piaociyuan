@@ -4,6 +4,15 @@ import prisma from '@/lib/prisma';
 
 type Props = { params: Promise<{ id: string }> };
 
+type TierData = {
+  id: number;
+  eventId: number;
+  name: string;
+  price: number;
+  capacity: number;
+  remaining: number;
+};
+
 export async function GET(_req: Request, { params }: Props) {
   try {
     const { id } = await params;
@@ -46,7 +55,7 @@ export async function GET(_req: Request, { params }: Props) {
       category: event.category,
       status: event.saleStatus, // on_sale -> ongoing 等映射
       createdAt: event.createdAt,
-      tiers: event.tiers.map(tier => ({
+      tiers: event.tiers.map((tier: TierData) => ({
         id: tier.id,
         eventId: tier.eventId,
         name: tier.name,

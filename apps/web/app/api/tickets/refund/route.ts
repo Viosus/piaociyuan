@@ -11,6 +11,7 @@
 
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { Prisma } from '@prisma/client';
 import { verifyToken } from '@/lib/auth';
 
 export async function POST(req: Request) {
@@ -80,7 +81,7 @@ export async function POST(req: Request) {
     }
 
     // 4️⃣ 执行退票（事务）
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       // a. 更新票的状态为 refunded，保留 orderId 和 userId 以维护历史记录
       await tx.ticket.update({
         where: { id: ticketId },

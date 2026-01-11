@@ -385,7 +385,7 @@ export async function POST(req: Request) {
     // 创建订单（事务）
     const orderId = `O_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       // 1. 创建订单
       const newOrder = await tx.order.create({
         data: {

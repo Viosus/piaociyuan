@@ -6,7 +6,7 @@ import prisma from "@/lib/prisma";
 // POST - 添加活动到栏目
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const authHeader = req.headers.get("authorization");
@@ -20,7 +20,7 @@ export async function POST(
     const token = authHeader.replace("Bearer ", "");
     const payload = verifyToken(token);
 
-    if (!payload || !payload.userId) {
+    if (!payload || !payload.id) {
       return NextResponse.json(
         { ok: false, message: "Token 无效" },
         { status: 401 }
@@ -29,7 +29,7 @@ export async function POST(
 
     // 检查是否是管理员
     const user = await prisma.user.findUnique({
-      where: { id: payload.userId },
+      where: { id: payload.id },
       select: { role: true }
     });
 
@@ -40,7 +40,7 @@ export async function POST(
       );
     }
 
-    const { id: sectionId } = params;
+    const { id: sectionId } = await params;
     const body = await req.json();
     const { eventId } = body;
 
@@ -141,7 +141,7 @@ export async function POST(
 // PUT - 批量更新活动顺序
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const authHeader = req.headers.get("authorization");
@@ -155,7 +155,7 @@ export async function PUT(
     const token = authHeader.replace("Bearer ", "");
     const payload = verifyToken(token);
 
-    if (!payload || !payload.userId) {
+    if (!payload || !payload.id) {
       return NextResponse.json(
         { ok: false, message: "Token 无效" },
         { status: 401 }
@@ -164,7 +164,7 @@ export async function PUT(
 
     // 检查是否是管理员
     const user = await prisma.user.findUnique({
-      where: { id: payload.userId },
+      where: { id: payload.id },
       select: { role: true }
     });
 
@@ -175,7 +175,7 @@ export async function PUT(
       );
     }
 
-    const { id: sectionId } = params;
+    const { id: sectionId } = await params;
     const body = await req.json();
     const { eventOrders } = body; // [{ eventId: 1, order: 0 }, { eventId: 2, order: 1 }]
 

@@ -1,9 +1,12 @@
 // app/ui/HomePage.tsx
 import Link from 'next/link';
 import prisma from '@/lib/prisma';
+import { Prisma } from '@prisma/client';
 import { getSaleStatusInfo } from '@/lib/eventUtils';
 import EventCard from '@/app/events/ui/EventCard';
 import { HeroBanners } from './HeroBanners';
+
+type EventWithTiers = Prisma.EventGetPayload<{ include: { tiers: true } }>;
 
 export default async function HomePage() {
   // 获取所有启用的栏目
@@ -27,7 +30,7 @@ export default async function HomePage() {
   // 处理自动栏目和手动栏目
   const processedSections = await Promise.all(
     sections.map(async (section) => {
-      let events = [];
+      let events: EventWithTiers[] = [];
 
       if (section.type === 'manual') {
         // 手动栏目：使用配置的活动

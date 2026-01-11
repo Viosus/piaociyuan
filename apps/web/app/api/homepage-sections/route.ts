@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getSaleStatusInfo } from "@/lib/eventUtils";
+import type { Event } from "@prisma/client";
 
 // GET - 获取前端展示的栏目（公开API，无需认证）
 export async function GET(req: NextRequest) {
@@ -23,7 +24,7 @@ export async function GET(req: NextRequest) {
     // 处理自动栏目和手动栏目
     const processedSections = await Promise.all(
       sections.map(async (section) => {
-        let events = [];
+        let events: Event[] = [];
 
         if (section.type === 'manual') {
           // 手动栏目：使用配置的活动

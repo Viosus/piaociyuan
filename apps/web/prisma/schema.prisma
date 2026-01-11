@@ -54,7 +54,7 @@ model Tier {
   updatedAt DateTime @updatedAt
 
   event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  orders    Order[]
+  // 注：Order.tierId 存储为 String，不建立外键关联
 
   @@map("tiers")
   @@index([eventId])
@@ -93,7 +93,7 @@ model Order {
   refundId        String?  // 退款单号
 
   user      User     @relation(fields: [userId], references: [id], onDelete: Restrict)
-  tier      Tier     @relation(fields: [tierId], references: [id], onDelete: Restrict)
+  // 注：tierId 存储为 String，不建立外键关联，在代码中处理类型转换
   tickets   Ticket[]
 
   @@map("orders")

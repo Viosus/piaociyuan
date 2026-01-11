@@ -13,6 +13,7 @@
  */
 
 import prisma from './prisma';
+import { Prisma } from '@prisma/client';
 import { TicketStatus } from '@piaoyuzhou/shared';
 
 // ✅ 清理过期 hold（释放锁定的票）
@@ -156,7 +157,7 @@ export async function createHoldWithLock(
 
   try {
     // 使用事务 + 悲观锁保证原子性和并发安全
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       // 1️⃣ 使用原生 SQL + FOR UPDATE SKIP LOCKED 查找并锁定可用的票
       // FOR UPDATE: 对选中的行加排他锁，其他事务无法修改
       // SKIP LOCKED: 跳过已被其他事务锁定的行，避免死锁和等待

@@ -9,6 +9,7 @@
  */
 
 import prisma from './prisma';
+import { Prisma } from '@prisma/client';
 
 // 策略配置
 const STRATEGY_CONFIG = {
@@ -106,7 +107,7 @@ export async function autoAssignSeats(
   const expireAt = nowMs + STRATEGY_CONFIG.HOLD_DURATION_MS;
 
   try {
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       // 使用 FOR UPDATE SKIP LOCKED 跳过被锁定的票
       const availableTickets: { id: string; ticketCode: string; seatNumber: string | null }[] = await tx.$queryRaw`
         SELECT id, "ticketCode", "seatNumber"
@@ -179,7 +180,7 @@ export async function manualSelectSeats(
   const qty = specificSeatIds.length;
 
   try {
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       // 尝试锁定指定的座位（乐观锁，不等待）
       const lockedTickets: { id: string }[] = await tx.$queryRaw`
         UPDATE tickets

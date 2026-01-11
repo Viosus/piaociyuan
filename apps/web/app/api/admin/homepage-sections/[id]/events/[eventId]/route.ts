@@ -6,7 +6,7 @@ import prisma from "@/lib/prisma";
 // DELETE - 从栏目移除活动
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string; eventId: string } }
+  { params }: { params: Promise<{ id: string; eventId: string }> }
 ) {
   try {
     const authHeader = req.headers.get("authorization");
@@ -20,7 +20,7 @@ export async function DELETE(
     const token = authHeader.replace("Bearer ", "");
     const payload = verifyToken(token);
 
-    if (!payload || !payload.userId) {
+    if (!payload || !payload.id) {
       return NextResponse.json(
         { ok: false, message: "Token 无效" },
         { status: 401 }
@@ -29,7 +29,7 @@ export async function DELETE(
 
     // 检查是否是管理员
     const user = await prisma.user.findUnique({
-      where: { id: payload.userId },
+      where: { id: payload.id },
       select: { role: true }
     });
 
@@ -40,7 +40,7 @@ export async function DELETE(
       );
     }
 
-    const { id: sectionId, eventId } = params;
+    const { id: sectionId, eventId } = await params;
     const eventIdInt = parseInt(eventId);
 
     // 检查关联是否存在

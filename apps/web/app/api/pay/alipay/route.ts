@@ -49,13 +49,6 @@ export async function POST(req: Request) {
     // 查询订单
     const order = await prisma.order.findUnique({
       where: { id: normalizedOrderId },
-      include: {
-        tier: {
-          include: {
-            event: true,
-          },
-        },
-      },
     });
 
     if (!order) {
@@ -64,6 +57,23 @@ export async function POST(req: Request) {
           ok: false,
           code: 'ORDER_NOT_FOUND',
           message: '订单不存在。',
+        },
+        { status: 404 }
+      );
+    }
+
+    // 获取票档和活动信息
+    const tier = await prisma.tier.findUnique({
+      where: { id: parseInt(order.tierId) },
+      include: { event: true },
+    });
+
+    if (!tier) {
+      return NextResponse.json(
+        {
+          ok: false,
+          code: 'TIER_NOT_FOUND',
+          message: '票档不存在。',
         },
         { status: 404 }
       );
@@ -107,7 +117,7 @@ export async function POST(req: Request) {
     }
 
     // 计算订单金额（单位：分）
-    const amount = order.qty * order.tier.price;
+    const amount = order.qty * tier.price;
 
     // 创建支付宝订单
     const payResult = await createPayment(
@@ -115,7 +125,7 @@ export async function POST(req: Request) {
       {
         orderId: normalizedOrderId,
         amount,
-        description: `${order.tier.event.name} - ${order.tier.name} x${order.qty}`,
+        description: `${tier.event.name} - ${tier.name} x${order.qty}`,
       },
       payType as 'app' | 'native' | 'web'
     );
