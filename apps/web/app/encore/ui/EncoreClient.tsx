@@ -141,9 +141,22 @@ export default function EncoreClient() {
         <div className="text-6xl mb-4">📭</div>
         <h2 className="text-xl font-semibold text-white mb-2">还没有内容</h2>
         <p className="text-white/60 mb-6">成为第一个分享演出时刻的人吧！</p>
-        <button className="px-6 py-3 bg-[#EAF353] text-white rounded-lg font-medium hover:bg-[#FFC9E0] transition">
+        <button
+          onClick={() => setIsCreateDialogOpen(true)}
+          className="px-6 py-3 bg-[#EAF353] text-gray-900 rounded-lg font-medium hover:bg-[#d4db4a] transition"
+        >
           📝 发布第一篇帖子
         </button>
+
+        {/* 发帖对话框 */}
+        <CreatePostDialog
+          isOpen={isCreateDialogOpen}
+          onClose={() => setIsCreateDialogOpen(false)}
+          onSuccess={() => {
+            setPage(1);
+            loadPosts(1);
+          }}
+        />
       </div>
     );
   }

@@ -179,3 +179,23 @@ export async function apiDelete(url: string): Promise<any> {
   });
   return response.json();
 }
+
+/**
+ * 文件上传请求
+ */
+export async function apiUpload(url: string, file: File): Promise<any> {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const token = localStorage.getItem('token');
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: formData,
+  });
+
+  return response.json();
+}
