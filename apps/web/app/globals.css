@@ -45,12 +45,18 @@ a, button, [role="button"], input, select, textarea {
   touch-action: manipulation;
 }
 
-/* iOS 输入框样式重置 */
-input, textarea, select {
+/* iOS 输入框样式重置 - 只重置 appearance，保留圆角 */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="search"],
+input[type="tel"],
+input[type="url"],
+input[type="number"],
+textarea {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
-  border-radius: 0;
 }
 
 /* iOS 点击高亮移除 */
@@ -411,13 +417,13 @@ img {
   -webkit-overflow-scrolling: touch;
 }
 
-/* 圆角修复 (Safari 渲染问题) */
+/* 圆角溢出修复 (Safari overflow:hidden + border-radius 问题) */
 .rounded-xl,
 .rounded-2xl,
 .rounded-full,
 .rounded-lg {
-  -webkit-mask-image: -webkit-radial-gradient(white, black);
-  mask-image: radial-gradient(white, black);
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
 }
 
 /* ========== 移动端特定修复 ========== */
