@@ -2,6 +2,18 @@
   "name": "@piaoyuzhou/web",
   "version": "0.1.0",
   "private": true,
+  "browserslist": [
+    "> 0.5%",
+    "last 2 versions",
+    "Firefox ESR",
+    "not dead",
+    "iOS >= 12",
+    "Android >= 5",
+    "Safari >= 12",
+    "Chrome >= 70",
+    "Firefox >= 60",
+    "Edge >= 79"
+  ],
   "scripts": {
     "dev": "node server.js",
     "dev:turbo": "next dev --turbopack",
@@ -48,6 +60,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/uuid": "^9.0.0",
+    "autoprefixer": "^10.4.23",
     "eslint": "^9",
     "eslint-config-next": "16.0.0",
     "prisma": "^6.18.0",

@@ -8,6 +8,11 @@
   --border: rgba(234, 243, 83, 0.5);
   --primary: #EAF353;
   --right-sidebar-width: 64px;
+
+  /* 全平台字体栈 */
+  --font-system: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+  --font-chinese: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", "Noto Sans SC", sans-serif;
+  --font-emoji: "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
 
 @theme inline {
@@ -20,9 +25,37 @@
 /* body background is now controlled by background.css */
 body {
   color: var(--foreground);
-  font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+  font-family: var(--font-geist-sans), var(--font-system), var(--font-chinese), var(--font-emoji);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* 全平台基础重置 */
+*, *::before, *::after {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 移动端触摸优化 */
+a, button, [role="button"], input, select, textarea {
+  touch-action: manipulation;
+}
+
+/* iOS 输入框样式重置 */
+input, textarea, select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  border-radius: 0;
+}
+
+/* iOS 点击高亮移除 */
+input:focus, textarea:focus, select:focus, button:focus {
+  outline: none;
 }
 
 /* 深色主题样式 */
@@ -232,11 +265,12 @@ tbody tr:hover {
   box-shadow: 0 10px 15px -3px rgba(234, 243, 83, 0.4), 0 0 20px rgba(234, 243, 83, 0.5) !important;
 }
 
-/* ========== Safari 兼容性修复 ========== */
+/* ========== 跨平台兼容性修复 ========== */
 
-/* Flexbox 修复 */
+/* Flexbox 兼容性 (Safari, 旧版浏览器) */
 .flex {
   display: -webkit-box;
+  display: -ms-flexbox;
   display: -webkit-flex;
   display: flex;
 }
@@ -244,70 +278,225 @@ tbody tr:hover {
 .flex-col {
   -webkit-box-orient: vertical;
   -webkit-box-direction: normal;
+  -ms-flex-direction: column;
   -webkit-flex-direction: column;
   flex-direction: column;
 }
 
 .items-center {
   -webkit-box-align: center;
+  -ms-flex-align: center;
   -webkit-align-items: center;
   align-items: center;
 }
 
 .justify-center {
   -webkit-box-pack: center;
+  -ms-flex-pack: center;
   -webkit-justify-content: center;
   justify-content: center;
 }
 
-/* Safari gap 属性回退 */
+.justify-between {
+  -webkit-box-pack: justify;
+  -ms-flex-pack: justify;
+  -webkit-justify-content: space-between;
+  justify-content: space-between;
+}
+
+.flex-1 {
+  -webkit-box-flex: 1;
+  -ms-flex: 1;
+  -webkit-flex: 1;
+  flex: 1;
+}
+
+.flex-shrink-0,
+.shrink-0 {
+  -webkit-flex-shrink: 0;
+  -ms-flex-negative: 0;
+  flex-shrink: 0;
+}
+
+/* Grid 兼容性 */
+.grid {
+  display: -ms-grid;
+  display: grid;
+}
+
+/* gap 属性回退 (旧版 Safari/iOS) */
 @supports not (gap: 1rem) {
+  .gap-1 > * + * { margin-left: 0.25rem; }
   .gap-2 > * + * { margin-left: 0.5rem; }
   .gap-3 > * + * { margin-left: 0.75rem; }
   .gap-4 > * + * { margin-left: 1rem; }
+  .gap-6 > * + * { margin-left: 1.5rem; }
+
+  .flex-col.gap-1 > * + * { margin-left: 0; margin-top: 0.25rem; }
+  .flex-col.gap-2 > * + * { margin-left: 0; margin-top: 0.5rem; }
+  .flex-col.gap-3 > * + * { margin-left: 0; margin-top: 0.75rem; }
+  .flex-col.gap-4 > * + * { margin-left: 0; margin-top: 1rem; }
 }
 
-/* Safari 过渡修复 */
+/* 过渡动画兼容性 */
 .transition-all {
   -webkit-transition: all 0.3s ease;
+  -moz-transition: all 0.3s ease;
+  -o-transition: all 0.3s ease;
+  -ms-transition: all 0.3s ease;
   transition: all 0.3s ease;
 }
 
-/* Safari backdrop-filter 全局支持 */
+.transition {
+  -webkit-transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
+  -moz-transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
+  transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
+  -webkit-transition-duration: 150ms;
+  -moz-transition-duration: 150ms;
+  transition-duration: 150ms;
+  -webkit-transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  -moz-transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Transform 兼容性 */
+.transform {
+  -webkit-transform: translateZ(0);
+  -moz-transform: translateZ(0);
+  -ms-transform: translateZ(0);
+  -o-transform: translateZ(0);
+  transform: translateZ(0);
+}
+
+/* backdrop-filter 全局支持 (Safari需要前缀) */
 [class*="backdrop-blur"],
-[class*="backdrop-filter"] {
+[class*="backdrop-filter"],
+.content-card {
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
 }
 
-/* Safari 图片显示修复 */
+/* 图片显示修复 */
 img {
   -webkit-transform: translateZ(0);
   transform: translateZ(0);
   image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  max-width: 100%;
+  height: auto;
 }
 
-/* Safari sticky 定位修复 */
+/* sticky 定位兼容性 */
 .sticky {
   position: -webkit-sticky;
   position: sticky;
 }
 
-/* Safari overflow 修复 */
+/* fixed 定位优化 (iOS Safari) */
+.fixed {
+  position: fixed;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
+
+/* overflow 滚动兼容性 (iOS) */
 .overflow-hidden {
   -webkit-overflow-scrolling: touch;
   overflow: hidden;
 }
 
-.overflow-y-auto {
+.overflow-y-auto,
+.overflow-x-auto,
+.overflow-auto {
   -webkit-overflow-scrolling: touch;
-  overflow-y: auto;
 }
 
-/* Safari 圆角修复 */
+/* 圆角修复 (Safari 渲染问题) */
 .rounded-xl,
 .rounded-2xl,
-.rounded-full {
-  -webkit-border-radius: inherit;
+.rounded-full,
+.rounded-lg {
   -webkit-mask-image: -webkit-radial-gradient(white, black);
+  mask-image: radial-gradient(white, black);
+}
+
+/* ========== 移动端特定修复 ========== */
+
+/* 安全区域适配 (iPhone X+) */
+@supports (padding: max(0px)) {
+  .safe-area-bottom {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+  .safe-area-top {
+    padding-top: max(1rem, env(safe-area-inset-top));
+  }
+}
+
+/* 移动端滚动条隐藏 */
+@media (max-width: 768px) {
+  ::-webkit-scrollbar {
+    display: none;
+  }
+
+  * {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+}
+
+/* 防止 iOS 输入框缩放 */
+@media screen and (max-width: 768px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* ========== 旧浏览器兼容性 ========== */
+
+/* CSS 变量回退 */
+@supports not (--css: variables) {
+  body {
+    background-color: #C72471;
+    color: #1a1a1f;
+  }
+
+  .bg-primary {
+    background-color: #EAF353;
+  }
+}
+
+/* aspect-ratio 回退 */
+@supports not (aspect-ratio: 1) {
+  .aspect-square {
+    position: relative;
+    padding-bottom: 100%;
+  }
+  .aspect-square > * {
+    position: absolute;
+    inset: 0;
+  }
+
+  .aspect-video {
+    position: relative;
+    padding-bottom: 56.25%;
+  }
+  .aspect-video > * {
+    position: absolute;
+    inset: 0;
+  }
+}
+
+/* Firefox 特定修复 */
+@-moz-document url-prefix() {
+  .overflow-y-auto {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(234, 243, 83, 0.4) transparent;
+  }
+}
+
+/* Edge/IE 兼容性 */
+@supports (-ms-ime-align: auto) {
+  .flex {
+    display: -ms-flexbox;
+  }
 }
