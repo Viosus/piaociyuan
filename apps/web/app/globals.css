@@ -20,7 +20,9 @@
 /* body background is now controlled by background.css */
 body {
   color: var(--foreground);
-  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* 深色主题样式 */
@@ -83,6 +85,16 @@ input:disabled, select:disabled, textarea:disabled, button:disabled {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  color: transparent;
+}
+
+/* Safari 兼容性修复 */
+@supports (-webkit-touch-callout: none) {
+  /* Safari-only styles */
+  .gradient-text {
+    background-clip: text;
+    -webkit-background-clip: text;
+  }
 }
 
 /* 浅色主题全局覆盖 - 使用更高优先级 */
@@ -218,4 +230,84 @@ tbody tr:hover {
 
 .hover\:shadow-lg:hover {
   box-shadow: 0 10px 15px -3px rgba(234, 243, 83, 0.4), 0 0 20px rgba(234, 243, 83, 0.5) !important;
+}
+
+/* ========== Safari 兼容性修复 ========== */
+
+/* Flexbox 修复 */
+.flex {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: flex;
+}
+
+.flex-col {
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: column;
+  flex-direction: column;
+}
+
+.items-center {
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+  align-items: center;
+}
+
+.justify-center {
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  justify-content: center;
+}
+
+/* Safari gap 属性回退 */
+@supports not (gap: 1rem) {
+  .gap-2 > * + * { margin-left: 0.5rem; }
+  .gap-3 > * + * { margin-left: 0.75rem; }
+  .gap-4 > * + * { margin-left: 1rem; }
+}
+
+/* Safari 过渡修复 */
+.transition-all {
+  -webkit-transition: all 0.3s ease;
+  transition: all 0.3s ease;
+}
+
+/* Safari backdrop-filter 全局支持 */
+[class*="backdrop-blur"],
+[class*="backdrop-filter"] {
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+/* Safari 图片显示修复 */
+img {
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  image-rendering: -webkit-optimize-contrast;
+}
+
+/* Safari sticky 定位修复 */
+.sticky {
+  position: -webkit-sticky;
+  position: sticky;
+}
+
+/* Safari overflow 修复 */
+.overflow-hidden {
+  -webkit-overflow-scrolling: touch;
+  overflow: hidden;
+}
+
+.overflow-y-auto {
+  -webkit-overflow-scrolling: touch;
+  overflow-y: auto;
+}
+
+/* Safari 圆角修复 */
+.rounded-xl,
+.rounded-2xl,
+.rounded-full {
+  -webkit-border-radius: inherit;
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
 }
