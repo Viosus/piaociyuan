@@ -40,7 +40,7 @@ export default function ConversationPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // 🔥 使用 WebSocket 实时通信
-  const { isConnected, on, off } = useSocket({
+  const { isConnected, getSocket } = useSocket({
     autoConnect: true,
     onConnect: () => console.log('[聊天页面] WebSocket 已连接'),
     onDisconnect: () => console.log('[聊天页面] WebSocket 已断开'),
@@ -67,6 +67,14 @@ export default function ConversationPage() {
   useEffect(() => {
     if (!isConnected || !conversationId) return;
 
+    const socket = getSocket();
+    if (!socket) {
+      console.log('[聊天页面] Socket 未就绪');
+      return;
+    }
+
+    console.log('[聊天页面] 注册消息监听器, conversationId:', conversationId);
+
     const handleNewMessage = (newMessage: Message) => {
       console.log('[聊天页面] 收到新消息:', newMessage);
 
@@ -87,12 +95,13 @@ export default function ConversationPage() {
       });
     };
 
-    on('message:new', handleNewMessage);
+    socket.on('message:new', handleNewMessage);
 
     return () => {
-      off('message:new', handleNewMessage);
+      console.log('[聊天页面] 移除消息监听器');
+      socket.off('message:new', handleNewMessage);
     };
-  }, [isConnected, conversationId, on, off]);
+  }, [isConnected, conversationId, getSocket]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -170,9 +179,9 @@ export default function ConversationPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#C72471] flex flex-col">
-      {/* Header */}
-      <div className="bg-white/80 backdrop-blur-sm border-b border-[#FFEBF5] px-4 py-3 flex items-center gap-3 sticky top-0 z-10">
+    <div className="min-h-screen bg-[#C72471] flex flex-col -mt-20">
+      {/* Header - 使用 fixed 定位覆盖全局搜索栏 */}
+      <div className="bg-white/80 backdrop-blur-sm border-b border-[#FFEBF5] px-4 py-3 flex items-center gap-3 fixed top-0 left-20 right-[var(--right-sidebar-width,64px)] z-50">
         <button
           onClick={() => router.push('/messages')}
           className="p-2 hover:bg-[#FFF9FC] rounded-lg transition"
@@ -201,8 +210,8 @@ export default function ConversationPage() {
         </div>
       </div>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-6">
+      {/* Messages - 添加顶部内边距避免被 header 覆盖 */}
+      <div className="flex-1 overflow-y-auto px-4 py-6 mt-16">
         <div className="max-w-4xl mx-auto space-y-4">
           {conversation.messages.length === 0 ? (
             <div className="text-center py-12 bg-white/80 backdrop-blur-sm rounded-lg border border-[#FFEBF5] p-8">

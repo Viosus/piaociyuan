@@ -1,7 +1,7 @@
 // hooks/useSocket.ts - Socket.io 客户端 Hook
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
 
 interface UseSocketOptions {
@@ -117,7 +117,7 @@ export function useSocket(options: UseSocketOptions = {}) {
   };
 
   // 发送事件
-  const emit = (event: string, data?: any) => {
+  const emit = useCallback((event: string, data?: any) => {
     if (!socketRef.current?.connected) {
       console.warn('[Socket] 未连接，无法发送消息');
       return false;
@@ -125,17 +125,21 @@ export function useSocket(options: UseSocketOptions = {}) {
 
     socketRef.current.emit(event, data);
     return true;
-  };
+  }, []);
 
-  // 监听事件
-  const on = (event: string, callback: (...args: any[]) => void) => {
-    socketRef.current?.on(event, callback);
-  };
+  // 监听事件 - 使用 useCallback 确保稳定引用
+  const on = useCallback((event: string, callback: (...args: any[]) => void) => {
+    if (socketRef.current) {
+      socketRef.current.on(event, callback);
+    }
+  }, []);
 
-  // 移除监听
-  const off = (event: string, callback?: (...args: any[]) => void) => {
-    socketRef.current?.off(event, callback);
-  };
+  // 移除监听 - 使用 useCallback 确保稳定引用
+  const off = useCallback((event: string, callback?: (...args: any[]) => void) => {
+    if (socketRef.current) {
+      socketRef.current.off(event, callback);
+    }
+  }, []);
 
   // 自动连接
   useEffect(() => {
@@ -148,8 +152,12 @@ export function useSocket(options: UseSocketOptions = {}) {
     };
   }, [autoConnect]);
 
+  // 获取当前 socket 实例（用于直接操作）
+  const getSocket = useCallback(() => socketRef.current, []);
+
   return {
     socket: socketRef.current,
+    getSocket,
     isConnected,
     isConnecting,
     connect,
