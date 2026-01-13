@@ -37,8 +37,8 @@ export default function BannersClient() {
       if (data.ok) {
         setBanners(data.data);
       }
-    } catch (error) {
-      console.error("加载 Banner 失败:", error);
+    } catch {
+      // 静默处理加载Banner失败
     } finally {
       setLoading(false);
     }
@@ -65,8 +65,8 @@ export default function BannersClient() {
       } else {
         alert(`❌ ${data.message}`);
       }
-    } catch (error) {
-      console.error("删除失败:", error);
+    } catch {
+      // 静默处理删除失败
       alert("❌ 删除失败");
     }
   };
@@ -89,8 +89,8 @@ export default function BannersClient() {
       } else {
         alert(`❌ ${data.message}`);
       }
-    } catch (error) {
-      console.error("更新失败:", error);
+    } catch {
+      // 静默处理更新失败
       alert("❌ 更新失败");
     }
   };
@@ -131,8 +131,8 @@ export default function BannersClient() {
         alert(`错误：${data.message}`);
         loadBanners();
       }
-    } catch (error) {
-      console.error("更新排序失败:", error);
+    } catch {
+      // 静默处理更新排序失败
       loadBanners();
     }
   };

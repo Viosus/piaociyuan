@@ -16,9 +16,9 @@ export default function AboutScreen() {
   const buildNumber = Application.nativeBuildVersion || '1';
 
   const handleLink = (url: string) => {
-    Linking.openURL(url).catch((err) =>
-      console.error('无法打开链接:', err)
-    );
+    Linking.openURL(url).catch(() => {
+      // 静默处理打开链接失败
+    });
   };
 
   const menuItems = [

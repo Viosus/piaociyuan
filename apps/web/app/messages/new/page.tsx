@@ -40,8 +40,8 @@ export default function NewConversationPage() {
     try {
       const data = await apiGet(`/api/users/search?q=${encodeURIComponent(query)}`);
       setSearchResults(data);
-    } catch (error) {
-      console.error('搜索失败:', error);
+    } catch {
+      // 静默处理搜索失败
       setSearchResults([]);
     } finally {
       setSearching(false);
@@ -54,7 +54,7 @@ export default function NewConversationPage() {
       const data = await apiPost('/api/messages/conversations', { otherUserId: userId });
       router.push(`/messages/${data.id}`);
     } catch (error: any) {
-      console.error('创建对话失败:', error);
+      // 静默处理创建对话失败
       alert(error?.error || '创建对话失败，请重试');
     } finally {
       setCreating(false);

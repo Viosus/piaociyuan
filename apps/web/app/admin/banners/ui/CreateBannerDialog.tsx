@@ -53,8 +53,8 @@ export default function CreateBannerDialog({ onClose, onSuccess }: Props) {
       } else {
         alert(`❌ ${data.message}`);
       }
-    } catch (error) {
-      console.error("创建 Banner 失败:", error);
+    } catch {
+      // 静默处理创建Banner失败
       alert("❌ 创建失败");
     } finally {
       setLoading(false);

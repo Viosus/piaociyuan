@@ -38,8 +38,8 @@ export default function SeatSelection({ eventId, tierId, tierName, tierPrice }: 
       if (data.ok) {
         setSeats(data.data);
       }
-    } catch (error) {
-      console.error('获取座位状态失败:', error);
+    } catch {
+      // 静默处理获取座位状态失败
     } finally {
       setLoading(false);
     }
@@ -96,8 +96,8 @@ export default function SeatSelection({ eventId, tierId, tierName, tierPrice }: 
         fetchSeats();
         setSelectedSeats([]);
       }
-    } catch (error) {
-      console.error('购票失败:', error);
+    } catch {
+      // 静默处理购票失败
       alert('网络错误，请重试');
     } finally {
       setPurchasing(false);

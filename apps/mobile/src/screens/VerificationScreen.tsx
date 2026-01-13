@@ -59,8 +59,8 @@ export default function VerificationScreen() {
       if (result.success && result.data) {
         setExistingVerification(result.data);
       }
-    } catch (error) {
-      console.error('加载认证状态失败:', error);
+    } catch {
+      // 静默处理加载错误
     } finally {
       setLoading(false);
     }

@@ -98,8 +98,8 @@ export default function NFTDetailClient({
             const metadataData = await metadataRes.json();
             setMetadata(metadataData);
           }
-        } catch (err) {
-          console.error("获取元数据失败:", err);
+        } catch {
+          // 静默处理获取元数据失败
         }
       }
     } catch (err: unknown) {

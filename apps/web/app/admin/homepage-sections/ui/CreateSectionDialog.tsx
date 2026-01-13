@@ -99,8 +99,8 @@ export default function CreateSectionDialog({ onClose, onSuccess }: Props) {
       } else {
         alert(`❌ ${data.message}`);
       }
-    } catch (error) {
-      console.error("Create section error:", error);
+    } catch {
+      // 静默处理创建栏目失败
       alert("❌ 创建失败");
     } finally {
       setLoading(false);

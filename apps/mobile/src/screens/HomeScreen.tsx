@@ -46,7 +46,6 @@ export default function HomeScreen() {
       setSections(sectionsData);
     } catch (err) {
       setError(err instanceof Error ? err.message : '加载失败');
-      console.error('Failed to load home data:', err);
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
@@ -67,7 +66,7 @@ export default function HomeScreen() {
 
   const handleSearch = (query: string) => {
     // 跳转到搜索页面（稍后实现）
-    console.log('Search:', query);
+    void query;
   };
 
   const handleSearchFocus = () => {

@@ -51,7 +51,6 @@ export interface AppNotification {
  */
 export async function requestNotificationPermission(): Promise<boolean> {
   if (!Device.isDevice) {
-    console.warn('推送通知仅在真实设备上可用');
     return false;
   }
 
@@ -64,7 +63,6 @@ export async function requestNotificationPermission(): Promise<boolean> {
   }
 
   if (finalStatus !== 'granted') {
-    console.warn('未获得推送通知权限');
     return false;
   }
 
@@ -77,7 +75,6 @@ export async function requestNotificationPermission(): Promise<boolean> {
 export async function getExpoPushToken(): Promise<string | null> {
   try {
     if (!Device.isDevice) {
-      console.warn('推送 Token 仅在真实设备上可用');
       return null;
     }
 
@@ -85,10 +82,8 @@ export async function getExpoPushToken(): Promise<string | null> {
       projectId: 'your-project-id', // 替换为实际的 Expo Project ID
     });
 
-    console.log('Expo Push Token:', token.data);
     return token.data;
-  } catch (error) {
-    console.error('获取 Push Token 失败:', error);
+  } catch {
     return null;
   }
 }
@@ -274,26 +269,20 @@ export async function initializeNotifications(): Promise<string | null> {
     // 2. 请求权限
     const hasPermission = await requestNotificationPermission();
     if (!hasPermission) {
-      console.warn('未获得通知权限');
       return null;
     }
 
     // 3. 获取 Push Token
     const token = await getExpoPushToken();
     if (!token) {
-      console.warn('未能获取 Push Token');
       return null;
     }
 
     // 4. 上传 Token 到服务器
-    const uploadResult = await uploadPushToken(token);
-    if (!uploadResult.success) {
-      console.error('上传 Token 失败:', uploadResult.error);
-    }
+    await uploadPushToken(token);
 
     return token;
-  } catch (error) {
-    console.error('初始化通知服务失败:', error);
+  } catch {
     return null;
   }
 }

@@ -125,9 +125,6 @@ export default function TicketDetailScreen() {
 
       if (result.action === Share.sharedAction) {
         // 分享成功
-        if (result.activityType) {
-          console.log('分享到:', result.activityType);
-        }
       }
     } catch (error: any) {
       Alert.alert('分享失败', error.message);

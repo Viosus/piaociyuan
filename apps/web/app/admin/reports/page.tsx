@@ -63,8 +63,8 @@ export default function ReportsManagement() {
       } else {
         alert('加载失败');
       }
-    } catch (error) {
-      console.error('加载举报列表失败:', error);
+    } catch {
+      // 静默处理加载举报列表失败
       alert('加载失败');
     } finally {
       setLoading(false);
@@ -101,8 +101,8 @@ export default function ReportsManagement() {
       } else {
         alert(res.message || '操作失败');
       }
-    } catch (error) {
-      console.error('处理举报失败:', error);
+    } catch {
+      // 静默处理处理举报失败
       alert('操作失败');
     } finally {
       setProcessing(null);

@@ -55,8 +55,8 @@ export function MintNFTButton({ ticketId, ticketStatus, nftMintStatus: initialSt
       if (data.error) {
         setError(data.error);
       }
-    } catch (err) {
-      console.error('查询领取状态失败:', err);
+    } catch {
+      // 静默处理查询领取状态失败
     }
   };
 
@@ -89,7 +89,6 @@ export function MintNFTButton({ ticketId, ticketStatus, nftMintStatus: initialSt
       alert('次元领取请求已提交！预计1-5分钟完成');
 
     } catch (err) {
-      console.error('领取次元错误:', err);
       setError(err instanceof Error ? err.message : '领取失败');
     } finally {
       setIsMinting(false);

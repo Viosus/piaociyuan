@@ -81,8 +81,8 @@ export default function NFTDetailScreen() {
       await Share.share({
         message: `查看我的 NFT 数字藏品：${nft.nft.name}\n\n${nft.nft.description}`,
       });
-    } catch (error) {
-      console.error('分享失败:', error);
+    } catch {
+      // 静默处理分享失败
     }
   };
 

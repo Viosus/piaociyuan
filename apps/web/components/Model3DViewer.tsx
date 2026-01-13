@@ -33,7 +33,6 @@ export default function Model3DViewer({
         setIsModelViewerReady(true);
       })
       .catch((err) => {
-        console.error('Failed to load model-viewer:', err);
         setError(new Error('Failed to load 3D viewer'));
         onError?.(err);
       });

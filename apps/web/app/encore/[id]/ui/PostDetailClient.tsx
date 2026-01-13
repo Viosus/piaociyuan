@@ -105,7 +105,6 @@ export default function PostDetailClient({ postId }: { postId: string }) {
 
       setPost(data.data);
     } catch (err: unknown) {
-      console.error("Load post error:", err);
       setError(err instanceof Error ? err.message : String(err) || "加载失败");
     } finally {
       setLoading(false);
@@ -129,8 +128,8 @@ export default function PostDetailClient({ postId }: { postId: string }) {
           setIsLiked(data.data.isLiked);
         }
       }
-    } catch (err) {
-      console.error('Check like status error:', err);
+    } catch {
+      // 静默处理检查点赞状态失败
     }
   };
 
@@ -151,17 +150,14 @@ export default function PostDetailClient({ postId }: { postId: string }) {
           setIsFollowing(data.data.isFollowing);
         }
       }
-    } catch (err) {
-      console.error('Check follow status error:', err);
+    } catch {
+      // 静默处理检查关注状态失败
     }
   };
 
   const handleLike = async () => {
-    console.log('[LIKE_CLICK] 点赞按钮被点击');
-
     // 防止重复点击
     if (isLiking) {
-      console.log('[LIKE_CLICK] 正在处理中，忽略重复点击');
       return;
     }
 
@@ -174,7 +170,6 @@ export default function PostDetailClient({ postId }: { postId: string }) {
       }
 
       setIsLiking(true);
-      console.log('[LIKE_REQUEST] 发送点赞请求');
 
       const res = await fetch(`/api/posts/${postId}/like`, {
         method: 'POST',
@@ -184,7 +179,6 @@ export default function PostDetailClient({ postId }: { postId: string }) {
       });
 
       const data = await res.json();
-      console.log('[LIKE_RESPONSE]', data);
 
       if (!res.ok) {
         throw new Error(data.message || '操作失败');
@@ -198,10 +192,7 @@ export default function PostDetailClient({ postId }: { postId: string }) {
           likeCount: data.data.likeCount,
         });
       }
-
-      console.log('[LIKE_SUCCESS]', { isLiked: data.data.isLiked, likeCount: data.data.likeCount });
     } catch (err: unknown) {
-      console.error('[LIKE_ERROR]', err);
       alert(err instanceof Error ? err.message : '操作失败');
     } finally {
       setIsLiking(false);
@@ -209,13 +200,10 @@ export default function PostDetailClient({ postId }: { postId: string }) {
   };
 
   const handleFollow = async () => {
-    console.log('[FOLLOW_CLICK] 关注按钮被点击');
-
     if (!post) return;
 
     // 防止重复点击
     if (isFollowLoading) {
-      console.log('[FOLLOW_CLICK] 正在处理中，忽略重复点击');
       return;
     }
 
@@ -228,7 +216,6 @@ export default function PostDetailClient({ postId }: { postId: string }) {
       }
 
       setIsFollowLoading(true);
-      console.log('[FOLLOW_REQUEST] 发送关注请求', { isFollowing });
 
       const method = isFollowing ? 'DELETE' : 'POST';
       const res = await fetch(`/api/users/${post.user.id}/follow`, {
@@ -239,7 +226,6 @@ export default function PostDetailClient({ postId }: { postId: string }) {
       });
 
       const data = await res.json();
-      console.log('[FOLLOW_RESPONSE]', data);
 
       if (!res.ok) {
         throw new Error(data.message || '操作失败');
@@ -247,9 +233,7 @@ export default function PostDetailClient({ postId }: { postId: string }) {
 
       // 更新关注状态
       setIsFollowing(data.data.isFollowing);
-      console.log('[FOLLOW_SUCCESS]', { isFollowing: data.data.isFollowing });
     } catch (err: unknown) {
-      console.error('[FOLLOW_ERROR]', err);
       alert(err instanceof Error ? err.message : '操作失败');
     } finally {
       setIsFollowLoading(false);
@@ -303,7 +287,6 @@ export default function PostDetailClient({ postId }: { postId: string }) {
 
       alert('举报成功，我们会尽快处理');
     } catch (err: unknown) {
-      console.error('Report error:', err);
       alert(err instanceof Error ? err.message : '举报失败');
     }
   };
@@ -349,7 +332,6 @@ export default function PostDetailClient({ postId }: { postId: string }) {
 
       alert('评论成功');
     } catch (err: unknown) {
-      console.error('Comment error:', err);
       alert(err instanceof Error ? err.message : '评论失败');
     } finally {
       setIsSubmittingComment(false);

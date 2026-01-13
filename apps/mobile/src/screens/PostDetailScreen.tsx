@@ -13,7 +13,7 @@ import {
   Modal,
 } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getAccessToken } from '../services/storage';
 import { API_URL } from '../config/api';
 import { colors, spacing, fontSize } from '../constants/config';
 
@@ -70,7 +70,7 @@ export default function PostDetailScreen() {
   const loadPost = async () => {
     try {
       setLoading(true);
-      const token = await AsyncStorage.getItem('token');
+      const token = await getAccessToken();
       const headers: HeadersInit = {
         'Content-Type': 'application/json',
       };
@@ -95,7 +95,7 @@ export default function PostDetailScreen() {
 
   const checkLikeStatus = async () => {
     try {
-      const token = await AsyncStorage.getItem('token');
+      const token = await getAccessToken();
       if (!token) return;
 
       const res = await fetch(`${API_URL}/posts/${postId}/like`, {
@@ -110,8 +110,8 @@ export default function PostDetailScreen() {
           setIsLiked(data.data.isLiked);
         }
       }
-    } catch (error) {
-      console.error('Check like status error:', error);
+    } catch {
+      // 静默处理检查点赞状态失败
     }
   };
 
@@ -119,7 +119,7 @@ export default function PostDetailScreen() {
     if (isLiking) return;
 
     try {
-      const token = await AsyncStorage.getItem('token');
+      const token = await getAccessToken();
       if (!token) {
         Alert.alert('提示', '请先登录');
         return;
@@ -166,7 +166,7 @@ export default function PostDetailScreen() {
         }
 
         try {
-          const token = await AsyncStorage.getItem('token');
+          const token = await getAccessToken();
           if (!token) {
             Alert.alert('提示', '请先登录');
             return;
@@ -209,7 +209,7 @@ export default function PostDetailScreen() {
     }
 
     try {
-      const token = await AsyncStorage.getItem('token');
+      const token = await getAccessToken();
       if (!token) {
         Alert.alert('提示', '请先登录');
         return;

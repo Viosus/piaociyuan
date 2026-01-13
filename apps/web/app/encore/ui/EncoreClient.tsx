@@ -62,7 +62,6 @@ export default function EncoreClient() {
 
       setHasMore(data.pagination.page < data.pagination.totalPages);
     } catch (err: unknown) {
-      console.error("Load posts error:", err);
       setError(err instanceof Error ? err.message : String(err) || "加载失败");
     } finally {
       setLoading(false);

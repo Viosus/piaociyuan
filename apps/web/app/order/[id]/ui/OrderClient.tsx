@@ -182,9 +182,9 @@ export default function OrderClient({ id }: { id: string }) {
           const data = await apiPost("/api/tickets/refund", { ticketId });
           if (!data.ok) throw new Error(data.message || "退票失败");
           successCount++;
-        } catch (e) {
+        } catch {
+          // 静默处理退票失败
           failCount++;
-          console.error('退票失败:', ticketId, e);
         }
       }
 

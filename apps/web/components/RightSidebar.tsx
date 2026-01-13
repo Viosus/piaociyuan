@@ -45,8 +45,6 @@ export default function RightSidebar() {
   // 🔥 使用 WebSocket 实时通信
   const { isConnected, on, off } = useSocket({
     autoConnect: true,
-    onConnect: () => console.log('[RightSidebar] WebSocket 已连接'),
-    onDisconnect: () => console.log('[RightSidebar] WebSocket 已断开'),
   });
 
   // 更新CSS变量以控制页面布局
@@ -65,8 +63,8 @@ export default function RightSidebar() {
         setNotifications(result.data);
         setUnreadNotifications(result.stats.unread);
       }
-    } catch (error) {
-      console.error('[LOAD_NOTIFICATIONS_ERROR]', error);
+    } catch {
+      // 静默处理加载通知失败
     }
   };
 
@@ -87,8 +85,8 @@ export default function RightSidebar() {
         const unread = data.reduce((sum: number, conv: Conversation) => sum + conv.unreadCount, 0);
         setUnreadMessages(unread);
       }
-    } catch (error) {
-      console.error('[LOAD_CONVERSATIONS_ERROR]', error);
+    } catch {
+      // 静默处理加载对话失败
     }
   };
 
@@ -122,9 +120,7 @@ export default function RightSidebar() {
     if (!isConnected || !isLoggedIn) return;
 
     // 监听新消息
-    const handleNewMessage = (message: any) => {
-      console.log('[RightSidebar] 收到新消息:', message);
-
+    const handleNewMessage = () => {
       // 重新加载对话列表
       loadConversations();
 
@@ -134,8 +130,6 @@ export default function RightSidebar() {
 
     // 监听新通知
     const handleNewNotification = (notification: Notification) => {
-      console.log('[RightSidebar] 收到新通知:', notification);
-
       // 添加到通知列表
       setNotifications(prev => [notification, ...prev].slice(0, 10));
 
@@ -144,8 +138,7 @@ export default function RightSidebar() {
     };
 
     // 监听消息已读
-    const handleMessageRead = (data: any) => {
-      console.log('[RightSidebar] 消息已读:', data);
+    const handleMessageRead = () => {
       loadConversations();
     };
 
@@ -178,8 +171,8 @@ export default function RightSidebar() {
       await apiPatch(`/api/notifications/${notificationId}/read`);
       setNotifications(prev => prev.map(n => n.id === notificationId ? { ...n, isRead: true } : n));
       setUnreadNotifications(prev => Math.max(0, prev - 1));
-    } catch (error) {
-      console.error('[MARK_READ_ERROR]', error);
+    } catch {
+      // 静默处理标记已读失败
     }
   };
 

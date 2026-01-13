@@ -9,6 +9,8 @@ import {
   Image,
   GestureResponderEvent,
   PanResponderGestureState,
+  StyleProp,
+  ViewStyle,
 } from 'react-native';
 import { GLView, ExpoWebGLRenderingContext } from 'expo-gl';
 import { Renderer } from 'expo-three';
@@ -18,7 +20,7 @@ import { COLORS } from '../constants/config';
 interface Model3DViewerProps {
   modelUrl: string;
   fallbackImageUrl: string;
-  style?: any;
+  style?: StyleProp<ViewStyle>;
   onLoad?: () => void;
   onError?: (error: Error) => void;
 }
@@ -139,12 +141,8 @@ export default function Model3DViewer({
           loader.load(
             modelUrl,
             (result) => resolve(result),
-            (progress) => {
-              // 可以在这里处理加载进度
-              console.log(
-                'Loading progress:',
-                (progress.loaded / progress.total) * 100 + '%'
-              );
+            () => {
+              // 加载进度静默处理
             },
             (err) => reject(err)
           );
@@ -197,7 +195,6 @@ export default function Model3DViewer({
           cancelAnimationFrame(animationId);
         };
       } catch (err) {
-        console.error('Error loading 3D model:', err);
         const error = err instanceof Error ? err : new Error('加载模型失败');
         setError(error);
         onError?.(error);

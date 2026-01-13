@@ -74,8 +74,8 @@ export default async function HomePage() {
               saleInfo.saleStatus === 'on_sale'
             );
           });
-        } catch (error) {
-          console.error('[HOMEPAGE] Auto config parse error:', error);
+        } catch {
+          // 静默处理自动配置解析失败
         }
       } else if (section.type === 'auto_status' && section.autoConfig) {
         // 自动按状态栏目（如即将开售）
@@ -102,8 +102,8 @@ export default async function HomePage() {
               saleInfo.saleStatus === 'on_sale'
             );
           });
-        } catch (error) {
-          console.error('[HOMEPAGE] Auto config parse error:', error);
+        } catch {
+          // 静默处理自动配置解析失败
         }
       }
 

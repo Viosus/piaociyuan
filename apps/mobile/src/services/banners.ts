@@ -26,8 +26,7 @@ export async function getBanners(): Promise<HeroBanner[]> {
     }
 
     return [];
-  } catch (error) {
-    console.error('Failed to fetch banners:', error);
+  } catch {
     return [];
   }
 }

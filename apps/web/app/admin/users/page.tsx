@@ -61,8 +61,8 @@ export default function UsersManagement() {
       } else {
         alert('加载失败');
       }
-    } catch (error) {
-      console.error('加载用户列表失败:', error);
+    } catch {
+      // 静默处理加载用户列表失败
       alert('加载失败');
     } finally {
       setLoading(false);
@@ -94,8 +94,8 @@ export default function UsersManagement() {
       } else {
         alert(res.message || '操作失败');
       }
-    } catch (error) {
-      console.error('更新用户角色失败:', error);
+    } catch {
+      // 静默处理更新用户角色失败
       alert('操作失败');
     } finally {
       setProcessing(null);
@@ -117,8 +117,8 @@ export default function UsersManagement() {
       } else {
         alert(res.message || '删除失败');
       }
-    } catch (error) {
-      console.error('删除用户失败:', error);
+    } catch {
+      // 静默处理删除用户失败
       alert('删除失败');
     } finally {
       setProcessing(null);

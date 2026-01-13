@@ -95,8 +95,8 @@ export default function Sidebar() {
           // 即使API调用失败也继续登出
         });
       }
-    } catch (error) {
-      console.error('登出API调用失败:', error);
+    } catch {
+      // 静默处理登出API调用失败
     }
 
     // 清除所有本地存储的数据

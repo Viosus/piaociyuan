@@ -247,8 +247,8 @@ function OrdersList() {
         const eventList = Array.isArray(data) ? data : data.data || [];
         setEvents(eventList);
       }
-    } catch (err) {
-      console.error("加载活动列表失败:", err);
+    } catch {
+      // 静默处理加载活动列表失败
     }
   }, []);
 
@@ -262,10 +262,8 @@ function OrdersList() {
     try {
       const params = buildURLParams(activeFilters, page);
       const url = `/api/orders?${params.toString()}`;
-      console.log("🔍 [ORDERS_PAGE] 请求:", url);
 
       const data = await apiGet(url);
-      console.log("📦 [ORDERS_PAGE] 响应数据:", data);
 
       if (data.ok && data.data) {
         setOrders(data.data);
@@ -276,7 +274,7 @@ function OrdersList() {
         throw new Error(data.message || "数据格式错误");
       }
     } catch (err: unknown) {
-      console.error("❌ [ORDERS_PAGE] 请求失败:", err);
+      // 静默处理请求失败
       setError(err instanceof Error ? err.message : String(err) || "加载失败");
       setOrders([]);
     } finally {

@@ -193,8 +193,8 @@ export default function CheckoutClient({ event, tier, initialQty, urlLimit }: Pr
           const currentUrl = window.location.pathname + window.location.search;
           router.push(`/auth/login?returnUrl=${encodeURIComponent(currentUrl)}`);
         }
-      } catch (error) {
-        console.error('Auth check failed:', error);
+      } catch {
+        // 静默处理认证检查失败
       }
     };
 
@@ -264,7 +264,6 @@ export default function CheckoutClient({ event, tier, initialQty, urlLimit }: Pr
     if (!meData.ok) {
       // 如果获取用户信息失败，lib/api.ts 会处理重定向到登录页
       // 返回 null 停止后续流程
-      console.log('用户未登录或认证失败，将由 lib/api.ts 处理重定向');
       return null;
     }
 
@@ -313,7 +312,6 @@ export default function CheckoutClient({ event, tier, initialQty, urlLimit }: Pr
 
       router.push(`/order/${orderResult.orderId}`);
     } catch (err: unknown) {
-      console.error(err);
       setErrorMsg(err instanceof Error ? err.message : "提交失败，请稍后重试");
     } finally {
       setSubmitting(false);

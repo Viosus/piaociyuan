@@ -65,8 +65,7 @@ export default function SelectUserScreen() {
       } else {
         setUsers([]);
       }
-    } catch (error) {
-      console.error('Search users error:', error);
+    } catch {
       setUsers([]);
     } finally {
       setLoading(false);

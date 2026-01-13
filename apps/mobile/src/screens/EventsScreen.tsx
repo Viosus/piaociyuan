@@ -55,8 +55,8 @@ export default function EventsScreen() {
         if (response.ok && response.data) {
           setEvents(response.data);
         }
-      } catch (err) {
-        console.error('搜索失败:', err);
+      } catch {
+        // 静默处理搜索失败
       }
     } else {
       loadEvents();

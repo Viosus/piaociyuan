@@ -9,13 +9,27 @@ export interface ApiError {
 }
 
 /**
+ * 类型守卫：检查是否为带有 response 属性的错误对象
+ */
+function isErrorWithResponse(error: unknown): error is { response: { status?: number; data?: { message?: string } } } {
+  return typeof error === 'object' && error !== null && 'response' in error;
+}
+
+/**
+ * 类型守卫：检查是否为带有 message 属性的对象
+ */
+function isErrorWithMessage(error: unknown): error is { message: string } {
+  return typeof error === 'object' && error !== null && 'message' in error && typeof (error as { message: unknown }).message === 'string';
+}
+
+/**
  * 处理 API 错误
  * @param error 错误对象
  * @returns 格式化后的错误信息
  */
-export function handleApiError(error: any): string {
+export function handleApiError(error: unknown): string {
   // 网络错误
-  if (!error.response) {
+  if (!isErrorWithResponse(error)) {
     return '网络连接失败，请检查您的网络';
   }
 
@@ -48,12 +62,12 @@ export function handleApiError(error: any): string {
  * @param error 错误对象或字符串
  * @returns 用户友好的错误消息
  */
-export function formatErrorMessage(error: any): string {
+export function formatErrorMessage(error: unknown): string {
   if (typeof error === 'string') {
     return error;
   }
 
-  if (error?.message) {
+  if (isErrorWithMessage(error)) {
     return error.message;
   }
 
@@ -63,22 +77,22 @@ export function formatErrorMessage(error: any): string {
 /**
  * 判断是否为网络错误
  */
-export function isNetworkError(error: any): boolean {
-  return !error.response && error.message === 'Network request failed';
+export function isNetworkError(error: unknown): boolean {
+  return !isErrorWithResponse(error) && isErrorWithMessage(error) && error.message === 'Network request failed';
 }
 
 /**
  * 判断是否为认证错误
  */
-export function isAuthError(error: any): boolean {
-  return error.response?.status === 401;
+export function isAuthError(error: unknown): boolean {
+  return isErrorWithResponse(error) && error.response?.status === 401;
 }
 
 /**
  * 判断是否为权限错误
  */
-export function isPermissionError(error: any): boolean {
-  return error.response?.status === 403;
+export function isPermissionError(error: unknown): boolean {
+  return isErrorWithResponse(error) && error.response?.status === 403;
 }
 
 /**

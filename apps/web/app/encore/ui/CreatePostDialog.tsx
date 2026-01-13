@@ -146,8 +146,8 @@ export default function CreatePostDialog({
       } else {
         alert(result.message || "发布失败");
       }
-    } catch (error) {
-      console.error("Create post error:", error);
+    } catch {
+      // 静默处理创建帖子失败
       alert("发布失败，请稍后重试");
     } finally {
       setLoading(false);

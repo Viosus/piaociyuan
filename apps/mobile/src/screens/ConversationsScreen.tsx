@@ -16,7 +16,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { colors, spacing, fontSize } from '../constants/config';
-import { getConversations, type Conversation } from '../services/messages';
+import { getConversations, type Conversation, type Message } from '../services/messages';
 import { useSocket } from '../contexts/SocketContext';
 import { SocketEvent } from '../services/socket';
 import { getRelativeTime } from '../utils/date';
@@ -44,14 +44,12 @@ export default function ConversationsScreen() {
 
   useEffect(() => {
     // 监听新消息
-    const handleNewMessage = (message: any) => {
-      console.log('New message received:', message);
+    const handleNewMessage = (message: Message) => {
       updateConversationWithMessage(message);
     };
 
     // 监听对话更新
     const handleConversationUpdated = (conversation: Conversation) => {
-      console.log('Conversation updated:', conversation);
       updateConversation(conversation);
     };
 
@@ -76,8 +74,8 @@ export default function ConversationsScreen() {
       if (response.ok && response.data) {
         setConversations(response.data);
       }
-    } catch (error) {
-      console.error('Load conversations error:', error);
+    } catch {
+      // 静默处理加载错误
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -89,7 +87,7 @@ export default function ConversationsScreen() {
     loadConversations();
   };
 
-  const updateConversationWithMessage = (message: any) => {
+  const updateConversationWithMessage = (message: Message) => {
     setConversations((prev) => {
       const index = prev.findIndex((c) => c.id === message.conversationId);
       if (index >= 0) {

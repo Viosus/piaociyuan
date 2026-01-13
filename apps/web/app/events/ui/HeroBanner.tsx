@@ -26,8 +26,8 @@ export default function HeroBanner() {
         if (data.ok && data.data.length > 0) {
           setBanners(data.data);
         }
-      } catch (error) {
-        console.error("加载 Banner 失败:", error);
+      } catch {
+        // 静默处理加载横幅失败
       } finally {
         setLoading(false);
       }

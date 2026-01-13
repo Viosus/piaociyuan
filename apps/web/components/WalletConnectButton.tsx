@@ -38,8 +38,8 @@ export function WalletConnectButton() {
       if (data.connected && data.walletAddress) {
         setWalletAddress(data.walletAddress);
       }
-    } catch (err) {
-      console.error('检查钱包状态失败:', err);
+    } catch {
+      // 静默处理检查钱包状态失败
     }
   };
 
@@ -97,7 +97,6 @@ export function WalletConnectButton() {
       alert('钱包绑定成功！');
 
     } catch (err) {
-      console.error('连接钱包错误:', err);
       setError(err instanceof Error ? err.message : '连接失败');
     } finally {
       setIsConnecting(false);

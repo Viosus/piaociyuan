@@ -60,7 +60,6 @@ export default function UserFollowings() {
       setTotalPages(data.data.pagination.totalPages);
       setTotalCount(data.data.pagination.totalCount);
     } catch (err: unknown) {
-      console.error("Load followings error:", err);
       setError(err instanceof Error ? err.message : "加载失败");
     } finally {
       setLoading(false);
@@ -93,8 +92,8 @@ export default function UserFollowings() {
       } else {
         alert(`❌ ${data.message || "取消关注失败"}`);
       }
-    } catch (error) {
-      console.error("Unfollow error:", error);
+    } catch {
+      // 静默处理取消关注失败
       alert("❌ 网络错误，请稍后重试");
     }
   };

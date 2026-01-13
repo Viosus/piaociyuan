@@ -31,8 +31,8 @@ export default function FollowButton({ eventId, eventName }: FollowButtonProps) 
         if (result.ok) {
           setIsFollowing(result.data.isFollowing);
         }
-      } catch (error) {
-        console.error('[CHECK_FOLLOW_ERROR]', error);
+      } catch {
+        // 静默处理检查关注状态失败
       } finally {
         setLoading(false);
       }
@@ -68,8 +68,8 @@ export default function FollowButton({ eventId, eventName }: FollowButtonProps) 
       } else {
         alert(`❌ ${result.message || '操作失败'}`);
       }
-    } catch (error) {
-      console.error('[FOLLOW_TOGGLE_ERROR]', error);
+    } catch {
+      // 静默处理关注操作失败
       alert('❌ 网络错误，请稍后重试');
     } finally {
       setActionLoading(false);

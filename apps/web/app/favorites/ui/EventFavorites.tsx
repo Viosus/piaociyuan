@@ -62,11 +62,9 @@ export default function EventFavorites() {
         if (result.ok) {
           setFollowedEvents(result.data);
           setStats(result.stats);
-        } else {
-          console.error("[LOAD_FOLLOWS_ERROR]", result.message);
         }
-      } catch (error) {
-        console.error("[LOAD_FOLLOWS_ERROR]", error);
+      } catch {
+        // 静默处理加载关注活动失败
       } finally {
         setLoading(false);
       }
@@ -91,8 +89,8 @@ export default function EventFavorites() {
       } else {
         alert(`❌ ${result.message || "取消关注失败"}`);
       }
-    } catch (error) {
-      console.error("[UNFOLLOW_ERROR]", error);
+    } catch {
+      // 静默处理取消关注活动失败
       alert("❌ 网络错误，请稍后重试");
     }
   };

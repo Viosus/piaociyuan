@@ -28,8 +28,8 @@ export function HeroBanners() {
         }
         setIsLoading(false);
       })
-      .catch((error) => {
-        console.error('Failed to load banners:', error);
+      .catch(() => {
+        // 静默处理加载横幅失败
         setIsLoading(false);
       });
   }, []);

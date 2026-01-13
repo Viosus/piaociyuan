@@ -65,7 +65,6 @@ export async function shareContent(options: ShareOptions): Promise<ShareResult> 
 
     return { success: true };
   } catch (error: any) {
-    console.error('分享失败:', error);
     return {
       success: false,
       error: error.message || '分享失败',
@@ -311,7 +310,6 @@ export async function shareImage(
 
     return { success: true };
   } catch (error: any) {
-    console.error('分享图片失败:', error);
     return {
       success: false,
       error: error.message || '分享图片失败',
@@ -327,10 +325,9 @@ export async function copyToClipboard(text: string): Promise<boolean> {
     // 注意: 需要安装 expo-clipboard
     // import * as Clipboard from 'expo-clipboard';
     // await Clipboard.setStringAsync(text);
-    console.log('复制到剪贴板:', text);
+    void text; // 保留参数使用
     return true;
-  } catch (error) {
-    console.error('复制失败:', error);
+  } catch {
     return false;
   }
 }

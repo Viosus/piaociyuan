@@ -39,11 +39,19 @@ class ApiClient {
   private cache: Map<string, CacheEntry<any>> = new Map();
   private defaultCacheTime: number = 5 * 60 * 1000; // 5 分钟
 
-  // 请求取消控制器
+  // 请求取消控制器（使用唯一 ID，避免并发请求覆盖）
   private abortControllers: Map<string, AbortController> = new Map();
+  private requestIdCounter: number = 0;
 
   constructor(baseURL: string) {
     this.baseURL = baseURL;
+  }
+
+  /**
+   * 生成唯一请求 ID
+   */
+  private generateRequestId(endpoint: string): string {
+    return `${endpoint}:${++this.requestIdCounter}`;
   }
 
   /**
@@ -69,8 +77,8 @@ class ApiClient {
       const refreshToken = await StorageService.getRefreshToken();
       this.setAccessToken(accessToken);
       this.setRefreshToken(refreshToken);
-    } catch (error) {
-      console.error('Failed to initialize tokens:', error);
+    } catch {
+      // Token 初始化失败，静默处理（用户可能未登录）
     }
   }
 
@@ -229,9 +237,10 @@ class ApiClient {
       }
     }
 
-    // 创建 AbortController
+    // 创建 AbortController（使用唯一 ID 避免并发覆盖）
+    const requestId = this.generateRequestId(endpoint);
     const controller = new AbortController();
-    this.abortControllers.set(endpoint, controller);
+    this.abortControllers.set(requestId, controller);
 
     let lastError: any;
 
@@ -302,7 +311,7 @@ class ApiClient {
         }
 
         // 清理 AbortController
-        this.abortControllers.delete(endpoint);
+        this.abortControllers.delete(requestId);
 
         return data;
       } catch (error: any) {
@@ -324,7 +333,7 @@ class ApiClient {
     }
 
     // 清理 AbortController
-    this.abortControllers.delete(endpoint);
+    this.abortControllers.delete(requestId);
 
     // 处理错误
     const errorMessage = handleApiError(lastError);

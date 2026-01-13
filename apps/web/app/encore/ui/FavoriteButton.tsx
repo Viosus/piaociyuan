@@ -21,8 +21,8 @@ export default function FavoriteButton({ postId }: FavoriteButtonProps) {
         if (result.ok) {
           setIsFavorited(result.isFavorited);
         }
-      } catch (error) {
-        console.error("Check favorite error:", error);
+      } catch {
+        // 静默处理检查收藏状态失败
       } finally {
         setChecking(false);
       }
@@ -32,14 +32,11 @@ export default function FavoriteButton({ postId }: FavoriteButtonProps) {
   }, [postId]);
 
   const handleToggleFavorite = async (e: React.MouseEvent) => {
-    console.log('[FavoriteButton] 点击收藏按钮', { postId, isFavorited, loading });
-
     // 阻止事件冒泡，防止触发父元素的Link跳转
     e.preventDefault();
     e.stopPropagation();
 
     if (loading) {
-      console.log('[FavoriteButton] 正在加载中，忽略点击');
       return;
     }
 
@@ -48,9 +45,7 @@ export default function FavoriteButton({ postId }: FavoriteButtonProps) {
     try {
       if (isFavorited) {
         // 取消收藏
-        console.log('[FavoriteButton] 正在取消收藏...');
         const result = await apiDelete(`/api/posts/${postId}/favorite`);
-        console.log('[FavoriteButton] 取消收藏结果:', result);
         if (result.ok) {
           setIsFavorited(false);
         } else {
@@ -58,9 +53,7 @@ export default function FavoriteButton({ postId }: FavoriteButtonProps) {
         }
       } else {
         // 添加收藏
-        console.log('[FavoriteButton] 正在添加收藏...');
         const result = await apiPost(`/api/posts/${postId}/favorite`, {});
-        console.log('[FavoriteButton] 添加收藏结果:', result);
         if (result.ok) {
           setIsFavorited(true);
         } else {
@@ -71,8 +64,8 @@ export default function FavoriteButton({ postId }: FavoriteButtonProps) {
           }
         }
       }
-    } catch (error) {
-      console.error("Toggle favorite error:", error);
+    } catch {
+      // 静默处理切换收藏状态失败
       alert("❌ 网络错误，请稍后重试");
     } finally {
       setLoading(false);

@@ -74,8 +74,8 @@ export default function UserProfileScreen() {
         }
         setHasMore(response.data.length >= 20);
       }
-    } catch (error: any) {
-      console.error('Load user posts error:', error);
+    } catch {
+      // 静默处理加载错误
     } finally {
       setLoading(false);
       setLoadingMore(false);

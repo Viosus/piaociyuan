@@ -88,8 +88,8 @@ export default function VerificationsManagement() {
       } else {
         alert('加载失败');
       }
-    } catch (error) {
-      console.error('加载认证申请失败:', error);
+    } catch {
+      // 静默处理加载认证申请失败
       alert('加载失败');
     } finally {
       setLoading(false);
@@ -134,8 +134,8 @@ export default function VerificationsManagement() {
       } else {
         alert(res.message || '操作失败');
       }
-    } catch (error) {
-      console.error('审核失败:', error);
+    } catch {
+      // 静默处理审核失败
       alert('操作失败');
     } finally {
       setProcessing(null);

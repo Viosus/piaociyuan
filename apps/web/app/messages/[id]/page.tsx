@@ -42,8 +42,6 @@ export default function ConversationPage() {
   // 🔥 使用 WebSocket 实时通信
   const { isConnected, getSocket } = useSocket({
     autoConnect: true,
-    onConnect: () => console.log('[聊天页面] WebSocket 已连接'),
-    onDisconnect: () => console.log('[聊天页面] WebSocket 已断开'),
   });
 
   useEffect(() => {
@@ -69,14 +67,10 @@ export default function ConversationPage() {
 
     const socket = getSocket();
     if (!socket) {
-      console.log('[聊天页面] Socket 未就绪');
       return;
     }
 
-    console.log('[聊天页面] 注册消息监听器, conversationId:', conversationId);
-
     const handleNewMessage = (newMessage: Message) => {
-      console.log('[聊天页面] 收到新消息:', newMessage);
 
       // 只处理当前对话的消息
       if (newMessage.conversationId !== conversationId) return;
@@ -98,7 +92,6 @@ export default function ConversationPage() {
     socket.on('message:new', handleNewMessage);
 
     return () => {
-      console.log('[聊天页面] 移除消息监听器');
       socket.off('message:new', handleNewMessage);
     };
   }, [isConnected, conversationId, getSocket]);
@@ -111,8 +104,8 @@ export default function ConversationPage() {
     try {
       const data = await apiGet(`/api/messages/conversations/${conversationId}`);
       setConversation(data);
-    } catch (error) {
-      console.error('加载对话失败:', error);
+    } catch {
+      // 静默处理加载对话失败
       router.push('/messages');
     } finally {
       setLoading(false);
@@ -140,8 +133,8 @@ export default function ConversationPage() {
           : null
       );
       setMessage('');
-    } catch (error) {
-      console.error('发送消息失败:', error);
+    } catch {
+      // 静默处理发送消息失败
       alert('发送失败，请重试');
     } finally {
       setSending(false);

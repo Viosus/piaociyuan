@@ -63,8 +63,7 @@ export default function CreateGroupScreen() {
       } else {
         setUsers([]);
       }
-    } catch (error) {
-      console.error('Search users error:', error);
+    } catch {
       setUsers([]);
     } finally {
       setSearching(false);

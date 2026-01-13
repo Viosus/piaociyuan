@@ -62,8 +62,8 @@ export default function HomepageSectionsClient() {
       if (data.ok) {
         setSections(data.data);
       }
-    } catch (error) {
-      console.error("Load sections error:", error);
+    } catch {
+      // 静默处理加载栏目失败
     } finally {
       setLoading(false);
     }
@@ -105,8 +105,8 @@ export default function HomepageSectionsClient() {
         alert(`错误：${data.message}`);
         loadSections(); // 重新加载
       }
-    } catch (error) {
-      console.error("Update order error:", error);
+    } catch {
+      // 静默处理更新排序失败
       loadSections(); // 重新加载
     }
   };
@@ -130,8 +130,8 @@ export default function HomepageSectionsClient() {
       } else {
         alert(`❌ ${data.message}`);
       }
-    } catch (error) {
-      console.error("Delete error:", error);
+    } catch {
+      // 静默处理删除失败
       alert("❌ 删除失败");
     }
   };
@@ -156,8 +156,8 @@ export default function HomepageSectionsClient() {
       } else {
         alert(`❌ ${data.message}`);
       }
-    } catch (error) {
-      console.error("Toggle active error:", error);
+    } catch {
+      // 静默处理切换启用状态失败
       alert("❌ 操作失败");
     }
   };

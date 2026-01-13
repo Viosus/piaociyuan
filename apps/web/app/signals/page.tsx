@@ -36,8 +36,8 @@ export default function SignalsPage() {
         if (data.ok) {
           setAllEvents(data.data || []);
         }
-      } catch (error) {
-        console.error("Failed to load events:", error);
+      } catch {
+        // 静默处理加载活动列表失败
       } finally {
         setLoading(false);
       }

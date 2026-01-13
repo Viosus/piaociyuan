@@ -71,8 +71,8 @@ export default function VerificationPage() {
       if (res.ok) {
         setRequests(res.data || []);
       }
-    } catch (error) {
-      console.error('加载认证记录失败:', error);
+    } catch {
+      // 静默处理加载认证记录失败
     } finally {
       setLoading(false);
     }
@@ -119,8 +119,8 @@ export default function VerificationPage() {
       } else {
         alert(res.message || '提交失败');
       }
-    } catch (error) {
-      console.error('提交认证申请失败:', error);
+    } catch {
+      // 静默处理提交认证申请失败
       alert('提交失败');
     } finally {
       setSubmitting(false);

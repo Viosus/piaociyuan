@@ -68,8 +68,8 @@ export default function NFTsManagement() {
       } else {
         alert('加载失败');
       }
-    } catch (error) {
-      console.error('加载NFT列表失败:', error);
+    } catch {
+      // 静默处理加载NFT列表失败
       alert('加载失败');
     } finally {
       setLoading(false);

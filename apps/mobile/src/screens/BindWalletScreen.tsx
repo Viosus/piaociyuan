@@ -37,8 +37,8 @@ export default function BindWalletScreen() {
           setWalletAddress(result.data.walletAddress);
         }
       }
-    } catch (error: any) {
-      console.error('加载钱包状态失败:', error);
+    } catch {
+      // 静默处理加载错误
     } finally {
       setLoading(false);
     }

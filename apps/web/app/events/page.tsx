@@ -54,8 +54,8 @@ async function getHomepageSections() {
             const saleInfo = getSaleStatusInfo(event.saleStatus, event.saleStartTime, event.saleEndTime);
             return saleInfo.saleStatus === 'not_started' || saleInfo.saleStatus === 'on_sale';
           });
-        } catch (error) {
-          console.error('[HOMEPAGE_SECTIONS] Auto config parse error:', error);
+        } catch {
+          // 静默处理自动配置解析失败
         }
       } else if (section.type === 'auto_status' && section.autoConfig) {
         // 自动按状态栏目
@@ -72,8 +72,8 @@ async function getHomepageSections() {
             const saleInfo = getSaleStatusInfo(event.saleStatus, event.saleStartTime, event.saleEndTime);
             return saleInfo.saleStatus === status;
           });
-        } catch (error) {
-          console.error('[HOMEPAGE_SECTIONS] Auto config parse error:', error);
+        } catch {
+          // 静默处理自动配置解析失败
         }
       }
 

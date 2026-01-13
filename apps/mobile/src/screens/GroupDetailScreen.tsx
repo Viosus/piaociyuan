@@ -27,7 +27,7 @@ import {
   type GroupDetail,
   type GroupMember,
 } from '../services/messages';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getUser } from '../services/storage';
 
 export default function GroupDetailScreen() {
   const route = useRoute();
@@ -47,13 +47,12 @@ export default function GroupDetailScreen() {
 
   const loadCurrentUser = async () => {
     try {
-      const userStr = await AsyncStorage.getItem('user');
-      if (userStr) {
-        const user = JSON.parse(userStr);
+      const user = await getUser();
+      if (user) {
         setCurrentUserId(user.id);
       }
     } catch (error) {
-      console.error('Load current user error:', error);
+      // 静默处理
     }
   };
 
@@ -68,8 +67,7 @@ export default function GroupDetailScreen() {
         Alert.alert('错误', response.error || '获取群聊详情失败');
         navigation.goBack();
       }
-    } catch (error) {
-      console.error('Load group detail error:', error);
+    } catch {
       Alert.alert('错误', '获取群聊详情失败');
       navigation.goBack();
     } finally {

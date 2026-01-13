@@ -47,8 +47,8 @@ export default function MessagesPage() {
     try {
       const data = await apiGet('/api/messages/conversations');
       setConversations(data);
-    } catch (error) {
-      console.error('加载对话列表失败:', error);
+    } catch {
+      // 静默处理加载对话列表失败
     } finally {
       setLoading(false);
     }

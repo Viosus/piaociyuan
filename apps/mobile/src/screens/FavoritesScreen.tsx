@@ -61,8 +61,8 @@ export default function FavoritesScreen() {
         }
         setHasMore(response.data.length >= 20);
       }
-    } catch (error) {
-      console.error('Load favorites error:', error);
+    } catch {
+      // 静默处理加载错误
     } finally {
       setLoading(false);
       setRefreshing(false);

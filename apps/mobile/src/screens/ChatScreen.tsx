@@ -28,7 +28,8 @@ import { SocketEvent } from '../services/socket';
 import { MessageBubble } from '../components/MessageBubble';
 import { MessageInput } from '../components/MessageInput';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { formatErrorMessage } from '../utils/error';
+import { getUser } from '../services/storage';
 
 export default function ChatScreen() {
   const route = useRoute();
@@ -136,13 +137,12 @@ export default function ChatScreen() {
 
   const loadCurrentUser = async () => {
     try {
-      const userStr = await AsyncStorage.getItem('user');
-      if (userStr) {
-        const user = JSON.parse(userStr);
+      const user = await getUser();
+      if (user) {
         setCurrentUserId(user.id);
       }
     } catch (error) {
-      console.error('Load current user error:', error);
+      // 静默处理，用户未登录时不影响页面
     }
   };
 
@@ -158,8 +158,8 @@ export default function ChatScreen() {
           setOtherUserId(response.data.otherUser.id);
         }
       }
-    } catch (error) {
-      console.error('Load conversation error:', error);
+    } catch {
+      // 静默处理加载错误
     }
   };
 
@@ -172,8 +172,8 @@ export default function ChatScreen() {
       if (response.ok && response.data) {
         setMessages(response.data.reverse());
       }
-    } catch (error) {
-      console.error('Load messages error:', error);
+    } catch {
+      // 静默处理加载错误
     } finally {
       setLoading(false);
     }
@@ -184,8 +184,8 @@ export default function ChatScreen() {
 
     try {
       await markConversationAsRead(conversationId);
-    } catch (error) {
-      console.error('Mark as read error:', error);
+    } catch {
+      // 静默处理标记已读错误
     }
   };
 
@@ -213,8 +213,8 @@ export default function ChatScreen() {
       } else {
         Alert.alert('错误', response.error || '发送失败');
       }
-    } catch (error: any) {
-      Alert.alert('错误', error.message || '发送失败');
+    } catch (error) {
+      Alert.alert('错误', formatErrorMessage(error) || '发送失败');
     } finally {
       setSending(false);
     }

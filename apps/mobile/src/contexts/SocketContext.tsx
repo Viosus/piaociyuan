@@ -48,12 +48,10 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     // 监听连接状态变化
     const handleConnectEvent = () => {
       setIsConnected(true);
-      console.log('Socket Context: Connected');
     };
 
     const handleDisconnectEvent = () => {
       setIsConnected(false);
-      console.log('Socket Context: Disconnected');
     };
 
     socketService.on(SocketEvent.Connect, handleConnectEvent);
@@ -68,8 +66,8 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   const handleConnect = async () => {
     try {
       await socketService.connect();
-    } catch (error) {
-      console.error('Socket Context: Connect error:', error);
+    } catch {
+      // 连接失败静默处理，会自动重试
     }
   };
 

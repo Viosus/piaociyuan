@@ -51,8 +51,8 @@ export default function FollowingListScreen() {
         }
         setHasMore(response.data.length >= 20);
       }
-    } catch (error) {
-      console.error('Load following error:', error);
+    } catch {
+      // 静默处理加载错误
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -94,8 +94,8 @@ export default function FollowingListScreen() {
           )
         );
       }
-    } catch (error) {
-      console.error('Follow error:', error);
+    } catch {
+      // 静默处理关注错误
     } finally {
       setFollowLoadingIds((prev) => {
         const next = new Set(prev);

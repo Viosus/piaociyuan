@@ -66,8 +66,8 @@ export default function EditBannerDialog({ banner, onClose, onSuccess }: Props) 
       } else {
         alert(`❌ ${data.message}`);
       }
-    } catch (error) {
-      console.error("更新 Banner 失败:", error);
+    } catch {
+      // 静默处理更新Banner失败
       alert("❌ 更新失败");
     } finally {
       setLoading(false);

@@ -92,8 +92,7 @@ export async function isCached(url: string): Promise<boolean> {
     }
 
     return true;
-  } catch (error) {
-    console.error('检查缓存失败:', error);
+  } catch {
     return false;
   }
 }
@@ -107,8 +106,7 @@ export async function getCachedImageUri(url: string): Promise<string | null> {
       return await getCachePath(url);
     }
     return null;
-  } catch (error) {
-    console.error('获取缓存图片失败:', error);
+  } catch {
     return null;
   }
 }
@@ -151,8 +149,7 @@ export async function cacheImage(url: string): Promise<string> {
     } else {
       throw new Error(`下载失败: HTTP ${downloadResult.status}`);
     }
-  } catch (error: any) {
-    console.error('缓存图片失败:', error);
+  } catch (error) {
     throw error;
   }
 }
@@ -161,8 +158,8 @@ export async function cacheImage(url: string): Promise<string> {
  * 预加载图片列表
  */
 export async function preloadImages(urls: string[]): Promise<void> {
-  const promises = urls.map((url) => cacheImage(url).catch((error) => {
-    console.warn(`预加载图片失败: ${url}`, error);
+  const promises = urls.map((url) => cacheImage(url).catch(() => {
+    // 静默处理预加载失败
   }));
 
   await Promise.all(promises);
@@ -180,8 +177,7 @@ export async function getCacheSize(): Promise<number> {
     }
 
     return totalSize;
-  } catch (error) {
-    console.error('获取缓存大小失败:', error);
+  } catch {
     return 0;
   }
 }
@@ -208,11 +204,9 @@ async function manageCacheSize(): Promise<void> {
         cacheMetadata.delete(key);
         sizeToFree -= metadata.size;
       }
-
-      console.log(`清理缓存完成，释放 ${currentSize - await getCacheSize()} 字节`);
     }
-  } catch (error) {
-    console.error('管理缓存大小失败:', error);
+  } catch {
+    // 静默处理缓存管理错误
   }
 }
 
@@ -224,9 +218,8 @@ export async function clearCache(): Promise<void> {
     await FileSystem.deleteAsync(CACHE_CONFIG.cacheDir, { idempotent: true });
     await initCacheDir();
     cacheMetadata.clear();
-    console.log('缓存已清除');
-  } catch (error) {
-    console.error('清除缓存失败:', error);
+  } catch {
+    // 静默处理清除缓存错误
   }
 }
 
@@ -247,12 +240,8 @@ export async function clearExpiredCache(): Promise<void> {
     }
 
     expiredKeys.forEach((key) => cacheMetadata.delete(key));
-
-    if (expiredKeys.length > 0) {
-      console.log(`清除 ${expiredKeys.length} 个过期缓存`);
-    }
-  } catch (error) {
-    console.error('清除过期缓存失败:', error);
+  } catch {
+    // 静默处理清除过期缓存错误
   }
 }
 
@@ -266,8 +255,8 @@ export async function removeCachedImage(url: string): Promise<void> {
 
     await FileSystem.deleteAsync(cachePath, { idempotent: true });
     cacheMetadata.delete(key);
-  } catch (error) {
-    console.error('删除缓存失败:', error);
+  } catch {
+    // 静默处理删除缓存错误
   }
 }
 
@@ -330,9 +319,7 @@ export async function initImageCache(): Promise<void> {
         });
       }
     }
-
-    console.log(`图片缓存已初始化: ${cacheMetadata.size} 个文件`);
-  } catch (error) {
-    console.error('初始化图片缓存失败:', error);
+  } catch {
+    // 静默处理初始化错误
   }
 }

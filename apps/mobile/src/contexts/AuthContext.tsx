@@ -48,8 +48,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (savedUser) {
         setUser(savedUser);
       }
-    } catch (error) {
-      console.error('检查认证状态失败:', error);
+    } catch {
+      // 认证检查失败，用户需要重新登录
     } finally {
       setIsLoading(false);
     }
@@ -73,7 +73,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error(response.error || '登录失败');
       }
     } catch (error) {
-      console.error('登录失败:', error);
       throw error;
     }
   };
@@ -106,7 +105,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error(response.error || '注册失败');
       }
     } catch (error) {
-      console.error('注册失败:', error);
       throw error;
     }
   };
@@ -119,7 +117,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       apiClient.setRefreshToken(null);
       setUser(null);
     } catch (error) {
-      console.error('退出登录失败:', error);
       throw error;
     }
   };

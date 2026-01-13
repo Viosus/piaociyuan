@@ -25,8 +25,7 @@ export async function getHomepageSections(): Promise<HomepageSection[]> {
     }
 
     return [];
-  } catch (error) {
-    console.error('Failed to fetch homepage sections:', error);
+  } catch {
     return [];
   }
 }

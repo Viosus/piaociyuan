@@ -72,8 +72,7 @@ export default function CachedImage({
         setCachedUri(path);
         setLoading(false);
       }
-    } catch (err) {
-      console.error('加载图片失败:', err);
+    } catch {
       setError(true);
       setLoading(false);
 

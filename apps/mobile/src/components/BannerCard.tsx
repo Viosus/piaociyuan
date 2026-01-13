@@ -35,8 +35,8 @@ export const BannerCard: React.FC<BannerCardProps> = ({
         if (canOpen) {
           await Linking.openURL(banner.link);
         }
-      } catch (error) {
-        console.error('Failed to open link:', error);
+      } catch {
+        // 静默处理链接打开失败
       }
     }
   };

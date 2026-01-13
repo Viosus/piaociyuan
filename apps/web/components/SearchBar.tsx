@@ -41,8 +41,7 @@ export default function SearchBar() {
         if (response.ok) {
           setResults(response.data);
         }
-      } catch (error) {
-        console.error("搜索失败:", error);
+      } catch {
         setResults([]);
       } finally {
         setLoading(false);

@@ -31,8 +31,8 @@ export default function PaymentSuccessScreen() {
       if (response.ok && response.data) {
         setOrder(response.data);
       }
-    } catch (err) {
-      console.error('Failed to load order:', err);
+    } catch {
+      // 静默处理加载订单失败
     } finally {
       setLoading(false);
     }

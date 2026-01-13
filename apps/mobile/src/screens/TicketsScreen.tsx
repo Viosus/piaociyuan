@@ -97,8 +97,8 @@ export default function TicketsScreen() {
                 index: 0,
                 routes: [{ name: 'Login' as never }],
               });
-            } catch (error) {
-              console.error('退出登录失败:', error);
+            } catch {
+              // 静默处理退出登录失败
             }
           },
         },

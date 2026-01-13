@@ -26,7 +26,6 @@ async function refreshAccessToken(): Promise<string | null> {
     try {
       const refreshToken = localStorage.getItem('refreshToken');
       if (!refreshToken) {
-        console.log('[REFRESH] 没有 refresh token');
         return null;
       }
 
@@ -45,17 +44,14 @@ async function refreshAccessToken(): Promise<string | null> {
         // 保存新的 access token
         localStorage.setItem('token', newAccessToken);
 
-        console.log('[REFRESH] Token 刷新成功');
         return newAccessToken;
       } else {
-        console.log('[REFRESH] Token 刷新失败，需要重新登录');
         // 清除所有 token
         localStorage.removeItem('token');
         localStorage.removeItem('refreshToken');
         return null;
       }
-    } catch (error) {
-      console.error('[REFRESH] 刷新出错:', error);
+    } catch {
       return null;
     } finally {
       isRefreshing = false;
@@ -89,13 +85,10 @@ export async function apiFetch(
 
   // 如果是 401 或 404（可能是路由编译导致），且有 refresh token，尝试刷新
   if (response.status === 401 || (response.status === 404 && url.includes('/api/auth'))) {
-    console.log(`[API] 收到 ${response.status}，尝试刷新 token`);
-
     const newToken = await refreshAccessToken();
 
     if (newToken) {
       // 用新 token 重试请求
-      console.log('[API] 用新 token 重试请求');
       const retryHeaders = {
         ...options.headers,
         Authorization: `Bearer ${newToken}`,
@@ -107,7 +100,6 @@ export async function apiFetch(
       });
     } else {
       // 刷新失败，跳转到登录页
-      console.log('[API] Token 刷新失败，跳转登录页');
       if (typeof window !== 'undefined') {
         const currentUrl = window.location.pathname + window.location.search;
         window.location.href = `/auth/login?returnUrl=${encodeURIComponent(currentUrl)}`;

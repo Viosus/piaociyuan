@@ -76,8 +76,8 @@ export default function EditSectionDialog({ section, onClose, onSuccess }: Props
       } else {
         alert(`❌ ${data.message}`);
       }
-    } catch (error) {
-      console.error("Update section error:", error);
+    } catch {
+      // 静默处理更新栏目失败
       alert("❌ 更新失败");
     } finally {
       setLoading(false);

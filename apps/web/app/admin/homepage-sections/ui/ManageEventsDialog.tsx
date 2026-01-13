@@ -52,8 +52,8 @@ export default function ManageEventsDialog({ section, onClose, onSuccess }: Prop
         const filtered = data.data.filter((e: Event) => !existingIds.has(e.id));
         setSearchResults(filtered);
       }
-    } catch (error) {
-      console.error("Search error:", error);
+    } catch {
+      // 静默处理搜索失败
     } finally {
       setSearching(false);
     }
@@ -82,8 +82,8 @@ export default function ManageEventsDialog({ section, onClose, onSuccess }: Prop
       } else {
         alert(`❌ ${data.message}`);
       }
-    } catch (error) {
-      console.error("Add event error:", error);
+    } catch {
+      // 静默处理添加活动失败
       alert("❌ 添加失败");
     }
   };
@@ -109,8 +109,8 @@ export default function ManageEventsDialog({ section, onClose, onSuccess }: Prop
       } else {
         alert(`❌ ${data.message}`);
       }
-    } catch (error) {
-      console.error("Remove event error:", error);
+    } catch {
+      // 静默处理移除活动失败
       alert("❌ 移除失败");
     }
   };
@@ -151,8 +151,8 @@ export default function ManageEventsDialog({ section, onClose, onSuccess }: Prop
       if (!data.ok) {
         alert(`错误：${data.message}`);
       }
-    } catch (error) {
-      console.error("Update order error:", error);
+    } catch {
+      // 静默处理更新排序失败
     }
   };
 
