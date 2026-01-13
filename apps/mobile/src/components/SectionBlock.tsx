@@ -28,8 +28,15 @@ export const SectionBlock: React.FC<SectionBlockProps> = ({ section }) => {
 
   const handleMorePress = () => {
     if (section.moreLink) {
-      // 可以根据 moreLink 跳转到相应页面
-      navigation.navigate('Events' as never);
+      // 根据 moreLink 跳转到相应页面
+      const linkToScreenMap: Record<string, string> = {
+        '/signals': 'Events',
+        '/events': 'Events',
+        '/encore': 'Encore',
+        '/favorites': 'Favorites',
+      };
+      const screenName = linkToScreenMap[section.moreLink] || 'Events';
+      navigation.navigate(screenName as never);
     }
   };
 

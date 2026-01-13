@@ -121,16 +121,16 @@ export default function Sidebar() {
       {/* Logo */}
       <Link
         href="/events"
-        className="h-28 border-b border-[#FFE3F0]/30 flex items-center justify-center transition-all duration-300 relative overflow-hidden"
+        className="h-20 border-b border-[#FFE3F0]/30 flex items-center justify-center transition-all duration-300 relative overflow-hidden px-2"
       >
         {/* Logo图标 - 收起时小，展开时大 */}
         <div className="transition-all duration-300 flex justify-center w-full">
           <Image
             src="/icons/logo-gradient.png"
             alt="票次元"
-            width={288}
-            height={100}
-            className="object-contain w-16 h-20 group-hover:w-56 group-hover:h-24 transition-all duration-300"
+            width={200}
+            height={60}
+            className="object-contain w-14 h-14 group-hover:w-48 group-hover:h-16 transition-all duration-300"
           />
         </div>
       </Link>
@@ -144,7 +144,7 @@ export default function Sidebar() {
               key={item.href}
               href={item.href}
               className={`
-                relative flex items-center py-3 rounded-xl transition-all duration-200 justify-center group-hover:justify-start group-hover:gap-3 group-hover:px-3
+                relative flex items-center py-3 px-4 rounded-xl transition-all duration-200 gap-3
                 ${
                   isActive
                     ? "bg-white/10 text-white"
@@ -157,8 +157,8 @@ export default function Sidebar() {
                 <div className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-gradient-to-b ${item.gradient} rounded-r-full`}></div>
               )}
 
-              {/* 图标 - 始终显示，收起时完全居中 */}
-              <span className="min-w-[2rem] w-8 h-8 shrink-0 flex items-center justify-center">
+              {/* 图标 - 始终显示 */}
+              <span className="w-8 h-8 shrink-0 flex items-center justify-center">
                 <Image
                   src={item.icon}
                   alt={item.name}
@@ -186,7 +186,7 @@ export default function Sidebar() {
           <div className="relative">
             <button
               onClick={() => setShowUserMenu(!showUserMenu)}
-              className="w-full flex items-center py-3 rounded-xl hover:bg-white/5 transition-all justify-center group-hover:justify-start group-hover:gap-3 group-hover:px-3"
+              className="w-full flex items-center py-3 px-4 rounded-xl hover:bg-white/5 transition-all gap-3"
             >
               {/* 头像 */}
               {user.avatar ? (
@@ -260,17 +260,17 @@ export default function Sidebar() {
             )}
           </div>
         ) : (
-          <div className="space-y-2 flex flex-col items-center group-hover:items-stretch">
+          <div className="space-y-2 px-1">
             <Link
               href="/auth/login"
-              className="w-10 h-10 group-hover:w-full flex items-center justify-center group-hover:px-4 group-hover:py-2.5 text-center text-sm font-medium text-white bg-white/10 hover:bg-white/15 rounded-xl transition-all overflow-hidden"
+              className="w-full flex items-center justify-center px-4 py-2.5 text-center text-sm font-medium text-white bg-white/10 hover:bg-white/15 rounded-xl transition-all overflow-hidden"
             >
               <span className="group-hover:hidden">👤</span>
               <span className="hidden group-hover:inline">登录</span>
             </Link>
             <Link
               href="/auth/register"
-              className="w-10 h-10 group-hover:w-full flex items-center justify-center group-hover:px-4 group-hover:py-2.5 text-center text-sm font-medium text-white bg-gradient-to-r from-purple-500 to-[#EAF353] hover:from-purple-600 hover:to-pink-600 rounded-xl transition-all shadow-lg shadow-purple-500/20 overflow-hidden"
+              className="w-full flex items-center justify-center px-4 py-2.5 text-center text-sm font-medium text-white bg-gradient-to-r from-purple-500 to-[#EAF353] hover:from-purple-600 hover:to-pink-600 rounded-xl transition-all shadow-lg shadow-purple-500/20 overflow-hidden"
             >
               <span className="group-hover:hidden">✨</span>
               <span className="hidden group-hover:inline">注册</span>

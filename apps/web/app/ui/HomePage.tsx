@@ -148,7 +148,7 @@ export default async function HomePage() {
               {section.moreLink && (
                 <Link
                   href={section.moreLink}
-                  className="text-sm font-medium text-[#EAF353] hover:text-[#d4db4a] flex items-center gap-1"
+                  className="text-sm font-medium text-purple-600 hover:text-purple-700 flex items-center gap-1"
                 >
                   查看更多
                   <svg
