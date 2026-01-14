@@ -80,7 +80,7 @@ export async function GET(
 
     if (currentUserId && currentUserId !== userId) {
       const [followStatus, followedByStatus] = await Promise.all([
-        prisma.follow.findUnique({
+        prisma.userFollow.findUnique({
           where: {
             followerId_followingId: {
               followerId: currentUserId,
@@ -88,7 +88,7 @@ export async function GET(
             },
           },
         }),
-        prisma.follow.findUnique({
+        prisma.userFollow.findUnique({
           where: {
             followerId_followingId: {
               followerId: userId,
