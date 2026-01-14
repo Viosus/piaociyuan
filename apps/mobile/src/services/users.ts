@@ -8,7 +8,7 @@ import { apiClient } from './api';
  * 用户信息接口
  */
 export interface UserProfile {
-  id: number;
+  id: string;
   phone: string;
   email?: string;
   nickname: string;
@@ -39,7 +39,7 @@ export interface UserProfile {
  * 关注用户数据
  */
 export interface FollowUser {
-  id: number;
+  id: string;
   nickname: string;
   avatar?: string;
   isVerified: boolean;
@@ -50,7 +50,7 @@ export interface FollowUser {
 /**
  * 获取用户资料
  */
-export async function getUserProfile(userId: number) {
+export async function getUserProfile(userId: string) {
   return apiClient.get<UserProfile>(`/api/user/${userId}`);
 }
 
@@ -77,21 +77,21 @@ export async function updateProfile(data: {
 /**
  * 关注用户
  */
-export async function followUser(userId: number) {
+export async function followUser(userId: string) {
   return apiClient.post<{ isFollowing: boolean }>(`/api/user/follows/${userId}`);
 }
 
 /**
  * 取消关注用户
  */
-export async function unfollowUser(userId: number) {
+export async function unfollowUser(userId: string) {
   return apiClient.delete<{ isFollowing: boolean }>(`/api/user/follows/${userId}`);
 }
 
 /**
  * 获取关注列表
  */
-export async function getFollowing(userId: number, page: number = 1, limit: number = 20) {
+export async function getFollowing(userId: string, page: number = 1, limit: number = 20) {
   return apiClient.get<FollowUser[]>(`/api/user/${userId}/following`, {
     params: { page, limit },
   });
@@ -100,7 +100,7 @@ export async function getFollowing(userId: number, page: number = 1, limit: numb
 /**
  * 获取粉丝列表
  */
-export async function getFollowers(userId: number, page: number = 1, limit: number = 20) {
+export async function getFollowers(userId: string, page: number = 1, limit: number = 20) {
   return apiClient.get<FollowUser[]>(`/api/user/${userId}/followers`, {
     params: { page, limit },
   });
@@ -109,7 +109,7 @@ export async function getFollowers(userId: number, page: number = 1, limit: numb
 /**
  * 获取用户发布的帖子
  */
-export async function getUserPosts(userId: number, page: number = 1, limit: number = 20) {
+export async function getUserPosts(userId: string, page: number = 1, limit: number = 20) {
   return apiClient.get<any[]>(`/api/posts`, {
     params: { userId, page, limit },
   });

@@ -13,9 +13,23 @@ import {
   ViewStyle,
 } from 'react-native';
 import { GLView, ExpoWebGLRenderingContext } from 'expo-gl';
-import { Renderer } from 'expo-three';
 import * as THREE from 'three';
 import { COLORS } from '../constants/config';
+
+// 创建 WebGL 渲染器的辅助函数（替代 expo-three）
+function createRenderer(gl: ExpoWebGLRenderingContext) {
+  return new THREE.WebGLRenderer({
+    canvas: {
+      width: gl.drawingBufferWidth,
+      height: gl.drawingBufferHeight,
+      style: {},
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      clientHeight: gl.drawingBufferHeight,
+    } as unknown as HTMLCanvasElement,
+    context: gl as unknown as WebGLRenderingContext,
+  });
+}
 
 interface Model3DViewerProps {
   modelUrl: string;
@@ -94,7 +108,7 @@ export default function Model3DViewer({
   const onContextCreate = useCallback(
     async (gl: ExpoWebGLRenderingContext) => {
       // 创建渲染器
-      const renderer = new Renderer({ gl });
+      const renderer = createRenderer(gl);
       renderer.setSize(gl.drawingBufferWidth, gl.drawingBufferHeight);
       renderer.setClearColor(0xf5f5f5, 1);
 

@@ -23,7 +23,7 @@ import { Post } from '../services/posts';
 export default function UserProfileScreen() {
   const route = useRoute();
   const navigation = useNavigation();
-  const { userId } = route.params as { userId: number };
+  const { userId } = route.params as { userId: string };
 
   const [user, setUser] = useState<UserProfile | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
