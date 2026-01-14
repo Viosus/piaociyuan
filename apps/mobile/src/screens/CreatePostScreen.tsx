@@ -27,7 +27,7 @@ import { createPost, uploadPostImage } from '../services/posts';
 const MAX_IMAGES = 9;
 
 interface SelectedEvent {
-  id: number;
+  id: string;
   name: string;
 }
 
@@ -112,9 +112,9 @@ export default function CreatePostScreen() {
         {
           text: '确定',
           onPress: (eventId) => {
-            if (eventId && !isNaN(Number(eventId))) {
+            if (eventId && eventId.trim()) {
               setSelectedEvent({
-                id: Number(eventId),
+                id: eventId.trim(),
                 name: `活动 #${eventId}`,
               });
             }

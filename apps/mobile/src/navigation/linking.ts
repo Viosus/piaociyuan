@@ -85,9 +85,6 @@ export const linking: LinkingOptions<any> = {
       // 用户相关
       UserProfile: {
         path: 'users/:userId',
-        parse: {
-          userId: (id: string) => parseInt(id, 10),
-        },
       },
       EditProfile: 'profile/edit',
       Settings: 'settings',
@@ -96,15 +93,9 @@ export const linking: LinkingOptions<any> = {
       Verification: 'verification',
       FollowingList: {
         path: 'users/:userId/following',
-        parse: {
-          userId: (id: string) => parseInt(id, 10),
-        },
       },
       FollowerList: {
         path: 'users/:userId/followers',
-        parse: {
-          userId: (id: string) => parseInt(id, 10),
-        },
       },
       Favorites: 'favorites',
 
@@ -157,17 +148,17 @@ export const createUniversalLink = (path: string): string => {
  */
 export const DEEP_LINK_EXAMPLES = {
   // 活动
-  eventDetail: (id: number) => createDeepLink(`events/${id}`),
+  eventDetail: (id: string) => createDeepLink(`events/${id}`),
   // 帖子
-  postDetail: (id: number) => createDeepLink(`posts/${id}`),
+  postDetail: (id: string) => createDeepLink(`posts/${id}`),
   // 用户
-  userProfile: (userId: number) => createDeepLink(`users/${userId}`),
+  userProfile: (userId: string) => createDeepLink(`users/${userId}`),
   // 订单
-  orderDetail: (id: number) => createDeepLink(`orders/${id}`),
+  orderDetail: (id: string) => createDeepLink(`orders/${id}`),
   // 门票
-  ticketDetail: (id: number) => createDeepLink(`tickets/${id}`),
+  ticketDetail: (id: string) => createDeepLink(`tickets/${id}`),
   // NFT
-  nftDetail: (nftId: number) => createDeepLink(`nfts/${nftId}`),
+  nftDetail: (nftId: string) => createDeepLink(`nfts/${nftId}`),
   // 消息
-  chat: (conversationId: number) => createDeepLink(`messages/${conversationId}`),
+  chat: (conversationId: string) => createDeepLink(`messages/${conversationId}`),
 };

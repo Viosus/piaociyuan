@@ -6,11 +6,11 @@ import { apiClient } from './api';
 
 // 帖子类型定义
 export interface Post {
-  id: number;
+  id: string;
   content: string;
   images: string[];
-  userId: number;
-  eventId?: number;
+  userId: string;
+  eventId?: string;
   location?: string;
   likeCount: number;
   commentCount: number;
@@ -20,13 +20,13 @@ export interface Post {
   createdAt: string;
   updatedAt: string;
   user?: {
-    id: number;
+    id: string;
     nickname: string;
     avatar?: string;
     isVerified?: boolean;
   };
   event?: {
-    id: number;
+    id: string;
     name: string;
     coverImage?: string;
   };
@@ -34,17 +34,17 @@ export interface Post {
 
 // 评论类型
 export interface Comment {
-  id: number;
-  postId: number;
-  userId: number;
+  id: string;
+  postId: string;
+  userId: string;
   content: string;
-  parentId?: number;
+  parentId?: string;
   likeCount: number;
   isLiked?: boolean;
   createdAt: string;
   updatedAt: string;
   user?: {
-    id: number;
+    id: string;
     nickname: string;
     avatar?: string;
     isVerified?: boolean;
@@ -56,8 +56,8 @@ export interface Comment {
 export interface GetPostsParams {
   page?: number;
   limit?: number;
-  userId?: number;
-  eventId?: number;
+  userId?: string;
+  eventId?: string;
   sort?: 'latest' | 'hot' | 'following';
 }
 

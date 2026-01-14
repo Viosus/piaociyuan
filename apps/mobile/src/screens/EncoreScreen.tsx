@@ -175,11 +175,7 @@ export default function EncoreScreen() {
           onPress: async () => {
             try {
               await logout();
-              // 导航到登录页面
-              navigation.reset({
-                index: 0,
-                routes: [{ name: 'Login' as never }],
-              });
+              // logout 会清除用户状态，AppNavigator 会自动切换到 AuthStack
             } catch {
               // 静默处理退出登录失败
             }
@@ -248,12 +244,12 @@ export default function EncoreScreen() {
     }
   };
 
-  const handleUserPress = (userId: number) => {
+  const handleUserPress = (userId: string) => {
     navigation.navigate('UserProfile' as never, { userId } as never);
   };
 
-  const handleEventPress = (eventId: number) => {
-    navigation.navigate('EventDetail' as never, { eventId: eventId } as never);
+  const handleEventPress = (eventId: string) => {
+    navigation.navigate('EventDetail' as never, { eventId } as never);
   };
 
   const handleCreatePost = () => {

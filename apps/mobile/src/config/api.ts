@@ -1,5 +1,3 @@
 // API 配置
-// 开发环境使用本地 API，生产环境使用实际域名
-export const API_URL = __DEV__
-  ? 'http://localhost:3000/api' // 开发环境
-  : 'https://your-production-domain.com/api'; // 生产环境，需要替换为实际域名
+// 使用环境变量中的 API URL
+export const API_URL = `${process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000'}/api`;

@@ -34,7 +34,7 @@ interface PostDetail {
     isVerified: boolean;
   };
   event?: {
-    id: number;
+    id: string;
     name: string;
     city: string;
     venue: string;
