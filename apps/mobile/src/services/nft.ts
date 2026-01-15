@@ -297,3 +297,146 @@ export async function getNFTAsset(
 ): Promise<ApiResponse<NFTAssetDetail>> {
   return apiClient.get<NFTAssetDetail>(`/api/nft/assets/${tokenId}`);
 }
+
+// ==================== NFT 转让功能 ====================
+
+/**
+ * NFT 转让记录
+ */
+export interface NFTTransfer {
+  id: string;
+  transferCode: string;
+  transferType: 'gift' | 'sale';
+  price?: number;
+  message?: string;
+  status: 'pending' | 'accepted' | 'rejected' | 'expired' | 'cancelled';
+  expiresAt: string;
+  createdAt: string;
+  acceptedAt?: string;
+  userNft?: {
+    id: string;
+    tokenId: number;
+    contractAddress: string;
+    isOnChain: boolean;
+    mintStatus: string;
+    obtainedAt?: string;
+  };
+  nft?: {
+    id: string;
+    name: string;
+    imageUrl: string;
+    rarity: string;
+    description?: string;
+    category?: string;
+  };
+  fromUser?: {
+    id: string;
+    nickname?: string;
+    avatar?: string;
+    isVerified?: boolean;
+    verifiedType?: string;
+  };
+  toUser?: {
+    id: string;
+    nickname?: string;
+    avatar?: string;
+  };
+}
+
+/**
+ * 发起 NFT 转让参数
+ */
+export interface CreateNFTTransferParams {
+  userNftId: string;
+  transferType?: 'gift' | 'sale';
+  price?: number;
+  message?: string;
+  toUserPhone?: string;
+  toUserEmail?: string;
+  expiresInHours?: number;
+}
+
+/**
+ * 发起 NFT 转让
+ */
+export async function createNFTTransfer(params: CreateNFTTransferParams) {
+  return apiClient.post<{
+    id: string;
+    transferCode: string;
+    transferType: string;
+    price?: number;
+    message?: string;
+    expiresAt: string;
+    status: string;
+  }>('/api/nft/transfer', params);
+}
+
+/**
+ * 获取 NFT 转让记录参数
+ */
+export interface GetNFTTransfersParams {
+  type?: 'sent' | 'received';
+  status?: string;
+  page?: number;
+  limit?: number;
+}
+
+/**
+ * 获取我的 NFT 转让记录
+ */
+export async function getMyNFTTransfers(params: GetNFTTransfersParams = {}) {
+  const queryParams = new URLSearchParams();
+  if (params.type) queryParams.append('type', params.type);
+  if (params.status) queryParams.append('status', params.status);
+  if (params.page) queryParams.append('page', params.page.toString());
+  if (params.limit) queryParams.append('limit', params.limit.toString());
+
+  const queryString = queryParams.toString();
+  const endpoint = `/api/nft/transfer${queryString ? `?${queryString}` : ''}`;
+
+  return apiClient.get<NFTTransfer[]>(endpoint);
+}
+
+/**
+ * 通过转让码获取转让详情
+ */
+export async function getNFTTransferByCode(code: string) {
+  return apiClient.get<NFTTransfer>(`/api/nft/transfer/${code}`);
+}
+
+/**
+ * 接收/拒绝 NFT 转让
+ */
+export async function acceptNFTTransfer(
+  transferCode: string,
+  action: 'accept' | 'reject' = 'accept'
+) {
+  return apiClient.post<{
+    transferId: string;
+    userNft?: {
+      id: string;
+      tokenId: number;
+      contractAddress: string;
+      isOnChain: boolean;
+    };
+    nft?: {
+      id: string;
+      name: string;
+      imageUrl: string;
+      rarity: string;
+    };
+    needsOnChainTransfer?: boolean;
+  }>('/api/nft/transfer/accept', {
+    transferCode,
+    action,
+  });
+}
+
+/**
+ * 取消 NFT 转让
+ */
+export async function cancelNFTTransfer(transferId: string) {
+  return apiClient.post('/api/nft/transfer/cancel', {
+    transferId,
+  });
+}

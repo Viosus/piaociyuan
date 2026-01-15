@@ -7,6 +7,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
+  TouchableOpacity,
 } from 'react-native';
 import { useAuth } from '../contexts/AuthContext';
 import Button from '../components/Button';
@@ -17,6 +18,7 @@ export default function LoginScreen({ navigation }: any) {
   const { login } = useAuth();
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -28,7 +30,7 @@ export default function LoginScreen({ navigation }: any) {
 
     setLoading(true);
     try {
-      await login(phone, password);
+      await login(phone, password, rememberMe);
     } catch (error: any) {
       Alert.alert('登录失败', error.message || '请检查手机号和密码');
     } finally {
@@ -74,6 +76,18 @@ export default function LoginScreen({ navigation }: any) {
             }
             onRightIconPress={() => setShowPassword(!showPassword)}
           />
+
+          {/* 记住我选项 */}
+          <TouchableOpacity
+            style={styles.rememberMeRow}
+            onPress={() => setRememberMe(!rememberMe)}
+            activeOpacity={0.7}
+          >
+            <View style={[styles.checkbox, rememberMe && styles.checkboxChecked]}>
+              {rememberMe && <Text style={styles.checkmark}>✓</Text>}
+            </View>
+            <Text style={styles.rememberMeText}>30天内免登录</Text>
+          </TouchableOpacity>
 
           <Button
             title="登录"
@@ -126,6 +140,34 @@ const styles = StyleSheet.create({
   showPasswordText: {
     fontSize: FONT_SIZES.sm,
     color: COLORS.primary,
+  },
+  rememberMeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: SPACING.md,
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderRadius: 4,
+    borderWidth: 2,
+    borderColor: COLORS.border,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: SPACING.sm,
+  },
+  checkboxChecked: {
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.primary,
+  },
+  checkmark: {
+    color: '#000',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  rememberMeText: {
+    fontSize: FONT_SIZES.sm,
+    color: COLORS.text,
   },
   loginButton: {
     marginTop: SPACING.lg,

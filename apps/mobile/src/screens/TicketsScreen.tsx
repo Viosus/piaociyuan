@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import { useNavigation } from '@react-navigation/native';
 import { colors, spacing, fontSize } from '../constants/config';
 import { getMyTickets, type Ticket } from '../services/tickets';
 import { useAuth } from '../contexts/AuthContext';
+import TicketFilterSheet, { type TicketFilters } from '../components/TicketFilterSheet';
 
 const STATUS_FILTERS = [
   { label: '全部', value: '' },
@@ -29,6 +30,17 @@ const TICKET_STATUS_CONFIG = {
   refunded: { label: '已退票', color: colors.error },
 };
 
+// 类别标签配置
+const CATEGORY_LABELS: Record<string, string> = {
+  concert: '演唱会',
+  festival: '音乐节',
+  exhibition: '展览',
+  musicale: '音乐会',
+  show: '演出',
+  sports: '体育赛事',
+  other: '其他',
+};
+
 export default function TicketsScreen() {
   const navigation = useNavigation();
   const { logout } = useAuth();
@@ -37,16 +49,19 @@ export default function TicketsScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [showFilter, setShowFilter] = useState(false);
+  const [filters, setFilters] = useState<TicketFilters>({});
 
   useEffect(() => {
     loadTickets();
-  }, [selectedStatus]);
+  }, [selectedStatus, filters]);
 
-  const loadTickets = async () => {
+  const loadTickets = useCallback(async () => {
     try {
       setError(null);
       const response = await getMyTickets({
         status: selectedStatus || undefined,
+        ...filters,
       });
       if (response.ok && response.data) {
         // 转换后端数据格式到前端格式
@@ -80,7 +95,7 @@ export default function TicketsScreen() {
       setLoading(false);
       setRefreshing(false);
     }
-  };
+  }, [selectedStatus, filters]);
 
   const handleTokenExpired = () => {
     Alert.alert(
@@ -125,6 +140,78 @@ export default function TicketsScreen() {
       minute: '2-digit',
     });
   };
+
+  const handleApplyFilters = (newFilters: TicketFilters) => {
+    setFilters(newFilters);
+  };
+
+  // 计算当前激活的筛选器数量
+  const getActiveFilterCount = () => {
+    let count = 0;
+    if (filters.category) count++;
+    if (filters.dateFrom || filters.dateTo) count++;
+    if (filters.minPrice !== undefined || filters.maxPrice !== undefined) count++;
+    if (filters.hasNft !== undefined) count++;
+    return count;
+  };
+
+  // 渲染当前筛选条件标签
+  const renderFilterTags = () => {
+    const tags: { label: string; onRemove: () => void }[] = [];
+
+    if (filters.category) {
+      tags.push({
+        label: CATEGORY_LABELS[filters.category] || filters.category,
+        onRemove: () => setFilters({ ...filters, category: undefined }),
+      });
+    }
+
+    if (filters.dateFrom || filters.dateTo) {
+      const dateLabel = filters.dateFrom && filters.dateTo
+        ? `${filters.dateFrom} ~ ${filters.dateTo}`
+        : filters.dateFrom || filters.dateTo;
+      tags.push({
+        label: `日期: ${dateLabel}`,
+        onRemove: () => setFilters({ ...filters, dateFrom: undefined, dateTo: undefined }),
+      });
+    }
+
+    if (filters.minPrice !== undefined || filters.maxPrice !== undefined) {
+      const priceLabel = filters.minPrice !== undefined && filters.maxPrice !== undefined
+        ? `¥${filters.minPrice} - ¥${filters.maxPrice}`
+        : filters.minPrice !== undefined
+          ? `¥${filters.minPrice}起`
+          : `¥${filters.maxPrice}以内`;
+      tags.push({
+        label: priceLabel,
+        onRemove: () => setFilters({ ...filters, minPrice: undefined, maxPrice: undefined }),
+      });
+    }
+
+    if (filters.hasNft !== undefined) {
+      tags.push({
+        label: filters.hasNft ? '有次元收藏品' : '无次元收藏品',
+        onRemove: () => setFilters({ ...filters, hasNft: undefined }),
+      });
+    }
+
+    if (tags.length === 0) return null;
+
+    return (
+      <View style={styles.filterTagsContainer}>
+        {tags.map((tag, index) => (
+          <View key={index} style={styles.filterTag}>
+            <Text style={styles.filterTagText}>{tag.label}</Text>
+            <TouchableOpacity onPress={tag.onRemove} style={styles.filterTagRemove}>
+              <Text style={styles.filterTagRemoveText}>×</Text>
+            </TouchableOpacity>
+          </View>
+        ))}
+      </View>
+    );
+  };
+
+  const filterCount = getActiveFilterCount();
 
   const renderTicket = ({ item }: { item: Ticket }) => (
     <TouchableOpacity
@@ -185,28 +272,43 @@ export default function TicketsScreen() {
         <Text style={styles.receiveTransferArrow}>›</Text>
       </TouchableOpacity>
 
-      {/* 状态筛选标签 */}
-      <View style={styles.filterTabs}>
-        {STATUS_FILTERS.map((filter) => (
+      {/* 状态筛选标签和筛选按钮 */}
+      <View style={styles.filterSection}>
+        <View style={styles.filterTabs}>
+          {STATUS_FILTERS.map((filter) => (
+            <TouchableOpacity
+              key={filter.value}
+              style={[
+                styles.filterTab,
+                selectedStatus === filter.value && styles.filterTabActive,
+              ]}
+              onPress={() => setSelectedStatus(filter.value)}
+              activeOpacity={0.7}
+            >
+              <Text
+                style={[
+                  styles.filterTabText,
+                  selectedStatus === filter.value && styles.filterTabTextActive,
+                ]}
+              >
+                {filter.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
           <TouchableOpacity
-            key={filter.value}
-            style={[
-              styles.filterTab,
-              selectedStatus === filter.value && styles.filterTabActive,
-            ]}
-            onPress={() => setSelectedStatus(filter.value)}
+            style={[styles.advancedFilterButton, filterCount > 0 && styles.advancedFilterButtonActive]}
+            onPress={() => setShowFilter(true)}
             activeOpacity={0.7}
           >
-            <Text
-              style={[
-                styles.filterTabText,
-                selectedStatus === filter.value && styles.filterTabTextActive,
-              ]}
-            >
-              {filter.label}
+            <Text style={styles.advancedFilterIcon}>🔍</Text>
+            <Text style={[styles.advancedFilterText, filterCount > 0 && styles.advancedFilterTextActive]}>
+              筛选{filterCount > 0 ? ` (${filterCount})` : ''}
             </Text>
           </TouchableOpacity>
-        ))}
+        </View>
+
+        {/* 筛选条件标签 */}
+        {renderFilterTags()}
       </View>
 
       {error ? (
@@ -232,11 +334,29 @@ export default function TicketsScreen() {
             <View style={styles.emptyContainer}>
               <Text style={styles.emptyText}>🎫</Text>
               <Text style={styles.emptyMessage}>暂无门票</Text>
-              <Text style={styles.emptyHint}>购买活动门票后会显示在这里</Text>
+              <Text style={styles.emptyHint}>
+                {filterCount > 0 ? '没有符合筛选条件的门票' : '购买活动门票后会显示在这里'}
+              </Text>
+              {filterCount > 0 && (
+                <TouchableOpacity
+                  style={styles.clearFilterButton}
+                  onPress={() => setFilters({})}
+                >
+                  <Text style={styles.clearFilterText}>清除筛选条件</Text>
+                </TouchableOpacity>
+              )}
             </View>
           }
         />
       )}
+
+      {/* 筛选弹窗 */}
+      <TicketFilterSheet
+        visible={showFilter}
+        onClose={() => setShowFilter(false)}
+        filters={filters}
+        onApply={handleApplyFilters}
+      />
     </View>
   );
 }
@@ -283,18 +403,22 @@ const styles = StyleSheet.create({
     fontSize: 24,
     color: colors.textSecondary,
   },
-  filterTabs: {
-    flexDirection: 'row',
+  filterSection: {
     backgroundColor: colors.surface,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
   },
+  filterTabs: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+  },
   filterTab: {
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,
-    marginRight: spacing.sm,
     borderRadius: 16,
     backgroundColor: colors.background,
   },
@@ -308,6 +432,77 @@ const styles = StyleSheet.create({
   },
   filterTabTextActive: {
     color: '#ffffff',
+    fontWeight: '600',
+  },
+  advancedFilterButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    backgroundColor: colors.background,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.border,
+    marginLeft: 'auto',
+  },
+  advancedFilterButtonActive: {
+    backgroundColor: `${colors.primary}20`,
+    borderColor: colors.primary,
+  },
+  advancedFilterIcon: {
+    fontSize: 14,
+    marginRight: spacing.xs,
+  },
+  advancedFilterText: {
+    fontSize: fontSize.sm,
+    color: colors.textSecondary,
+  },
+  advancedFilterTextActive: {
+    color: colors.primary,
+    fontWeight: '600',
+  },
+  filterTagsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginTop: spacing.sm,
+    gap: spacing.xs,
+  },
+  filterTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: `${colors.primary}15`,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderRadius: 12,
+  },
+  filterTagText: {
+    fontSize: fontSize.xs,
+    color: colors.primary,
+  },
+  filterTagRemove: {
+    marginLeft: spacing.xs,
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  filterTagRemoveText: {
+    fontSize: 12,
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  clearFilterButton: {
+    marginTop: spacing.md,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
+    backgroundColor: colors.primary,
+    borderRadius: 20,
+  },
+  clearFilterText: {
+    fontSize: fontSize.sm,
+    color: '#000',
     fontWeight: '600',
   },
   listContent: {

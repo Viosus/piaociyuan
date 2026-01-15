@@ -13,6 +13,7 @@ function LoginForm() {
     account: "",
     password: "",
   });
+  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -25,7 +26,7 @@ function LoginForm() {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, rememberMe }),
       });
 
       const data = await res.json();
@@ -87,6 +88,20 @@ function LoginForm() {
               required
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#EAF353] focus:border-transparent"
             />
+          </div>
+
+          {/* 记住我选项 */}
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="rememberMe"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              className="w-4 h-4 text-[#EAF353] border-gray-300 rounded focus:ring-[#EAF353] cursor-pointer"
+            />
+            <label htmlFor="rememberMe" className="ml-2 text-sm text-[#282828] cursor-pointer select-none">
+              30天内免登录
+            </label>
           </div>
 
           {/* 错误提示 */}

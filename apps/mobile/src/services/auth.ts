@@ -9,6 +9,7 @@ interface LoginRequest {
   phone?: string;
   email?: string;
   password: string;
+  rememberMe?: boolean;
 }
 
 interface LoginResponse {
@@ -36,12 +37,13 @@ interface RegisterRequest {
  */
 export async function login(data: LoginRequest): Promise<ApiResponse<LoginResponse>> {
   // 后端API期望 account 字段（可以是手机号或邮箱）
-  const { phone, email, password } = data;
+  const { phone, email, password, rememberMe = false } = data;
   const account = phone || email;
 
   return apiClient.post<LoginResponse>('/api/auth/login', {
     account,
     password,
+    rememberMe,
   });
 }
 

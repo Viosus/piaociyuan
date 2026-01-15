@@ -32,6 +32,8 @@ import FollowingListScreen from '../screens/FollowingListScreen';
 import FollowerListScreen from '../screens/FollowerListScreen';
 import TransferTicketScreen from '../screens/TransferTicketScreen';
 import ReceiveTransferScreen from '../screens/ReceiveTransferScreen';
+import TransferNFTScreen from '../screens/TransferNFTScreen';
+import ReceiveNFTTransferScreen from '../screens/ReceiveNFTTransferScreen';
 import CreatePostScreen from '../screens/CreatePostScreen';
 import PostDetailScreen from '../screens/PostDetailScreen';
 import UserProfileScreen from '../screens/UserProfileScreen';
@@ -40,6 +42,10 @@ import ChatScreen from '../screens/ChatScreen';
 import SelectUserScreen from '../screens/SelectUserScreen';
 import CreateGroupScreen from '../screens/CreateGroupScreen';
 import GroupDetailScreen from '../screens/GroupDetailScreen';
+import IdDocumentsScreen from '../screens/IdDocumentsScreen';
+import AddIdDocumentScreen from '../screens/AddIdDocumentScreen';
+import AddressesScreen from '../screens/AddressesScreen';
+import AddAddressScreen from '../screens/AddAddressScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -307,6 +313,28 @@ function MainStackNavigator() {
         }}
       />
       <MainStack.Screen
+        name="TransferNFT"
+        component={TransferNFTScreen}
+        options={{
+          title: '转让次元',
+          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: COLORS.primary,
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+        }}
+      />
+      <MainStack.Screen
+        name="ReceiveNFTTransfer"
+        component={ReceiveNFTTransferScreen}
+        options={{
+          title: '接收次元',
+          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: COLORS.primary,
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+        }}
+      />
+      <MainStack.Screen
         name="CreatePost"
         component={CreatePostScreen}
         options={{
@@ -377,6 +405,50 @@ function MainStackNavigator() {
         options={{
           title: '群聊详情',
           headerShown: false,
+        }}
+      />
+      <MainStack.Screen
+        name="IdDocuments"
+        component={IdDocumentsScreen}
+        options={{
+          title: '证件管理',
+          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: COLORS.primary,
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+        }}
+      />
+      <MainStack.Screen
+        name="AddIdDocument"
+        component={AddIdDocumentScreen}
+        options={{
+          title: '添加证件',
+          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: COLORS.primary,
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+        }}
+      />
+      <MainStack.Screen
+        name="Addresses"
+        component={AddressesScreen}
+        options={{
+          title: '地址管理',
+          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: COLORS.primary,
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+        }}
+      />
+      <MainStack.Screen
+        name="AddAddress"
+        component={AddAddressScreen}
+        options={{
+          title: '添加地址',
+          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: COLORS.primary,
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
         }}
       />
     </MainStack.Navigator>

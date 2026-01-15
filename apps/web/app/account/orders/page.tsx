@@ -390,9 +390,14 @@ function OrdersList() {
           <input
             type="text"
             value={(filter.value || '') as string}
-            onChange={(e) => updateFilterValue(filter.id, e.target.value)}
+            onChange={(e) => {
+              // 限制搜索关键词最大长度为50字符
+              const value = e.target.value.slice(0, 50);
+              updateFilterValue(filter.id, value);
+            }}
             onKeyDown={(e) => e.key === "Enter" && applyFilters()}
-            placeholder="输入订单号"
+            placeholder="输入订单号（最多50字符）"
+            maxLength={50}
             className="flex-1 px-3 py-2 border rounded-lg"
           />
         );

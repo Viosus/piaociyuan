@@ -119,13 +119,15 @@ export default function SearchBar() {
                 type="text"
                 value={query}
                 onChange={(e) => {
-                  setQuery(e.target.value);
+                  // 限制搜索关键词最大长度为100字符，防止 414 错误
+                  setQuery(e.target.value.slice(0, 100));
                   setSelectedIndex(-1);
                 }}
                 onKeyDown={handleKeyDown}
                 placeholder="搜索活动名称、城市、场馆..."
                 className="flex-1 outline-none text-gray-700 text-sm placeholder-gray-400"
                 autoComplete="off"
+                maxLength={100}
               />
               <button
                 onClick={() => {

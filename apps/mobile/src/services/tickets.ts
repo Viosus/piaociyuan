@@ -43,6 +43,13 @@ export interface GetMyTicketsParams {
   status?: 'available' | 'sold' | 'used' | 'refunded';
   page?: number;
   limit?: number;
+  // 新增筛选参数
+  category?: string;           // 活动类别
+  dateFrom?: string;           // 活动日期范围开始
+  dateTo?: string;             // 活动日期范围结束
+  minPrice?: number;           // 最低票价
+  maxPrice?: number;           // 最高票价
+  hasNft?: boolean;            // 是否有NFT纪念品
 }
 
 /**
@@ -54,6 +61,13 @@ export async function getMyTickets(params: GetMyTicketsParams = {}) {
   if (params.status) queryParams.append('status', params.status);
   if (params.page) queryParams.append('page', params.page.toString());
   if (params.limit) queryParams.append('limit', params.limit.toString());
+  // 新增筛选参数
+  if (params.category) queryParams.append('category', params.category);
+  if (params.dateFrom) queryParams.append('dateFrom', params.dateFrom);
+  if (params.dateTo) queryParams.append('dateTo', params.dateTo);
+  if (params.minPrice !== undefined) queryParams.append('minPrice', params.minPrice.toString());
+  if (params.maxPrice !== undefined) queryParams.append('maxPrice', params.maxPrice.toString());
+  if (params.hasNft !== undefined) queryParams.append('hasNft', params.hasNft.toString());
 
   const queryString = queryParams.toString();
   const endpoint = `/api/tickets/my-tickets${queryString ? `?${queryString}` : ''}`;

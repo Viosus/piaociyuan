@@ -12,9 +12,9 @@ import { createUserSession, createLoginLog, extractDeviceInfo, getClientIP } fro
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { account, password } = body;
+    const { account, password, rememberMe = false } = body;
 
-    console.log('[LOGIN] 登录尝试:', { account });
+    console.log('[LOGIN] 登录尝试:', { account, rememberMe });
 
     // 验证输入
     if (!account || !password) {
@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 生成双 Token
+    // 生成双 Token（根据 rememberMe 设置不同有效期）
     const { accessToken, refreshToken } = generateTokenPair({
       id: user.id,
       email: user.email ?? undefined,
@@ -80,11 +80,11 @@ export async function POST(req: NextRequest) {
       nickname: user.nickname ?? undefined,
       authProvider: user.authProvider,
       role: user.role, // 添加角色信息
-    });
+    }, rememberMe);
 
     // 创建会话（存储 Refresh Token）
     const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 7); // 7天后过期
+    expiresAt.setDate(expiresAt.getDate() + (rememberMe ? 30 : 7)); // 记住我：30天，否则7天
 
     await createUserSession({
       userId: user.id,

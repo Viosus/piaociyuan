@@ -1,6 +1,7 @@
 // app/api/events/route.ts
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { Prisma } from '@prisma/client';
 
 // Force reload - category field should be returned
 export async function GET(req: Request) {
@@ -12,14 +13,22 @@ export async function GET(req: Request) {
     const page = parseInt(searchParams.get('page') || '1');
     const pageSize = parseInt(searchParams.get('pageSize') || '20');
 
+    // 新增筛选参数
+    const dateFrom = searchParams.get('dateFrom'); // 日期范围开始
+    const dateTo = searchParams.get('dateTo');     // 日期范围结束
+    const minPrice = searchParams.get('minPrice'); // 最低价格
+    const maxPrice = searchParams.get('maxPrice'); // 最高价格
+    const hasNft = searchParams.get('hasNft');     // 是否有NFT纪念品
+    const sortBy = searchParams.get('sortBy') || 'date'; // 排序字段: date, price
+    const sortOrder = searchParams.get('sortOrder') || 'asc'; // 排序顺序: asc, desc
+
     // 构建 where 条件
-    const where: {
-      category?: string;
-      saleStatus?: string | { in: string[] };
-    } = {};
+    const where: Prisma.EventWhereInput = {};
+
     if (category) {
       where.category = category;
     }
+
     if (status) {
       // 映射移动端的 status 到后端的 saleStatus
       const statusMap: Record<string, string | string[]> = {
@@ -36,16 +45,59 @@ export async function GET(req: Request) {
       }
     }
 
+    // 日期范围筛选
+    if (dateFrom || dateTo) {
+      where.date = {};
+      if (dateFrom) {
+        where.date.gte = dateFrom;
+      }
+      if (dateTo) {
+        where.date.lte = dateTo;
+      }
+    }
+
+    // 价格范围筛选（通过票档价格）
+    if (minPrice || maxPrice) {
+      where.tiers = {
+        some: {
+          price: {
+            ...(minPrice ? { gte: parseInt(minPrice) } : {}),
+            ...(maxPrice ? { lte: parseInt(maxPrice) } : {}),
+          },
+        },
+      };
+    }
+
+    // 是否有NFT纪念品
+    if (hasNft === 'true') {
+      where.nfts = {
+        some: {},
+      };
+    } else if (hasNft === 'false') {
+      where.nfts = {
+        none: {},
+      };
+    }
+
+    // 构建排序
+    let orderBy: Prisma.EventOrderByWithRelationInput = { date: 'asc' };
+    if (sortBy === 'date') {
+      orderBy = { date: sortOrder === 'desc' ? 'desc' : 'asc' };
+    } else if (sortBy === 'createdAt') {
+      orderBy = { createdAt: sortOrder === 'desc' ? 'desc' : 'asc' };
+    }
+
     const events = await prisma.event.findMany({
       where,
-      orderBy: {
-        date: 'asc',
-      },
+      orderBy,
       include: {
         tiers: {
           orderBy: {
             price: 'asc',
           },
+        },
+        _count: {
+          select: { nfts: true },
         },
       },
       skip: (page - 1) * pageSize,
@@ -73,6 +125,12 @@ export async function GET(req: Request) {
       artist: event.artist,
       createdAt: event.createdAt.toISOString(),
       tiers: event.tiers,
+      // 最低价格（方便前端显示）
+      minPrice: event.tiers.length > 0 ? Math.min(...event.tiers.map(t => t.price)) : null,
+      maxPrice: event.tiers.length > 0 ? Math.max(...event.tiers.map(t => t.price)) : null,
+      // NFT纪念品数量
+      hasNft: event._count.nfts > 0,
+      nftCount: event._count.nfts,
     }));
 
     return NextResponse.json({ ok: true, data: formattedEvents });

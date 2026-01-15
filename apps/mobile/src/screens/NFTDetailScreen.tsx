@@ -10,7 +10,7 @@ import {
   Alert,
   Share,
 } from 'react-native';
-import { useRoute, RouteProp } from '@react-navigation/native';
+import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { LoadingOverlay } from '../components/LoadingOverlay';
 import Button from '../components/Button';
@@ -44,6 +44,7 @@ const CATEGORY_CONFIG = {
 
 export default function NFTDetailScreen() {
   const route = useRoute<RouteProp<{ params: NFTDetailRouteParams }, 'params'>>();
+  const navigation = useNavigation();
   const { nftId } = route.params;
 
   const [nft, setNft] = useState<UserNFT | null>(null);
@@ -291,30 +292,44 @@ export default function NFTDetailScreen() {
         </View>
 
         {/* 操作按钮 */}
-        {nft.isOnChain && nft.contractAddress && nft.tokenId && (
-          <View style={styles.actions}>
+        <View style={styles.actions}>
+          {/* 转让按钮 - 只有已铸造的 NFT 可以转让 */}
+          {nft.mintStatus === 'minted' && (
             <Button
-              title="在 OpenSea 查看"
+              title="转让次元"
               onPress={() =>
-                handleOpenLink(
-                  `https://opensea.io/assets/ethereum/${nft.contractAddress}/${nft.tokenId}`
-                )
+                navigation.navigate('TransferNFT' as never, { userNftId: nft.id } as never)
               }
-              variant="outline"
               style={styles.actionButton}
             />
-            <Button
-              title="查看区块链浏览器"
-              onPress={() =>
-                handleOpenLink(
-                  `https://etherscan.io/token/${nft.contractAddress}?a=${nft.tokenId}`
-                )
-              }
-              variant="outline"
-              style={styles.actionButton}
-            />
-          </View>
-        )}
+          )}
+
+          {/* 链上操作按钮 */}
+          {nft.isOnChain && nft.contractAddress && nft.tokenId && (
+            <>
+              <Button
+                title="在 OpenSea 查看"
+                onPress={() =>
+                  handleOpenLink(
+                    `https://opensea.io/assets/ethereum/${nft.contractAddress}/${nft.tokenId}`
+                  )
+                }
+                variant="outline"
+                style={styles.actionButton}
+              />
+              <Button
+                title="查看区块链浏览器"
+                onPress={() =>
+                  handleOpenLink(
+                    `https://etherscan.io/token/${nft.contractAddress}?a=${nft.tokenId}`
+                  )
+                }
+                variant="outline"
+                style={styles.actionButton}
+              />
+            </>
+          )}
+        </View>
       </View>
     </ScrollView>
   );

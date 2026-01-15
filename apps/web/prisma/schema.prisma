@@ -218,6 +218,10 @@ model User {
   // 认证申请
   verificationRequests VerificationRequest[]
 
+  // 个人信息
+  idDocuments   UserIdDocument[]
+  addresses     UserAddress[]
+
   @@map("users")
   @@index([email])
   @@index([phone])
@@ -804,6 +808,35 @@ model TicketTransfer {
   @@index([expiresAt])
 }
 
+// NFT 转让记录表（独立的 NFT 转让，不含门票）
+model NFTTransfer {
+  id              String    @id @default(uuid())
+  userNftId       String    // 转让的 UserNFT ID
+  fromUserId      String    // 转让人
+  toUserId        String?   // 接收人（确认后填写）
+  toUserPhone     String?   // 接收人手机号（用于通知）
+  toUserEmail     String?   // 接收人邮箱（用于通知）
+  transferCode    String    @unique // 转让码（8位大写）
+  message         String?   @db.Text // 转让留言
+  transferType    String    @default("gift") // gift(赠送), sale(出售)
+  price           Int?      // 出售价格（仅出售时）
+  status          String    @default("pending") // pending/accepted/rejected/expired/cancelled
+  expiresAt       DateTime  // 过期时间
+  acceptedAt      DateTime?
+  rejectedAt      DateTime?
+  cancelledAt     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@map("nft_transfers")
+  @@index([userNftId])
+  @@index([fromUserId])
+  @@index([toUserId])
+  @@index([transferCode])
+  @@index([status])
+  @@index([expiresAt])
+}
+
 // ==================== 首页轮播广告栏 ====================
 
 // 首页 Hero Banner 轮播图
@@ -822,4 +855,82 @@ model HeroBanner {
   @@map("hero_banners")
   @@index([order])
   @@index([isActive])
+}
+
+// ==================== 个人信息管理系统 ====================
+
+// 用户证件信息表
+model UserIdDocument {
+  id               String    @id @default(uuid())
+  userId           String
+
+  // ============ 证件基本信息 ============
+  idType           String    // china_id(身份证), passport(护照), hk_permit(港澳通行证), tw_permit(台湾通行证)
+  fullName         String    // 证件上的姓名
+  idNumber         String    // 证件号码
+
+  // ============ 证件有效期 ============
+  issueDate        DateTime? // 签发日期
+  expiryDate       DateTime? // 有效期至
+  issuingAuthority String?   // 签发机关
+
+  // ============ 护照特有字段 ============
+  nationality      String?   // 国籍（护照）
+  birthDate        DateTime? // 出生日期
+  gender           String?   // 性别 male/female
+
+  // ============ 默认标记 ============
+  isDefault        Boolean   @default(false)
+
+  // ============ 时间戳 ============
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  // 关联
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_id_documents")
+  @@index([userId])
+  @@index([idType])
+  @@index([isDefault])
+  @@unique([userId, idType, idNumber])
+}
+
+// 用户地址表
+model UserAddress {
+  id             String   @id @default(uuid())
+  userId         String
+
+  // ============ 收件人信息 ============
+  recipientName  String   // 收件人姓名
+  recipientPhone String   // 收件人电话
+
+  // ============ 地址层级结构 ============
+  country        String   @default("中国") // 国家
+  province       String   // 省/直辖市/自治区/州
+  city           String   // 市
+  district       String   // 区/县
+  street         String?  // 街道/乡镇
+  addressDetail  String   // 详细地址（建筑、楼栋、房间号）
+
+  // ============ 邮编 ============
+  postalCode     String?  // 邮政编码
+
+  // ============ 标签和备注 ============
+  label          String?  // 地址标签：home(家), work(公司), other(其他)
+
+  // ============ 默认标记 ============
+  isDefault      Boolean  @default(false)
+
+  // ============ 时间戳 ============
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // 关联
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_addresses")
+  @@index([userId])
+  @@index([isDefault])
+  @@index([country])
 }

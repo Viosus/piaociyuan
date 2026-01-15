@@ -46,6 +46,14 @@ export async function GET(req: Request) {
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '50');
 
+    // 新增筛选参数
+    const category = searchParams.get('category');     // 活动类别
+    const dateFrom = searchParams.get('dateFrom');     // 活动日期范围开始
+    const dateTo = searchParams.get('dateTo');         // 活动日期范围结束
+    const minPrice = searchParams.get('minPrice');     // 最低票价
+    const maxPrice = searchParams.get('maxPrice');     // 最高票价
+    const hasNft = searchParams.get('hasNft');         // 是否有NFT纪念品
+
     // 构建 where 条件
     const where: any = {
       userId,
@@ -69,6 +77,48 @@ export async function GET(req: Request) {
       where.status = {
         in: ['sold', 'available', 'used', 'refunded'],
       };
+    }
+
+    // 通过关联的活动进行筛选
+    const eventWhere: any = {};
+
+    // 活动类别筛选
+    if (category) {
+      eventWhere.category = category;
+    }
+
+    // 活动日期范围筛选
+    if (dateFrom || dateTo) {
+      eventWhere.date = {};
+      if (dateFrom) {
+        eventWhere.date.gte = dateFrom;
+      }
+      if (dateTo) {
+        eventWhere.date.lte = dateTo;
+      }
+    }
+
+    // 是否有NFT纪念品
+    if (hasNft === 'true') {
+      eventWhere.nfts = { some: {} };
+    } else if (hasNft === 'false') {
+      eventWhere.nfts = { none: {} };
+    }
+
+    // 如果有活动筛选条件，添加到 where
+    if (Object.keys(eventWhere).length > 0) {
+      where.event = eventWhere;
+    }
+
+    // 票价范围筛选
+    if (minPrice || maxPrice) {
+      where.price = {};
+      if (minPrice) {
+        where.price.gte = parseInt(minPrice);
+      }
+      if (maxPrice) {
+        where.price.lte = parseInt(maxPrice);
+      }
     }
 
     // 查询用户的票
@@ -98,6 +148,11 @@ export async function GET(req: Request) {
     const [events, tiers] = await Promise.all([
       prisma.event.findMany({
         where: { id: { in: eventIds } },
+        include: {
+          _count: {
+            select: { nfts: true },
+          },
+        },
       }),
       prisma.tier.findMany({
         where: { id: { in: tierIds } },
@@ -136,6 +191,9 @@ export async function GET(req: Request) {
               date: event.date,
               time: event.time,
               cover: event.cover,
+              category: event.category,
+              hasNft: (event as any)._count?.nfts > 0,
+              nftCount: (event as any)._count?.nfts || 0,
             }
           : null,
         tier: tier

@@ -26,17 +26,19 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
   return bcrypt.compare(password, hash);
 }
 
-// 生成 Access Token（短期，1天 - 方便测试）
-export function generateAccessToken(user: UserPayload): string {
-  const expiresIn = process.env.JWT_ACCESS_EXPIRES || '1d';
+// 生成 Access Token（短期，1天 - 方便测试，记住我时为7天）
+export function generateAccessToken(user: UserPayload, rememberMe: boolean = false): string {
+  const defaultExpires = rememberMe ? '7d' : '1d';
+  const expiresIn = process.env.JWT_ACCESS_EXPIRES || defaultExpires;
   return jwt.sign(user, JWT_SECRET, { expiresIn } as jwt.SignOptions);
 }
 
-// 生成 Refresh Token（长期，7天）
-export function generateRefreshToken(user: UserPayload): string {
-  const expiresIn = process.env.JWT_REFRESH_EXPIRES || '7d';
+// 生成 Refresh Token（长期，默认7天，记住我时为30天）
+export function generateRefreshToken(user: UserPayload, rememberMe: boolean = false): string {
+  const defaultExpires = rememberMe ? '30d' : '7d';
+  const expiresIn = process.env.JWT_REFRESH_EXPIRES || defaultExpires;
   return jwt.sign(
-    { id: user.id, type: 'refresh' },
+    { id: user.id, type: 'refresh', rememberMe },
     JWT_SECRET,
     { expiresIn } as jwt.SignOptions
   );
@@ -48,10 +50,10 @@ export function generateToken(user: UserPayload): string {
 }
 
 // 生成完整的 Token 对
-export function generateTokenPair(user: UserPayload): { accessToken: string; refreshToken: string } {
+export function generateTokenPair(user: UserPayload, rememberMe: boolean = false): { accessToken: string; refreshToken: string } {
   return {
-    accessToken: generateAccessToken(user),
-    refreshToken: generateRefreshToken(user),
+    accessToken: generateAccessToken(user, rememberMe),
+    refreshToken: generateRefreshToken(user, rememberMe),
   };
 }
 

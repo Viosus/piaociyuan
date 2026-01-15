@@ -22,7 +22,7 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  login: (phone: string, password: string) => Promise<void>;
+  login: (phone: string, password: string, rememberMe?: boolean) => Promise<void>;
   register: (phone: string, password: string, verificationCode: string, nickname?: string) => Promise<void>;
   logout: () => Promise<void>;
 }
@@ -55,9 +55,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const login = async (phone: string, password: string) => {
+  const login = async (phone: string, password: string, rememberMe: boolean = false) => {
     try {
-      const response = await apiLogin({ phone, password });
+      const response = await apiLogin({ phone, password, rememberMe });
 
       if (response.ok && response.data) {
         const { accessToken, refreshToken, user: userData } = response.data;

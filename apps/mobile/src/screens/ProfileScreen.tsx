@@ -64,6 +64,7 @@ export default function ProfileScreen() {
       items: [
         { icon: 'receipt-outline' as const, label: '我的订单', screen: 'Orders', emoji: '📦' },
         { icon: 'diamond-outline' as const, label: '我的次元', screen: 'MyNFTs', emoji: '💎' },
+        { icon: 'gift-outline' as const, label: '接收次元', screen: 'ReceiveNFTTransfer', emoji: '🎁' },
         { icon: 'heart-outline' as const, label: '我的收藏', screen: 'Favorites', emoji: '⭐' },
       ],
     },
@@ -73,6 +74,13 @@ export default function ProfileScreen() {
         { icon: 'flame-outline' as const, label: '安可区', screen: 'Encore', emoji: '🔥' },
         { icon: 'people-outline' as const, label: '关注列表', screen: 'FollowingList', emoji: '👥' },
         { icon: 'chatbubbles-outline' as const, label: '我的消息', screen: 'Conversations', emoji: '💬' },
+      ],
+    },
+    {
+      title: '个人信息',
+      items: [
+        { icon: 'id-card-outline' as const, label: '证件管理', screen: 'IdDocuments', emoji: '🪪' },
+        { icon: 'location-outline' as const, label: '地址管理', screen: 'Addresses', emoji: '📍' },
       ],
     },
     {

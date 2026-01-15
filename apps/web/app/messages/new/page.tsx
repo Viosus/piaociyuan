@@ -29,16 +29,18 @@ export default function NewConversationPage() {
   }, [router]);
 
   const handleSearch = async (query: string) => {
-    setSearchQuery(query);
+    // 限制搜索关键词最大长度为50字符，防止 414 错误
+    const limitedQuery = query.slice(0, 50);
+    setSearchQuery(limitedQuery);
 
-    if (query.length < 2) {
+    if (limitedQuery.length < 2) {
       setSearchResults([]);
       return;
     }
 
     setSearching(true);
     try {
-      const data = await apiGet(`/api/users/search?q=${encodeURIComponent(query)}`);
+      const data = await apiGet(`/api/users/search?q=${encodeURIComponent(limitedQuery)}`);
       setSearchResults(data);
     } catch {
       // 静默处理搜索失败
@@ -86,6 +88,7 @@ export default function NewConversationPage() {
               onChange={(e) => handleSearch(e.target.value)}
               className="w-full pl-10 pr-4 py-2 bg-white border border-[#FFEBF5] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EAF353] text-[#282828]"
               autoFocus
+              maxLength={50}
             />
           </div>
         </div>

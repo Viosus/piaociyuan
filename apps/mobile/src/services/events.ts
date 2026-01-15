@@ -10,12 +10,22 @@ export interface Event {
   name: string;
   description?: string;
   venue: string;
+  city?: string;
+  date?: string;
+  time?: string;
   startTime: string;
   endTime: string;
   coverImage?: string;
+  cover?: string;
   category?: string;
   status: 'upcoming' | 'ongoing' | 'ended';
   createdAt: string;
+  // 价格信息
+  minPrice?: number | null;
+  maxPrice?: number | null;
+  // NFT信息
+  hasNft?: boolean;
+  nftCount?: number;
 }
 
 export interface EventDetail extends Event {
@@ -32,20 +42,45 @@ export interface Tier {
   description?: string;
 }
 
-/**
- * 获取活动列表
- */
-export async function getEvents(params?: {
+// 活动筛选参数类型
+export interface EventFilters {
   category?: string;
   status?: string;
   page?: number;
   pageSize?: number;
-}): Promise<ApiResponse<Event[]>> {
+  // 日期范围
+  dateFrom?: string;
+  dateTo?: string;
+  // 价格范围
+  minPrice?: number;
+  maxPrice?: number;
+  // 是否有NFT纪念品
+  hasNft?: boolean;
+  // 排序
+  sortBy?: 'date' | 'createdAt';
+  sortOrder?: 'asc' | 'desc';
+}
+
+/**
+ * 获取活动列表
+ */
+export async function getEvents(params?: EventFilters): Promise<ApiResponse<Event[]>> {
   const query = new URLSearchParams();
   if (params?.category) query.append('category', params.category);
   if (params?.status) query.append('status', params.status);
   if (params?.page) query.append('page', params.page.toString());
   if (params?.pageSize) query.append('pageSize', params.pageSize.toString());
+  // 日期范围
+  if (params?.dateFrom) query.append('dateFrom', params.dateFrom);
+  if (params?.dateTo) query.append('dateTo', params.dateTo);
+  // 价格范围
+  if (params?.minPrice !== undefined) query.append('minPrice', params.minPrice.toString());
+  if (params?.maxPrice !== undefined) query.append('maxPrice', params.maxPrice.toString());
+  // NFT筛选
+  if (params?.hasNft !== undefined) query.append('hasNft', params.hasNft.toString());
+  // 排序
+  if (params?.sortBy) query.append('sortBy', params.sortBy);
+  if (params?.sortOrder) query.append('sortOrder', params.sortOrder);
 
   const queryString = query.toString();
   return apiClient.get<Event[]>(`/api/events${queryString ? `?${queryString}` : ''}`);
