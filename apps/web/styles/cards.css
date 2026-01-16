@@ -25,10 +25,10 @@
   --card-radius-xl: 1.5rem;   /* 24px */
 
   /* 卡片阴影 */
-  --card-shadow-sm: 0 1px 3px 0 rgba(234, 243, 83, 0.3);
-  --card-shadow-md: 0 4px 6px -1px rgba(234, 243, 83, 0.3);
-  --card-shadow-lg: 0 10px 15px -3px rgba(234, 243, 83, 0.4);
-  --card-shadow-hover: 0 10px 15px -3px rgba(234, 243, 83, 0.4), 0 0 20px rgba(234, 243, 83, 0.5);
+  --card-shadow-sm: 0 1px 3px 0 rgba(70, 70, 122, 0.3);
+  --card-shadow-md: 0 4px 6px -1px rgba(70, 70, 122, 0.3);
+  --card-shadow-lg: 0 10px 15px -3px rgba(70, 70, 122, 0.4);
+  --card-shadow-hover: 0 10px 15px -3px rgba(70, 70, 122, 0.4), 0 0 20px rgba(70, 70, 122, 0.5);
 
   /* 卡片间距 */
   --card-padding-sm: 1rem;    /* 16px */

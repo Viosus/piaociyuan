@@ -4,9 +4,9 @@
 
 :root {
   --foreground: #1a1a1f;
-  --card-bg: #EAF353;
-  --border: rgba(234, 243, 83, 0.5);
-  --primary: #EAF353;
+  --card-bg: #46467A;
+  --border: rgba(70, 70, 122, 0.5);
+  --primary: #46467A;
   --right-sidebar-width: 64px;
 
   /* 全平台字体栈 */
@@ -80,25 +80,25 @@ input:focus, textarea:focus, select:focus, button:focus {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(234, 243, 83, 0.4);
+  background: rgba(70, 70, 122, 0.4);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(234, 243, 83, 0.6);
+  background: rgba(70, 70, 122, 0.6);
 }
 
 /* 输入框样式 */
 input, select, textarea {
   background: rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(234, 243, 83, 0.5);
+  border: 1px solid rgba(70, 70, 122, 0.5);
   color: #1a1a1f;
 }
 
 input:focus, select:focus, textarea:focus {
   outline: none;
-  border-color: #EAF353;
-  box-shadow: 0 0 0 3px rgba(234, 243, 83, 0.3);
+  border-color: #46467A;
+  box-shadow: 0 0 0 3px rgba(70, 70, 122, 0.3);
 }
 
 input::placeholder,
@@ -120,7 +120,7 @@ input:disabled, select:disabled, textarea:disabled, button:disabled {
 
 /* 渐变文字效果 */
 .gradient-text {
-  background: linear-gradient(135deg, #EAF353 0%, #D5E340 50%, #EAF353 100%);
+  background: linear-gradient(135deg, #46467A 0%, #D5E340 50%, #46467A 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -157,16 +157,16 @@ input:disabled, select:disabled, textarea:disabled, button:disabled {
   background-color: rgba(255, 255, 255, 0.4) !important;
 }
 
-/* Heading colors - default to #EAF353 unless overridden */
+/* Heading colors - default to #46467A unless overridden */
 h1, h2, h3, h4, h5, h6,
 [class*="heading"],
 [class*="title"] {
-  color: #EAF353;
+  color: #46467A;
 }
 
 /* Special class for item names (events, collections, favorites) */
 .item-name {
-  color: #C72471 !important;
+  color: #E0DFFD !important;
 }
 
 /* Regular text colors */
@@ -201,13 +201,13 @@ h1, h2, h3, h4, h5, h6,
 .border-gray-300,
 [class*="border-gray-2"],
 [class*="border-gray-3"] {
-  border-color: rgba(234, 243, 83, 0.3) !important;
+  border-color: rgba(70, 70, 122, 0.3) !important;
 }
 
 .border-b,
 .border-t,
 [class*="border-"] {
-  border-color: rgba(234, 243, 83, 0.3);
+  border-color: rgba(70, 70, 122, 0.3);
 }
 
 .hover\:bg-gray-50:hover {
@@ -220,24 +220,24 @@ h1, h2, h3, h4, h5, h6,
 
 /* 保持特定颜色 */
 .bg-indigo-50 {
-  background-color: rgba(234, 243, 83, 0.2) !important;
+  background-color: rgba(70, 70, 122, 0.2) !important;
 }
 
 .bg-purple-50 {
-  background-color: rgba(234, 243, 83, 0.2) !important;
+  background-color: rgba(70, 70, 122, 0.2) !important;
 }
 
 .bg-red-50 {
-  background-color: rgba(234, 243, 83, 0.25) !important;
+  background-color: rgba(70, 70, 122, 0.25) !important;
 }
 
 .bg-green-50 {
-  background-color: rgba(234, 243, 83, 0.2) !important;
+  background-color: rgba(70, 70, 122, 0.2) !important;
 }
 
 .bg-amber-50,
 .bg-yellow-50 {
-  background-color: rgba(234, 243, 83, 0.2) !important;
+  background-color: rgba(70, 70, 122, 0.2) !important;
 }
 
 /* 表格样式 */
@@ -246,29 +246,29 @@ table {
 }
 
 thead tr {
-  border-bottom-color: rgba(234, 243, 83, 0.4) !important;
+  border-bottom-color: rgba(70, 70, 122, 0.4) !important;
 }
 
 tbody tr {
-  border-top-color: rgba(234, 243, 83, 0.3) !important;
+  border-top-color: rgba(70, 70, 122, 0.3) !important;
 }
 
 tbody tr:hover {
-  background-color: rgba(234, 243, 83, 0.15) !important;
+  background-color: rgba(70, 70, 122, 0.15) !important;
 }
 
 /* 卡片阴影 */
 .shadow,
 .shadow-sm {
-  box-shadow: 0 1px 3px 0 rgba(234, 243, 83, 0.3) !important;
+  box-shadow: 0 1px 3px 0 rgba(70, 70, 122, 0.3) !important;
 }
 
 .shadow-lg {
-  box-shadow: 0 10px 15px -3px rgba(234, 243, 83, 0.4) !important;
+  box-shadow: 0 10px 15px -3px rgba(70, 70, 122, 0.4) !important;
 }
 
 .hover\:shadow-lg:hover {
-  box-shadow: 0 10px 15px -3px rgba(234, 243, 83, 0.4), 0 0 20px rgba(234, 243, 83, 0.5) !important;
+  box-shadow: 0 10px 15px -3px rgba(70, 70, 122, 0.4), 0 0 20px rgba(70, 70, 122, 0.5) !important;
 }
 
 /* ========== 跨平台兼容性修复 ========== */
@@ -462,12 +462,12 @@ img {
 /* CSS 变量回退 */
 @supports not (--css: variables) {
   body {
-    background-color: #C72471;
+    background-color: #E0DFFD;
     color: #1a1a1f;
   }
 
   .bg-primary {
-    background-color: #EAF353;
+    background-color: #46467A;
   }
 }
 
@@ -496,7 +496,7 @@ img {
 @-moz-document url-prefix() {
   .overflow-y-auto {
     scrollbar-width: thin;
-    scrollbar-color: rgba(234, 243, 83, 0.4) transparent;
+    scrollbar-color: rgba(70, 70, 122, 0.4) transparent;
   }
 }
 

@@ -8,8 +8,8 @@
 
 /* 背景配置变量 */
 :root {
-  /* 当前背景：深粉色 #C72471 */
-  --app-bg-color: #C72471;
+  /* 当前背景：淡紫色 #E0DFFD */
+  --app-bg-color: #E0DFFD;
 
   /* 备用：背景图片（当需要使用图片时取消注释） */
   /* --app-bg-image: url('/images/background.jpg'); */
