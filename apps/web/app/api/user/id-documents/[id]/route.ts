@@ -11,6 +11,18 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
 
+// 安全解析日期字符串，处理空字符串和无效值
+function parseDate(value: string | null | undefined): Date | null {
+  if (!value || value.trim() === '') {
+    return null;
+  }
+  const date = new Date(value);
+  if (isNaN(date.getTime())) {
+    return null;
+  }
+  return date;
+}
+
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -140,15 +152,20 @@ export async function PUT(
     } = body;
 
     // 5. 更新证件（不允许修改证件类型和号码）
+    // 处理日期字段：undefined 表示不修改，null 或空字符串表示清空
+    const parsedIssueDate = issueDate === undefined ? document.issueDate : parseDate(issueDate);
+    const parsedExpiryDate = expiryDate === undefined ? document.expiryDate : parseDate(expiryDate);
+    const parsedBirthDate = birthDate === undefined ? document.birthDate : parseDate(birthDate);
+
     const updated = await prisma.userIdDocument.update({
       where: { id },
       data: {
         fullName: fullName?.trim() || document.fullName,
-        issueDate: issueDate ? new Date(issueDate) : document.issueDate,
-        expiryDate: expiryDate ? new Date(expiryDate) : document.expiryDate,
+        issueDate: parsedIssueDate,
+        expiryDate: parsedExpiryDate,
         issuingAuthority: issuingAuthority?.trim() ?? document.issuingAuthority,
         nationality: nationality?.trim() ?? document.nationality,
-        birthDate: birthDate ? new Date(birthDate) : document.birthDate,
+        birthDate: parsedBirthDate,
         gender: gender ?? document.gender,
       },
     });

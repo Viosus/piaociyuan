@@ -90,6 +90,19 @@ function validateIdNumber(idType: string, idNumber: string): { valid: boolean; e
   }
 }
 
+// 安全解析日期字符串，处理空字符串和无效值
+function parseDate(value: string | null | undefined): Date | null {
+  if (!value || value.trim() === '') {
+    return null;
+  }
+  const date = new Date(value);
+  // 检查是否是有效日期
+  if (isNaN(date.getTime())) {
+    return null;
+  }
+  return date;
+}
+
 export async function GET(req: NextRequest) {
   try {
     // 1. 认证
@@ -228,11 +241,11 @@ export async function POST(req: NextRequest) {
         idType,
         fullName: fullName.trim(),
         idNumber: idNumber.toUpperCase(),
-        issueDate: issueDate ? new Date(issueDate) : null,
-        expiryDate: expiryDate ? new Date(expiryDate) : null,
+        issueDate: parseDate(issueDate),
+        expiryDate: parseDate(expiryDate),
         issuingAuthority: issuingAuthority?.trim() || null,
         nationality: nationality?.trim() || null,
-        birthDate: birthDate ? new Date(birthDate) : null,
+        birthDate: parseDate(birthDate),
         gender: gender || null,
         isDefault,
       },
