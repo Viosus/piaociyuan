@@ -211,12 +211,12 @@ export default function RightSidebar() {
 
   return (
     <aside
-      className={`fixed right-0 top-0 h-screen bg-[#EAF353] border-l border-[#FFE3F0] flex flex-col z-50 transition-all duration-300 ease-in-out ${
+      className={`fixed right-0 top-0 h-screen bg-[#46467A] border-l border-[#46467A]/30 flex flex-col z-50 transition-all duration-300 ease-in-out ${
         isExpanded ? 'w-80' : 'w-16'
       }`}
     >
       {/* 顶部：展开/收起按钮 */}
-      <div className="h-20 border-b border-[#FFE3F0]/30 flex items-center justify-center px-4">
+      <div className="h-20 border-b border-white/20 flex items-center justify-center px-4">
         <button
           onClick={() => setIsExpanded(!isExpanded)}
           className="relative w-12 h-12 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all"
@@ -242,7 +242,7 @@ export default function RightSidebar() {
       {/* Tab切换 + 新建按钮 - 仅展开时显示 */}
       {isExpanded && (
         <>
-          <div className="flex border-b border-[#FFE3F0]/30">
+          <div className="flex border-b border-white/20">
             <button
               onClick={() => setActiveTab('notifications')}
               className={`flex-1 py-3 text-sm font-medium transition-all ${
@@ -281,7 +281,7 @@ export default function RightSidebar() {
 
           {/* 新建私信按钮 - 仅在私信tab显示 */}
           {activeTab === 'messages' && (
-            <div className="p-3 border-b border-[#FFE3F0]/30">
+            <div className="p-3 border-b border-white/20">
               <button
                 onClick={() => router.push('/messages/new')}
                 className="w-full py-2.5 text-sm font-medium text-white bg-white/10 hover:bg-white/20 rounded-xl transition-all flex items-center justify-center gap-2"
@@ -434,7 +434,7 @@ export default function RightSidebar() {
 
       {/* 底部：查看全部按钮 - 仅展开时显示 */}
       {isExpanded && (
-        <div className="p-3 border-t border-[#FFE3F0]/30">
+        <div className="p-3 border-t border-white/20">
           <button
             onClick={() => router.push(activeTab === 'notifications' ? '/notifications' : '/messages')}
             className="w-full py-2.5 text-sm font-medium text-white bg-white/10 hover:bg-white/20 rounded-xl transition-all"

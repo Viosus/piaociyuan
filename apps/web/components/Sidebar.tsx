@@ -117,11 +117,11 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="group fixed left-0 top-0 h-screen w-20 hover:w-64 bg-[#EAF353] border-r border-[#FFE3F0] flex flex-col z-50 transition-all duration-300 ease-in-out">
+    <aside className="group fixed left-0 top-0 h-screen w-20 hover:w-64 bg-[#46467A] border-r border-[#46467A]/30 flex flex-col z-50 transition-all duration-300 ease-in-out">
       {/* Logo */}
       <Link
         href="/events"
-        className="h-20 border-b border-[#FFE3F0]/30 flex items-center justify-center transition-all duration-300 relative overflow-hidden px-2"
+        className="h-20 border-b border-white/20 flex items-center justify-center transition-all duration-300 relative overflow-hidden px-2"
       >
         {/* Logo图标 - 收起时小，展开时大 */}
         <div className="transition-all duration-300 flex justify-center w-full">
@@ -181,7 +181,7 @@ export default function Sidebar() {
       </nav>
 
       {/* 用户信息 */}
-      <div className="px-3 py-4 border-t border-[#FFE3F0]/30">
+      <div className="px-3 py-4 border-t border-white/20">
         {user ? (
           <div className="relative">
             <button
@@ -222,7 +222,7 @@ export default function Sidebar() {
 
             {/* 用户菜单 */}
             {showUserMenu && (
-              <div className="absolute bottom-full left-0 w-56 mb-2 bg-[#FFE3F0] rounded-xl border border-[#FFEBF5] shadow-2xl overflow-hidden z-50">
+              <div className="absolute bottom-full left-0 w-56 mb-2 bg-[#46467A] rounded-xl border border-white/20 shadow-2xl overflow-hidden z-50">
                 <Link
                   href="/account"
                   onClick={() => setShowUserMenu(false)}
@@ -239,7 +239,7 @@ export default function Sidebar() {
                 </Link>
                 {user.role === 'admin' && (
                   <>
-                    <hr className="border-[#FFEBF5]" />
+                    <hr className="border-white/20" />
                     <Link
                       href="/admin"
                       onClick={() => setShowUserMenu(false)}
@@ -249,7 +249,7 @@ export default function Sidebar() {
                     </Link>
                   </>
                 )}
-                <hr className="border-[#FFEBF5]" />
+                <hr className="border-white/20" />
                 <button
                   onClick={handleLogout}
                   className="w-full text-left px-4 py-3 text-sm text-red-400 hover:bg-white/5 transition"
