@@ -144,7 +144,7 @@ export default function Sidebar() {
               key={item.href}
               href={item.href}
               className={`
-                relative flex items-center py-3 px-4 rounded-xl transition-all duration-200 gap-3
+                relative flex items-center py-3 px-2 rounded-xl transition-all duration-200 gap-3 justify-center group-hover:justify-start group-hover:px-4
                 ${
                   isActive
                     ? "bg-white/10 text-white"
@@ -186,7 +186,7 @@ export default function Sidebar() {
           <div className="relative">
             <button
               onClick={() => setShowUserMenu(!showUserMenu)}
-              className="w-full flex items-center py-3 px-4 rounded-xl hover:bg-white/5 transition-all gap-3"
+              className="w-full flex items-center py-3 px-2 rounded-xl hover:bg-white/5 transition-all gap-3 justify-center group-hover:justify-start group-hover:px-4"
             >
               {/* 头像 */}
               {user.avatar ? (

@@ -25,7 +25,7 @@ export default function SectionContainer({
       {/* 栏目头部 */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+          <h2 className="text-2xl font-bold text-[#46467A] flex items-center gap-2">
             {icon && <span className="text-3xl">{icon}</span>}
             <span>{title}</span>
           </h2>

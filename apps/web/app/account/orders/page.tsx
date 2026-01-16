@@ -536,7 +536,7 @@ function OrdersList() {
             onClick={() => goToPage(p)}
             className={`px-3 py-2 border rounded-lg ${
               currentPage === p
-                ? "bg-[#EAF353] text-white"
+                ? "bg-[#46467A] text-white"
                 : "hover:bg-gray-50"
             }`}
           >
@@ -568,16 +568,16 @@ function OrdersList() {
   };
 
   return (
-    <div className="min-h-screen bg-[#C72471] p-8">
+    <div className="min-h-screen bg-[#E0DFFD] p-8">
       <div className="max-w-6xl mx-auto">
         {/* 标题和导航 */}
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 via-[#FFE3F0] to-blue-400 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 via-[#E0DFFD] to-blue-400 bg-clip-text text-transparent">
             我的订单
           </h1>
           <Link
             href="/account/nfts"
-            className="px-4 py-2 bg-[#EAF353] text-white rounded-lg hover:bg-[#FFC9E0] transition-all flex items-center gap-2"
+            className="px-4 py-2 bg-[#46467A] text-white rounded-lg hover:bg-[#5a5a9e] transition-all flex items-center gap-2"
           >
             🎨 我的次元
           </Link>
@@ -611,7 +611,7 @@ function OrdersList() {
             <div className="relative">
               <button
                 onClick={() => setShowFilterMenu(!showFilterMenu)}
-                className="px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg hover:border-[#FFE3F0] hover:bg-[#FFFAFD] text-[#282828] hover:text-[#EAF353] transition-colors"
+                className="px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg hover:border-[#46467A] hover:bg-[#f0f0ff] text-[#282828] hover:text-[#46467A] transition-colors"
               >
                 {activeFilters.length === 0 ? "+ 添加筛选" : "+ 添加更多筛选"}
               </button>
@@ -646,7 +646,7 @@ function OrdersList() {
               <>
                 <button
                   onClick={applyFilters}
-                  className="px-4 py-2 bg-[#EAF353] text-white rounded-lg hover:bg-[#FFC9E0]"
+                  className="px-4 py-2 bg-[#46467A] text-white rounded-lg hover:bg-[#5a5a9e]"
                 >
                   应用筛选
                 </button>
@@ -669,7 +669,7 @@ function OrdersList() {
         </div>
 
         {/* 排序栏 - 独立显示 */}
-        <div className="mb-6 flex items-center gap-3 p-3 bg-gradient-to-r from-[#FFFAFD] to-[#FFF5FB] rounded-lg border border-[#FFF0F8]">
+        <div className="mb-6 flex items-center gap-3 p-3 bg-gradient-to-r from-[#f0f0ff] to-[#E0DFFD] rounded-lg border border-[#46467A]/20">
           <span className="text-lg">📊</span>
           <span className="text-sm font-medium text-[#282828] min-w-[60px]">排序</span>
           <select
@@ -682,7 +682,7 @@ function OrdersList() {
               params.set("page", "1");
               router.push(`?${params.toString()}`);
             }}
-            className="flex-1 px-3 py-2 border border-[#FFEBF5] rounded-lg bg-white focus:ring-2 focus:ring-[#EAF353] focus:border-transparent"
+            className="flex-1 px-3 py-2 border border-[#46467A]/30 rounded-lg bg-white focus:ring-2 focus:ring-[#46467A] focus:border-transparent"
           >
             <option value="createdAt-desc">📅 创建时间（新→旧）</option>
             <option value="createdAt-asc">📅 创建时间（旧→新）</option>
@@ -741,7 +741,7 @@ function OrdersList() {
                     <div className="text-[#282828] opacity-60 mb-2">暂无订单</div>
                     <Link
                       href="/events"
-                      className="inline-block px-4 py-2 bg-[#EAF353] text-white rounded-lg hover:bg-[#FFC9E0]"
+                      className="inline-block px-4 py-2 bg-[#46467A] text-white rounded-lg hover:bg-[#5a5a9e]"
                     >
                       去购票
                     </Link>
@@ -801,7 +801,7 @@ function OrdersList() {
                             <>
                               <Link
                                 href={`/order/${o.id}`}
-                                className="px-3 py-1.5 rounded bg-[#EAF353] text-white hover:bg-[#FFC9E0] text-xs"
+                                className="px-3 py-1.5 rounded bg-[#46467A] text-white hover:bg-[#5a5a9e] text-xs"
                               >
                                 查看详情
                               </Link>
@@ -834,7 +834,7 @@ function OrdersList() {
 
         {/* 返回链接 */}
         <div className="mt-6 text-sm">
-          <Link href="/events" className="text-[#EAF353] hover:underline">
+          <Link href="/events" className="text-[#46467A] hover:underline">
             ← 返回活动列表
           </Link>
         </div>
@@ -846,7 +846,7 @@ function OrdersList() {
 export default function OrdersPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-[#C72471] py-12">
+      <div className="min-h-screen bg-[#E0DFFD] py-12">
         <div className="container mx-auto px-4">
           <div className="text-center">加载中...</div>
         </div>

@@ -131,7 +131,7 @@ export default async function EventsPage() {
           /* 空状态 */
           <div className="text-center py-20">
             <div className="text-6xl mb-6">🎫</div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">暂无可售活动</h2>
+            <h2 className="text-2xl font-bold text-[#46467A] mb-4">暂无可售活动</h2>
             <p className="text-gray-500 mb-8">敬请期待更多精彩活动</p>
             <Link
               href="/signals"
