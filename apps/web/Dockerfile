@@ -39,8 +39,7 @@ COPY --from=builder /app/apps/web/server.js ./server.js
 COPY --from=builder /app/apps/web/package.json ./package.json
 COPY --from=builder /app/apps/web/lib ./lib
 
-# 复制 node_modules（先复制 apps/web 的，再复制根目录的来覆盖/补充 Prisma 等）
-COPY --from=builder /app/apps/web/node_modules ./node_modules
+# 复制 node_modules（npm workspaces 会将依赖 hoist 到根目录）
 COPY --from=builder /app/node_modules ./node_modules
 
 # 修复 Prisma client 符号链接（Turbopack 生成的链接在复制后会失效）
