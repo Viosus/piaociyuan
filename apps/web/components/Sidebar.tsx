@@ -144,7 +144,7 @@ export default function Sidebar() {
               key={item.href}
               href={item.href}
               className={`
-                relative flex items-center py-3 px-2 rounded-xl transition-all duration-200 gap-3 justify-center group-hover:justify-start group-hover:px-4
+                relative flex items-center py-3 rounded-xl transition-all duration-200
                 ${
                   isActive
                     ? "bg-white/10 text-white"
@@ -157,8 +157,8 @@ export default function Sidebar() {
                 <div className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-gradient-to-b ${item.gradient} rounded-r-full`}></div>
               )}
 
-              {/* 图标 - 始终显示 */}
-              <span className="w-8 h-8 shrink-0 flex items-center justify-center">
+              {/* 图标容器 - 收起时居中，展开时靠左 */}
+              <span className="w-14 shrink-0 flex items-center justify-center group-hover:w-8 group-hover:ml-4 transition-all duration-300">
                 <Image
                   src={item.icon}
                   alt={item.name}
@@ -169,7 +169,7 @@ export default function Sidebar() {
               </span>
 
               {/* 文字 - 展开时显示 */}
-              <span className="font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300 overflow-hidden w-0 group-hover:w-auto">{item.name}</span>
+              <span className="font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300 overflow-hidden w-0 group-hover:w-auto group-hover:ml-3">{item.name}</span>
 
               {/* 悬浮光效 */}
               {!isActive && (
@@ -186,23 +186,25 @@ export default function Sidebar() {
           <div className="relative">
             <button
               onClick={() => setShowUserMenu(!showUserMenu)}
-              className="w-full flex items-center py-3 px-2 rounded-xl hover:bg-white/5 transition-all gap-3 justify-center group-hover:justify-start group-hover:px-4"
+              className="w-full flex items-center py-3 rounded-xl hover:bg-white/5 transition-all"
             >
-              {/* 头像 */}
-              {user.avatar ? (
-                <img
-                  src={user.avatar}
-                  alt="头像"
-                  className="w-10 h-10 rounded-full object-cover ring-2 ring-white/10 min-w-[2.5rem] shrink-0"
-                />
-              ) : (
-                <div className="w-10 h-10 min-w-[2.5rem] shrink-0 rounded-full bg-gradient-to-br from-purple-500 to-[#EAF353] flex items-center justify-center text-white font-bold text-lg ring-2 ring-white/10">
-                  {user.nickname?.[0] || user.email?.[0] || "U"}
-                </div>
-              )}
+              {/* 头像容器 - 收起时居中，展开时靠左 */}
+              <span className="w-14 shrink-0 flex items-center justify-center group-hover:w-10 group-hover:ml-4 transition-all duration-300">
+                {user.avatar ? (
+                  <img
+                    src={user.avatar}
+                    alt="头像"
+                    className="w-10 h-10 rounded-full object-cover ring-2 ring-white/10"
+                  />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-[#46467A] flex items-center justify-center text-white font-bold text-lg ring-2 ring-white/10">
+                    {user.nickname?.[0] || user.email?.[0] || "U"}
+                  </div>
+                )}
+              </span>
 
               {/* 用户名 */}
-              <div className="text-left opacity-0 group-hover:opacity-100 transition-opacity duration-300 overflow-hidden w-0 group-hover:w-auto">
+              <div className="text-left opacity-0 group-hover:opacity-100 transition-opacity duration-300 overflow-hidden w-0 group-hover:w-auto group-hover:ml-3">
                 <p className="text-white text-sm font-medium whitespace-nowrap">
                   {user.nickname || user.email || user.phone}
                 </p>
@@ -211,7 +213,7 @@ export default function Sidebar() {
 
               {/* 箭头 */}
               <svg
-                className={`shrink-0 text-white/40 transition-all opacity-0 group-hover:opacity-100 w-0 h-0 group-hover:w-4 group-hover:h-4 ${showUserMenu ? "rotate-180" : ""}`}
+                className={`shrink-0 text-white/40 transition-all opacity-0 group-hover:opacity-100 w-0 h-0 group-hover:w-4 group-hover:h-4 group-hover:ml-auto group-hover:mr-4 ${showUserMenu ? "rotate-180" : ""}`}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
