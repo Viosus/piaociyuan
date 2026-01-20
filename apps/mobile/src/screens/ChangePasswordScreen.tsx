@@ -56,7 +56,7 @@ export default function ChangePasswordScreen() {
         newPassword,
       });
 
-      if (result.success) {
+      if (result.ok) {
         Alert.alert('成功', '密码修改成功，请重新登录', [
           {
             text: '确定',

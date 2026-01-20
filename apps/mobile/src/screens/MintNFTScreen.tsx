@@ -102,7 +102,7 @@ export default function MintNFTScreen() {
             try {
               const result = await requestMintNFT({ orderId: order.id });
 
-              if (result.success && result.data) {
+              if (result.ok && result.data) {
                 Alert.alert(
                   '铸造请求已提交',
                   `您的 NFT 铸造请求已加入队列\n预计等待时间：${result.data.estimatedTime}`,

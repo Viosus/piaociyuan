@@ -66,7 +66,7 @@ export default function NotificationsScreen() {
       const params = filter === 'all' ? {} : { type: filter };
       const result = await getNotifications(params);
 
-      if (result.success && result.data) {
+      if (result.ok && result.data) {
         setNotifications(result.data.data);
         setUnreadCount(result.data.data.filter((n) => !n.isRead).length);
       } else {
@@ -89,7 +89,7 @@ export default function NotificationsScreen() {
     // 标记为已读
     if (!notification.isRead) {
       const result = await markNotificationAsRead(notification.id);
-      if (result.success) {
+      if (result.ok) {
         setNotifications((prev) =>
           prev.map((n) => (n.id === notification.id ? { ...n, isRead: true } : n))
         );
@@ -150,7 +150,7 @@ export default function NotificationsScreen() {
 
     try {
       const result = await markAllNotificationsAsRead();
-      if (result.success) {
+      if (result.ok) {
         setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
         setUnreadCount(0);
         Alert.alert('成功', '已标记所有通知为已读');
@@ -171,7 +171,7 @@ export default function NotificationsScreen() {
         onPress: async () => {
           try {
             const result = await deleteNotification(id);
-            if (result.success) {
+            if (result.ok) {
               const notification = notifications.find((n) => n.id === id);
               setNotifications((prev) => prev.filter((n) => n.id !== id));
               if (notification && !notification.isRead) {

@@ -57,7 +57,7 @@ export default function NFTDetailScreen() {
   const loadNFTDetail = async () => {
     try {
       const result = await getNFTDetail(nftId);
-      if (result.success && result.data) {
+      if (result.ok && result.data) {
         setNft(result.data);
       } else {
         Alert.alert('错误', result.error || '加载 NFT 详情失败');

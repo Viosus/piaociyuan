@@ -76,7 +76,7 @@ export default function EditProfileScreen() {
         avatar: finalAvatar,
       });
 
-      if (result.success) {
+      if (result.ok) {
         Alert.alert('成功', '资料已更新', [
           {
             text: '确定',

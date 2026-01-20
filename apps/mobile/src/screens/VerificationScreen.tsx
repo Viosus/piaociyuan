@@ -56,7 +56,7 @@ export default function VerificationScreen() {
   const loadVerificationStatus = async () => {
     try {
       const result = await getVerificationStatus();
-      if (result.success && result.data) {
+      if (result.ok && result.data) {
         setExistingVerification(result.data);
       }
     } catch {
@@ -141,7 +141,7 @@ export default function VerificationScreen() {
         proofImages,
       });
 
-      if (result.success) {
+      if (result.ok) {
         Alert.alert('提交成功', '您的认证申请已提交，我们会在 3-5 个工作日内审核', [
           {
             text: '确定',

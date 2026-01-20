@@ -31,7 +31,7 @@ export default function BindWalletScreen() {
   const loadWalletStatus = async () => {
     try {
       const result = await getWalletStatus();
-      if (result.success && result.data) {
+      if (result.ok && result.data) {
         setWalletStatus(result.data);
         if (result.data.walletAddress) {
           setWalletAddress(result.data.walletAddress);

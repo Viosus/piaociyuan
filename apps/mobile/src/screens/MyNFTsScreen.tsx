@@ -50,7 +50,7 @@ export default function MyNFTsScreen() {
         selectedRarity === 'all' ? {} : { rarity: selectedRarity as NFTRarity };
       const result = await getUserNFTs(params);
 
-      if (result.success && result.data) {
+      if (result.ok && result.data) {
         setNfts(result.data.data);
         setStats({
           total: result.data.stats.total,
