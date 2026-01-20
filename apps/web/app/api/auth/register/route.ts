@@ -11,7 +11,7 @@ import {
   isValidPhone,
   isValidPassword,
 } from '@/lib/auth';
-import { verifyCode } from '@/lib/verification';
+import { verifyCode } from '@/lib/services/verification';
 import { createUserSession, createLoginLog, extractDeviceInfo, getClientIP } from '@/lib/session';
 
 export async function POST(req: NextRequest) {
@@ -35,29 +35,33 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 邮箱注册需要验证码
-    if (email) {
-      if (!verificationCode) {
-        return NextResponse.json(
-          { ok: false, error: '请输入邮箱验证码' },
-          { status: 400 }
-        );
-      }
-
-      // 验证验证码
-      const isCodeValid = verifyCode(email, verificationCode, 'register');
-      if (!isCodeValid) {
-        return NextResponse.json(
-          { ok: false, error: '验证码错误或已过期' },
-          { status: 400 }
-        );
-      }
-    }
-
     // 验证手机号格式
     if (phone && !isValidPhone(phone)) {
       return NextResponse.json(
         { ok: false, error: '手机号格式不正确' },
+        { status: 400 }
+      );
+    }
+
+    // 验证码必填
+    if (!verificationCode) {
+      return NextResponse.json(
+        { ok: false, error: email ? '请输入邮箱验证码' : '请输入短信验证码' },
+        { status: 400 }
+      );
+    }
+
+    // 验证验证码
+    const isCodeValid = await verifyCode({
+      email: email || undefined,
+      phone: phone || undefined,
+      code: verificationCode,
+      type: 'register',
+    });
+
+    if (!isCodeValid) {
+      return NextResponse.json(
+        { ok: false, error: '验证码错误或已过期' },
         { status: 400 }
       );
     }

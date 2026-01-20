@@ -80,6 +80,8 @@ const styles = StyleSheet.create({
     color: COLORS.text,
     backgroundColor: '#ffffff',
     minHeight: 48,
+    textAlignVertical: 'center',
+    includeFontPadding: false,
   },
   inputFocused: {
     borderColor: COLORS.primary,

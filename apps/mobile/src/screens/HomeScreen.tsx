@@ -173,10 +173,10 @@ const styles = StyleSheet.create({
   },
   header: { padding: spacing.lg, backgroundColor: colors.secondary,
   },
-  title: { fontSize: fontSize.xxxl, fontWeight: 'bold', color: colors.primary,
+  title: { fontSize: fontSize.xxxl, fontWeight: 'bold', color: colors.textLight,
     marginBottom: spacing.xs,
   },
-  subtitle: { fontSize: fontSize.md, color: colors.primary, opacity: 0.9 },
+  subtitle: { fontSize: fontSize.md, color: colors.textLight, opacity: 0.9 },
   loadingContainer: {
     flex: 1,
     alignItems: 'center',

@@ -56,19 +56,19 @@ function MainTabs() {
   return (
     <Tab.Navigator
       screenOptions={{
-        tabBarActiveTintColor: COLORS.primary,
+        tabBarActiveTintColor: '#ffffff',
         tabBarInactiveTintColor: 'rgba(255,255,255,0.6)',
         tabBarStyle: {
           backgroundColor: COLORS.secondary,
-          borderTopColor: 'rgba(234, 243, 83, 0.3)',
+          borderTopColor: 'rgba(70, 70, 122, 0.3)',
         },
         headerStyle: {
           backgroundColor: COLORS.secondary,
         },
-        headerTintColor: COLORS.primary,
+        headerTintColor: '#ffffff',
         headerTitleStyle: {
           fontWeight: 'bold',
-          color: COLORS.primary,
+          color: '#ffffff',
         },
       }}
     >
@@ -141,7 +141,7 @@ function MainStackNavigator() {
         component={EventDetailScreen}
         options={{
           title: '活动详情',
-          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: COLORS.primary,
+          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
           headerTitleStyle: {
             fontWeight: 'bold',
           },
@@ -152,7 +152,7 @@ function MainStackNavigator() {
         component={CheckoutScreen}
         options={{
           title: '确认订单',
-          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: COLORS.primary,
+          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
           headerTitleStyle: {
             fontWeight: 'bold',
           },
@@ -163,7 +163,7 @@ function MainStackNavigator() {
         component={PaymentScreen}
         options={{
           title: '支付订单',
-          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: COLORS.primary,
+          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
           headerTitleStyle: {
             fontWeight: 'bold',
           },
@@ -174,7 +174,7 @@ function MainStackNavigator() {
         component={TicketDetailScreen}
         options={{
           title: '门票详情',
-          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: COLORS.primary,
+          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
           headerTitleStyle: {
             fontWeight: 'bold',
           },
@@ -185,7 +185,7 @@ function MainStackNavigator() {
         component={OrdersScreen}
         options={{
           title: '我的订单',
-          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: COLORS.primary,
+          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
           headerTitleStyle: {
             fontWeight: 'bold',
           },
@@ -196,7 +196,7 @@ function MainStackNavigator() {
         component={OrderDetailScreen}
         options={{
           title: '订单详情',
-          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: COLORS.primary,
+          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
           headerTitleStyle: {
             fontWeight: 'bold',
           },
@@ -207,7 +207,7 @@ function MainStackNavigator() {
         component={FavoritesScreen}
         options={{
           title: '我的收藏',
-          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: COLORS.primary,
+          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
           headerTitleStyle: {
             fontWeight: 'bold',
           },
@@ -218,7 +218,7 @@ function MainStackNavigator() {
         component={MyNFTsScreen}
         options={{
           title: '我的次元',
-          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: COLORS.primary,
+          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
           headerTitleStyle: {
             fontWeight: 'bold',
           },
@@ -229,7 +229,7 @@ function MainStackNavigator() {
         component={NFTDetailScreen}
         options={{
           title: '次元详情',
-          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: COLORS.primary,
+          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
           headerTitleStyle: {
             fontWeight: 'bold',
           },
@@ -240,7 +240,7 @@ function MainStackNavigator() {
         component={EditProfileScreen}
         options={{
           title: '编辑资料',
-          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: COLORS.primary,
+          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
           headerTitleStyle: {
             fontWeight: 'bold',
           },
@@ -251,7 +251,7 @@ function MainStackNavigator() {
         component={VerificationScreen}
         options={{
           title: '身份认证',
-          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: COLORS.primary,
+          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
           headerTitleStyle: {
             fontWeight: 'bold',
           },
@@ -262,7 +262,7 @@ function MainStackNavigator() {
         component={SettingsScreen}
         options={{
           title: '设置',
-          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: COLORS.primary,
+          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
           headerTitleStyle: {
             fontWeight: 'bold',
           },
@@ -273,7 +273,7 @@ function MainStackNavigator() {
         component={FollowingListScreen}
         options={{
           title: '关注列表',
-          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: COLORS.primary,
+          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
           headerTitleStyle: {
             fontWeight: 'bold',
           },
@@ -284,7 +284,7 @@ function MainStackNavigator() {
         component={FollowerListScreen}
         options={{
           title: '粉丝列表',
-          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: COLORS.primary,
+          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
           headerTitleStyle: {
             fontWeight: 'bold',
           },
@@ -295,7 +295,7 @@ function MainStackNavigator() {
         component={TransferTicketScreen}
         options={{
           title: '转让门票',
-          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: COLORS.primary,
+          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
           headerTitleStyle: {
             fontWeight: 'bold',
           },
@@ -306,7 +306,7 @@ function MainStackNavigator() {
         component={ReceiveTransferScreen}
         options={{
           title: '接收转让',
-          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: COLORS.primary,
+          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
           headerTitleStyle: {
             fontWeight: 'bold',
           },
@@ -317,7 +317,7 @@ function MainStackNavigator() {
         component={TransferNFTScreen}
         options={{
           title: '转让次元',
-          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: COLORS.primary,
+          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
           headerTitleStyle: {
             fontWeight: 'bold',
           },
@@ -328,7 +328,7 @@ function MainStackNavigator() {
         component={ReceiveNFTTransferScreen}
         options={{
           title: '接收次元',
-          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: COLORS.primary,
+          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
           headerTitleStyle: {
             fontWeight: 'bold',
           },
@@ -355,7 +355,7 @@ function MainStackNavigator() {
         component={UserProfileScreen}
         options={{
           title: '用户主页',
-          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: COLORS.primary,
+          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
           headerTitleStyle: {
             fontWeight: 'bold',
           },
@@ -382,7 +382,7 @@ function MainStackNavigator() {
         component={SelectUserScreen}
         options={{
           title: '选择用户',
-          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: COLORS.primary,
+          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
           headerTitleStyle: {
             fontWeight: 'bold',
           },
@@ -393,7 +393,7 @@ function MainStackNavigator() {
         component={CreateGroupScreen}
         options={{
           title: '创建群聊',
-          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: COLORS.primary,
+          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
           headerTitleStyle: {
             fontWeight: 'bold',
           },
@@ -412,7 +412,7 @@ function MainStackNavigator() {
         component={IdDocumentsScreen}
         options={{
           title: '证件管理',
-          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: COLORS.primary,
+          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
           headerTitleStyle: {
             fontWeight: 'bold',
           },
@@ -423,7 +423,7 @@ function MainStackNavigator() {
         component={AddIdDocumentScreen}
         options={{
           title: '添加证件',
-          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: COLORS.primary,
+          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
           headerTitleStyle: {
             fontWeight: 'bold',
           },
@@ -434,7 +434,7 @@ function MainStackNavigator() {
         component={AddressesScreen}
         options={{
           title: '地址管理',
-          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: COLORS.primary,
+          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
           headerTitleStyle: {
             fontWeight: 'bold',
           },
@@ -445,7 +445,7 @@ function MainStackNavigator() {
         component={AddAddressScreen}
         options={{
           title: '添加地址',
-          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: COLORS.primary,
+          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
           headerTitleStyle: {
             fontWeight: 'bold',
           },

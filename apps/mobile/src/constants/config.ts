@@ -8,9 +8,9 @@ export const APP_CONFIG = {
 // 主题颜色 - 与网站 globals.css 统一
 export const COLORS = {
   // 主色调
-  primary: '#EAF353',              // 票次元黄色（主色）
-  secondary: '#C72471',            // 玫红色（强调色）
-  accent: '#C72471',               // 强调色（用于标题、项目名称）
+  primary: '#46467A',              // 票次元紫色（主色）
+  secondary: '#46467A',            // 紫色（强调色，用于导航栏）
+  accent: '#46467A',               // 强调色（用于标题、项目名称）
 
   // 功能色
   success: '#10b981',
@@ -18,29 +18,29 @@ export const COLORS = {
   error: '#ef4444',
 
   // 背景色
-  background: '#ffffff',           // 页面背景（白色，适合移动端）
-  backgroundAccent: '#C72471',     // 强调背景（玫红色，用于头部/特殊区域）
+  background: '#E0DFFD',           // 页面背景（淡紫色，与网站统一）
+  backgroundAccent: '#46467A',     // 强调背景（紫色，用于头部/底部导航）
   surface: '#f8f8f8',              // 卡片背景（浅灰）
   surfaceElevated: '#ffffff',      // 抬起的卡片背景（纯白）
 
   // 文字色
   text: '#282828',                 // 主文字（与网站统一）
   textSecondary: 'rgba(40, 40, 40, 0.6)',  // 次要文字
-  textOnPrimary: '#1a1a1f',        // 在 primary 色上的文字
+  textOnPrimary: '#ffffff',        // 在 primary 色上的文字（白色）
   textLight: '#ffffff',            // 在深色背景上的文字
 
   // 边框色
-  border: '#FFEBF5',               // 默认边框（粉色）
-  borderHover: '#FFE3F0',          // hover 边框
-  borderSubtle: 'rgba(255, 235, 245, 0.5)',  // 淡边框
-  borderPrimary: 'rgba(234, 243, 83, 0.3)',  // 黄色边框
+  border: 'rgba(70, 70, 122, 0.2)',        // 默认边框（紫色半透明）
+  borderHover: 'rgba(70, 70, 122, 0.3)',   // hover 边框
+  borderSubtle: 'rgba(70, 70, 122, 0.1)',  // 淡边框
+  borderPrimary: 'rgba(70, 70, 122, 0.3)', // 主色边框
 };
 
 // 渐变色配置（单独导出，避免与 COLORS 混淆）
 export const GRADIENTS = {
-  primary: ['#EAF353', '#C72471'],        // 黄到玫红
-  secondary: ['#C72471', '#FFE3F0'],      // 玫红到粉
-  accent: ['#EAF353', '#D5E340'],         // 黄色渐变（与网站 gradient-text 一致）
+  primary: ['#46467A', '#E0DFFD'],        // 紫色到淡紫
+  secondary: ['#46467A', '#7A7AAE'],      // 紫色渐变
+  accent: ['#46467A', '#5A5A8E'],         // 紫色渐变（与网站统一）
   card: ['rgba(255,255,255,0.9)', 'rgba(255,255,255,0.7)'],  // 卡片渐变
 };
 

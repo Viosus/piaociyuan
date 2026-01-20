@@ -84,6 +84,8 @@ const styles = StyleSheet.create({
     fontSize: fontSize.md,
     color: colors.text,
     padding: 0,
+    textAlignVertical: 'center',
+    includeFontPadding: false,
   },
   clearButton: {
     padding: spacing.xs,

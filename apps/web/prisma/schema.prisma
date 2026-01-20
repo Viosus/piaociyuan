@@ -272,7 +272,8 @@ model UserSession {
 // ✅ 验证码表
 model VerificationCode {
   id        String   @id @default(uuid())
-  email     String
+  email     String?  // 邮箱（与 phone 二选一）
+  phone     String?  // 手机号（与 email 二选一）
   code      String
   type      String   @default("register")
   expiresAt DateTime
@@ -281,6 +282,7 @@ model VerificationCode {
 
   @@map("verification_codes")
   @@index([email, type])
+  @@index([phone, type])
   @@index([expiresAt])
 }
 
