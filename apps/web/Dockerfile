@@ -17,8 +17,9 @@ RUN npx prisma generate
 WORKDIR /app/packages/shared
 RUN npm run build 2>/dev/null || echo "No build script for shared"
 
-# 构建 web 应用
+# 构建 web 应用（需要占位环境变量，Next.js 构建时会加载 lib/auth.ts）
 WORKDIR /app/apps/web
+ENV JWT_SECRET=build-placeholder
 RUN npm run build
 
 # 阶段2: 生产镜像
