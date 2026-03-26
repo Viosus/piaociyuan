@@ -29,7 +29,6 @@ export default function ProfileScreen() {
     following: 0,
     followers: 0,
     posts: 0,
-    nfts: 0,
   });
 
   const renderAvatar = () => {
@@ -63,8 +62,8 @@ export default function ProfileScreen() {
       title: '我的资产',
       items: [
         { icon: 'receipt-outline' as const, label: '我的订单', screen: 'Orders', emoji: '📦' },
-        { icon: 'diamond-outline' as const, label: '我的次元', screen: 'MyNFTs', emoji: '💎' },
         { icon: 'heart-outline' as const, label: '我的收藏', screen: 'Favorites', emoji: '⭐' },
+        { icon: 'diamond-outline' as const, label: '我的收藏品', screen: 'MyCollectibles', emoji: '🎨' },
       ],
     },
     {
@@ -136,13 +135,6 @@ export default function ProfileScreen() {
         <TouchableOpacity style={styles.statItem}>
           <Text style={styles.statValue}>{stats.posts}</Text>
           <Text style={styles.statLabel}>帖子</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.statItem}
-          onPress={() => navigation.navigate('MyNFTs' as never)}
-        >
-          <Text style={styles.statValue}>{stats.nfts}</Text>
-          <Text style={styles.statLabel}>NFT</Text>
         </TouchableOpacity>
       </View>
 

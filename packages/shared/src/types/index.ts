@@ -50,40 +50,11 @@ export enum OrderStatus {
 }
 
 /**
- * NFT 类别
- */
-export enum NFTCategory {
-  TICKET = 'ticket',          // 票据类NFT
-  BADGE = 'badge',            // 徽章类NFT
-  COMMEMORATIVE = 'commemorative', // 纪念类NFT
-}
-
-/**
- * NFT 稀有度
- */
-export enum NFTRarity {
-  COMMON = 'common',          // 普通
-  RARE = 'rare',              // 稀有
-  EPIC = 'epic',              // 史诗
-  LEGENDARY = 'legendary',    // 传说
-}
-
-/**
- * NFT 来源类型
- */
-export enum NFTSourceType {
-  PURCHASE = 'purchase',      // 购买获得
-  AIRDROP = 'airdrop',        // 空投获得
-  ACHIEVEMENT = 'achievement', // 成就获得
-}
-
-/**
  * 通知类型
  */
 export enum NotificationType {
   SYSTEM = 'system',          // 系统通知
   ORDER = 'order',            // 订单通知
   EVENT = 'event',            // 活动通知
-  NFT = 'nft',                // NFT通知
   SOCIAL = 'social',          // 社交通知
 }

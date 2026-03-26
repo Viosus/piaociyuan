@@ -22,9 +22,6 @@ export interface Event {
   // 价格信息
   minPrice?: number | null;
   maxPrice?: number | null;
-  // NFT信息
-  hasNft?: boolean;
-  nftCount?: number;
 }
 
 export interface EventDetail extends Event {
@@ -53,8 +50,6 @@ export interface EventFilters {
   // 价格范围
   minPrice?: number;
   maxPrice?: number;
-  // 是否有NFT纪念品
-  hasNft?: boolean;
   // 排序
   sortBy?: 'date' | 'createdAt';
   sortOrder?: 'asc' | 'desc';
@@ -75,8 +70,6 @@ export async function getEvents(params?: EventFilters): Promise<ApiResponse<Even
   // 价格范围
   if (params?.minPrice !== undefined) query.append('minPrice', params.minPrice.toString());
   if (params?.maxPrice !== undefined) query.append('maxPrice', params.maxPrice.toString());
-  // NFT筛选
-  if (params?.hasNft !== undefined) query.append('hasNft', params.hasNft.toString());
   // 排序
   if (params?.sortBy) query.append('sortBy', params.sortBy);
   if (params?.sortOrder) query.append('sortOrder', params.sortOrder);

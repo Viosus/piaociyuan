@@ -23,8 +23,6 @@ import ProfileScreen from '../screens/ProfileScreen';
 import OrdersScreen from '../screens/OrdersScreen';
 import OrderDetailScreen from '../screens/OrderDetailScreen';
 import FavoritesScreen from '../screens/FavoritesScreen';
-import MyNFTsScreen from '../screens/MyNFTsScreen';
-import NFTDetailScreen from '../screens/NFTDetailScreen';
 import EditProfileScreen from '../screens/EditProfileScreen';
 import VerificationScreen from '../screens/VerificationScreen';
 import SettingsScreen from '../screens/SettingsScreen';
@@ -32,9 +30,6 @@ import FollowingListScreen from '../screens/FollowingListScreen';
 import FollowerListScreen from '../screens/FollowerListScreen';
 import TransferTicketScreen from '../screens/TransferTicketScreen';
 import ReceiveTransferScreen from '../screens/ReceiveTransferScreen';
-// NFT wallet screens hidden for store submission (feature flag: NFT_WALLET_ENABLED)
-// import TransferNFTScreen from '../screens/TransferNFTScreen';
-// import ReceiveNFTTransferScreen from '../screens/ReceiveNFTTransferScreen';
 import CreatePostScreen from '../screens/CreatePostScreen';
 import PostDetailScreen from '../screens/PostDetailScreen';
 import UserProfileScreen from '../screens/UserProfileScreen';
@@ -47,6 +42,8 @@ import IdDocumentsScreen from '../screens/IdDocumentsScreen';
 import AddIdDocumentScreen from '../screens/AddIdDocumentScreen';
 import AddressesScreen from '../screens/AddressesScreen';
 import AddAddressScreen from '../screens/AddAddressScreen';
+import MyCollectiblesScreen from '../screens/MyCollectiblesScreen';
+import CollectibleDetailScreen from '../screens/CollectibleDetailScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -215,28 +212,6 @@ function MainStackNavigator() {
         }}
       />
       <MainStack.Screen
-        name="MyNFTs"
-        component={MyNFTsScreen}
-        options={{
-          title: '我的次元',
-          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
-        }}
-      />
-      <MainStack.Screen
-        name="NFTDetail"
-        component={NFTDetailScreen}
-        options={{
-          title: '次元详情',
-          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
-        }}
-      />
-      <MainStack.Screen
         name="EditProfile"
         component={EditProfileScreen}
         options={{
@@ -313,26 +288,6 @@ function MainStackNavigator() {
           },
         }}
       />
-      {/* NFT wallet screens hidden for store submission
-      <MainStack.Screen
-        name="TransferNFT"
-        component={TransferNFTScreen}
-        options={{
-          title: '转让次元',
-          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
-          headerTitleStyle: { fontWeight: 'bold' },
-        }}
-      />
-      <MainStack.Screen
-        name="ReceiveNFTTransfer"
-        component={ReceiveNFTTransferScreen}
-        options={{
-          title: '接收次元',
-          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
-          headerTitleStyle: { fontWeight: 'bold' },
-        }}
-      />
-      */}
       <MainStack.Screen
         name="CreatePost"
         component={CreatePostScreen}
@@ -444,6 +399,28 @@ function MainStackNavigator() {
         component={AddAddressScreen}
         options={{
           title: '添加地址',
+          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+        }}
+      />
+      <MainStack.Screen
+        name="MyCollectibles"
+        component={MyCollectiblesScreen}
+        options={{
+          title: '我的收藏品',
+          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+        }}
+      />
+      <MainStack.Screen
+        name="CollectibleDetail"
+        component={CollectibleDetailScreen}
+        options={{
+          title: '收藏品详情',
           headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
           headerTitleStyle: {
             fontWeight: 'bold',

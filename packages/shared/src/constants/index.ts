@@ -48,16 +48,6 @@ export const PAGINATION = {
 } as const;
 
 /**
- * NFT 铸造状态
- */
-export const NFT_MINT_STATUS = {
-  PENDING: 'pending',
-  MINTING: 'minting',
-  MINTED: 'minted',
-  FAILED: 'failed',
-} as const;
-
-/**
  * 文件上传限制
  */
 export const UPLOAD_LIMITS = {

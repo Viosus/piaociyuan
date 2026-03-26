@@ -38,6 +38,7 @@ COPY --from=builder /app/apps/web/public ./public
 COPY --from=builder /app/apps/web/server.js ./server.js
 COPY --from=builder /app/apps/web/package.json ./package.json
 COPY --from=builder /app/apps/web/lib ./lib
+COPY --from=builder /app/apps/web/prisma ./prisma
 
 # 复制 node_modules（npm workspaces 会将依赖 hoist 到根目录）
 COPY --from=builder /app/node_modules ./node_modules

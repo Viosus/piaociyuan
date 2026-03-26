@@ -4,8 +4,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { apiPost } from '@/lib/api';
-// NFT minting hidden for store submission
-// import { MintNFTButton } from '@/components/MintNFTButton';
 
 type Ticket = {
   id: string;
@@ -14,8 +12,6 @@ type Ticket = {
   price: number;
   refundedAt?: string | null; // 退票时间，用于判断是否已退票
   usedAt?: string | null; // 使用时间
-  nftMintStatus?: string | null; // NFT铸造状态
-  nftTokenId?: number | null; // NFT Token ID
 };
 
 type Order = {
@@ -28,7 +24,6 @@ type Order = {
   createdAt: number;
   paidAt?: number;
   tickets?: Ticket[];
-  nftStatus?: string; // NFT状态
 };
 
 function StatusBadge({ status }: { status: Order["status"] }) {
@@ -357,7 +352,6 @@ export default function OrderClient({ id }: { id: string }) {
                               {usingTicket === ticket.id ? '检票中...' : '🎫 检票'}
                             </button>
                           )}
-                          {/* MintNFTButton hidden for store submission */}
                         </div>
                       )}
                     </div>

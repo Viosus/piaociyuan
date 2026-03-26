@@ -37,7 +37,6 @@ const NOTIFICATION_TYPE_CONFIG: Record<
   post_comment: { label: '评论', icon: 'chatbubble', color: '#8B5CF6' },
   new_follower: { label: '新粉丝', icon: 'person-add', color: '#06B6D4' },
   new_message: { label: '新消息', icon: 'mail', color: '#EC4899' },
-  nft_minted: { label: '藏品生成', icon: 'cube', color: '#6366F1' },
   system: { label: '系统通知', icon: 'notifications', color: '#6B7280' },
 };
 
@@ -132,11 +131,6 @@ export default function NotificationsScreen() {
           navigation.navigate('Chat' as never, { conversationId: data.conversationId } as never);
         }
         break;
-      case 'nft_minted':
-        if (data?.nftId) {
-          navigation.navigate('NFTDetail' as never, { nftId: data.nftId } as never);
-        }
-        break;
       default:
         break;
     }
@@ -195,7 +189,6 @@ export default function NotificationsScreen() {
       { key: 'order_status', label: '订单' },
       { key: 'post_like', label: '互动' },
       { key: 'new_message', label: '消息' },
-      { key: 'nft_minted', label: 'NFT' },
       { key: 'system', label: '系统' },
     ];
 

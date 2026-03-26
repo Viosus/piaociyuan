@@ -49,8 +49,8 @@ export default function Sidebar() {
       gradient: "from-yellow-500 to-orange-500"
     },
     {
-      name: "我的次元",
-      href: "/account/nfts",
+      name: "我的收藏品",
+      href: "/account/collectibles",
       icon: "/icons/achievements.png",
       gradient: "from-purple-500 to-blue-500"
     },

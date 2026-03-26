@@ -65,7 +65,6 @@ export async function GET(req: NextRequest) {
             select: {
               posts: true,
               followers: true,
-              nfts: true,
             },
           },
         },

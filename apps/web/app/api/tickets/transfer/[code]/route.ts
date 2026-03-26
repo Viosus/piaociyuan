@@ -73,26 +73,6 @@ export async function GET(
       select: { id: true, nickname: true, avatar: true, isVerified: true, verifiedType: true },
     });
 
-    // 获取关联的 NFT 信息
-    let nftInfo = null;
-    if (ticket?.nftUserNftId) {
-      const userNFT = await prisma.userNFT.findUnique({
-        where: { id: ticket.nftUserNftId },
-      });
-      if (userNFT) {
-        const nft = await prisma.nFT.findUnique({
-          where: { id: userNFT.nftId },
-          select: { id: true, name: true, imageUrl: true, rarity: true, description: true },
-        });
-        nftInfo = {
-          userNftId: userNFT.id,
-          nft,
-          isOnChain: userNFT.isOnChain,
-          mintStatus: userNFT.mintStatus,
-        };
-      }
-    }
-
     return NextResponse.json({
       ok: true,
       data: {
@@ -113,8 +93,6 @@ export async function GET(
         event,
         tier,
         fromUser,
-        nft: nftInfo, // 包含 NFT 信息
-        hasNFT: !!nftInfo, // 便于前端快速判断
       },
     });
   } catch (error: unknown) {

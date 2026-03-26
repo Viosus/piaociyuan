@@ -13,8 +13,6 @@ type User = {
   role: string;
   isVerified: boolean;
   verifiedType?: string;
-  walletAddress?: string;
-  nftCount: number;
   followerCount: number;
   followingCount: number;
   createdAt: string;
@@ -252,7 +250,7 @@ export default function UsersManagement() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-xs text-gray-600">
-                        帖子: {user._count.posts} | 订单: {user._count.orders} | NFT: {user.nftCount}
+                        帖子: {user._count.posts} | 订单: {user._count.orders}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

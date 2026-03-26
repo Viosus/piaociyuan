@@ -40,7 +40,7 @@ export function getEmailHtml(code: string, type: VerificationType): string {
               <tr>
                 <td style="background: linear-gradient(135deg, #46467A 0%, #6B6BA8 100%); padding: 30px 40px; text-align: center;">
                   <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 600;">票次元</h1>
-                  <p style="margin: 8px 0 0; color: rgba(255,255,255,0.9); font-size: 14px;">您的数字票务与 NFT 藏品平台</p>
+                  <p style="margin: 8px 0 0; color: rgba(255,255,255,0.9); font-size: 14px;">您的数字票务平台</p>
                 </td>
               </tr>
 

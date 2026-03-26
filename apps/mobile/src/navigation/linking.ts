@@ -108,17 +108,11 @@ export const linking: LinkingOptions<any> = {
       },
       SelectUser: 'messages/new',
 
-      // NFT 相关
-      MyNFTs: 'nfts',
-      NFTDetail: {
-        path: 'nfts/:nftId',
-        parse: {
-          nftId: (id: string) => parseInt(id, 10),
-        },
+      // 收藏品
+      MyCollectibles: 'collectibles',
+      CollectibleDetail: {
+        path: 'collectibles/:id',
       },
-      // NFT wallet deep links hidden for store submission
-      // BindWallet: 'wallet/bind',
-      // MintNFT: 'nft/mint',
 
       // 通知
       Notifications: 'notifications',
@@ -158,8 +152,6 @@ export const DEEP_LINK_EXAMPLES = {
   orderDetail: (id: string) => createDeepLink(`orders/${id}`),
   // 门票
   ticketDetail: (id: string) => createDeepLink(`tickets/${id}`),
-  // NFT
-  nftDetail: (nftId: string) => createDeepLink(`nfts/${nftId}`),
   // 消息
   chat: (conversationId: string) => createDeepLink(`messages/${conversationId}`),
 };

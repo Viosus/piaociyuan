@@ -106,12 +106,6 @@ export async function POST(req: Request) {
       });
     }
 
-    // 获取接收人信息（用于 NFT 转移）
-    const toUser = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { id: true, walletAddress: true },
-    });
-
     // 接收转让 - 使用事务
     const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       // 1. 更新转让记录
@@ -124,12 +118,7 @@ export async function POST(req: Request) {
         },
       });
 
-      // 2. 获取门票信息（包含 NFT 关联）
-      const ticketWithNFT = await tx.ticket.findUnique({
-        where: { id: transfer.ticketId },
-      });
-
-      // 3. 更新门票所有权
+      // 2. 更新门票所有权
       const updatedTicket = await tx.ticket.update({
         where: { id: transfer.ticketId },
         data: {
@@ -137,39 +126,7 @@ export async function POST(req: Request) {
         },
       });
 
-      // 4. 如果门票关联了 NFT，同时转移 NFT 所有权
-      let updatedUserNFT = null;
-      if (ticketWithNFT?.nftUserNftId) {
-        updatedUserNFT = await tx.userNFT.update({
-          where: { id: ticketWithNFT.nftUserNftId },
-          data: {
-            userId: userId,
-            // 更新链上所有者地址（如果接收人已绑定钱包）
-            ownerWalletAddress: toUser?.walletAddress || '',
-            // 标记为转移状态
-            isTransferred: true,
-            transferredTo: userId,
-            transferredAt: new Date(),
-            // 更新获得方式
-            sourceType: 'transfer',
-            sourceId: updatedTransfer.id,
-          },
-        });
-
-        // 5. 更新用户 NFT 计数
-        // 减少原所有者的 NFT 数量
-        await tx.user.update({
-          where: { id: transfer.fromUserId },
-          data: { nftCount: { decrement: 1 } },
-        });
-        // 增加新所有者的 NFT 数量
-        await tx.user.update({
-          where: { id: userId },
-          data: { nftCount: { increment: 1 } },
-        });
-      }
-
-      return { transfer: updatedTransfer, ticket: updatedTicket, userNFT: updatedUserNFT };
+      return { transfer: updatedTransfer, ticket: updatedTicket };
     });
 
     // 获取活动信息
@@ -185,23 +142,7 @@ export async function POST(req: Request) {
       });
     }
 
-    // 获取 NFT 信息（如果有）
-    let nftInfo = null;
-    if (result.userNFT) {
-      const nft = await prisma.nFT.findUnique({
-        where: { id: result.userNFT.nftId },
-        select: { id: true, name: true, imageUrl: true, rarity: true },
-      });
-      nftInfo = {
-        userNftId: result.userNFT.id,
-        nft,
-        // 提示：如果 NFT 已上链，需要在链上完成转移
-        needsOnChainTransfer: result.userNFT.isOnChain && result.userNFT.mintStatus === 'minted',
-      };
-    }
-
     // TODO: 发送通知给转让人
-    // TODO: 如果 NFT 已上链，触发链上转移流程
 
     return NextResponse.json({
       ok: true,
@@ -213,9 +154,8 @@ export async function POST(req: Request) {
           price: result.ticket.price,
         },
         event,
-        nft: nftInfo,
       },
-      message: result.userNFT ? '门票和 NFT 接收成功' : '门票接收成功',
+      message: '门票接收成功',
     });
   } catch (error: unknown) {
     console.error('[TICKET_TRANSFER_ACCEPT_ERROR]', error);

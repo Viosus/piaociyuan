@@ -1,6 +1,6 @@
 # 票次元 (Piaoyuzhou) - Claude 环境配置
 
-> 这是一个 monorepo 项目，包含 Web 和 Mobile 应用，用于票务和 NFT 数字藏品管理。
+> 这是一个 monorepo 项目，包含 Web 和 Mobile 应用，用于票务和收藏品管理。
 
 ## 项目结构
 
@@ -96,7 +96,7 @@ Web API 路径: `apps/web/app/api/`
 - `/api/auth/*` - 认证 (登录、注册、验证码)
 - `/api/events/*` - 活动管理
 - `/api/tickets/*` - 票务
-- `/api/nft/*` - NFT 数字藏品
+- `/api/collectibles/*` - 收藏品
 - `/api/orders/*` - 订单
 - `/api/admin/*` - 管理后台
 
@@ -111,7 +111,6 @@ Web API 路径: `apps/web/app/api/`
 - **导航**: @react-navigation v7
 - **状态管理**: zustand
 - **存储**: expo-secure-store (敏感数据), @react-native-async-storage (普通数据)
-- **钱包**: ethers.js 6.x
 
 ## 注意事项
 

@@ -18,7 +18,6 @@ export async function GET(req: Request) {
     const dateTo = searchParams.get('dateTo');     // 日期范围结束
     const minPrice = searchParams.get('minPrice'); // 最低价格
     const maxPrice = searchParams.get('maxPrice'); // 最高价格
-    const hasNft = searchParams.get('hasNft');     // 是否有NFT纪念品
     const sortBy = searchParams.get('sortBy') || 'date'; // 排序字段: date, price
     const sortOrder = searchParams.get('sortOrder') || 'asc'; // 排序顺序: asc, desc
 
@@ -68,17 +67,6 @@ export async function GET(req: Request) {
       };
     }
 
-    // 是否有NFT纪念品
-    if (hasNft === 'true') {
-      where.nfts = {
-        some: {},
-      };
-    } else if (hasNft === 'false') {
-      where.nfts = {
-        none: {},
-      };
-    }
-
     // 构建排序
     let orderBy: Prisma.EventOrderByWithRelationInput = { date: 'asc' };
     if (sortBy === 'date') {
@@ -95,9 +83,6 @@ export async function GET(req: Request) {
           orderBy: {
             price: 'asc',
           },
-        },
-        _count: {
-          select: { nfts: true },
         },
       },
       skip: (page - 1) * pageSize,
@@ -128,9 +113,6 @@ export async function GET(req: Request) {
       // 最低价格（方便前端显示）
       minPrice: event.tiers.length > 0 ? Math.min(...event.tiers.map(t => t.price)) : null,
       maxPrice: event.tiers.length > 0 ? Math.max(...event.tiers.map(t => t.price)) : null,
-      // NFT纪念品数量
-      hasNft: event._count.nfts > 0,
-      nftCount: event._count.nfts,
     }));
 
     return NextResponse.json({ ok: true, data: formattedEvents });

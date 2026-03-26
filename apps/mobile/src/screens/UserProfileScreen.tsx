@@ -212,10 +212,6 @@ export default function UserProfileScreen() {
           <Text style={styles.statValue}>{user.stats?.postCount || 0}</Text>
           <Text style={styles.statLabel}>帖子</Text>
         </View>
-        <View style={styles.statItem}>
-          <Text style={styles.statValue}>{user.stats?.nftCount || 0}</Text>
-          <Text style={styles.statLabel}>NFT</Text>
-        </View>
       </View>
 
       {/* 操作按钮 */}

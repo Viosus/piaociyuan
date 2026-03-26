@@ -83,6 +83,9 @@ web-build/
 small_parts/
 tiny_parts/
 
+# NFT 备份（不推送到远端，避免触发 ECS 自动部署）
+_backup/
+
 # Large 3D model files (use cloud storage for production)
 apps/web/public/models/*.glb
 apps/web/public/models/*.gltf

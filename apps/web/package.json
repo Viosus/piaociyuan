@@ -23,7 +23,6 @@
     "db:seed": "tsx prisma/seed.ts",
     "db:create-tickets": "tsx scripts/create-tickets.ts",
     "db:fix-tickets": "tsx scripts/fix-missing-tickets.ts",
-    "db:add-3d-nft": "tsx scripts/add-sample-3d-nft.ts",
     "studio": "prisma studio --schema=./prisma/schema.prisma",
     "db:studio": "dotenv -e .env -- prisma studio"
   },
@@ -36,7 +35,6 @@
     "bcryptjs": "^3.0.2",
     "better-sqlite3": "^12.4.1",
     "dotenv": "^17.2.3",
-    "ethers": "^6.16.0",
     "jose": "^6.1.0",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.552.0",

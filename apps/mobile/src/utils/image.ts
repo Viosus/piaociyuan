@@ -142,36 +142,6 @@ export function getOrderStatusColor(status: string): string {
 }
 
 /**
- * 获取 NFT 稀有度文本
- * @param rarity 稀有度
- * @returns 稀有度文本
- */
-export function getRarityText(rarity: string): string {
-  const rarityTexts: Record<string, string> = {
-    common: '普通',
-    rare: '稀有',
-    epic: '史诗',
-    legendary: '传奇',
-  };
-  return rarityTexts[rarity] || rarity;
-}
-
-/**
- * 获取 NFT 稀有度颜色
- * @param rarity 稀有度
- * @returns 稀有度颜色
- */
-export function getRarityColor(rarity: string): string {
-  const rarityColors: Record<string, string> = {
-    common: '#6B7280', // gray
-    rare: '#3B82F6', // blue
-    epic: '#8B5CF6', // purple
-    legendary: '#F59E0B', // amber
-  };
-  return rarityColors[rarity] || '#6B7280';
-}
-
-/**
  * 压缩图片（占位符，实际实现需要使用 expo-image-manipulator）
  * @param uri 图片 URI
  * @param quality 压缩质量 (0-1)

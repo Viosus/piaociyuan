@@ -52,8 +52,6 @@ export async function GET(req: Request) {
     const dateTo = searchParams.get('dateTo');         // 活动日期范围结束
     const minPrice = searchParams.get('minPrice');     // 最低票价
     const maxPrice = searchParams.get('maxPrice');     // 最高票价
-    const hasNft = searchParams.get('hasNft');         // 是否有NFT纪念品
-
     // 构建 where 条件
     const where: any = {
       userId,
@@ -96,13 +94,6 @@ export async function GET(req: Request) {
       if (dateTo) {
         eventWhere.date.lte = dateTo;
       }
-    }
-
-    // 是否有NFT纪念品
-    if (hasNft === 'true') {
-      eventWhere.nfts = { some: {} };
-    } else if (hasNft === 'false') {
-      eventWhere.nfts = { none: {} };
     }
 
     // 如果有活动筛选条件，添加到 where
@@ -148,11 +139,6 @@ export async function GET(req: Request) {
     const [events, tiers] = await Promise.all([
       prisma.event.findMany({
         where: { id: { in: eventIds } },
-        include: {
-          _count: {
-            select: { nfts: true },
-          },
-        },
       }),
       prisma.tier.findMany({
         where: { id: { in: tierIds } },
@@ -192,8 +178,6 @@ export async function GET(req: Request) {
               time: event.time,
               coverImage: event.cover,
               category: event.category,
-              hasNft: (event as any)._count?.nfts > 0,
-              nftCount: (event as any)._count?.nfts || 0,
             }
           : null,
         tier: tier

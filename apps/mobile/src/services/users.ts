@@ -19,7 +19,6 @@ export interface UserProfile {
   role: 'user' | 'admin';
   isVerified: boolean;
   verifiedType?: 'celebrity' | 'artist' | 'organizer' | 'official';
-  walletAddress?: string;
   createdAt: string;
 
   // 统计数据
@@ -27,7 +26,6 @@ export interface UserProfile {
     postCount: number;
     followingCount: number;
     followerCount: number;
-    nftCount: number;
   };
 
   // 关系状态

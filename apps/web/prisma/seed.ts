@@ -146,104 +146,7 @@ async function main() {
   }
   console.log(`✅ 创建了 ${ticketCount} 张票`);
 
-  // 5. 创建NFT
-  console.log('\n🎨 创建NFT...');
-  const nfts = await prisma.$transaction([
-    // 票赠送的NFT
-    prisma.nFT.create({
-      data: {
-        name: '周杰伦演唱会VIP专属徽章',
-        description: '参加周杰伦2025巡演北京站的VIP专属纪念徽章',
-        imageUrl: '/badges/event-1-badge.png',
-        sourceType: 'ticket_reward',
-        category: 'badge',
-        eventId: 1,
-        tierId: 101,
-        rarity: 'legendary',
-        totalSupply: 50,
-        has3DModel: true,
-        model3DUrl: '/models/jay-badge.glb',
-        modelFormat: 'glb',
-        hasAR: true,
-        arUrl: '/models/jay-badge.usdz',
-      },
-    }),
-    prisma.nFT.create({
-      data: {
-        name: '周杰伦3D票根NFT',
-        description: '独一无二的3D数字票根，永久保存您的演唱会记忆',
-        imageUrl: '/badges/ticket-stub-3d.png',
-        sourceType: 'ticket_reward',
-        category: 'ticket_stub',
-        eventId: 1,
-        rarity: 'epic',
-        totalSupply: 350,
-        has3DModel: true,
-        model3DUrl: '/models/ticket-stub.glb',
-        modelFormat: 'glb',
-      },
-    }),
-    prisma.nFT.create({
-      data: {
-        name: 'Taylor Swift时代巡演海报',
-        description: 'The Eras Tour限量版数字海报',
-        imageUrl: '/badges/taylor-poster.png',
-        sourceType: 'ticket_reward',
-        category: 'poster',
-        eventId: 2,
-        rarity: 'rare',
-        totalSupply: 180,
-      },
-    }),
-    // 独立售卖的NFT
-    prisma.nFT.create({
-      data: {
-        name: '票次元创世纪念NFT',
-        description: '票次元平台首个独立发行的纪念NFT，记录平台诞生的历史时刻',
-        imageUrl: '/nfts/genesis.png',
-        sourceType: 'standalone',
-        category: 'art',
-        rarity: 'legendary',
-        price: 999,
-        totalSupply: 100,
-        has3DModel: true,
-        model3DUrl: '/models/genesis.glb',
-        hasAnimation: true,
-        animationUrl: '/animations/genesis.mp4',
-        isMarketable: true,
-      },
-    }),
-    prisma.nFT.create({
-      data: {
-        name: '音乐艺术收藏 #001',
-        description: '限量版音乐主题艺术NFT',
-        imageUrl: '/nfts/music-art-001.png',
-        sourceType: 'standalone',
-        category: 'art',
-        rarity: 'epic',
-        price: 299,
-        totalSupply: 500,
-        isMarketable: true,
-      },
-    }),
-  ]);
-  console.log(`✅ 创建了 ${nfts.length} 个NFT`);
-
-  // 6. 绑定部分VIP票到3D票根NFT
-  console.log('\n🔗 绑定票和NFT...');
-  const vipTickets = await prisma.ticket.findMany({
-    where: { eventId: 1, tierId: 101, status: 'available' },
-    take: 10,
-  });
-  for (const ticket of vipTickets) {
-    await prisma.ticket.update({
-      where: { id: ticket.id },
-      data: { nftId: nfts[1].id, nftMintStatus: 'pending' },
-    });
-  }
-  console.log(`✅ 为 ${vipTickets.length} 张VIP票绑定了3D票根NFT`);
-
-  // 7. 创建测试用户（用于帖子）
+  // 5. 创建测试用户（用于帖子）
   console.log('\n👥 创建测试用户...');
 
   // 所有测试用户的默认密码: password123
@@ -308,7 +211,7 @@ async function main() {
   ]);
   console.log(`✅ 创建了 ${testUsers.length} 个测试用户（密码: password123）`);
 
-  // 8. 创建帖子
+  // 6. 创建帖子
   console.log('\n📝 创建测试帖子...');
   const posts = [];
 
@@ -567,7 +470,7 @@ async function main() {
 
   console.log(`✅ 创建了 ${posts.length} 条帖子`);
 
-  // 9. 为帖子添加一些点赞
+  // 7. 为帖子添加一些点赞
   console.log('\n❤️  添加帖子点赞...');
   let likeCount = 0;
   for (const post of posts.slice(0, 5)) {
@@ -584,7 +487,7 @@ async function main() {
   }
   console.log(`✅ 添加了 ${likeCount} 个点赞`);
 
-  // 10. 为帖子添加一些评论
+  // 8. 为帖子添加一些评论
   console.log('\n💬 添加帖子评论...');
   const comments = await prisma.$transaction([
     prisma.comment.create({

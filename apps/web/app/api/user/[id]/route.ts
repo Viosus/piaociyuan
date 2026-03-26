@@ -52,7 +52,6 @@ export async function GET(
         location: true,
         isVerified: true,
         verifiedType: true,
-        nftCount: true,
         followerCount: true,
         followingCount: true,
         createdAt: true,
@@ -120,7 +119,6 @@ export async function GET(
         isFollowedBy,
         stats: {
           postCount: user._count.posts,
-          nftCount: user.nftCount,
           followerCount: user.followerCount,
           followingCount: user.followingCount,
         },

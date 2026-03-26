@@ -27,7 +27,6 @@ type Event = {
   _count: {
     posts: number;
     followers: number;
-    nfts: number;
   };
 };
 
@@ -220,7 +219,6 @@ export default function EventsManagement() {
                       <div className="flex gap-4 text-sm text-gray-600 mb-3">
                         <span>📝 {event._count.posts} 帖子</span>
                         <span>❤️ {event._count.followers} 关注</span>
-                        <span>🎨 {event._count.nfts} NFT</span>
                       </div>
 
                       {/* 操作按钮 */}

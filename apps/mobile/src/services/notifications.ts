@@ -30,7 +30,6 @@ export type NotificationType =
   | 'post_comment' // 帖子评论
   | 'new_follower' // 新粉丝
   | 'new_message' // 新消息
-  | 'nft_minted' // NFT 铸造完成
   | 'system'; // 系统通知
 
 /**

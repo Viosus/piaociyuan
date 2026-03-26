@@ -30,7 +30,7 @@ model Event {
   updatedAt DateTime @updatedAt
 
   tiers     Tier[]
-  nfts      NFT[]   // 该活动相关的NFT
+  collectibles Collectible[]
   posts     Post[]
   followers EventFollow[]
   notifications Notification[]
@@ -103,7 +103,7 @@ model Order {
   @@index([transactionId])
 }
 
-// ✅ 票表（增加NFT绑定）
+// ✅ 票表
 model Ticket {
   id          String   @id @default(uuid())
   ticketCode  String   @unique
@@ -122,15 +122,9 @@ model Ticket {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  // ============ NFT绑定（新增）============
-  nftId               String?  // 绑定的NFT ID（如3D票根NFT）
-  nftMintStatus       String?  // 该票的NFT铸造状态 pending/minted/failed
-  nftUserNftId        String?  // 对应的UserNFT记录ID
-
   // 关联
   order       Order?   @relation(fields: [orderId], references: [id], onDelete: SetNull)
   user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
-  nft         NFT?     @relation(fields: [nftId], references: [id], onDelete: SetNull)
 
   @@map("tickets")
   @@index([eventId])
@@ -141,11 +135,9 @@ model Ticket {
   @@index([status])
   @@index([ticketCode])
   @@index([eventId, tierId, status, seatNumber])
-  @@index([nftId])
-  @@index([nftMintStatus])
 }
 
-// ✅ 用户表（扩展个人信息和钱包）
+// ✅ 用户表（扩展个人信息）
 model User {
   id            String   @id @default(uuid())
   email         String?  @unique
@@ -162,25 +154,20 @@ model User {
   // 用户角色
   role          String   @default("user")
 
-  // ============ 个人信息扩展（新增）============
+  // ============ 个人信息扩展 ============
   bio                 String?  @db.Text // 个人简介
   coverImage          String?  // 个人主页封面图
   website             String?  // 个人网站
   location            String?  // 所在地
 
-  // ============ 认证系统（新增）============
+  // ============ 认证系统 ============
   isVerified          Boolean  @default(false)
   verifiedType        String?  // celebrity, artist, organizer, official
   verifiedAt          DateTime?
   verificationBadge   String?  // 认证徽章图标URL
 
-  // ============ 钱包信息（修改）============
-  walletAddress       String?  @unique
-  walletProvider      String?  // metamask, imtoken, tokenpocket, bitkeep, etc.
-  walletConnectedAt   DateTime?
-
-  // ============ 统计字段（新增）============
-  nftCount            Int      @default(0)
+  // ============ 统计字段 ============
+  collectibleCount    Int      @default(0)
   followerCount       Int      @default(0)
   followingCount      Int      @default(0)
 
@@ -190,9 +177,11 @@ model User {
   // 关联
   orders        Order[]
   tickets       Ticket[]
-  userNFTs      UserNFT[]   // 改为 userNFTs
   loginLogs     LoginLog[]
   sessions      UserSession[]
+
+  // 收藏品
+  userCollectibles UserCollectible[]
 
   // 社交
   posts         Post[]
@@ -212,9 +201,6 @@ model User {
   followers      UserFollow[]   @relation("UserFollowers")  // 关注我的人
   following      UserFollow[]   @relation("UserFollowing")  // 我关注的人
 
-  // NFT
-  nftMintQueue   NFTMintQueue[]
-
   // 认证申请
   verificationRequests VerificationRequest[]
 
@@ -227,7 +213,6 @@ model User {
   @@index([phone])
   @@index([wechatOpenId])
   @@index([qqOpenId])
-  @@index([walletAddress])
 }
 
 // ✅ 登录日志表
@@ -286,112 +271,70 @@ model VerificationCode {
   @@index([expiresAt])
 }
 
-// ✅ NFT表（原Badge表重构）
-model NFT {
-  id                  String   @id @default(uuid())
-  name                String
-  description         String   @db.Text
-  imageUrl            String
+// ==================== 收藏品系统 ====================
 
-  // ============ NFT分类 ============
-  sourceType          String   // ticket_reward, standalone, airdrop
-  category            String   // badge, ticket_stub, poster, certificate, art
+// ✅ 收藏品表
+model Collectible {
+  id            String   @id @default(uuid())
+  name          String
+  description   String   @db.Text
+  imageUrl      String
 
-  // ============ 关联信息 ============
-  eventId             Int?
-  tierId              Int?
-
-  // ============ 经济模型 ============
-  rarity              String   @default("common")
-  price               Int?     // 独立售卖价格
-  totalSupply         Int      // 总供应量
-  mintedCount         Int      @default(0)
-
-  // ============ 3D/AR 功能 ============
-  has3DModel          Boolean  @default(false)
-  model3DUrl          String?
-  modelFormat         String?
-  hasAR               Boolean  @default(false)
-  arUrl               String?
-  hasAnimation        Boolean  @default(false)
-  animationUrl        String?
-  modelConfig         String?  @db.Text
-
-  // ============ 区块链信息 ============
-  contractAddress     String?
-  tokenIdStart        Int?
-  metadataUriTemplate String?  @db.Text
-
-  // ============ 状态控制 ============
-  isActive            Boolean  @default(true)
-  isMintable          Boolean  @default(true)
-  isMarketable        Boolean  @default(false)
-
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+  // 分类
+  category      String   // badge, ticket_stub, poster, certificate, art
 
   // 关联
-  event               Event?   @relation(fields: [eventId], references: [id], onDelete: SetNull)
-  userNFTs            UserNFT[]
-  ticketsWithNFT      Ticket[]
+  eventId       Int?
+  tierId        Int?
 
-  @@map("nfts")
+  // 3D/AR 展示
+  has3DModel    Boolean  @default(false)
+  model3DUrl    String?
+  modelFormat   String?
+  hasAnimation  Boolean  @default(false)
+  animationUrl  String?
+  modelConfig   String?  @db.Text
+
+  // 供应控制
+  totalSupply   Int
+  claimedCount  Int      @default(0)
+
+  // 状态
+  isActive      Boolean  @default(true)
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // 关联
+  event         Event?   @relation(fields: [eventId], references: [id], onDelete: SetNull)
+  userCollectibles UserCollectible[]
+
+  @@map("collectibles")
   @@index([eventId])
-  @@index([sourceType])
   @@index([category])
-  @@index([rarity])
   @@index([isActive])
-  @@index([isMintable])
 }
 
-// ✅ 用户NFT表（原UserBadge表重构）
-model UserNFT {
-  id                  String   @id @default(uuid())
-  userId              String
-  nftId               String
+// ✅ 用户收藏记录表
+model UserCollectible {
+  id            String   @id @default(uuid())
+  userId        String
+  collectibleId String
 
-  // ============ 获得方式 ============
-  sourceType          String   // ticket_purchase, direct_purchase, airdrop, transfer
-  sourceId            String?  // 来源ID（订单ID、票ID、交易哈希等）
+  // 获取方式
+  sourceType    String   // ticket_purchase, gift, achievement
+  sourceId      String?  // 来源ID（订单ID等）
 
-  // ============ 区块链唯一标识 ============
-  contractAddress     String   // 合约地址
-  tokenId             Int      // Token ID
-  metadataUri         String?  @db.Text
-
-  // ============ 所有权信息 ============
-  ownerWalletAddress  String   // 当前链上所有者
-  isOnChain           Boolean  @default(false)
-
-  // ============ 铸造信息 ============
-  mintStatus          String   @default("pending")
-  mintTransactionHash String?
-  mintedAt            DateTime?
-  mintError           String?  @db.Text
-
-  // ============ 转移信息 ============
-  isTransferred       Boolean  @default(false)
-  transferredTo       String?
-  transferredAt       DateTime?
-
-  // ============ 额外数据 ============
-  metadata            String?  @db.Text // JSON格式
-
-  obtainedAt          DateTime @default(now())
-  lastSyncedAt        DateTime?
+  obtainedAt    DateTime @default(now())
 
   // 关联
-  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  nft                 NFT      @relation(fields: [nftId], references: [id], onDelete: Restrict)
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  collectible   Collectible @relation(fields: [collectibleId], references: [id], onDelete: Restrict)
 
-  @@map("user_nfts")
-  @@unique([contractAddress, tokenId])
+  @@map("user_collectibles")
   @@index([userId])
-  @@index([nftId])
-  @@index([ownerWalletAddress])
-  @@index([mintStatus])
+  @@index([collectibleId])
   @@index([obtainedAt])
-  @@index([sourceType])
 }
 
 // ==================== 社交系统 ====================
@@ -640,61 +583,6 @@ model Notification {
   @@index([createdAt])
 }
 
-// ==================== NFT系统 ====================
-
-model NFTMintQueue {
-  id            String   @id @default(uuid())
-  userNftId     String   // 关联UserNFT
-  userId        String
-  walletAddress String
-  status        String   @default("pending")
-  retryCount    Int      @default(0)
-  errorMessage  String?  @db.Text
-  createdAt     DateTime @default(now())
-  processedAt   DateTime?
-
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("nft_mint_queue")
-  @@index([userNftId])
-  @@index([status])
-  @@index([createdAt])
-  @@index([userId])
-}
-
-model NFTTransaction {
-  id                String   @id @default(uuid())
-  transactionHash   String   @unique
-  fromAddress       String?
-  toAddress         String?
-  tokenId           Int?
-  contractAddress   String?
-  transactionType   String
-  blockNumber       BigInt?
-  gasUsed           BigInt?
-  gasPrice          BigInt?
-  status            String
-  createdAt         DateTime @default(now())
-  confirmedAt       DateTime?
-
-  @@map("nft_transactions")
-  @@index([transactionHash])
-  @@index([transactionType])
-  @@index([toAddress])
-  @@index([status])
-}
-
-model NFTConfig {
-  id          String   @id @default(uuid())
-  key         String   @unique
-  value       String?  @db.Text
-  description String?  @db.Text
-  updatedAt   DateTime @default(now()) @updatedAt
-
-  @@map("nft_config")
-  @@index([key])
-}
-
 // ✅ 用户关注表
 model UserFollow {
   id          String   @id @default(uuid())
@@ -803,35 +691,6 @@ model TicketTransfer {
 
   @@map("ticket_transfers")
   @@index([ticketId])
-  @@index([fromUserId])
-  @@index([toUserId])
-  @@index([transferCode])
-  @@index([status])
-  @@index([expiresAt])
-}
-
-// NFT 转让记录表（独立的 NFT 转让，不含门票）
-model NFTTransfer {
-  id              String    @id @default(uuid())
-  userNftId       String    // 转让的 UserNFT ID
-  fromUserId      String    // 转让人
-  toUserId        String?   // 接收人（确认后填写）
-  toUserPhone     String?   // 接收人手机号（用于通知）
-  toUserEmail     String?   // 接收人邮箱（用于通知）
-  transferCode    String    @unique // 转让码（8位大写）
-  message         String?   @db.Text // 转让留言
-  transferType    String    @default("gift") // gift(赠送), sale(出售)
-  price           Int?      // 出售价格（仅出售时）
-  status          String    @default("pending") // pending/accepted/rejected/expired/cancelled
-  expiresAt       DateTime  // 过期时间
-  acceptedAt      DateTime?
-  rejectedAt      DateTime?
-  cancelledAt     DateTime?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-
-  @@map("nft_transfers")
-  @@index([userNftId])
   @@index([fromUserId])
   @@index([toUserId])
   @@index([transferCode])

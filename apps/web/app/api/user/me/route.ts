@@ -55,8 +55,6 @@ export async function GET(req: NextRequest) {
         location: true,
         isVerified: true,
         verifiedType: true,
-        walletAddress: true,
-        nftCount: true,
         followerCount: true,
         followingCount: true,
         createdAt: true,

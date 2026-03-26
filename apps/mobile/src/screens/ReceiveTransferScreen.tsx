@@ -26,17 +26,6 @@ const TRANSFER_STATUS_CONFIG: Record<string, { label: string; color: string; des
   cancelled: { label: '已取消', color: colors.textSecondary, desc: '转让已取消' },
 };
 
-// NFT 稀有度颜色
-const getRarityColor = (rarity: string): string => {
-  const rarityColors: Record<string, string> = {
-    common: '#9CA3AF',
-    rare: '#3B82F6',
-    epic: '#8B5CF6',
-    legendary: '#F59E0B',
-  };
-  return rarityColors[rarity.toLowerCase()] || colors.textSecondary;
-};
-
 export default function ReceiveTransferScreen() {
   const route = useRoute();
   const navigation = useNavigation<any>();
@@ -83,10 +72,7 @@ export default function ReceiveTransferScreen() {
   const handleAccept = async () => {
     if (!transfer) return;
 
-    const hasNFT = transfer.hasNFT && transfer.nft;
-    const confirmMessage = hasNFT
-      ? `确定要接收这张门票和附带的 NFT 吗？\n\n活动：${transfer.event?.name || '活动'}\nNFT：${transfer.nft?.nft?.name || 'NFT'}`
-      : `确定要接收这张门票吗？\n\n活动：${transfer.event?.name || '活动'}`;
+    const confirmMessage = `确定要接收这张门票吗？\n\n活动：${transfer.event?.name || '活动'}`;
 
     Alert.alert(
       '确认接收',
@@ -101,8 +87,7 @@ export default function ReceiveTransferScreen() {
               const response = await acceptTransfer(transfer.transferCode, 'accept');
               if (response.ok) {
                 setSuccess(true);
-                const successMessage = hasNFT ? '门票和 NFT 接收成功！' : '门票接收成功！';
-                Alert.alert('成功', successMessage, [
+                Alert.alert('成功', '门票接收成功！', [
                   {
                     text: '查看我的门票',
                     onPress: () => navigation.navigate('Tickets'),
@@ -277,46 +262,6 @@ export default function ReceiveTransferScreen() {
               <View style={styles.messageSection}>
                 <Text style={styles.sectionLabel}>留言</Text>
                 <Text style={styles.messageText}>"{transfer.message}"</Text>
-              </View>
-            )}
-
-            {/* NFT 信息 */}
-            {transfer.hasNFT && transfer.nft && (
-              <View style={styles.nftSection}>
-                <View style={styles.nftHeader}>
-                  <Text style={styles.sectionLabel}>附带 NFT</Text>
-                  <View style={styles.nftBadge}>
-                    <Text style={styles.nftBadgeText}>NFT</Text>
-                  </View>
-                </View>
-                <View style={styles.nftCard}>
-                  {transfer.nft.nft?.imageUrl && (
-                    <Image
-                      source={transfer.nft.nft.imageUrl}
-                      style={styles.nftImage}
-                      contentFit="cover"
-                    />
-                  )}
-                  <View style={styles.nftInfo}>
-                    <Text style={styles.nftName}>{transfer.nft.nft?.name || 'NFT'}</Text>
-                    {transfer.nft.nft?.rarity && (
-                      <View style={[
-                        styles.rarityBadge,
-                        { backgroundColor: getRarityColor(transfer.nft.nft.rarity) + '20' }
-                      ]}>
-                        <Text style={[
-                          styles.rarityText,
-                          { color: getRarityColor(transfer.nft.nft.rarity) }
-                        ]}>
-                          {transfer.nft.nft.rarity}
-                        </Text>
-                      </View>
-                    )}
-                    {transfer.nft.isOnChain && (
-                      <Text style={styles.onChainText}>已上链</Text>
-                    )}
-                  </View>
-                </View>
               </View>
             )}
 
@@ -670,66 +615,5 @@ const styles = StyleSheet.create({
     fontSize: fontSize.md,
     fontWeight: '600',
     color: '#111827',
-  },
-  // NFT 相关样式
-  nftSection: {
-    marginBottom: spacing.lg,
-    paddingTop: spacing.md,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-  },
-  nftHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: spacing.sm,
-  },
-  nftBadge: {
-    backgroundColor: colors.primary,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 2,
-    borderRadius: 4,
-  },
-  nftBadgeText: {
-    fontSize: fontSize.xs,
-    fontWeight: 'bold',
-    color: '#111827',
-  },
-  nftCard: {
-    flexDirection: 'row',
-    backgroundColor: colors.background,
-    borderRadius: 12,
-    padding: spacing.md,
-  },
-  nftImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 8,
-    marginRight: spacing.md,
-  },
-  nftInfo: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  nftName: {
-    fontSize: fontSize.md,
-    fontWeight: '600',
-    color: colors.text,
-    marginBottom: spacing.xs,
-  },
-  rarityBadge: {
-    alignSelf: 'flex-start',
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 2,
-    borderRadius: 4,
-    marginBottom: spacing.xs,
-  },
-  rarityText: {
-    fontSize: fontSize.xs,
-    fontWeight: '600',
-  },
-  onChainText: {
-    fontSize: fontSize.xs,
-    color: colors.success,
   },
 });

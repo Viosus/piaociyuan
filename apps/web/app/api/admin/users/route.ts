@@ -60,8 +60,6 @@ export async function GET(req: NextRequest) {
           role: true,
           isVerified: true,
           verifiedType: true,
-          walletAddress: true,
-          nftCount: true,
           followerCount: true,
           followingCount: true,
           createdAt: true,

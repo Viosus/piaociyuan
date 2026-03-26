@@ -109,6 +109,10 @@ jobs:
             docker-compose down
             docker-compose up -d
 
+            # 等待容器就绪后同步数据库 schema
+            sleep 10
+            docker-compose exec -T web npx prisma db push --skip-generate
+
             # 清理旧镜像
             docker image prune -f
 

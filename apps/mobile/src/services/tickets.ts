@@ -48,7 +48,6 @@ export interface GetMyTicketsParams {
   dateTo?: string;             // 活动日期范围结束
   minPrice?: number;           // 最低票价
   maxPrice?: number;           // 最高票价
-  hasNft?: boolean;            // 是否有NFT纪念品
 }
 
 /**
@@ -66,8 +65,6 @@ export async function getMyTickets(params: GetMyTicketsParams = {}) {
   if (params.dateTo) queryParams.append('dateTo', params.dateTo);
   if (params.minPrice !== undefined) queryParams.append('minPrice', params.minPrice.toString());
   if (params.maxPrice !== undefined) queryParams.append('maxPrice', params.maxPrice.toString());
-  if (params.hasNft !== undefined) queryParams.append('hasNft', params.hasNft.toString());
-
   const queryString = queryParams.toString();
   const endpoint = `/api/tickets/my-tickets${queryString ? `?${queryString}` : ''}`;
 
@@ -143,20 +140,6 @@ export interface TicketTransfer {
     id: string;
     nickname?: string;
     avatar?: string;
-  };
-  // NFT 相关信息
-  hasNFT?: boolean;
-  nft?: {
-    userNftId: string;
-    nft?: {
-      id: string;
-      name: string;
-      imageUrl?: string;
-      rarity?: string;
-      description?: string;
-    };
-    isOnChain?: boolean;
-    mintStatus?: string;
   };
 }
 

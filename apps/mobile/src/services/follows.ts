@@ -21,7 +21,6 @@ export interface User {
   followersCount?: number;
   followingCount?: number;
   postCount?: number;
-  nftCount?: number;
   isFollowing?: boolean;
   isFollowedBy?: boolean;
   createdAt: string;

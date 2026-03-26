@@ -82,35 +82,14 @@ Authorization: Bearer <access_token>
 | 获取订单详情 | GET | `/api/orders/[id]` | 是 | 获取单个订单详情 |
 | 取消订单 | POST | `/api/orders/[id]/cancel` | 是 | 取消未支付订单 |
 
-### 5. NFT 数字藏品
-
-#### 5.1 NFT 资产
+### 5. 收藏品
 
 | 接口 | 方法 | 路径 | 认证 | 说明 |
 |------|------|------|------|------|
-| 获取我的NFT | GET | `/api/nft/assets/my` | 是 | 获取已铸造的NFT列表 |
-| 获取NFT详情 | GET | `/api/nft/assets/[tokenId]` | 是 | 获取单个NFT详情 |
-
-#### 5.2 NFT 铸造
-
-| 接口 | 方法 | 路径 | 认证 | 说明 |
-|------|------|------|------|------|
-| 请求铸造NFT | POST | `/api/nft/mint/request` | 是 | 将票转为NFT |
-| 查询铸造状态 | GET | `/api/nft/mint/status/[ticketId]` | 是 | 查询NFT铸造进度 |
-
-#### 5.3 钱包管理
-
-| 接口 | 方法 | 路径 | 认证 | 说明 |
-|------|------|------|------|------|
-| 绑定钱包 | POST | `/api/nft/wallet/bind` | 是 | 绑定Web3钱包 |
-| 查询钱包状态 | GET | `/api/nft/wallet/status` | 是 | 获取钱包绑定状态 |
-
-#### 5.4 用户收藏
-
-| 接口 | 方法 | 路径 | 认证 | 说明 |
-|------|------|------|------|------|
-| 获取NFT收藏 | GET | `/api/user/nfts` | 是 | 获取用户的NFT收藏列表 |
-| 获取收藏详情 | GET | `/api/user/nfts/[id]` | 是 | 获取单个NFT收藏详情 |
+| 获取收藏品列表 | GET | `/api/collectibles` | 否 | 公开收藏品列表 |
+| 获取收藏品详情 | GET | `/api/collectibles/[id]` | 否 | 收藏品详情 |
+| 获取我的收藏品 | GET | `/api/collectibles/my` | 是 | 用户已领取的收藏品 |
+| 领取收藏品 | POST | `/api/collectibles/claim` | 是 | 领取收藏品 |
 
 ### 6. 通知系统
 
