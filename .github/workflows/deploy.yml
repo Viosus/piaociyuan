@@ -107,7 +107,7 @@ jobs:
             # 重启服务
             cd ~/piaociyuan
             docker-compose down
-            docker-compose up -d
+            docker-compose up -d --no-build
 
             # 等待容器就绪后同步数据库 schema
             sleep 10
