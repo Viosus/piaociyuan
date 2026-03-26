@@ -4,7 +4,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { apiPost } from '@/lib/api';
-import { MintNFTButton } from '@/components/MintNFTButton';
+// NFT minting hidden for store submission
+// import { MintNFTButton } from '@/components/MintNFTButton';
 
 type Ticket = {
   id: string;
@@ -64,8 +65,8 @@ export default function OrderClient({ id }: { id: string }) {
       const data = (await res.json()) as Order;
       setOrder(data);
       setErr(null);
-    } catch (e: unknown) {
-      setErr(e instanceof Error ? e.message : "加载失败");
+    } catch (error: unknown) {
+      setErr(error instanceof Error ? error.message : "加载失败");
     } finally {
       setLoading(false);
     }
@@ -99,8 +100,8 @@ export default function OrderClient({ id }: { id: string }) {
       if (!res.ok) throw new Error((await res.json()).error || "PAY_FAIL");
       // 立即刷新订单状态
       await fetchOrder();
-    } catch (e: unknown) {
-      alert(`支付失败：${e instanceof Error ? e.message : "未知错误"}`);
+    } catch (error: unknown) {
+      alert(`支付失败：${error instanceof Error ? error.message : "未知错误"}`);
     } finally {
       setPaying(false);
     }
@@ -156,8 +157,8 @@ export default function OrderClient({ id }: { id: string }) {
       }
 
       await fetchOrder();
-    } catch (e: unknown) {
-      alert(`检票失败：${e instanceof Error ? e.message : "未知错误"}`);
+    } catch (error: unknown) {
+      alert(`检票失败：${error instanceof Error ? error.message : "未知错误"}`);
     } finally {
       setUsingTicket(null);
     }
@@ -198,8 +199,8 @@ export default function OrderClient({ id }: { id: string }) {
       } else {
         alert('退票失败，请稍后重试');
       }
-    } catch (e: unknown) {
-      alert(`退票失败：${e instanceof Error ? e.message : "未知错误"}`);
+    } catch (error: unknown) {
+      alert(`退票失败：${error instanceof Error ? error.message : "未知错误"}`);
     } finally {
       setRefunding(false);
     }
@@ -356,11 +357,7 @@ export default function OrderClient({ id }: { id: string }) {
                               {usingTicket === ticket.id ? '检票中...' : '🎫 检票'}
                             </button>
                           )}
-                          <MintNFTButton
-                            ticketId={ticket.id}
-                            ticketStatus={ticket.status}
-                            nftMintStatus={ticket.nftMintStatus}
-                          />
+                          {/* MintNFTButton hidden for store submission */}
                         </div>
                       )}
                     </div>

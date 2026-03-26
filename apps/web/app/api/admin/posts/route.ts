@@ -8,6 +8,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { requireAdmin } from '@/lib/auth';
+import { getErrorMessage } from '@/lib/error-utils';
 
 export async function GET(req: NextRequest) {
   try {
@@ -107,7 +108,7 @@ export async function GET(req: NextRequest) {
         code: 'SERVER_ERROR',
         message: '获取帖子列表失败',
         ...(process.env.NODE_ENV === 'development' && {
-          error: error instanceof Error ? error.message : String(error),
+          error: getErrorMessage(error),
         }),
       },
       { status: 500 }

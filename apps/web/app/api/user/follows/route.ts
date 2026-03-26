@@ -17,7 +17,7 @@ import { getSaleStatusInfo } from '@/lib/eventUtils';
 export async function GET(req: NextRequest) {
   try {
     // 1️⃣ 认证
-    const authHeader = req.headers.get('Authorization');
+    const authHeader = req.headers.get('authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return NextResponse.json(
         {

@@ -8,15 +8,14 @@ interface WalletStatus {
 }
 
 /**
- * 钱包连接按钮组件
- * 用于模式2：用户主动连接钱包
+ * 账户连接按钮组件
  */
 export function WalletConnectButton() {
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // 检查是否已绑定钱包
+  // 检查是否已绑定账户
   useEffect(() => {
     checkWalletStatus();
   }, []);
@@ -39,7 +38,7 @@ export function WalletConnectButton() {
         setWalletAddress(data.walletAddress);
       }
     } catch {
-      // 静默处理检查钱包状态失败
+      // 静默处理检查账户状态失败
     }
   };
 
@@ -48,9 +47,9 @@ export function WalletConnectButton() {
     setError(null);
 
     try {
-      // 1. 检查MetaMask
+      // 1. 检查环境
       if (!window.ethereum) {
-        throw new Error('请先安装MetaMask钱包');
+        throw new Error('当前环境不支持此功能');
       }
 
       // 2. 请求连接
@@ -60,7 +59,7 @@ export function WalletConnectButton() {
       const address = accounts[0];
 
       // 3. 生成签名消息
-      const message = `绑定钱包到账户\n时间戳: ${Date.now()}`;
+      const message = `绑定账户\n时间戳: ${Date.now()}`;
 
       // 4. 请求签名
       const signature = await window.ethereum.request({
@@ -94,7 +93,7 @@ export function WalletConnectButton() {
       }
 
       setWalletAddress(address);
-      alert('钱包绑定成功！');
+      alert('账户绑定成功！');
 
     } catch (err) {
       setError(err instanceof Error ? err.message : '连接失败');
@@ -121,7 +120,7 @@ export function WalletConnectButton() {
         disabled={isConnecting}
         className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white font-semibold px-6 py-3 rounded-lg transition-colors"
       >
-        {isConnecting ? '连接中...' : '🔗 连接钱包'}
+        {isConnecting ? '连接中...' : '🔗 连接账户'}
       </button>
 
       {error && (
@@ -131,7 +130,7 @@ export function WalletConnectButton() {
       )}
 
       <p className="text-xs text-gray-500">
-        连接钱包后可将您的票转为NFT
+        连接账户后可领取数字藏品
       </p>
     </div>
   );

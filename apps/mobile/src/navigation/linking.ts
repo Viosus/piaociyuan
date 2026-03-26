@@ -116,8 +116,9 @@ export const linking: LinkingOptions<any> = {
           nftId: (id: string) => parseInt(id, 10),
         },
       },
-      BindWallet: 'wallet/bind',
-      MintNFT: 'nft/mint',
+      // NFT wallet deep links hidden for store submission
+      // BindWallet: 'wallet/bind',
+      // MintNFT: 'nft/mint',
 
       // 通知
       Notifications: 'notifications',

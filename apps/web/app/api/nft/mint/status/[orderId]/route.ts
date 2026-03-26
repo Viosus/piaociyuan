@@ -17,13 +17,13 @@ export async function GET(
     // 验证用户身份
     const authHeader = req.headers.get('authorization');
     if (!authHeader?.startsWith('Bearer ')) {
-      return NextResponse.json({ error: '未授权' }, { status: 401 });
+      return NextResponse.json({ ok: false, error: '未授权' }, { status: 401 });
     }
 
     const token = authHeader.substring(7);
     const payload = await verifyToken(token);
     if (!payload) {
-      return NextResponse.json({ error: '无效的令牌' }, { status: 401 });
+      return NextResponse.json({ ok: false, error: '无效的令牌' }, { status: 401 });
     }
 
     const userId = payload.id as string;
@@ -42,7 +42,7 @@ export async function GET(
     });
 
     if (!ticket) {
-      return NextResponse.json({ error: "票不存在" }, { status: 404 });
+      return NextResponse.json({ ok: false, error: "票不存在" }, { status: 404 });
     }
 
     // 如果有UserNFT记录，查询详细信息
@@ -87,6 +87,6 @@ export async function GET(
     });
   } catch (error) {
     console.error("查询铸造状态错误:", error);
-    return NextResponse.json({ error: "查询失败" }, { status: 500 });
+    return NextResponse.json({ ok: false, error: "查询失败" }, { status: 500 });
   }
 }

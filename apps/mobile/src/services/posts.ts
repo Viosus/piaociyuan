@@ -82,7 +82,7 @@ export async function getPosts(params: GetPostsParams = {}) {
   return apiClient.get<Post[]>('/api/posts', {
     params: {
       page: params.page || 1,
-      limit: params.limit || 20,
+      pageSize: params.limit || 20,
       userId: params.userId,
       eventId: params.eventId,
       sort: params.sort || 'latest',
@@ -205,7 +205,7 @@ export async function uploadPostImage(uri: string) {
     type,
   } as any);
 
-  return apiClient.post<{ url: string }>('/api/upload/post-image', formData, {
+  return apiClient.post<{ url: string }>('/api/upload', formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },

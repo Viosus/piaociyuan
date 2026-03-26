@@ -37,8 +37,8 @@ export default function EventDetailScreen() {
       } else {
         Alert.alert('错误', response.error || '加载活动详情失败');
       }
-    } catch (err: any) {
-      Alert.alert('错误', err.message || '加载活动详情失败');
+    } catch (error: any) {
+      Alert.alert('错误', error.message || '加载活动详情失败');
     } finally {
       setLoading(false);
     }

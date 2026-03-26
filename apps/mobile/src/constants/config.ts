@@ -1,6 +1,6 @@
 // 应用配置
 export const APP_CONFIG = {
-  API_URL: process.env.EXPO_PUBLIC_API_URL || 'http://10.0.0.14:3000',
+  API_URL: process.env.EXPO_PUBLIC_API_URL || 'https://piaociyuan.com',
   APP_NAME: '票次元',
   VERSION: '1.0.0',
 };

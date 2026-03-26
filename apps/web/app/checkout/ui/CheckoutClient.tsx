@@ -311,8 +311,8 @@ export default function CheckoutClient({ event, tier, initialQty, urlLimit }: Pr
       }
 
       router.push(`/order/${orderResult.orderId}`);
-    } catch (err: unknown) {
-      setErrorMsg(err instanceof Error ? err.message : "提交失败，请稍后重试");
+    } catch (error: unknown) {
+      setErrorMsg(error instanceof Error ? error.message : "提交失败，请稍后重试");
     } finally {
       setSubmitting(false);
     }

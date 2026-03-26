@@ -28,7 +28,6 @@ export interface Ticket {
     date?: string;
     time?: string;
     startTime?: string;
-    cover?: string;
     coverImage?: string;
   };
   tier?: {
@@ -60,7 +59,7 @@ export async function getMyTickets(params: GetMyTicketsParams = {}) {
   const queryParams = new URLSearchParams();
   if (params.status) queryParams.append('status', params.status);
   if (params.page) queryParams.append('page', params.page.toString());
-  if (params.limit) queryParams.append('limit', params.limit.toString());
+  if (params.limit) queryParams.append('pageSize', params.limit.toString());
   // 新增筛选参数
   if (params.category) queryParams.append('category', params.category);
   if (params.dateFrom) queryParams.append('dateFrom', params.dateFrom);

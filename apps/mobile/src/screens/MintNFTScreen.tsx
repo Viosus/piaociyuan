@@ -34,13 +34,13 @@ export default function MintNFTScreen() {
     try {
       // 检查钱包状态
       const walletResult = await getWalletStatus();
-      if (walletResult.success && walletResult.data) {
+      if (walletResult.ok && walletResult.data) {
         setHasWallet(walletResult.data.isBound);
       }
 
       // 加载可铸造订单
       const ordersResult = await getMintableOrders();
-      if (ordersResult.success && ordersResult.data) {
+      if (ordersResult.ok && ordersResult.data) {
         setOrders(ordersResult.data);
       } else {
         Alert.alert('错误', ordersResult.error || '加载订单列表失败');
@@ -59,37 +59,19 @@ export default function MintNFTScreen() {
   };
 
   const handleMintNFT = async (order: MintableOrder) => {
-    if (!hasWallet) {
-      Alert.alert(
-        '提示',
-        '您还未绑定钱包地址，请先绑定钱包',
-        [
-          {
-            text: '取消',
-            style: 'cancel',
-          },
-          {
-            text: '去绑定',
-            onPress: () => navigation.navigate('BindWallet' as never),
-          },
-        ]
-      );
-      return;
-    }
-
     if (order.nftMinted) {
-      Alert.alert('提示', '该订单已铸造 NFT');
+      Alert.alert('提示', '该订单已领取数字藏品');
       return;
     }
 
     if (!order.canMintNFT) {
-      Alert.alert('提示', '该订单暂时不能铸造 NFT');
+      Alert.alert('提示', '该订单暂时不能领取数字藏品');
       return;
     }
 
     Alert.alert(
-      '确认铸造',
-      `确定要为订单 #${order.id} 铸造 NFT 吗？\n\n活动：${order.event.name}\n票档：${order.tier.name}\n数量：${order.qty} 张`,
+      '确认领取',
+      `确定要为订单 #${order.id} 领取数字藏品吗？\n\n活动：${order.event.name}\n票档：${order.tier.name}\n数量：${order.qty} 张`,
       [
         {
           text: '取消',
@@ -104,8 +86,8 @@ export default function MintNFTScreen() {
 
               if (result.ok && result.data) {
                 Alert.alert(
-                  '铸造请求已提交',
-                  `您的 NFT 铸造请求已加入队列\n预计等待时间：${result.data.estimatedTime}`,
+                  '领取请求已提交',
+                  `您的数字藏品领取请求已加入队列\n预计等待时间：${result.data.estimatedTime}`,
                   [
                     {
                       text: '确定',
@@ -116,10 +98,10 @@ export default function MintNFTScreen() {
                   ]
                 );
               } else {
-                Alert.alert('错误', result.error || '铸造请求失败');
+                Alert.alert('错误', result.error || '领取请求失败');
               }
             } catch (error: any) {
-              Alert.alert('错误', error.message || '铸造请求失败');
+              Alert.alert('错误', error.message || '领取请求失败');
             } finally {
               setMinting((prev) => ({ ...prev, [order.id]: false }));
             }
@@ -161,28 +143,28 @@ export default function MintNFTScreen() {
               <>
                 <Ionicons name="checkmark-circle" size={16} color={COLORS.success} />
                 <Text style={[styles.statusText, { color: COLORS.success }]}>
-                  已铸造
+                  已领取
                 </Text>
               </>
             ) : item.canMintNFT ? (
               <>
                 <Ionicons name="time" size={16} color={COLORS.warning} />
                 <Text style={[styles.statusText, { color: COLORS.warning }]}>
-                  可铸造
+                  可领取
                 </Text>
               </>
             ) : (
               <>
                 <Ionicons name="close-circle" size={16} color={COLORS.error} />
                 <Text style={[styles.statusText, { color: COLORS.error }]}>
-                  不可铸造
+                  不可领取
                 </Text>
               </>
             )}
           </View>
 
           <Button
-            title={isMinting ? '铸造中...' : item.nftMinted ? '已铸造' : '铸造 NFT'}
+            title={isMinting ? '领取中...' : item.nftMinted ? '已领取' : '领取藏品'}
             onPress={() => handleMintNFT(item)}
             disabled={isMinting || item.nftMinted || !item.canMintNFT}
             size="small"
@@ -200,30 +182,14 @@ export default function MintNFTScreen() {
           <Ionicons name="information-circle" size={24} color={COLORS.primary} />
         </View>
         <View style={styles.infoContent}>
-          <Text style={styles.infoTitle}>关于 NFT 铸造</Text>
+          <Text style={styles.infoTitle}>关于数字藏品</Text>
           <Text style={styles.infoText}>
-            购买门票后，您可以将门票铸造为独特的 NFT 数字藏品。铸造完成后，NFT 将发送到您绑定的钱包地址。
+            购买门票后，您可以领取专属的数字藏品。每张藏品都是独特的纪念品，记录您的观演体验。
           </Text>
         </View>
       </View>
 
-      {!hasWallet && (
-        <TouchableOpacity
-          style={styles.bindWalletCard}
-          onPress={() => navigation.navigate('BindWallet' as never)}
-        >
-          <Ionicons name="wallet" size={24} color={COLORS.primary} />
-          <View style={styles.bindWalletContent}>
-            <Text style={styles.bindWalletTitle}>绑定钱包</Text>
-            <Text style={styles.bindWalletDescription}>
-              铸造 NFT 前需要先绑定以太坊钱包
-            </Text>
-          </View>
-          <Ionicons name="chevron-forward" size={20} color={COLORS.textSecondary} />
-        </TouchableOpacity>
-      )}
-
-      <Text style={styles.listTitle}>可铸造订单 ({orders.length})</Text>
+      <Text style={styles.listTitle}>可领取订单 ({orders.length})</Text>
     </View>
   );
 
@@ -233,8 +199,8 @@ export default function MintNFTScreen() {
     return (
       <EmptyState
         icon="cube-outline"
-        title="暂无可铸造订单"
-        description="购票后即可在此铸造 NFT"
+        title="暂无可领取订单"
+        description="购票后即可在此领取数字藏品"
         actionText="去购票"
         onAction={() => navigation.navigate('Events' as never)}
       />

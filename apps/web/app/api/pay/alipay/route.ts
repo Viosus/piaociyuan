@@ -151,13 +151,13 @@ export async function POST(req: Request) {
         payUrl: payResult.alipay?.payUrl,
       },
     });
-  } catch (err: any) {
-    console.error('[ALIPAY_ERROR]', err);
+  } catch (error: any) {
+    console.error('[ALIPAY_ERROR]', error);
     return NextResponse.json(
       {
         ok: false,
         code: 'INTERNAL_ERROR',
-        message: err.message || '创建支付订单失败，请稍后重试。',
+        message: error.message || '创建支付订单失败，请稍后重试。',
       },
       { status: 500 }
     );

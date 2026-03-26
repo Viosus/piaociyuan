@@ -16,7 +16,6 @@ export interface Event {
   startTime: string;
   endTime: string;
   coverImage?: string;
-  cover?: string;
   category?: string;
   status: 'upcoming' | 'ongoing' | 'ended';
   createdAt: string;

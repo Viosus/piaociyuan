@@ -89,7 +89,7 @@ export default function VerificationScreen() {
       setUploadingImage(true);
       try {
         const uploadResult = await uploadVerificationImage(result.assets[0].uri);
-        if (uploadResult.success && uploadResult.data) {
+        if (uploadResult.ok && uploadResult.data) {
           setProofImages([...proofImages, uploadResult.data.url]);
         } else {
           Alert.alert('错误', '上传图片失败');

@@ -4,7 +4,10 @@ import jwt from 'jsonwebtoken';
 import { headers } from 'next/headers';
 import prisma from './prisma';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-this-in-production';
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  throw new Error('JWT_SECRET environment variable is required');
+}
 const SALT_ROUNDS = 12; // 从 10 提升到 12，增强安全性
 
 export type UserPayload = {
@@ -120,9 +123,12 @@ export function isValidPhone(phone: string): boolean {
   return phoneRegex.test(phone);
 }
 
-// 验证密码强度（至少6位）
+// 验证密码强度（至少8位，包含字母和数字）
 export function isValidPassword(password: string): boolean {
-  return password.length >= 6;
+  if (password.length < 8) return false;
+  const hasLetter = /[a-zA-Z]/.test(password);
+  const hasNumber = /\d/.test(password);
+  return hasLetter && hasNumber;
 }
 
 // 从请求头获取当前用户

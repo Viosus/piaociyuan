@@ -44,7 +44,7 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const statusFilter = searchParams.get('status');
     const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '50');
+    const limit = parseInt(searchParams.get('pageSize') || searchParams.get('limit') || '50');
 
     // 新增筛选参数
     const category = searchParams.get('category');     // 活动类别
@@ -190,7 +190,7 @@ export async function GET(req: Request) {
               venue: event.venue,
               date: event.date,
               time: event.time,
-              cover: event.cover,
+              coverImage: event.cover,
               category: event.category,
               hasNft: (event as any)._count?.nfts > 0,
               nftCount: (event as any)._count?.nfts || 0,

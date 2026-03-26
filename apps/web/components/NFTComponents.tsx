@@ -30,7 +30,7 @@ type NFTAsset = {
 };
 
 // ============================================
-// 1. 钱包连接按钮组件（导出独立组件）
+// 1. 账户连接按钮组件（导出独立组件）
 // ============================================
 
 export function WalletConnectButton() {
@@ -38,7 +38,7 @@ export function WalletConnectButton() {
 }
 
 // ============================================
-// 2. NFT铸造按钮组件（导出独立组件）
+// 2. 数字藏品领取按钮组件（导出独立组件）
 // ============================================
 
 type MintNFTButtonProps = {
@@ -52,7 +52,7 @@ export function MintNFTButton(props: MintNFTButtonProps) {
 }
 
 // ============================================
-// 3. 我的NFT列表组件
+// 3. 我的数字藏品列表组件
 // ============================================
 
 export function MyNFTList() {
@@ -78,13 +78,13 @@ export function MyNFTList() {
       });
 
       if (!response.ok) {
-        throw new Error("获取NFT列表失败");
+        throw new Error("获取数字藏品列表失败");
       }
 
       const data = await response.json();
       setNfts(data.assets);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "加载失败");
+    } catch (error: unknown) {
+      setError(error instanceof Error ? error.message : "加载失败");
     } finally {
       setLoading(false);
     }
@@ -141,8 +141,8 @@ export function MyNFTList() {
             d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
           />
         </svg>
-        <p className="text-gray-600 mt-4 font-medium">还没有NFT</p>
-        <p className="text-gray-500 text-sm mt-1">购买票品后可转为NFT收藏</p>
+        <p className="text-gray-600 mt-4 font-medium">还没有数字藏品</p>
+        <p className="text-gray-500 text-sm mt-1">购买票品后可领取数字藏品</p>
       </div>
     );
   }
@@ -179,7 +179,7 @@ export function MyNFTList() {
             </div>
 
             <div className="flex items-center justify-between text-sm mb-4">
-              <span className="text-gray-500">铸造时间</span>
+              <span className="text-gray-500">生成时间</span>
               <span className="text-gray-700">
                 {new Date(nft.mintedAt).toLocaleDateString("zh-CN")}
               </span>
@@ -211,7 +211,7 @@ export function MyNFTList() {
 // ============================================
 // 4. 注意：OrderNFTSection 组件已废弃
 // ============================================
-// 现在NFT铸造改为基于票（Ticket）而不是订单（Order）
+// 现在数字藏品领取改为基于票（Ticket）而不是订单（Order）
 // 请在订单详情页面直接为每张票使用 MintNFTButton 组件
 // 参考 app/order/[id]/ui/OrderClient.tsx
 

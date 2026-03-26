@@ -26,12 +26,12 @@ const RARITY_CONFIG: Record<
   legendary: { label: '传说', color: '#F59E0B', bgColor: '#FEF3C7' },
 };
 
-// 铸造状态配置
+// 生成状态配置
 const MINT_STATUS_CONFIG = {
-  pending: { label: '待铸造', color: COLORS.warning, icon: 'time-outline' as const },
-  minting: { label: '铸造中', color: COLORS.primary, icon: 'sync-outline' as const },
-  minted: { label: '已铸造', color: COLORS.success, icon: 'checkmark-circle-outline' as const },
-  failed: { label: '铸造失败', color: COLORS.error, icon: 'close-circle-outline' as const },
+  pending: { label: '待生成', color: COLORS.warning, icon: 'time-outline' as const },
+  minting: { label: '生成中', color: COLORS.primary, icon: 'sync-outline' as const },
+  minted: { label: '已生成', color: COLORS.success, icon: 'checkmark-circle-outline' as const },
+  failed: { label: '生成失败', color: COLORS.error, icon: 'close-circle-outline' as const },
 };
 
 export default function NFTCard({ nft, onPress }: NFTCardProps) {
@@ -84,10 +84,10 @@ export default function NFTCard({ nft, onPress }: NFTCardProps) {
           )}
         </View>
 
-        {/* 链上标记 */}
+        {/* 认证标记 */}
         {nft.isOnChain && (
           <View style={styles.onChainBadge}>
-            <Ionicons name="link" size={12} color="#fff" />
+            <Ionicons name="shield-checkmark" size={12} color="#fff" />
           </View>
         )}
       </View>
@@ -106,7 +106,7 @@ export default function NFTCard({ nft, onPress }: NFTCardProps) {
           </Text>
         </View>
 
-        {/* 铸造状态 */}
+        {/* 生成状态 */}
         <View style={styles.statusContainer}>
           <Ionicons
             name={mintStatusConfig.icon}

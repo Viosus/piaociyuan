@@ -97,8 +97,8 @@ export default function PaymentScreen() {
       } else {
         setError(response.error || '加载订单详情失败');
       }
-    } catch (err: any) {
-      setError(err.message || '加载订单详情失败');
+    } catch (error: any) {
+      setError(error.message || '加载订单详情失败');
     } finally {
       setLoading(false);
     }
@@ -169,8 +169,8 @@ export default function PaymentScreen() {
         // 模拟支付
         await handleMockPay();
       }
-    } catch (err: any) {
-      Alert.alert('支付失败', err.message || '支付失败，请重试');
+    } catch (error: any) {
+      Alert.alert('支付失败', error.message || '支付失败，请重试');
     } finally {
       setPaying(false);
     }

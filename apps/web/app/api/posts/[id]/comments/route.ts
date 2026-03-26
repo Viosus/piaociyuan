@@ -10,6 +10,7 @@ import { Prisma } from "@prisma/client";
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
+import { getErrorMessage } from '@/lib/error-utils';
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -132,7 +133,7 @@ export async function GET(req: NextRequest, { params }: Props) {
         ok: false,
         code: 'SERVER_ERROR',
         message: '获取评论列表失败',
-        error: (error instanceof Error ? error.message : String(error)),
+        error: getErrorMessage(error),
       },
       { status: 500 }
     );
@@ -143,7 +144,7 @@ export async function GET(req: NextRequest, { params }: Props) {
 export async function POST(req: NextRequest, { params }: Props) {
   try {
     // 1️⃣ 认证
-    const authHeader = req.headers.get('Authorization');
+    const authHeader = req.headers.get('authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return NextResponse.json(
         {
@@ -342,7 +343,7 @@ export async function POST(req: NextRequest, { params }: Props) {
         ok: false,
         code: 'SERVER_ERROR',
         message: '评论失败',
-        error: (error instanceof Error ? error.message : String(error)),
+        error: getErrorMessage(error),
       },
       { status: 500 }
     );

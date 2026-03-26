@@ -76,8 +76,8 @@ export default function PostFavorites() {
 
       setFavorites(data.data.favorites);
       setTotalPages(data.data.pagination.totalPages);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "加载失败");
+    } catch (error: unknown) {
+      setError(error instanceof Error ? error.message : "加载失败");
     } finally {
       setLoading(false);
     }

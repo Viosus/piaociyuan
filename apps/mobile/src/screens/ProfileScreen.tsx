@@ -64,7 +64,6 @@ export default function ProfileScreen() {
       items: [
         { icon: 'receipt-outline' as const, label: '我的订单', screen: 'Orders', emoji: '📦' },
         { icon: 'diamond-outline' as const, label: '我的次元', screen: 'MyNFTs', emoji: '💎' },
-        { icon: 'gift-outline' as const, label: '接收次元', screen: 'ReceiveNFTTransfer', emoji: '🎁' },
         { icon: 'heart-outline' as const, label: '我的收藏', screen: 'Favorites', emoji: '⭐' },
       ],
     },

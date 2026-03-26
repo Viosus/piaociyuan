@@ -11,13 +11,13 @@ export async function GET(req: NextRequest) {
     // 验证用户身份
     const authHeader = req.headers.get('authorization');
     if (!authHeader?.startsWith('Bearer ')) {
-      return NextResponse.json({ error: '未授权' }, { status: 401 });
+      return NextResponse.json({ ok: false, error: '未授权' }, { status: 401 });
     }
 
     const token = authHeader.substring(7);
     const payload = await verifyToken(token);
     if (!payload) {
-      return NextResponse.json({ error: '无效的令牌' }, { status: 401 });
+      return NextResponse.json({ ok: false, error: '无效的令牌' }, { status: 401 });
     }
 
     const userId = payload.id as string;
@@ -32,7 +32,7 @@ export async function GET(req: NextRequest) {
     });
 
     if (!user) {
-      return NextResponse.json({ error: "用户不存在" }, { status: 404 });
+      return NextResponse.json({ ok: false, error: "用户不存在" }, { status: 404 });
     }
 
     return NextResponse.json({
@@ -43,6 +43,6 @@ export async function GET(req: NextRequest) {
     });
   } catch (error) {
     console.error("查询钱包状态错误:", error);
-    return NextResponse.json({ error: "查询失败" }, { status: 500 });
+    return NextResponse.json({ ok: false, error: "查询失败" }, { status: 500 });
   }
 }

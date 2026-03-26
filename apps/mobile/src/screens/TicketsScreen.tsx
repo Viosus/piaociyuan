@@ -72,7 +72,7 @@ export default function TicketsScreen() {
             startTime: ticket.event.date && ticket.event.time
               ? `${ticket.event.date}T${ticket.event.time}`
               : ticket.event.date,
-            coverImage: ticket.event.cover,
+            coverImage: ticket.event.coverImage || ticket.event.cover,
           } : undefined,
         }));
         setTickets(transformedTickets);
@@ -84,12 +84,12 @@ export default function TicketsScreen() {
           setError(response.error || '加载门票失败');
         }
       }
-    } catch (err: any) {
+    } catch (error: any) {
       // 检查是否是登录过期错误
-      if (err.message?.includes('登录已过期') || err.message?.includes('认证')) {
+      if (error.message?.includes('登录已过期') || error.message?.includes('认证')) {
         handleTokenExpired();
       } else {
-        setError(err.message || '加载门票失败');
+        setError(error.message || '加载门票失败');
       }
     } finally {
       setLoading(false);

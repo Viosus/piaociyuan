@@ -10,6 +10,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
+import { getErrorMessage } from '@/lib/error-utils';
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -17,7 +18,7 @@ type Props = { params: Promise<{ id: string }> };
 export async function GET(req: NextRequest, { params }: Props) {
   try {
     // 1️⃣ 认证
-    const authHeader = req.headers.get('Authorization');
+    const authHeader = req.headers.get('authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return NextResponse.json(
         {
@@ -93,7 +94,7 @@ export async function GET(req: NextRequest, { params }: Props) {
         ok: false,
         code: 'SERVER_ERROR',
         message: '查询失败',
-        error: error instanceof Error ? error.message : String(error),
+        error: getErrorMessage(error),
       },
       { status: 500 }
     );
@@ -104,7 +105,7 @@ export async function GET(req: NextRequest, { params }: Props) {
 export async function POST(req: NextRequest, { params }: Props) {
   try {
     // 1️⃣ 认证
-    const authHeader = req.headers.get('Authorization');
+    const authHeader = req.headers.get('authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return NextResponse.json(
         {
@@ -237,7 +238,7 @@ export async function POST(req: NextRequest, { params }: Props) {
         ok: false,
         code: 'SERVER_ERROR',
         message: '关注失败',
-        error: error instanceof Error ? error.message : String(error),
+        error: getErrorMessage(error),
       },
       { status: 500 }
     );
@@ -248,7 +249,7 @@ export async function POST(req: NextRequest, { params }: Props) {
 export async function DELETE(req: NextRequest, { params }: Props) {
   try {
     // 1️⃣ 认证
-    const authHeader = req.headers.get('Authorization');
+    const authHeader = req.headers.get('authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return NextResponse.json(
         {
@@ -349,7 +350,7 @@ export async function DELETE(req: NextRequest, { params }: Props) {
         ok: false,
         code: 'SERVER_ERROR',
         message: '取消关注失败',
-        error: error instanceof Error ? error.message : String(error),
+        error: getErrorMessage(error),
       },
       { status: 500 }
     );

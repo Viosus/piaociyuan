@@ -8,6 +8,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/auth';
 import prisma from '@/lib/prisma';
+import { getErrorMessage } from '@/lib/error-utils';
 
 export async function GET(
   req: NextRequest,
@@ -29,7 +30,7 @@ export async function GET(
 
     // 获取当前登录用户（可选，用于判断关注状态）
     let currentUserId: string | null = null;
-    const authHeader = req.headers.get('Authorization');
+    const authHeader = req.headers.get('authorization');
     if (authHeader?.startsWith('Bearer ')) {
       const token = authHeader.substring(7);
       const payload = verifyToken(token);
@@ -133,7 +134,7 @@ export async function GET(
         code: 'SERVER_ERROR',
         message: '获取用户资料失败',
         ...(process.env.NODE_ENV === 'development' && {
-          error: error instanceof Error ? error.message : String(error),
+          error: getErrorMessage(error),
         }),
       },
       { status: 500 }

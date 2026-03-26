@@ -103,10 +103,10 @@ export async function POST(req: Request) {
 
     // 返回成功响应
     return NextResponse.json({ code: 'SUCCESS', message: 'OK' });
-  } catch (err: any) {
-    console.error('[WECHAT_NOTIFY_ERROR]', err);
+  } catch (error: any) {
+    console.error('[WECHAT_NOTIFY_ERROR]', error);
     return NextResponse.json(
-      { code: 'FAIL', message: err.message || '处理失败' },
+      { code: 'FAIL', message: error.message || '处理失败' },
       { status: 500 }
     );
   }

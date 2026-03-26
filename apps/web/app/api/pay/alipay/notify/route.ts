@@ -89,8 +89,8 @@ export async function POST(req: Request) {
 
     // 支付宝要求返回 "success" 字符串
     return new Response('success');
-  } catch (err: any) {
-    console.error('[ALIPAY_NOTIFY_ERROR]', err);
+  } catch (error: any) {
+    console.error('[ALIPAY_NOTIFY_ERROR]', error);
     return new Response('fail', { status: 500 });
   }
 }

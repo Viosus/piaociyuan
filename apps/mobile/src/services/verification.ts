@@ -74,14 +74,14 @@ export async function uploadVerificationImage(
   const uriParts = imageUri.split('.');
   const fileType = uriParts[uriParts.length - 1];
 
-  formData.append('image', {
+  formData.append('file', {
     uri: imageUri,
     name: `verification-${Date.now()}.${fileType}`,
     type: `image/${fileType}`,
   } as any);
 
   return apiClient.post<{ url: string }>(
-    '/api/user/verification/upload-image',
+    '/api/upload',
     formData,
     {
       headers: {
@@ -140,14 +140,14 @@ export async function uploadAvatar(
   const uriParts = imageUri.split('.');
   const fileType = uriParts[uriParts.length - 1];
 
-  formData.append('avatar', {
+  formData.append('file', {
     uri: imageUri,
     name: `avatar-${Date.now()}.${fileType}`,
     type: `image/${fileType}`,
   } as any);
 
   return apiClient.post<{ url: string }>(
-    '/api/user/upload-avatar',
+    '/api/upload',
     formData,
     {
       headers: {

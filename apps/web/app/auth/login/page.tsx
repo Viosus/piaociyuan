@@ -42,7 +42,7 @@ function LoginForm() {
 
       // 跳转到指定页面或默认页面（刷新确保 Navbar 重新加载用户信息）
       window.location.href = returnUrl || "/events";
-    } catch (err: unknown) {
+    } catch (error: unknown) {
       setError("网络错误，请稍后重试");
     } finally {
       setLoading(false);

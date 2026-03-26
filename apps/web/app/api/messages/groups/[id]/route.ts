@@ -10,7 +10,7 @@ export async function GET(
   try {
     const user = await getCurrentUser();
     if (!user) {
-      return NextResponse.json({ error: '未授权' }, { status: 401 });
+      return NextResponse.json({ ok: false, error: '未授权' }, { status: 401 });
     }
 
     const { id } = await params;
@@ -26,7 +26,7 @@ export async function GET(
     });
 
     if (!participant) {
-      return NextResponse.json({ error: '您不是该群成员' }, { status: 403 });
+      return NextResponse.json({ ok: false, error: '您不是该群成员' }, { status: 403 });
     }
 
     const conversation = await prisma.conversation.findUnique({
@@ -52,7 +52,7 @@ export async function GET(
     });
 
     if (!conversation) {
-      return NextResponse.json({ error: '群聊不存在' }, { status: 404 });
+      return NextResponse.json({ ok: false, error: '群聊不存在' }, { status: 404 });
     }
 
     return NextResponse.json({
@@ -79,7 +79,7 @@ export async function GET(
     });
   } catch (error) {
     console.error('获取群聊详情失败:', error);
-    return NextResponse.json({ error: '获取群聊详情失败' }, { status: 500 });
+    return NextResponse.json({ ok: false, error: '获取群聊详情失败' }, { status: 500 });
   }
 }
 
@@ -91,7 +91,7 @@ export async function PUT(
   try {
     const user = await getCurrentUser();
     if (!user) {
-      return NextResponse.json({ error: '未授权' }, { status: 401 });
+      return NextResponse.json({ ok: false, error: '未授权' }, { status: 401 });
     }
 
     const { id } = await params;
@@ -108,7 +108,7 @@ export async function PUT(
     });
 
     if (!participant || (participant.role !== 'owner' && participant.role !== 'admin')) {
-      return NextResponse.json({ error: '您没有权限修改群信息' }, { status: 403 });
+      return NextResponse.json({ ok: false, error: '您没有权限修改群信息' }, { status: 403 });
     }
 
     const updateData: any = {};
@@ -129,7 +129,7 @@ export async function PUT(
     });
   } catch (error) {
     console.error('更新群聊失败:', error);
-    return NextResponse.json({ error: '更新群聊失败' }, { status: 500 });
+    return NextResponse.json({ ok: false, error: '更新群聊失败' }, { status: 500 });
   }
 }
 
@@ -141,7 +141,7 @@ export async function DELETE(
   try {
     const user = await getCurrentUser();
     if (!user) {
-      return NextResponse.json({ error: '未授权' }, { status: 401 });
+      return NextResponse.json({ ok: false, error: '未授权' }, { status: 401 });
     }
 
     const { id } = await params;
@@ -157,7 +157,7 @@ export async function DELETE(
     });
 
     if (!participant || participant.role !== 'owner') {
-      return NextResponse.json({ error: '只有群主可以解散群聊' }, { status: 403 });
+      return NextResponse.json({ ok: false, error: '只有群主可以解散群聊' }, { status: 403 });
     }
 
     // 删除群聊（级联删除参与者和消息）
@@ -165,9 +165,9 @@ export async function DELETE(
       where: { id, type: 'group' },
     });
 
-    return NextResponse.json({ success: true, message: '群聊已解散' });
+    return NextResponse.json({ ok: true, message: '群聊已解散' });
   } catch (error) {
     console.error('解散群聊失败:', error);
-    return NextResponse.json({ error: '解散群聊失败' }, { status: 500 });
+    return NextResponse.json({ ok: false, error: '解散群聊失败' }, { status: 500 });
   }
 }

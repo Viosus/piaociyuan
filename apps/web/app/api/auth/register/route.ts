@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
     // 验证密码
     if (!password || !isValidPassword(password)) {
       return NextResponse.json(
-        { ok: false, error: '密码至少需要6位' },
+        { ok: false, error: '密码至少8位，需包含字母和数字' },
         { status: 400 }
       );
     }

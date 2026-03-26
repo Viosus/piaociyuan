@@ -24,8 +24,8 @@ export async function GET(req: Request) {
     });
 
     return NextResponse.json(tiers);
-  } catch (err: unknown) {
-    console.error('[TIERS_GET_ERROR]', err);
+  } catch (error: unknown) {
+    console.error('[TIERS_GET_ERROR]', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

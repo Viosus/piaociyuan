@@ -54,8 +54,8 @@ export function usePermission(type: PermissionType): UsePermissionResult {
 
       setStatus(permissionStatus);
       return permissionStatus;
-    } catch (err: any) {
-      setError(err.message || '检查权限失败');
+    } catch (error: any) {
+      setError(error.message || '检查权限失败');
       return 'denied';
     }
   }, [type]);
@@ -86,8 +86,8 @@ export function usePermission(type: PermissionType): UsePermissionResult {
 
       setStatus(permissionStatus);
       return result.granted;
-    } catch (err: any) {
-      setError(err.message || '请求权限失败');
+    } catch (error: any) {
+      setError(error.message || '请求权限失败');
       return false;
     } finally {
       setLoading(false);

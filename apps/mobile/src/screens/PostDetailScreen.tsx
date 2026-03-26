@@ -39,7 +39,7 @@ interface PostDetail {
     city: string;
     venue: string;
     date: string;
-    cover: string;
+    coverImage: string;
   };
   images: {
     id: string;
@@ -359,7 +359,7 @@ export default function PostDetailScreen() {
         {post.event && (
           <TouchableOpacity style={styles.eventCard}>
             <Image
-              source={{ uri: post.event.cover }}
+              source={{ uri: post.event.coverImage || post.event.cover }}
               style={styles.eventCover}
             />
             <View style={styles.eventInfo}>

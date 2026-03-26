@@ -14,13 +14,13 @@ export async function GET(
     // 验证用户身份
     const authHeader = req.headers.get("authorization");
     if (!authHeader?.startsWith("Bearer ")) {
-      return NextResponse.json({ error: "未授权" }, { status: 401 });
+      return NextResponse.json({ ok: false, error: "未授权" }, { status: 401 });
     }
 
     const token = authHeader.substring(7);
     const payload = await verifyToken(token);
     if (!payload) {
-      return NextResponse.json({ error: "无效的令牌" }, { status: 401 });
+      return NextResponse.json({ ok: false, error: "无效的令牌" }, { status: 401 });
     }
 
     const userId = payload.id as string;
@@ -38,7 +38,7 @@ export async function GET(
     });
 
     if (!asset) {
-      return NextResponse.json({ error: "NFT不存在" }, { status: 404 });
+      return NextResponse.json({ ok: false, error: "NFT不存在" }, { status: 404 });
     }
 
     // 获取活动和票档信息（如果有关联）
@@ -93,6 +93,6 @@ export async function GET(
     });
   } catch (error) {
     console.error("获取NFT详情错误:", error);
-    return NextResponse.json({ error: "获取失败" }, { status: 500 });
+    return NextResponse.json({ ok: false, error: "获取失败" }, { status: 500 });
   }
 }

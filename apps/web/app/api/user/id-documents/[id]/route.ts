@@ -10,6 +10,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
+import { getErrorMessage } from '@/lib/error-utils';
 
 // 安全解析日期字符串，处理空字符串和无效值
 function parseDate(value: string | null | undefined): Date | null {
@@ -31,7 +32,7 @@ export async function GET(
     const { id } = await params;
 
     // 1. 认证
-    const authHeader = req.headers.get('Authorization');
+    const authHeader = req.headers.get('authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return NextResponse.json(
         { ok: false, code: 'UNAUTHORIZED', message: '未提供认证信息' },
@@ -83,7 +84,7 @@ export async function GET(
         code: 'SERVER_ERROR',
         message: '获取证件详情失败',
         ...(process.env.NODE_ENV === 'development' && {
-          error: error instanceof Error ? error.message : String(error),
+          error: getErrorMessage(error),
         }),
       },
       { status: 500 }
@@ -99,7 +100,7 @@ export async function PUT(
     const { id } = await params;
 
     // 1. 认证
-    const authHeader = req.headers.get('Authorization');
+    const authHeader = req.headers.get('authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return NextResponse.json(
         { ok: false, code: 'UNAUTHORIZED', message: '未提供认证信息' },
@@ -183,7 +184,7 @@ export async function PUT(
         code: 'SERVER_ERROR',
         message: '更新证件失败',
         ...(process.env.NODE_ENV === 'development' && {
-          error: error instanceof Error ? error.message : String(error),
+          error: getErrorMessage(error),
         }),
       },
       { status: 500 }
@@ -199,7 +200,7 @@ export async function DELETE(
     const { id } = await params;
 
     // 1. 认证
-    const authHeader = req.headers.get('Authorization');
+    const authHeader = req.headers.get('authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return NextResponse.json(
         { ok: false, code: 'UNAUTHORIZED', message: '未提供认证信息' },
@@ -271,7 +272,7 @@ export async function DELETE(
         code: 'SERVER_ERROR',
         message: '删除证件失败',
         ...(process.env.NODE_ENV === 'development' && {
-          error: error instanceof Error ? error.message : String(error),
+          error: getErrorMessage(error),
         }),
       },
       { status: 500 }

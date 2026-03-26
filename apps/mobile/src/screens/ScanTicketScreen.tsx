@@ -65,8 +65,8 @@ export default function ScanTicketScreen() {
           [{ text: '确定' }]
         );
       }
-    } catch (err: any) {
-      Alert.alert('错误', err.message || '验票失败，请重试');
+    } catch (error: any) {
+      Alert.alert('错误', error.message || '验票失败，请重试');
     } finally {
       setVerifying(false);
     }

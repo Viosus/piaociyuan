@@ -63,7 +63,7 @@ export default function EditProfileScreen() {
       // 如果选择了新头像（非 preset 且不是当前头像）
       if (avatar && !avatar.startsWith('preset:') && avatar !== user?.avatar) {
         const uploadResult = await uploadAvatar(avatar);
-        if (uploadResult.success && uploadResult.data) {
+        if (uploadResult.ok && uploadResult.data) {
           finalAvatar = uploadResult.data.url;
         }
       }

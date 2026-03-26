@@ -32,8 +32,9 @@ import FollowingListScreen from '../screens/FollowingListScreen';
 import FollowerListScreen from '../screens/FollowerListScreen';
 import TransferTicketScreen from '../screens/TransferTicketScreen';
 import ReceiveTransferScreen from '../screens/ReceiveTransferScreen';
-import TransferNFTScreen from '../screens/TransferNFTScreen';
-import ReceiveNFTTransferScreen from '../screens/ReceiveNFTTransferScreen';
+// NFT wallet screens hidden for store submission (feature flag: NFT_WALLET_ENABLED)
+// import TransferNFTScreen from '../screens/TransferNFTScreen';
+// import ReceiveNFTTransferScreen from '../screens/ReceiveNFTTransferScreen';
 import CreatePostScreen from '../screens/CreatePostScreen';
 import PostDetailScreen from '../screens/PostDetailScreen';
 import UserProfileScreen from '../screens/UserProfileScreen';
@@ -312,15 +313,14 @@ function MainStackNavigator() {
           },
         }}
       />
+      {/* NFT wallet screens hidden for store submission
       <MainStack.Screen
         name="TransferNFT"
         component={TransferNFTScreen}
         options={{
           title: '转让次元',
           headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
+          headerTitleStyle: { fontWeight: 'bold' },
         }}
       />
       <MainStack.Screen
@@ -329,11 +329,10 @@ function MainStackNavigator() {
         options={{
           title: '接收次元',
           headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
+          headerTitleStyle: { fontWeight: 'bold' },
         }}
       />
+      */}
       <MainStack.Screen
         name="CreatePost"
         component={CreatePostScreen}

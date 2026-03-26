@@ -29,7 +29,7 @@ export type MintStatus = 'pending' | 'minting' | 'minted' | 'failed';
  * NFT 数据结构
  */
 export interface NFT {
-  id: number;
+  id: string;
   name: string;
   description: string;
   imageUrl: string;
@@ -54,7 +54,7 @@ export interface NFT {
  * 用户拥有的 NFT
  */
 export interface UserNFT {
-  id: number;
+  id: string;
   nft: NFT;
   // 所有权信息
   ownerWalletAddress?: string | null;
@@ -137,7 +137,7 @@ export async function getUserNFTs(params?: {
 /**
  * 获取单个 NFT 详情
  */
-export async function getNFTDetail(id: number): Promise<ApiResponse<UserNFT>> {
+export async function getNFTDetail(id: string): Promise<ApiResponse<UserNFT>> {
   return apiClient.get<UserNFT>(`/api/user/nfts/${id}`);
 }
 
@@ -155,7 +155,6 @@ export interface BindWalletRequest {
  * 钱包绑定响应
  */
 export interface BindWalletResponse {
-  success: boolean;
   message: string;
   walletAddress: string;
 }
@@ -197,7 +196,6 @@ export interface MintNFTRequest {
  * 铸造响应
  */
 export interface MintNFTResponse {
-  success: boolean;
   message: string;
   queueId: number;
   estimatedTime: string;

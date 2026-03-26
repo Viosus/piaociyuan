@@ -49,8 +49,8 @@ export default function EventsScreen() {
       } else {
         setError(response.error || '加载活动失败');
       }
-    } catch (err: any) {
-      setError(err.message || '加载活动失败');
+    } catch (error: any) {
+      setError(error.message || '加载活动失败');
     } finally {
       setLoading(false);
       setRefreshing(false);

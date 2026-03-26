@@ -187,13 +187,13 @@ export async function POST(req: Request) {
         status: 'REFUNDED',
       },
     });
-  } catch (err: any) {
-    console.error('[REFUND_ERROR]', err);
+  } catch (error: any) {
+    console.error('[REFUND_ERROR]', error);
     return NextResponse.json(
       {
         ok: false,
         code: 'INTERNAL_ERROR',
-        message: err.message || '退款处理失败，请稍后重试。',
+        message: error.message || '退款处理失败，请稍后重试。',
       },
       { status: 500 }
     );

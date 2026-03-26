@@ -70,8 +70,8 @@ export default function RegisterScreen({ navigation }: any) {
       return;
     }
 
-    if (password.length < 6) {
-      Alert.alert('提示', '密码长度至少为 6 位');
+    if (password.length < 8 || !/[a-zA-Z]/.test(password) || !/\d/.test(password)) {
+      Alert.alert('提示', '密码至少8位，需包含字母和数字');
       return;
     }
 
@@ -138,7 +138,7 @@ export default function RegisterScreen({ navigation }: any) {
 
           <Input
             label="密码 *"
-            placeholder="请输入密码（至少 6 位）"
+            placeholder="至少8位，包含字母和数字"
             value={password}
             onChangeText={setPassword}
             secureTextEntry={!showPassword}

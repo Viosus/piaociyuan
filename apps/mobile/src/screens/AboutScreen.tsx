@@ -88,14 +88,14 @@ export default function AboutScreen() {
         <View style={styles.aboutSection}>
           <Text style={styles.aboutTitle}>关于票次元</Text>
           <Text style={styles.aboutText}>
-            票次元是一个专注于演唱会、音乐节、戏剧等文娱活动的票务平台。我们致力于为用户提供便捷的购票体验，同时结合区块链技术，将每一张门票转化为独特的数字藏品，让每一场演出都成为永恒的回忆。
+            票次元是一个专注于演唱会、音乐节、戏剧等文娱活动的票务平台。我们致力于为用户提供便捷的购票体验，同时将每一张门票转化为独特的数字藏品，让每一场演出都成为永恒的回忆。
           </Text>
           <Text style={styles.aboutText}>
             我们相信，文化娱乐不仅是一种消费，更是一种体验和记忆的载体。通过票次元，您可以：
           </Text>
           <View style={styles.featureList}>
             <Text style={styles.featureItem}>• 快速购买心仪的演出门票</Text>
-            <Text style={styles.featureItem}>• 将门票转化为独特的 NFT 数字藏品</Text>
+            <Text style={styles.featureItem}>• 将门票转化为独特的数字藏品</Text>
             <Text style={styles.featureItem}>• 与其他乐迷分享您的观演体验</Text>
             <Text style={styles.featureItem}>• 收藏和展示您的文娱足迹</Text>
           </View>

@@ -8,17 +8,25 @@
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "scheme": "piaociyuan",
+    "owner": "piaociyuan",
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true,
+      "supportsTablet": false,
       "bundleIdentifier": "com.piaociyuan.mobile",
       "associatedDomains": [
         "applinks:piaociyuan.com"
-      ]
+      ],
+      "infoPlist": {
+        "NSCameraUsageDescription": "票次元需要使用相机来扫描门票二维码和拍摄头像照片",
+        "NSPhotoLibraryUsageDescription": "票次元需要访问您的相册来选择头像和帖子图片",
+        "NSPhotoLibraryAddUsageDescription": "票次元需要保存门票二维码到您的相册",
+        "NSLocationWhenInUseUsageDescription": "票次元需要获取您的位置来推荐附近的活动",
+        "NSFaceIDUsageDescription": "票次元使用面容ID来保护您的账号安全"
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -28,6 +36,15 @@
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "package": "com.piaociyuan.mobile",
+      "permissions": [
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "VIBRATE",
+        "RECEIVE_BOOT_COMPLETED"
+      ],
       "intentFilters": [
         {
           "action": "VIEW",
@@ -53,7 +70,20 @@
       "expo-secure-store",
       "expo-barcode-scanner",
       "expo-asset",
-      "expo-font"
+      "expo-font",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "票次元需要访问您的相册来选择图片",
+          "cameraPermission": "票次元需要使用相机来拍照"
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "票次元需要获取您的位置来推荐附近的活动"
+        }
+      ]
     ]
   }
 }

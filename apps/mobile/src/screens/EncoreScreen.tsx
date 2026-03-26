@@ -166,8 +166,8 @@ export default function EncoreScreen() {
       } else {
         setPostsError(response.error || '加载帖子失败');
       }
-    } catch (err: any) {
-      setPostsError(err.message || '加载帖子失败');
+    } catch (error: any) {
+      setPostsError(error.message || '加载帖子失败');
     } finally {
       setPostsLoading(false);
       setPostsRefreshing(false);
@@ -273,8 +273,8 @@ export default function EncoreScreen() {
           )
         );
       }
-    } catch (err: any) {
-      if (err.message?.includes('登录已过期') || err.message?.includes('认证')) {
+    } catch (error: any) {
+      if (error.message?.includes('登录已过期') || error.message?.includes('认证')) {
         handleTokenExpired();
         return;
       }

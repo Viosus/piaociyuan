@@ -80,18 +80,18 @@ export async function POST(req: Request) {
         expireAt: result.expireAt,
       },
     });
-  } catch (e: unknown) {
-    console.error("[HOLD_ERROR]", e);
+  } catch (error: unknown) {
+    console.error("[HOLD_ERROR]", error);
 
-    if (e instanceof ApiError) {
+    if (error instanceof ApiError) {
       return NextResponse.json(
         {
           ok: false,
-          code: e.code,
-          message: e.message,
-          data: e.data,
+          code: error.code,
+          message: error.message,
+          data: error.data,
         },
-        { status: e.status }
+        { status: error.status }
       );
     }
 
@@ -163,17 +163,17 @@ export async function GET(req: Request) {
         createdAt: Number(h.createdAt),
       })),
     });
-  } catch (e: unknown) {
-    console.error("[HOLD_DIAGNOSTIC_ERROR]", e);
+  } catch (error: unknown) {
+    console.error("[HOLD_DIAGNOSTIC_ERROR]", error);
 
-    if (e instanceof ApiError) {
+    if (error instanceof ApiError) {
       return NextResponse.json(
         {
           ok: false,
-          code: e.code,
-          message: e.message,
+          code: error.code,
+          message: error.message,
         },
-        { status: e.status }
+        { status: error.status }
       );
     }
 

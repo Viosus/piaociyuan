@@ -20,8 +20,8 @@ export interface User {
   };
   followersCount?: number;
   followingCount?: number;
-  postsCount?: number;
-  nftsCount?: number;
+  postCount?: number;
+  nftCount?: number;
   isFollowing?: boolean;
   isFollowedBy?: boolean;
   createdAt: string;
@@ -32,52 +32,8 @@ export interface FollowListResponse {
   users: User[];
   total: number;
   page: number;
-  limit: number;
+  pageSize: number;
   hasMore: boolean;
-}
-
-/**
- * 关注用户
- */
-export async function followUser(userId: number) {
-  return apiClient.post(`/api/users/${userId}/follow`);
-}
-
-/**
- * 取消关注用户
- */
-export async function unfollowUser(userId: number) {
-  return apiClient.delete(`/api/users/${userId}/follow`);
-}
-
-/**
- * 获取用户的关注列表
- */
-export async function getFollowing(userId: number, page: number = 1, limit: number = 20) {
-  return apiClient.get<FollowListResponse>(`/api/users/${userId}/following`, {
-    params: { page, limit },
-    cache: false,
-  });
-}
-
-/**
- * 获取用户的粉丝列表
- */
-export async function getFollowers(userId: number, page: number = 1, limit: number = 20) {
-  return apiClient.get<FollowListResponse>(`/api/users/${userId}/followers`, {
-    params: { page, limit },
-    cache: false,
-  });
-}
-
-/**
- * 获取用户详细信息
- */
-export async function getUserProfile(userId: number) {
-  return apiClient.get<User>(`/api/users/${userId}`, {
-    cache: true,
-    cacheTime: 60000, // 缓存 1 分钟
-  });
 }
 
 /**

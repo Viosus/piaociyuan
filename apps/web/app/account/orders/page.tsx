@@ -273,9 +273,9 @@ function OrdersList() {
       } else {
         throw new Error(data.message || "数据格式错误");
       }
-    } catch (err: unknown) {
+    } catch (error: unknown) {
       // 静默处理请求失败
-      setError(err instanceof Error ? err.message : String(err) || "加载失败");
+      setError(error instanceof Error ? error.message : String(error) || "加载失败");
       setOrders([]);
     } finally {
       setLoading(false);

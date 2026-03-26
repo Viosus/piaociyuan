@@ -61,8 +61,8 @@ export default function EncoreClient() {
       }
 
       setHasMore(data.pagination.page < data.pagination.totalPages);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : String(err) || "加载失败");
+    } catch (error: unknown) {
+      setError(error instanceof Error ? error.message : String(error) || "加载失败");
     } finally {
       setLoading(false);
     }

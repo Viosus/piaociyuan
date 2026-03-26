@@ -11,7 +11,8 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../contexts/AuthContext';
-import { COLORS, SPACING, FONT_SIZES } from '../constants/config';
+import { COLORS, SPACING, FONT_SIZES, APP_CONFIG } from '../constants/config';
+import { Linking } from 'react-native';
 
 export default function SettingsScreen() {
   const navigation = useNavigation();
@@ -49,11 +50,53 @@ export default function SettingsScreen() {
     },
   ];
 
+  const handleDeleteAccount = () => {
+    Alert.alert(
+      '注销账号',
+      '注销后，您的个人信息将被清除，但订单和票务记录将按法律要求保留。此操作不可撤销。',
+      [
+        { text: '取消', style: 'cancel' },
+        {
+          text: '确认注销',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const response = await fetch(`${APP_CONFIG.API_URL}/api/user/delete-account`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+              });
+              const data = await response.json();
+              if (data.ok) {
+                Alert.alert('注销成功', data.message, [
+                  { text: '确定', onPress: () => logout() },
+                ]);
+              } else {
+                Alert.alert('错误', data.message || '注销失败');
+              }
+            } catch {
+              Alert.alert('错误', '网络请求失败，请稍后再试');
+            }
+          },
+        },
+      ]
+    );
+  };
+
   const aboutItems = [
     {
       icon: 'information-circle-outline' as const,
       title: '关于票次元',
       onPress: () => navigation.navigate('About' as never),
+    },
+    {
+      icon: 'document-text-outline' as const,
+      title: '隐私政策',
+      onPress: () => Linking.openURL(`${APP_CONFIG.API_URL}/privacy`),
+    },
+    {
+      icon: 'shield-checkmark-outline' as const,
+      title: '服务条款',
+      onPress: () => Linking.openURL(`${APP_CONFIG.API_URL}/terms`),
     },
   ];
 
@@ -187,6 +230,12 @@ export default function SettingsScreen() {
         <View style={styles.logoutSection}>
           <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
             <Text style={styles.logoutButtonText}>退出登录</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.logoutButton, { marginTop: SPACING.md, borderColor: COLORS.textSecondary }]}
+            onPress={handleDeleteAccount}
+          >
+            <Text style={[styles.logoutButtonText, { color: COLORS.textSecondary }]}>注销账号</Text>
           </TouchableOpacity>
         </View>
       </View>

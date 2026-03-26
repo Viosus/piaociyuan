@@ -10,7 +10,7 @@ export async function PUT(
   try {
     const user = await getCurrentUser();
     if (!user) {
-      return NextResponse.json({ error: '未授权' }, { status: 401 });
+      return NextResponse.json({ ok: false, error: '未授权' }, { status: 401 });
     }
 
     const { id: conversationId } = await params;
@@ -24,7 +24,7 @@ export async function PUT(
     });
 
     if (!participant) {
-      return NextResponse.json({ error: '无权访问该对话' }, { status: 403 });
+      return NextResponse.json({ ok: false, error: '无权访问该对话' }, { status: 403 });
     }
 
     // 标记所有未读消息为已读
@@ -48,9 +48,9 @@ export async function PUT(
       },
     });
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ ok: true });
   } catch (error) {
     console.error('标记已读失败:', error);
-    return NextResponse.json({ error: '标记已读失败' }, { status: 500 });
+    return NextResponse.json({ ok: false, error: '标记已读失败' }, { status: 500 });
   }
 }

@@ -11,7 +11,7 @@ export async function GET(
 
     // 获取当前用户ID（如果已登录）
     let currentUserId: string | null = null;
-    const authHeader = req.headers.get('Authorization');
+    const authHeader = req.headers.get('authorization');
     if (authHeader && authHeader.startsWith('Bearer ')) {
       const token = authHeader.substring(7);
       const payload = verifyToken(token);

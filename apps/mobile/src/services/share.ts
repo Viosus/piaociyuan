@@ -119,7 +119,7 @@ export async function sharePost(post: {
 }
 
 /**
- * 分享 NFT
+ * 分享数字藏品
  */
 export async function shareNFT(nft: {
   id: number;
@@ -127,9 +127,6 @@ export async function shareNFT(nft: {
   description?: string;
   rarity: string;
   imageUrl?: string;
-  isOnChain?: boolean;
-  contractAddress?: string;
-  tokenId?: string;
 }): Promise<ShareResult> {
   const url = createUniversalLink(`nfts/${nft.id}`);
 
@@ -140,10 +137,6 @@ export async function shareNFT(nft: {
       ? nft.description.substring(0, 80) + '...'
       : nft.description;
     message += `\n\n${desc}`;
-  }
-
-  if (nft.isOnChain && nft.contractAddress && nft.tokenId) {
-    message += `\n\n⛓️ 链上 NFT\n合约: ${formatAddress(nft.contractAddress)}\nToken ID: ${nft.tokenId}`;
   }
 
   message += '\n\n快来看看我的数字藏品！';
@@ -343,14 +336,6 @@ function getRarityLabel(rarity: string): string {
     legendary: '传说',
   };
   return labels[rarity] || rarity;
-}
-
-/**
- * 辅助函数：格式化地址（显示前6位和后4位）
- */
-function formatAddress(address: string): string {
-  if (address.length < 10) return address;
-  return `${address.slice(0, 6)}...${address.slice(-4)}`;
 }
 
 /**

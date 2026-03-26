@@ -67,8 +67,8 @@ export async function GET(_req: Request, { params }: Props) {
     };
 
     return NextResponse.json({ ok: true, data: mappedEvent });
-  } catch (err: unknown) {
-    console.error('[EVENT_GET_ERROR]', err);
+  } catch (error: unknown) {
+    console.error('[EVENT_GET_ERROR]', error);
     return NextResponse.json(
       { ok: false, error: 'Internal server error' },
       { status: 500 }

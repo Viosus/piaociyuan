@@ -111,7 +111,7 @@ function RegisterForm() {
 
       // 跳转到指定页面或默认页面（刷新确保 Navbar 重新加载用户信息）
       window.location.href = returnUrl || "/events";
-    } catch (err: unknown) {
+    } catch (error: unknown) {
       setError("网络错误，请稍后重试");
     } finally {
       setLoading(false);
@@ -225,9 +225,9 @@ function RegisterForm() {
               type="password"
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              placeholder="至少6位密码"
+              placeholder="至少8位，包含字母和数字"
               required
-              minLength={6}
+              minLength={8}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#EAF353] focus:border-transparent"
             />
           </div>

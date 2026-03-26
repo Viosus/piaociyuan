@@ -16,7 +16,7 @@ import { verifyToken } from '@/lib/auth';
 export async function GET(req: NextRequest) {
   try {
     // 1️⃣ 认证
-    const authHeader = req.headers.get('Authorization');
+    const authHeader = req.headers.get('authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return NextResponse.json(
         {
@@ -154,7 +154,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     // 1️⃣ 认证（创建通知通常由系统内部调用，这里也允许管理员手动创建）
-    const authHeader = req.headers.get('Authorization');
+    const authHeader = req.headers.get('authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return NextResponse.json(
         {

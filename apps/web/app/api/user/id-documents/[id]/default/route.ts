@@ -8,6 +8,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
+import { getErrorMessage } from '@/lib/error-utils';
 
 export async function POST(
   req: NextRequest,
@@ -17,7 +18,7 @@ export async function POST(
     const { id } = await params;
 
     // 1. 认证
-    const authHeader = req.headers.get('Authorization');
+    const authHeader = req.headers.get('authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return NextResponse.json(
         { ok: false, code: 'UNAUTHORIZED', message: '未提供认证信息' },
@@ -89,7 +90,7 @@ export async function POST(
         code: 'SERVER_ERROR',
         message: '设置默认证件失败',
         ...(process.env.NODE_ENV === 'development' && {
-          error: error instanceof Error ? error.message : String(error),
+          error: getErrorMessage(error),
         }),
       },
       { status: 500 }

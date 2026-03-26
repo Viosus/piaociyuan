@@ -7,6 +7,7 @@ import { Prisma } from "@prisma/client";
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
+import { getErrorMessage } from '@/lib/error-utils';
 
 export async function GET(req: NextRequest) {
   try {
@@ -19,7 +20,7 @@ export async function GET(req: NextRequest) {
 
     // 获取当前用户ID（如果已登录）
     let currentUserId: string | null = null;
-    const authHeader = req.headers.get('Authorization');
+    const authHeader = req.headers.get('authorization');
     if (authHeader && authHeader.startsWith('Bearer ')) {
       const token = authHeader.substring(7);
       const payload = verifyToken(token);
@@ -158,7 +159,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     // 1️⃣ 认证
-    const authHeader = req.headers.get('Authorization');
+    const authHeader = req.headers.get('authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return NextResponse.json(
         {
@@ -336,7 +337,7 @@ export async function POST(req: NextRequest) {
         ok: false,
         code: 'SERVER_ERROR',
         message: '发布失败',
-        error: (error instanceof Error ? error.message : String(error)),
+        error: getErrorMessage(error),
       },
       { status: 500 }
     );

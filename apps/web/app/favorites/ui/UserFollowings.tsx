@@ -59,8 +59,8 @@ export default function UserFollowings() {
       setFollowings(data.data.followings);
       setTotalPages(data.data.pagination.totalPages);
       setTotalCount(data.data.pagination.totalCount);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "加载失败");
+    } catch (error: unknown) {
+      setError(error instanceof Error ? error.message : "加载失败");
     } finally {
       setLoading(false);
     }

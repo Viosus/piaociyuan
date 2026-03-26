@@ -19,7 +19,7 @@ import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS } from '../constants/config'
 import { getNFTDetail, type UserNFT, type NFTRarity } from '../services/nft';
 
 type NFTDetailRouteParams = {
-  nftId: number;
+  nftId: string;
 };
 
 // 稀有度配置
@@ -60,10 +60,10 @@ export default function NFTDetailScreen() {
       if (result.ok && result.data) {
         setNft(result.data);
       } else {
-        Alert.alert('错误', result.error || '加载 NFT 详情失败');
+        Alert.alert('错误', result.error || '加载藏品详情失败');
       }
     } catch (error: any) {
-      Alert.alert('错误', error.message || '加载 NFT 详情失败');
+      Alert.alert('错误', error.message || '加载藏品详情失败');
     } finally {
       setLoading(false);
     }
@@ -80,7 +80,7 @@ export default function NFTDetailScreen() {
 
     try {
       await Share.share({
-        message: `查看我的 NFT 数字藏品：${nft.nft.name}\n\n${nft.nft.description}`,
+        message: `查看我的数字藏品：${nft.nft.name}\n\n${nft.nft.description}`,
       });
     } catch {
       // 静默处理分享失败
@@ -95,7 +95,7 @@ export default function NFTDetailScreen() {
     return (
       <View style={styles.errorContainer}>
         <Ionicons name="alert-circle-outline" size={64} color={COLORS.textSecondary} />
-        <Text style={styles.errorText}>NFT 不存在</Text>
+        <Text style={styles.errorText}>藏品不存在</Text>
       </View>
     );
   }
@@ -105,7 +105,7 @@ export default function NFTDetailScreen() {
 
   return (
     <ScrollView style={styles.container}>
-      {/* NFT 图片/3D 模型 */}
+      {/* 藏品图片/3D 模型 */}
       <View style={styles.imageContainer}>
         <NFTMediaDisplay
           has3DModel={nft.nft.has3DModel}
@@ -174,53 +174,27 @@ export default function NFTDetailScreen() {
             <Text style={styles.infoValue}>{nft.nft.totalSupply}</Text>
           </View>
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>已铸造</Text>
+            <Text style={styles.infoLabel}>已生成</Text>
             <Text style={styles.infoValue}>{nft.nft.mintedCount}</Text>
           </View>
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>稀有度</Text>
             <Text style={[styles.infoValue, { color: rarityConfig.color }]}>
-              {((nft.nft.mintedCount / nft.nft.totalSupply) * 100).toFixed(1)}% 铸造
+              {((nft.nft.mintedCount / nft.nft.totalSupply) * 100).toFixed(1)}% 已领取
             </Text>
           </View>
         </View>
 
-        {/* 所有权信息 */}
-        {nft.isOnChain && (
+        {/* 生成信息 */}
+        {nft.mintedAt && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>区块链信息</Text>
-            {nft.contractAddress && (
-              <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>合约地址</Text>
-                <Text style={styles.infoValue} numberOfLines={1}>
-                  {nft.contractAddress.substring(0, 10)}...
-                  {nft.contractAddress.substring(nft.contractAddress.length - 8)}
-                </Text>
-              </View>
-            )}
-            {nft.tokenId && (
-              <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Token ID</Text>
-                <Text style={styles.infoValue}>#{nft.tokenId}</Text>
-              </View>
-            )}
-            {nft.ownerWalletAddress && (
-              <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>所有者</Text>
-                <Text style={styles.infoValue} numberOfLines={1}>
-                  {nft.ownerWalletAddress.substring(0, 10)}...
-                  {nft.ownerWalletAddress.substring(nft.ownerWalletAddress.length - 8)}
-                </Text>
-              </View>
-            )}
-            {nft.mintedAt && (
-              <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>铸造时间</Text>
-                <Text style={styles.infoValue}>
-                  {new Date(nft.mintedAt).toLocaleDateString()}
-                </Text>
-              </View>
-            )}
+            <Text style={styles.sectionTitle}>生成信息</Text>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>生成时间</Text>
+              <Text style={styles.infoValue}>
+                {new Date(nft.mintedAt).toLocaleDateString()}
+              </Text>
+            </View>
           </View>
         )}
 
@@ -247,9 +221,9 @@ export default function NFTDetailScreen() {
           </View>
         </View>
 
-        {/* 铸造状态 */}
+        {/* 生成状态 */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>铸造状态</Text>
+          <Text style={styles.sectionTitle}>生成状态</Text>
           <View style={styles.statusCard}>
             <View style={styles.statusRow}>
               <Ionicons
@@ -276,16 +250,13 @@ export default function NFTDetailScreen() {
               <View style={styles.statusTextContainer}>
                 <Text style={styles.statusText}>
                   {nft.mintStatus === 'minted'
-                    ? '已铸造'
+                    ? '已生成'
                     : nft.mintStatus === 'minting'
-                    ? '铸造中'
+                    ? '生成中'
                     : nft.mintStatus === 'failed'
-                    ? '铸造失败'
-                    : '待铸造'}
+                    ? '生成失败'
+                    : '待生成'}
                 </Text>
-                {nft.isOnChain && (
-                  <Text style={styles.statusSubText}>已上链</Text>
-                )}
               </View>
             </View>
           </View>
@@ -293,42 +264,7 @@ export default function NFTDetailScreen() {
 
         {/* 操作按钮 */}
         <View style={styles.actions}>
-          {/* 转让按钮 - 只有已铸造的 NFT 可以转让 */}
-          {nft.mintStatus === 'minted' && (
-            <Button
-              title="转让次元"
-              onPress={() =>
-                navigation.navigate('TransferNFT' as never, { userNftId: nft.id } as never)
-              }
-              style={styles.actionButton}
-            />
-          )}
-
-          {/* 链上操作按钮 */}
-          {nft.isOnChain && nft.contractAddress && nft.tokenId && (
-            <>
-              <Button
-                title="在 OpenSea 查看"
-                onPress={() =>
-                  handleOpenLink(
-                    `https://opensea.io/assets/ethereum/${nft.contractAddress}/${nft.tokenId}`
-                  )
-                }
-                variant="outline"
-                style={styles.actionButton}
-              />
-              <Button
-                title="查看区块链浏览器"
-                onPress={() =>
-                  handleOpenLink(
-                    `https://etherscan.io/token/${nft.contractAddress}?a=${nft.tokenId}`
-                  )
-                }
-                variant="outline"
-                style={styles.actionButton}
-              />
-            </>
-          )}
+          {/* 藏品转让功能暂时隐藏 (store submission) */}
         </View>
       </View>
     </ScrollView>

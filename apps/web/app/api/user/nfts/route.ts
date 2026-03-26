@@ -12,11 +12,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
 import { Prisma } from '@prisma/client';
+import { getErrorMessage } from '@/lib/error-utils';
 
 export async function GET(req: NextRequest) {
   try {
     // 1️⃣ 认证
-    const authHeader = req.headers.get('Authorization');
+    const authHeader = req.headers.get('authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return NextResponse.json(
         {
@@ -188,7 +189,7 @@ export async function GET(req: NextRequest) {
         ok: false,
         code: 'SERVER_ERROR',
         message: '查询失败',
-        error: error instanceof Error ? (error instanceof Error ? error.message : String(error)) : '未知错误',
+        error: getErrorMessage(error),
       },
       { status: 500 }
     );

@@ -10,7 +10,33 @@ env:
   IMAGE_NAME: ${{ github.repository }}/piaoyuzhou-web
 
 jobs:
-  build-and-deploy:
+  # Step 1: Build validation
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: cd apps/web && npx tsc --noEmit
+        continue-on-error: true
+
+      - name: Lint check
+        run: cd apps/web && npx next lint
+        continue-on-error: true
+
+  # Step 2: Build and push Docker image
+  build:
+    needs: validate
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -50,6 +76,13 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+  # Step 3: Deploy to production (requires manual approval for workflow_dispatch)
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
       - name: Deploy to ECS
         uses: appleboy/ssh-action@v1.0.3
         env:
@@ -80,3 +113,11 @@ jobs:
             docker image prune -f
 
             echo "Deployment completed successfully!"
+
+      - name: Health check
+        run: |
+          echo "Waiting for service to start..."
+          sleep 30
+          if [ -n "${{ secrets.ECS_HOST }}" ]; then
+            echo "Deployment completed. Please verify health at https://piaociyuan.com/api/health"
+          fi

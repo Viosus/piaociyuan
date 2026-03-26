@@ -116,7 +116,7 @@ class ApiClient {
 
       const data = await response.json();
 
-      if (!response.ok || !data.success) {
+      if (!response.ok || !data.ok) {
         throw new Error('Failed to refresh token');
       }
 

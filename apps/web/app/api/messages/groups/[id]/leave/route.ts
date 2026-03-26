@@ -10,7 +10,7 @@ export async function POST(
   try {
     const user = await getCurrentUser();
     if (!user) {
-      return NextResponse.json({ error: '未授权' }, { status: 401 });
+      return NextResponse.json({ ok: false, error: '未授权' }, { status: 401 });
     }
 
     const { id } = await params;
@@ -26,7 +26,7 @@ export async function POST(
     });
 
     if (!participant) {
-      return NextResponse.json({ error: '您不是该群成员' }, { status: 403 });
+      return NextResponse.json({ ok: false, error: '您不是该群成员' }, { status: 403 });
     }
 
     // 群主不能直接退出，需要先转让群主或解散群
@@ -48,7 +48,7 @@ export async function POST(
       });
 
       return NextResponse.json({
-        success: true,
+        ok: true,
         message: '群聊已解散（您是最后一位成员）'
       });
     }
@@ -77,9 +77,9 @@ export async function POST(
       }),
     ]);
 
-    return NextResponse.json({ success: true, message: '已退出群聊' });
+    return NextResponse.json({ ok: true, message: '已退出群聊' });
   } catch (error) {
     console.error('退出群聊失败:', error);
-    return NextResponse.json({ error: '退出群聊失败' }, { status: 500 });
+    return NextResponse.json({ ok: false, error: '退出群聊失败' }, { status: 500 });
   }
 }

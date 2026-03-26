@@ -9,6 +9,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { requireAdmin } from '@/lib/auth';
+import { getErrorMessage } from '@/lib/error-utils';
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -81,7 +82,7 @@ export async function PATCH(req: NextRequest, { params }: Props) {
         code: 'SERVER_ERROR',
         message: '更新用户失败',
         ...(process.env.NODE_ENV === 'development' && {
-          error: error instanceof Error ? error.message : String(error),
+          error: getErrorMessage(error),
         }),
       },
       { status: 500 }
@@ -155,7 +156,7 @@ export async function DELETE(req: NextRequest, { params }: Props) {
         code: 'SERVER_ERROR',
         message: '删除用户失败',
         ...(process.env.NODE_ENV === 'development' && {
-          error: error instanceof Error ? error.message : String(error),
+          error: getErrorMessage(error),
         }),
       },
       { status: 500 }

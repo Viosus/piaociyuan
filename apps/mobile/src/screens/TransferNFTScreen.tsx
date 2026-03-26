@@ -72,18 +72,18 @@ export default function TransferNFTScreen() {
     try {
       setLoading(true);
       setError(null);
-      const response = await getNFTDetail(parseInt(userNftId));
+      const response = await getNFTDetail(userNftId);
       if (response.ok && response.data) {
         setUserNft(response.data);
         // 检查是否可以转让
         if (response.data.mintStatus !== 'minted') {
-          setError('该 NFT 尚未铸造完成，无法转让');
+          setError('该藏品尚未生成完成，无法转让');
         }
       } else {
-        setError(response.error || '加载 NFT 详情失败');
+        setError(response.error || '加载藏品详情失败');
       }
-    } catch (err: any) {
-      setError(err.message || '加载 NFT 详情失败');
+    } catch (error: any) {
+      setError(error.message || '加载藏品详情失败');
     } finally {
       setLoading(false);
     }
@@ -121,8 +121,8 @@ export default function TransferNFTScreen() {
               } else {
                 Alert.alert('失败', response.error || '发起转让失败');
               }
-            } catch (err: any) {
-              Alert.alert('错误', err.message || '发起转让失败');
+            } catch (error: any) {
+              Alert.alert('错误', error.message || '发起转让失败');
             } finally {
               setSubmitting(false);
             }
@@ -143,10 +143,10 @@ export default function TransferNFTScreen() {
     if (!transferResult?.transferCode || !userNft) return;
 
     try {
-      const shareMessage = `【票次元 NFT 转让】
+      const shareMessage = `【票次元藏品转让】
 我想把这个次元收藏品${transferType === 'gift' ? '赠送' : '出售'}给你！
 
-收藏品：${userNft.nft?.name || 'NFT'}
+收藏品：${userNft.nft?.name || '数字藏品'}
 稀有度：${RARITY_LABELS[userNft.nft?.rarity || 'common']}
 ${message ? `留言：${message}\n` : ''}
 转让码：${transferResult.transferCode}
@@ -157,7 +157,7 @@ ${message ? `留言：${message}\n` : ''}
 
       await Share.share({
         message: shareMessage,
-        title: '分享 NFT 转让',
+        title: '分享藏品转让',
       });
     } catch (error: any) {
       Alert.alert('分享失败', error.message);
@@ -186,7 +186,7 @@ ${message ? `留言：${message}\n` : ''}
   if (!userNft) {
     return (
       <SafeAreaView style={styles.container}>
-        <ErrorState message="NFT 不存在" />
+        <ErrorState message="藏品不存在" />
       </SafeAreaView>
     );
   }
@@ -277,7 +277,7 @@ ${message ? `留言：${message}\n` : ''}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* NFT 信息卡片 */}
+        {/* 藏品信息卡片 */}
         <View style={styles.nftCard}>
           {nft?.imageUrl ? (
             <Image source={{ uri: nft.imageUrl }} style={styles.nftImage} />
@@ -287,17 +287,12 @@ ${message ? `留言：${message}\n` : ''}
             </View>
           )}
           <View style={styles.nftInfo}>
-            <Text style={styles.nftName}>{nft?.name || 'NFT'}</Text>
+            <Text style={styles.nftName}>{nft?.name || '数字藏品'}</Text>
             <View style={[styles.rarityBadge, { backgroundColor: `${rarityColor}20` }]}>
               <Text style={[styles.rarityText, { color: rarityColor }]}>
                 {RARITY_LABELS[nft?.rarity || 'common']}
               </Text>
             </View>
-            {userNft.isOnChain && (
-              <View style={styles.onChainBadge}>
-                <Text style={styles.onChainText}>已上链</Text>
-              </View>
-            )}
           </View>
         </View>
 
@@ -399,10 +394,9 @@ ${message ? `留言：${message}\n` : ''}
         {/* 提示 */}
         <View style={styles.tips}>
           <Text style={styles.tipsTitle}>注意事项</Text>
-          <Text style={styles.tipsItem}>• 转让发起后，NFT 将暂时锁定</Text>
+          <Text style={styles.tipsItem}>• 转让发起后，藏品将暂时锁定</Text>
           <Text style={styles.tipsItem}>• 对方接收前，你可以随时取消转让</Text>
           <Text style={styles.tipsItem}>• 超过有效期未接收，转让自动取消</Text>
-          <Text style={styles.tipsItem}>• 已上链的 NFT 转让后需要链上确认</Text>
         </View>
 
         <View style={{ height: 100 }} />

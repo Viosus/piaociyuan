@@ -80,7 +80,7 @@ export default function NFTDetailClient({
       });
 
       if (!response.ok) {
-        throw new Error("获取NFT详情失败");
+        throw new Error("获取次元详情失败");
       }
 
       const data = await response.json();
@@ -102,8 +102,8 @@ export default function NFTDetailClient({
           // 静默处理获取元数据失败
         }
       }
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "加载失败");
+    } catch (error: unknown) {
+      setError(error instanceof Error ? error.message : "加载失败");
     } finally {
       setLoading(false);
     }
@@ -112,35 +112,6 @@ export default function NFTDetailClient({
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     alert("已复制到剪贴板");
-  };
-
-  const getBlockExplorerUrl = (type: "token" | "tx" | "address", value: string) => {
-    const chainId = process.env.NEXT_PUBLIC_CHAIN_ID || "80002";
-    const baseUrl =
-      chainId === "137"
-        ? "https://polygonscan.com"
-        : "https://amoy.polygonscan.com";
-
-    switch (type) {
-      case "token":
-        return `${baseUrl}/token/${nft?.contractAddress}?a=${nft?.tokenId}`;
-      case "tx":
-        return `${baseUrl}/tx/${value}`;
-      case "address":
-        return `${baseUrl}/address/${value}`;
-      default:
-        return baseUrl;
-    }
-  };
-
-  const getOpenSeaUrl = () => {
-    const chainId = process.env.NEXT_PUBLIC_CHAIN_ID || "80002";
-    const isMainnet = chainId === "137";
-    const baseUrl = isMainnet
-      ? "https://opensea.io"
-      : "https://testnets.opensea.io";
-
-    return `${baseUrl}/assets/${isMainnet ? "matic" : "amoy"}/${nft?.contractAddress}/${nft?.tokenId}`;
   };
 
   if (loading) {
@@ -161,13 +132,13 @@ export default function NFTDetailClient({
     return (
       <main className="min-h-screen p-4 md:p-8 bg-[#C72471]">
         <div className="max-w-6xl mx-auto bg-white/80 backdrop-blur-sm rounded-2xl shadow p-6 text-center">
-          <h1 className="text-2xl font-bold mb-2 text-red-600">NFT不存在</h1>
+          <h1 className="text-2xl font-bold mb-2 text-red-600">数字藏品不存在</h1>
           <p className="text-gray-600 mb-4">{error || "请返回重试"}</p>
           <Link
             href="/account/nfts"
             className="inline-block px-6 py-2 bg-[#EAF353] text-white rounded-lg hover:bg-[#FFC9E0]"
           >
-            返回NFT列表
+            返回数字藏品列表
           </Link>
         </div>
       </main>
@@ -200,66 +171,31 @@ export default function NFTDetailClient({
               d="M15 19l-7-7 7-7"
             />
           </svg>
-          返回NFT列表
+          返回数字藏品列表
         </Link>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* 左侧：NFT图片 */}
+          {/* 左侧：藏品图片 */}
           <div className="bg-white rounded-2xl shadow p-6">
             <div className="aspect-square rounded-lg overflow-hidden bg-gray-100 mb-4">
               <NFTMediaDisplay
                 has3DModel={nft.has3DModel || false}
                 model3DUrl={nft.model3DUrl}
                 imageUrl={imageUrl}
-                name={metadata?.name || `NFT #${nft.tokenId}`}
+                name={metadata?.name || `次元 #${nft.tokenId}`}
                 className="w-full h-full"
               />
             </div>
 
-            {/* 快速操作 */}
-            <div className="grid grid-cols-2 gap-3">
-              <a
-                href={getOpenSeaUrl()}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-              >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 90 90">
-                  <path d="M45 0C20.151 0 0 20.151 0 45s20.151 45 45 45 45-20.151 45-45S69.849 0 45 0zm23.123 49.573L50.821 73.605c-.35.577-1.08.77-1.657.42l-17.21-10.395c-.577-.35-.77-1.08-.42-1.657L48.84 37.94c.35-.577 1.08-.77 1.657-.42l17.21 10.395c.577.35.77 1.08.42 1.657z" />
-                </svg>
-                OpenSea
-              </a>
-              <a
-                href={getBlockExplorerUrl("token", "")}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition"
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                  />
-                </svg>
-                区块浏览器
-              </a>
-            </div>
           </div>
 
-          {/* 右侧：NFT信息 */}
+          {/* 右侧：藏品信息 */}
           <div className="bg-white rounded-2xl shadow p-6">
             {/* 标题和描述 */}
             <div className="mb-6">
               <div className="flex items-center gap-2 mb-2">
                 <h1 className="text-3xl font-bold text-[#EAF353]">
-                  {metadata?.name || `Token #${nft.tokenId}`}
+                  {metadata?.name || `次元 #${nft.tokenId}`}
                 </h1>
                 <span className="px-3 py-1 bg-purple-100 text-purple-700 text-sm rounded-full">
                   #{nft.tokenId}
@@ -308,27 +244,13 @@ export default function NFTDetailClient({
             {activeTab === "details" && (
               <div className="space-y-3">
                 <DetailRow
-                  label="合约地址"
-                  value={nft.contractAddress}
-                  copyable
-                  onCopy={() => copyToClipboard(nft.contractAddress)}
-                  link={getBlockExplorerUrl("address", nft.contractAddress)}
-                />
-                <DetailRow
-                  label="Token ID"
+                  label="藏品编号"
                   value={nft.tokenId.toString()}
                   copyable
                   onCopy={() => copyToClipboard(nft.tokenId.toString())}
                 />
                 <DetailRow
-                  label="当前持有者"
-                  value={nft.currentOwnerAddress}
-                  copyable
-                  onCopy={() => copyToClipboard(nft.currentOwnerAddress)}
-                  link={getBlockExplorerUrl("address", nft.currentOwnerAddress)}
-                />
-                <DetailRow
-                  label="铸造时间"
+                  label="生成时间"
                   value={new Date(nft.mintedAt).toLocaleString("zh-CN")}
                 />
                 <DetailRow
@@ -403,17 +325,17 @@ export default function NFTDetailClient({
                     </svg>
                   </div>
                   <div className="flex-1">
-                    <div className="font-semibold">铸造</div>
+                    <div className="font-semibold">生成</div>
                     <div className="text-sm text-gray-500">
                       {new Date(nft.mintedAt).toLocaleString("zh-CN")}
                     </div>
                     <div className="text-xs text-gray-400 mt-1">
-                      由平台铸造并转移至您的钱包
+                      由平台生成并添加至您的账户
                     </div>
                   </div>
                 </div>
                 <div className="text-center py-4 text-gray-500 text-sm">
-                  更多历史记录请在区块浏览器查看
+                  暂无更多历史记录
                 </div>
               </div>
             )}

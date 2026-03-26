@@ -49,8 +49,8 @@ export default function OrderDetailScreen() {
       } else {
         setError(response.error || '加载订单详情失败');
       }
-    } catch (err: any) {
-      setError(err.message || '加载订单详情失败');
+    } catch (error: any) {
+      setError(error.message || '加载订单详情失败');
     } finally {
       setLoading(false);
     }
@@ -77,8 +77,8 @@ export default function OrderDetailScreen() {
             } else {
               Alert.alert('失败', response.error || '取消订单失败');
             }
-          } catch (err: any) {
-            Alert.alert('错误', err.message || '取消订单失败');
+          } catch (error: any) {
+            Alert.alert('错误', error.message || '取消订单失败');
           } finally {
             setActionLoading(false);
           }
@@ -103,8 +103,8 @@ export default function OrderDetailScreen() {
             } else {
               Alert.alert('失败', response.error || '申请退款失败');
             }
-          } catch (err: any) {
-            Alert.alert('错误', err.message || '申请退款失败');
+          } catch (error: any) {
+            Alert.alert('错误', error.message || '申请退款失败');
           } finally {
             setActionLoading(false);
           }

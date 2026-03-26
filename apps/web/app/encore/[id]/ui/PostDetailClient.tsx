@@ -104,8 +104,8 @@ export default function PostDetailClient({ postId }: { postId: string }) {
       }
 
       setPost(data.data);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : String(err) || "加载失败");
+    } catch (error: unknown) {
+      setError(error instanceof Error ? error.message : String(error) || "加载失败");
     } finally {
       setLoading(false);
     }
@@ -192,8 +192,8 @@ export default function PostDetailClient({ postId }: { postId: string }) {
           likeCount: data.data.likeCount,
         });
       }
-    } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : '操作失败');
+    } catch (error: unknown) {
+      alert(error instanceof Error ? error.message : '操作失败');
     } finally {
       setIsLiking(false);
     }
@@ -233,8 +233,8 @@ export default function PostDetailClient({ postId }: { postId: string }) {
 
       // 更新关注状态
       setIsFollowing(data.data.isFollowing);
-    } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : '操作失败');
+    } catch (error: unknown) {
+      alert(error instanceof Error ? error.message : '操作失败');
     } finally {
       setIsFollowLoading(false);
     }
@@ -286,8 +286,8 @@ export default function PostDetailClient({ postId }: { postId: string }) {
       }
 
       alert('举报成功，我们会尽快处理');
-    } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : '举报失败');
+    } catch (error: unknown) {
+      alert(error instanceof Error ? error.message : '举报失败');
     }
   };
 
@@ -331,8 +331,8 @@ export default function PostDetailClient({ postId }: { postId: string }) {
       await loadPost();
 
       alert('评论成功');
-    } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : '评论失败');
+    } catch (error: unknown) {
+      alert(error instanceof Error ? error.message : '评论失败');
     } finally {
       setIsSubmittingComment(false);
     }

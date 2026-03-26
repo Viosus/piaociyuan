@@ -20,7 +20,7 @@ import { UserListItem } from '../components/UserListItem';
 export default function FollowingListScreen() {
   const route = useRoute();
   const navigation = useNavigation();
-  const { userId } = route.params as { userId: number };
+  const { userId } = route.params as { userId: string };
 
   const [users, setUsers] = useState<FollowUser[]>([]);
   const [loading, setLoading] = useState(true);
@@ -28,7 +28,7 @@ export default function FollowingListScreen() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
-  const [followLoadingIds, setFollowLoadingIds] = useState<Set<number>>(new Set());
+  const [followLoadingIds, setFollowLoadingIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     loadFollowing(1);

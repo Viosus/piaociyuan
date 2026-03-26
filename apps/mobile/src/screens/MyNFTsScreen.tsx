@@ -64,10 +64,10 @@ export default function MyNFTsScreen() {
           });
         }
       } else {
-        Alert.alert('错误', response.error || '加载 NFT 列表失败');
+        Alert.alert('错误', response.error || '加载数字藏品列表失败');
       }
     } catch (error: any) {
-      Alert.alert('错误', error.message || '加载 NFT 列表失败');
+      Alert.alert('错误', error.message || '加载数字藏品列表失败');
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -166,8 +166,8 @@ export default function MyNFTsScreen() {
     return (
       <EmptyState
         icon="diamond-outline"
-        title="暂无 NFT 藏品"
-        description="您还没有任何 NFT 数字藏品\n购票后可铸造专属 NFT"
+        title="暂无数字藏品"
+        description="您还没有任何数字藏品\n购票后可领取专属藏品"
         actionText="去购票"
         onAction={() => navigation.navigate('Events' as never)}
       />
@@ -199,15 +199,7 @@ export default function MyNFTsScreen() {
         }
       />
 
-      {/* 铸造入口 */}
-      {!loading && nfts.length > 0 && (
-        <TouchableOpacity
-          style={styles.mintButton}
-          onPress={() => navigation.navigate('MintNFT' as never)}
-        >
-          <Ionicons name="hammer" size={24} color="#fff" />
-        </TouchableOpacity>
-      )}
+      {/* 数字藏品领取入口暂时隐藏 (store submission) */}
     </View>
   );
 }

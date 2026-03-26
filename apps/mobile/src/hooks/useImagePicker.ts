@@ -89,8 +89,8 @@ export function useImagePicker(): UseImagePickerResult {
           return combined.slice(0, maxImages);
         });
       }
-    } catch (err: any) {
-      setError(err.message || '选择图片失败');
+    } catch (error: any) {
+      setError(error.message || '选择图片失败');
     } finally {
       setLoading(false);
     }
@@ -133,8 +133,8 @@ export function useImagePicker(): UseImagePickerResult {
 
         setImages((prev) => [...prev, newImage]);
       }
-    } catch (err: any) {
-      setError(err.message || '拍照失败');
+    } catch (error: any) {
+      setError(error.message || '拍照失败');
     } finally {
       setLoading(false);
     }

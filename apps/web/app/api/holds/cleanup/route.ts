@@ -9,6 +9,7 @@
 
 import { NextResponse } from 'next/server';
 import { purgeExpiredHolds } from '@/lib/inventory';
+import { getErrorMessage } from '@/lib/error-utils';
 
 export async function GET() {
   try {
@@ -31,7 +32,7 @@ export async function GET() {
         code: 'SERVER_ERROR',
         message: '清理过期锁票失败',
         ...(process.env.NODE_ENV === 'development' && {
-          error: error instanceof Error ? error.message : String(error),
+          error: getErrorMessage(error),
         }),
       },
       { status: 500 }

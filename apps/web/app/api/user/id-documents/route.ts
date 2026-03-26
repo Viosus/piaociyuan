@@ -9,6 +9,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
+import { getErrorMessage } from '@/lib/error-utils';
 
 // 证件类型
 const VALID_ID_TYPES = ['china_id', 'passport', 'hk_permit', 'tw_permit'];
@@ -106,7 +107,7 @@ function parseDate(value: string | null | undefined): Date | null {
 export async function GET(req: NextRequest) {
   try {
     // 1. 认证
-    const authHeader = req.headers.get('Authorization');
+    const authHeader = req.headers.get('authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return NextResponse.json(
         { ok: false, code: 'UNAUTHORIZED', message: '未提供认证信息' },
@@ -144,7 +145,7 @@ export async function GET(req: NextRequest) {
         code: 'SERVER_ERROR',
         message: '获取证件列表失败',
         ...(process.env.NODE_ENV === 'development' && {
-          error: error instanceof Error ? error.message : String(error),
+          error: getErrorMessage(error),
         }),
       },
       { status: 500 }
@@ -155,7 +156,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     // 1. 认证
-    const authHeader = req.headers.get('Authorization');
+    const authHeader = req.headers.get('authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return NextResponse.json(
         { ok: false, code: 'UNAUTHORIZED', message: '未提供认证信息' },
@@ -264,7 +265,7 @@ export async function POST(req: NextRequest) {
         code: 'SERVER_ERROR',
         message: '添加证件失败',
         ...(process.env.NODE_ENV === 'development' && {
-          error: error instanceof Error ? error.message : String(error),
+          error: getErrorMessage(error),
         }),
       },
       { status: 500 }

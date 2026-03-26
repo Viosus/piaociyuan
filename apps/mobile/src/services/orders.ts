@@ -6,10 +6,10 @@ import type { ApiResponse } from '@piaoyuzhou/shared';
  */
 
 export interface Order {
-  id: number;
-  userId: number;
-  eventId: number;
-  tierId: number;
+  id: string;
+  userId: string;
+  eventId: string;
+  tierId: string;
   qty: number;
   totalPrice: number;
   status: 'pending' | 'paid' | 'cancelled' | 'refunded';
@@ -29,12 +29,12 @@ export interface Order {
 }
 
 export interface Ticket {
-  id: number;
+  id: string;
   ticketCode: string;
-  orderId: number;
-  eventId: number;
-  tierId: number;
-  userId: number;
+  orderId: string;
+  eventId: string;
+  tierId: string;
+  userId: string;
   status: 'available' | 'held' | 'sold' | 'used' | 'refunded';
   price: number;
   createdAt: string;
@@ -56,8 +56,8 @@ export interface Ticket {
  * 创建订单
  */
 export async function createOrder(data: {
-  eventId: number;
-  tierId: number;
+  eventId: string;
+  tierId: string;
   qty: number;
 }): Promise<ApiResponse<Order>> {
   return apiClient.post<Order>('/api/orders', data);
@@ -83,7 +83,7 @@ export async function getMyOrders(params?: {
 /**
  * 获取订单详情
  */
-export async function getOrderDetail(orderId: number): Promise<ApiResponse<Order>> {
+export async function getOrderDetail(orderId: string): Promise<ApiResponse<Order>> {
   return apiClient.get<Order>(`/api/orders/${orderId}`);
 }
 
@@ -164,37 +164,14 @@ export async function requestRefund(
 /**
  * 取消订单
  */
-export async function cancelOrder(orderId: number): Promise<ApiResponse<{ success: boolean }>> {
+export async function cancelOrder(orderId: string): Promise<ApiResponse<{ success: boolean }>> {
   return apiClient.post<{ success: boolean }>(`/api/orders/${orderId}/cancel`);
 }
 
 /**
  * 申请退款
  */
-export async function refundOrder(orderId: number): Promise<ApiResponse<{ success: boolean }>> {
+export async function refundOrder(orderId: string): Promise<ApiResponse<{ success: boolean }>> {
   return apiClient.post<{ success: boolean }>(`/api/orders/${orderId}/refund`);
 }
 
-/**
- * 获取我的门票
- */
-export async function getMyTickets(params?: {
-  status?: string;
-  page?: number;
-  pageSize?: number;
-}): Promise<ApiResponse<Ticket[]>> {
-  const query = new URLSearchParams();
-  if (params?.status) query.append('status', params.status);
-  if (params?.page) query.append('page', params.page.toString());
-  if (params?.pageSize) query.append('pageSize', params.pageSize.toString());
-
-  const queryString = query.toString();
-  return apiClient.get<Ticket[]>(`/api/tickets/my${queryString ? `?${queryString}` : ''}`);
-}
-
-/**
- * 获取门票详情
- */
-export async function getTicketDetail(ticketId: number): Promise<ApiResponse<Ticket>> {
-  return apiClient.get<Ticket>(`/api/tickets/${ticketId}`);
-}

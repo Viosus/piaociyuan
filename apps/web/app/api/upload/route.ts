@@ -8,15 +8,32 @@ import { verifyToken } from '@/lib/auth';
 import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
 import { existsSync } from 'fs';
+import { getErrorMessage } from '@/lib/error-utils';
 
 // 允许的图片类型
 const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
+const MAGIC_BYTES: Record<string, number[][]> = {
+  'image/jpeg': [[0xFF, 0xD8, 0xFF]],
+  'image/jpg': [[0xFF, 0xD8, 0xFF]],
+  'image/png': [[0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]],
+  'image/gif': [[0x47, 0x49, 0x46, 0x38, 0x37, 0x61], [0x47, 0x49, 0x46, 0x38, 0x39, 0x61]],
+  'image/webp': [[0x52, 0x49, 0x46, 0x46]],
+};
+
+function validateMagicBytes(buffer: Buffer, mimeType: string): boolean {
+  const signatures = MAGIC_BYTES[mimeType];
+  if (!signatures) return false;
+  return signatures.some(sig =>
+    sig.every((byte, index) => buffer[index] === byte)
+  );
+}
+
 export async function POST(req: NextRequest) {
   try {
     // 1️⃣ 认证
-    const authHeader = req.headers.get('Authorization');
+    const authHeader = req.headers.get('authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return NextResponse.json(
         {
@@ -81,6 +98,20 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // 4.5 验证文件内容（magic bytes）
+    const bytes = await file.arrayBuffer();
+    const buffer = Buffer.from(bytes);
+    if (!validateMagicBytes(buffer, file.type)) {
+      return NextResponse.json(
+        {
+          ok: false,
+          code: 'INVALID_FILE_TYPE',
+          message: '文件内容与类型不匹配',
+        },
+        { status: 400 }
+      );
+    }
+
     // 5️⃣ 生成文件名
     const ext = file.name.split('.').pop() || 'jpg';
     const timestamp = Date.now();
@@ -94,8 +125,6 @@ export async function POST(req: NextRequest) {
     }
 
     // 7️⃣ 保存文件
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
     const filePath = path.join(uploadDir, fileName);
     await writeFile(filePath, buffer);
 
@@ -126,7 +155,7 @@ export async function POST(req: NextRequest) {
         ok: false,
         code: 'SERVER_ERROR',
         message: '上传失败',
-        error: error instanceof Error ? error.message : String(error),
+        error: getErrorMessage(error),
       },
       { status: 500 }
     );

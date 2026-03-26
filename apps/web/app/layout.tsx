@@ -4,6 +4,7 @@ import "./globals.css";
 import Sidebar from "@/components/Sidebar";
 import RightSidebar from "@/components/RightSidebar";
 import SearchBar from "@/components/SearchBar";
+import PrivacyConsent from "@/components/PrivacyConsent";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -74,6 +75,17 @@ export default function RootLayout({
         <div className="ml-20 h-screen overflow-y-auto transition-all duration-300 pt-20" style={{ marginRight: 'var(--right-sidebar-width, 64px)' }}>
           {children}
         </div>
+        <footer className="fixed bottom-0 left-0 right-0 z-10 py-2 text-center">
+          <a
+            href="https://beian.miit.gov.cn/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-gray-400 hover:text-gray-500 transition-colors"
+          >
+            京ICP备XXXXXXXX号
+          </a>
+        </footer>
+        <PrivacyConsent />
       </body>
     </html>
   );

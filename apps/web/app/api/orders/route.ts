@@ -290,8 +290,8 @@ export async function GET(req: NextRequest) {
         totalPages,
       },
     });
-  } catch (e: unknown) {
-    console.error('[ORDER_LIST_ERROR] ❌', e);
+  } catch (error: unknown) {
+    console.error('[ORDER_LIST_ERROR] ❌', error);
     return NextResponse.json(
       {
         ok: false,
@@ -426,8 +426,8 @@ export async function POST(req: Request) {
         createdAt: now,
       },
     });
-  } catch (err: unknown) {
-    console.error('[ORDER_CREATE_ERROR] ❌', err);
+  } catch (error: unknown) {
+    console.error('[ORDER_CREATE_ERROR] ❌', error);
 
     return NextResponse.json(
       {

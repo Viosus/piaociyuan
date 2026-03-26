@@ -17,7 +17,7 @@ interface MintStatusResponse {
 
 /**
  * 次元领取按钮组件
- * 验票后可领取对应的次元藏品（3D建模/AR数字艺术品NFT）
+ * 验票后可领取对应的次元藏品（3D建模/AR数字艺术品）
  */
 export function MintNFTButton({ ticketId, ticketStatus, nftMintStatus: initialStatus }: MintNFTButtonProps) {
   const [isMinting, setIsMinting] = useState(false);
@@ -25,7 +25,7 @@ export function MintNFTButton({ ticketId, ticketStatus, nftMintStatus: initialSt
   const [error, setError] = useState<string | null>(null);
   const [tokenId, setTokenId] = useState<number | null>(null);
 
-  // 如果正在铸造，定时查询状态
+  // 如果正在生成，定时查询状态
   useEffect(() => {
     if (mintStatus === 'pending' || mintStatus === 'minting') {
       const interval = setInterval(checkMintStatus, 5000);
@@ -56,7 +56,7 @@ export function MintNFTButton({ ticketId, ticketStatus, nftMintStatus: initialSt
         setError(data.error);
       }
     } catch {
-      // 静默处理查询领取状态失败
+      // 静默处理查询生成状态失败
     }
   };
 
@@ -114,17 +114,9 @@ export function MintNFTButton({ ticketId, ticketStatus, nftMintStatus: initialSt
         </div>
         {tokenId && (
           <p className="text-xs text-green-700">
-            Token ID: #{tokenId}
+            藏品编号: #{tokenId}
           </p>
         )}
-        <a
-          href={`https://testnets.opensea.io/assets/polygon-mumbai/${process.env.NEXT_PUBLIC_NFT_CONTRACT_ADDRESS}/${tokenId}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-block text-xs text-blue-600 hover:text-blue-700 underline"
-        >
-          在OpenSea查看 →
-        </a>
       </div>
     );
   }

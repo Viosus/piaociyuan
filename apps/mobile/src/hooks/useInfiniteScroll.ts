@@ -55,8 +55,8 @@ export function useInfiniteScroll<T>({
 
       setData((prev) => [...prev, ...newData]);
       setPage((prev) => prev + 1);
-    } catch (err: any) {
-      setError(err.message || '加载失败');
+    } catch (error: any) {
+      setError(error.message || '加载失败');
     } finally {
       setLoading(false);
     }
@@ -77,8 +77,8 @@ export function useInfiniteScroll<T>({
 
       setData(newData);
       setPage(initialPage + 1);
-    } catch (err: any) {
-      setError(err.message || '刷新失败');
+    } catch (error: any) {
+      setError(error.message || '刷新失败');
     } finally {
       setLoading(false);
     }

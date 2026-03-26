@@ -127,18 +127,18 @@ export async function POST(req: Request) {
         tickets: order.tickets,
       },
     });
-  } catch (err: unknown) {
-    console.error('[PAY_ERROR]', err);
+  } catch (error: unknown) {
+    console.error('[PAY_ERROR]', error);
 
-    if (err instanceof ApiError) {
+    if (error instanceof ApiError) {
       return NextResponse.json(
         {
           ok: false,
-          code: err.code,
-          message: err.message,
-          data: err.data,
+          code: error.code,
+          message: error.message,
+          data: error.data,
         },
-        { status: err.status }
+        { status: error.status }
       );
     }
 

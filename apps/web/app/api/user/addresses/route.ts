@@ -9,6 +9,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
+import { getErrorMessage } from '@/lib/error-utils';
 
 // 地址标签
 const VALID_LABELS = ['home', 'work', 'other'];
@@ -26,7 +27,7 @@ function validateInternationalPhone(phone: string): boolean {
 export async function GET(req: NextRequest) {
   try {
     // 1. 认证
-    const authHeader = req.headers.get('Authorization');
+    const authHeader = req.headers.get('authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return NextResponse.json(
         { ok: false, code: 'UNAUTHORIZED', message: '未提供认证信息' },
@@ -64,7 +65,7 @@ export async function GET(req: NextRequest) {
         code: 'SERVER_ERROR',
         message: '获取地址列表失败',
         ...(process.env.NODE_ENV === 'development' && {
-          error: error instanceof Error ? error.message : String(error),
+          error: getErrorMessage(error),
         }),
       },
       { status: 500 }
@@ -75,7 +76,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     // 1. 认证
-    const authHeader = req.headers.get('Authorization');
+    const authHeader = req.headers.get('authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return NextResponse.json(
         { ok: false, code: 'UNAUTHORIZED', message: '未提供认证信息' },
@@ -189,7 +190,7 @@ export async function POST(req: NextRequest) {
         code: 'SERVER_ERROR',
         message: '添加地址失败',
         ...(process.env.NODE_ENV === 'development' && {
-          error: error instanceof Error ? error.message : String(error),
+          error: getErrorMessage(error),
         }),
       },
       { status: 500 }

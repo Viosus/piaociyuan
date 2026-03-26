@@ -78,8 +78,8 @@ export default function ReceiveNFTTransferScreen() {
       } else {
         setError(response.error || '转让码无效');
       }
-    } catch (err: any) {
-      setError(err.message || '查询失败');
+    } catch (error: any) {
+      setError(error.message || '查询失败');
     } finally {
       setLoading(false);
     }
@@ -88,7 +88,7 @@ export default function ReceiveNFTTransferScreen() {
   const handleAccept = async () => {
     if (!transfer) return;
 
-    const confirmMessage = `确定要接收这个次元收藏品吗？\n\n收藏品：${transfer.nft?.name || 'NFT'}\n稀有度：${RARITY_LABELS[transfer.nft?.rarity || 'common']}`;
+    const confirmMessage = `确定要接收这个次元收藏品吗？\n\n收藏品：${transfer.nft?.name || '数字藏品'}\n稀有度：${RARITY_LABELS[transfer.nft?.rarity || 'common']}`;
 
     Alert.alert(
       '确认接收',
@@ -103,7 +103,7 @@ export default function ReceiveNFTTransferScreen() {
               const response = await acceptNFTTransfer(transfer.transferCode, 'accept');
               if (response.ok) {
                 setSuccess(true);
-                Alert.alert('成功', 'NFT 接收成功！', [
+                Alert.alert('成功', '藏品接收成功！', [
                   {
                     text: '查看我的收藏',
                     onPress: () => navigation.navigate('Collectibles'),
@@ -112,8 +112,8 @@ export default function ReceiveNFTTransferScreen() {
               } else {
                 Alert.alert('失败', response.error || '接收失败');
               }
-            } catch (err: any) {
-              Alert.alert('错误', err.message || '接收失败');
+            } catch (error: any) {
+              Alert.alert('错误', error.message || '接收失败');
             } finally {
               setActionLoading(false);
             }
@@ -145,8 +145,8 @@ export default function ReceiveNFTTransferScreen() {
               } else {
                 Alert.alert('失败', response.error || '操作失败');
               }
-            } catch (err: any) {
-              Alert.alert('错误', err.message || '操作失败');
+            } catch (error: any) {
+              Alert.alert('错误', error.message || '操作失败');
             } finally {
               setActionLoading(false);
             }
@@ -214,7 +214,7 @@ export default function ReceiveNFTTransferScreen() {
               </Text>
             </View>
 
-            {/* NFT 信息 */}
+            {/* 藏品信息 */}
             <View style={styles.nftSection}>
               {transfer.nft?.imageUrl ? (
                 <Image source={{ uri: transfer.nft.imageUrl }} style={styles.nftImage} />
@@ -224,7 +224,7 @@ export default function ReceiveNFTTransferScreen() {
                 </View>
               )}
               <View style={styles.nftDetails}>
-                <Text style={styles.nftName}>{transfer.nft?.name || 'NFT'}</Text>
+                <Text style={styles.nftName}>{transfer.nft?.name || '数字藏品'}</Text>
                 <View style={[styles.rarityBadge, { backgroundColor: `${rarityColor}20` }]}>
                   <Text style={[styles.rarityText, { color: rarityColor }]}>
                     {RARITY_LABELS[transfer.nft?.rarity || 'common']}
@@ -234,11 +234,6 @@ export default function ReceiveNFTTransferScreen() {
                   <Text style={styles.nftDescription} numberOfLines={2}>
                     {transfer.nft.description}
                   </Text>
-                )}
-                {transfer.userNft?.isOnChain && (
-                  <View style={styles.onChainBadge}>
-                    <Text style={styles.onChainText}>已上链</Text>
-                  </View>
                 )}
               </View>
             </View>
@@ -299,7 +294,7 @@ export default function ReceiveNFTTransferScreen() {
         {success && (
           <View style={styles.successBox}>
             <Text style={styles.successIcon}>🎉</Text>
-            <Text style={styles.successText}>NFT 接收成功！</Text>
+            <Text style={styles.successText}>藏品接收成功！</Text>
             <TouchableOpacity
               style={styles.viewNftButton}
               onPress={() => navigation.navigate('Collectibles')}

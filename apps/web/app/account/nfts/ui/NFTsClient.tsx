@@ -1,6 +1,6 @@
 "use client";
 
-import { WalletConnectButton, MyNFTList } from "@/components/NFTComponents";
+import { MyNFTList } from "@/components/NFTComponents";
 
 export default function NFTsClient() {
   return (
@@ -13,10 +13,10 @@ export default function NFTsClient() {
               我的次元收藏
             </h1>
             <p className="text-[#46467A]/70 mt-1">
-              区块链数字资产，永久保存，可在OpenSea等平台交易
+              3D数字藏品，独特的活动纪念品
             </p>
           </div>
-          <WalletConnectButton />
+          {/* WalletConnectButton hidden for store submission */}
         </div>
 
         {/* 次元说明卡片 */}
@@ -37,16 +37,15 @@ export default function NFTsClient() {
           </h2>
           <div className="text-sm text-gray-700 space-y-2">
             <p>
-              <strong>什么是次元？</strong> 次元是独立的3D建模/AR数字艺术品，基于NFT（Non-Fungible
-              Token）技术存储在区块链上，具有唯一性、不可篡改性和可追溯性。
+              <strong>什么是次元？</strong> 次元是独立的3D建模/AR数字艺术品，每件藏品具有唯一性和不可篡改性。
             </p>
             <p>
               <strong>如何领取次元？</strong>{" "}
-              验票后，在订单详情页连接钱包即可领取对应的次元藏品到您的账户。
+              验票后，在订单详情页即可领取对应的次元藏品到您的账户。
             </p>
             <p>
               <strong>次元有什么用？</strong>{" "}
-              作为永久数字收藏、在OpenSea等平台展示和交易、证明您参加过该活动的独特艺术品。
+              作为永久数字收藏，证明您参加过该活动的独特艺术品。
             </p>
           </div>
         </div>

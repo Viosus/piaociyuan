@@ -61,8 +61,8 @@ export function usePagination<T>({
         setData(result.data);
         setTotal(result.total);
         setPage(targetPage);
-      } catch (err: any) {
-        setError(err.message || '加载失败');
+      } catch (error: any) {
+        setError(error.message || '加载失败');
       } finally {
         setLoading(false);
       }

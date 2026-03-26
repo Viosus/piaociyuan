@@ -45,7 +45,7 @@ export default function BindWalletScreen() {
   };
 
   const validateWalletAddress = (address: string): boolean => {
-    // 简单的以太坊地址验证（0x 开头，42 个字符）
+    // 简单的地址验证（0x 开头，42 个字符）
     return /^0x[a-fA-F0-9]{40}$/.test(address);
   };
 
@@ -56,15 +56,15 @@ export default function BindWalletScreen() {
     }
 
     if (!validateWalletAddress(walletAddress)) {
-      Alert.alert('提示', '请输入有效的以太坊钱包地址');
+      Alert.alert('提示', '请输入有效的地址');
       return;
     }
 
-    // 注意：实际的钱包绑定需要签名验证
+    // 注意：实际的绑定需要验证
     // 这里简化为直接输入地址（仅供演示）
     Alert.alert(
       '提示',
-      '钱包绑定需要签名验证。在移动端，建议使用 MetaMask 或其他支持 WalletConnect 的钱包应用进行连接。\n\n当前版本暂不支持直接绑定，请在 Web 端完成钱包绑定。',
+      '当前版本暂不支持在移动端直接绑定，请在 Web 端完成操作。',
       [
         {
           text: '取消',
@@ -97,18 +97,18 @@ export default function BindWalletScreen() {
             <View style={styles.successIcon}>
               <Ionicons name="checkmark-circle" size={64} color={COLORS.success} />
             </View>
-            <Text style={styles.successTitle}>钱包已绑定</Text>
+            <Text style={styles.successTitle}>已绑定</Text>
             <Text style={styles.successDescription}>
-              您的账户已成功绑定以太坊钱包
+              您的账户已成功绑定
             </Text>
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>钱包信息</Text>
+            <Text style={styles.sectionTitle}>绑定信息</Text>
 
             <View style={styles.infoCard}>
               <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>钱包地址</Text>
+                <Text style={styles.infoLabel}>地址</Text>
                 <Text style={styles.infoValue} numberOfLines={1}>
                   {walletStatus.walletAddress.substring(0, 10)}...
                   {walletStatus.walletAddress.substring(
@@ -119,7 +119,7 @@ export default function BindWalletScreen() {
 
               {walletStatus.walletProvider && (
                 <View style={styles.infoRow}>
-                  <Text style={styles.infoLabel}>钱包类型</Text>
+                  <Text style={styles.infoLabel}>类型</Text>
                   <Text style={styles.infoValue}>{walletStatus.walletProvider}</Text>
                 </View>
               )}
@@ -135,22 +135,10 @@ export default function BindWalletScreen() {
             </View>
           </View>
 
-          <View style={styles.actions}>
-            <Button
-              title="在区块链浏览器查看"
-              onPress={() =>
-                Linking.openURL(
-                  `https://etherscan.io/address/${walletStatus.walletAddress}`
-                )
-              }
-              variant="outline"
-            />
-          </View>
-
           <View style={styles.tipCard}>
             <Ionicons name="information-circle" size={24} color={COLORS.primary} />
             <Text style={styles.tipText}>
-              钱包绑定后暂不支持更换。如需更换钱包，请联系客服。
+              绑定后暂不支持更换。如需更换，请联系客服。
             </Text>
           </View>
         </View>
@@ -166,61 +154,46 @@ export default function BindWalletScreen() {
           <View style={styles.headerIcon}>
             <Ionicons name="wallet" size={48} color={COLORS.primary} />
           </View>
-          <Text style={styles.title}>绑定以太坊钱包</Text>
+          <Text style={styles.title}>账户绑定</Text>
           <Text style={styles.description}>
-            绑定钱包后，您的 NFT 将铸造到您的钱包地址
+            绑定后即可领取专属数字藏品
           </Text>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>钱包地址</Text>
+          <Text style={styles.sectionTitle}>地址</Text>
           <Input
             value={walletAddress}
             onChangeText={setWalletAddress}
-            placeholder="请输入以太坊钱包地址 (0x...)"
+            placeholder="请输入地址 (0x...)"
             autoCapitalize="none"
             autoCorrect={false}
           />
           <Text style={styles.hint}>
-            请输入以 0x 开头的 42 位以太坊钱包地址
+            请输入以 0x 开头的 42 位地址
           </Text>
         </View>
 
         <View style={styles.guidSection}>
-          <Text style={styles.sectionTitle}>如何获取钱包地址？</Text>
+          <Text style={styles.sectionTitle}>需要帮助？</Text>
 
           <TouchableOpacity style={styles.guideItem} onPress={handleOpenGuide}>
             <View style={styles.guideIconContainer}>
               <Ionicons name="information-circle-outline" size={24} color={COLORS.primary} />
             </View>
             <View style={styles.guideContent}>
-              <Text style={styles.guideTitle}>查看钱包教程</Text>
+              <Text style={styles.guideTitle}>查看帮助教程</Text>
               <Text style={styles.guideDescription}>
-                了解如何创建和使用以太坊钱包
+                了解如何完成账户绑定
               </Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color={COLORS.textSecondary} />
           </TouchableOpacity>
-
-          <View style={styles.walletOptions}>
-            <Text style={styles.walletOptionsTitle}>推荐钱包：</Text>
-            <View style={styles.walletBadges}>
-              <View style={styles.walletBadge}>
-                <Text style={styles.walletBadgeText}>MetaMask</Text>
-              </View>
-              <View style={styles.walletBadge}>
-                <Text style={styles.walletBadgeText}>imToken</Text>
-              </View>
-              <View style={styles.walletBadge}>
-                <Text style={styles.walletBadgeText}>Trust Wallet</Text>
-              </View>
-            </View>
-          </View>
         </View>
 
         <View style={styles.actions}>
           <Button
-            title={submitting ? '绑定中...' : '绑定钱包'}
+            title={submitting ? '绑定中...' : '确认绑定'}
             onPress={handleBindWallet}
             disabled={submitting}
           />
@@ -229,7 +202,7 @@ export default function BindWalletScreen() {
         <View style={styles.tipCard}>
           <Ionicons name="shield-checkmark" size={24} color={COLORS.primary} />
           <Text style={styles.tipText}>
-            您的钱包私钥不会被存储或上传。绑定仅用于 NFT 铸造和所有权验证。
+            您的信息安全受到保护。绑定仅用于数字藏品领取和所有权验证。
           </Text>
         </View>
       </View>

@@ -10,14 +10,14 @@ export async function POST(
   try {
     const user = await getCurrentUser();
     if (!user) {
-      return NextResponse.json({ error: '未授权' }, { status: 401 });
+      return NextResponse.json({ ok: false, error: '未授权' }, { status: 401 });
     }
 
     const { id } = await params;
     const { memberIds } = await request.json();
 
     if (!memberIds || !Array.isArray(memberIds) || memberIds.length === 0) {
-      return NextResponse.json({ error: '请选择要添加的成员' }, { status: 400 });
+      return NextResponse.json({ ok: false, error: '请选择要添加的成员' }, { status: 400 });
     }
 
     // 检查用户权限
@@ -31,7 +31,7 @@ export async function POST(
     });
 
     if (!participant || (participant.role !== 'owner' && participant.role !== 'admin')) {
-      return NextResponse.json({ error: '您没有权限添加成员' }, { status: 403 });
+      return NextResponse.json({ ok: false, error: '您没有权限添加成员' }, { status: 403 });
     }
 
     // 获取群聊信息
@@ -40,12 +40,12 @@ export async function POST(
     });
 
     if (!conversation) {
-      return NextResponse.json({ error: '群聊不存在' }, { status: 404 });
+      return NextResponse.json({ ok: false, error: '群聊不存在' }, { status: 404 });
     }
 
     // 检查是否超过人数限制
     if (conversation.memberCount + memberIds.length > conversation.maxMembers) {
-      return NextResponse.json({ error: `群成员已达上限（${conversation.maxMembers}人）` }, { status: 400 });
+      return NextResponse.json({ ok: false, error: `群成员已达上限（${conversation.maxMembers}人）` }, { status: 400 });
     }
 
     // 过滤已经是成员的用户
@@ -61,7 +61,7 @@ export async function POST(
     const newMemberIds = memberIds.filter((mid: string) => !existingMemberIds.includes(mid));
 
     if (newMemberIds.length === 0) {
-      return NextResponse.json({ error: '所选用户已经是群成员' }, { status: 400 });
+      return NextResponse.json({ ok: false, error: '所选用户已经是群成员' }, { status: 400 });
     }
 
     // 验证新成员用户存在
@@ -71,7 +71,7 @@ export async function POST(
     });
 
     if (newMembers.length !== newMemberIds.length) {
-      return NextResponse.json({ error: '部分用户不存在' }, { status: 400 });
+      return NextResponse.json({ ok: false, error: '部分用户不存在' }, { status: 400 });
     }
 
     // 批量添加成员
@@ -99,13 +99,13 @@ export async function POST(
     ]);
 
     return NextResponse.json({
-      success: true,
+      ok: true,
       addedCount: newMemberIds.length,
       members: newMembers,
     });
   } catch (error) {
     console.error('添加群成员失败:', error);
-    return NextResponse.json({ error: '添加群成员失败' }, { status: 500 });
+    return NextResponse.json({ ok: false, error: '添加群成员失败' }, { status: 500 });
   }
 }
 
@@ -117,7 +117,7 @@ export async function DELETE(
   try {
     const user = await getCurrentUser();
     if (!user) {
-      return NextResponse.json({ error: '未授权' }, { status: 401 });
+      return NextResponse.json({ ok: false, error: '未授权' }, { status: 401 });
     }
 
     const { id } = await params;
@@ -125,7 +125,7 @@ export async function DELETE(
     const memberId = searchParams.get('memberId');
 
     if (!memberId) {
-      return NextResponse.json({ error: '缺少成员ID' }, { status: 400 });
+      return NextResponse.json({ ok: false, error: '缺少成员ID' }, { status: 400 });
     }
 
     // 检查用户权限
@@ -139,7 +139,7 @@ export async function DELETE(
     });
 
     if (!myParticipant || (myParticipant.role !== 'owner' && myParticipant.role !== 'admin')) {
-      return NextResponse.json({ error: '您没有权限移除成员' }, { status: 403 });
+      return NextResponse.json({ ok: false, error: '您没有权限移除成员' }, { status: 403 });
     }
 
     // 检查被移除的成员
@@ -156,17 +156,17 @@ export async function DELETE(
     });
 
     if (!targetParticipant) {
-      return NextResponse.json({ error: '该用户不是群成员' }, { status: 404 });
+      return NextResponse.json({ ok: false, error: '该用户不是群成员' }, { status: 404 });
     }
 
     // 群主不能被移除
     if (targetParticipant.role === 'owner') {
-      return NextResponse.json({ error: '不能移除群主' }, { status: 403 });
+      return NextResponse.json({ ok: false, error: '不能移除群主' }, { status: 403 });
     }
 
     // 管理员只能被群主移除
     if (targetParticipant.role === 'admin' && myParticipant.role !== 'owner') {
-      return NextResponse.json({ error: '只有群主可以移除管理员' }, { status: 403 });
+      return NextResponse.json({ ok: false, error: '只有群主可以移除管理员' }, { status: 403 });
     }
 
     // 移除成员
@@ -193,9 +193,9 @@ export async function DELETE(
       }),
     ]);
 
-    return NextResponse.json({ success: true, message: '成员已移除' });
+    return NextResponse.json({ ok: true, message: '成员已移除' });
   } catch (error) {
     console.error('移除群成员失败:', error);
-    return NextResponse.json({ error: '移除群成员失败' }, { status: 500 });
+    return NextResponse.json({ ok: false, error: '移除群成员失败' }, { status: 500 });
   }
 }

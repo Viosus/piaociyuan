@@ -37,7 +37,7 @@ const NOTIFICATION_TYPE_CONFIG: Record<
   post_comment: { label: '评论', icon: 'chatbubble', color: '#8B5CF6' },
   new_follower: { label: '新粉丝', icon: 'person-add', color: '#06B6D4' },
   new_message: { label: '新消息', icon: 'mail', color: '#EC4899' },
-  nft_minted: { label: 'NFT铸造', icon: 'cube', color: '#6366F1' },
+  nft_minted: { label: '藏品生成', icon: 'cube', color: '#6366F1' },
   system: { label: '系统通知', icon: 'notifications', color: '#6B7280' },
 };
 
@@ -119,7 +119,7 @@ export default function NotificationsScreen() {
       case 'post_like':
       case 'post_comment':
         if (data?.postId) {
-          navigation.navigate('PostDetail' as never, { id: data.postId } as never);
+          navigation.navigate('PostDetail' as never, { postId: data.postId } as never);
         }
         break;
       case 'new_follower':

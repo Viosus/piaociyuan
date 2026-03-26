@@ -53,7 +53,7 @@ export const PAGINATION = {
 export const NFT_MINT_STATUS = {
   PENDING: 'pending',
   MINTING: 'minting',
-  SUCCESS: 'success',
+  MINTED: 'minted',
   FAILED: 'failed',
 } as const;
 

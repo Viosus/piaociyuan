@@ -61,8 +61,8 @@ export default function TransferTicketScreen() {
       } else {
         setError(response.error || '加载门票详情失败');
       }
-    } catch (err: any) {
-      setError(err.message || '加载门票详情失败');
+    } catch (error: any) {
+      setError(error.message || '加载门票详情失败');
     } finally {
       setLoading(false);
     }
@@ -100,8 +100,8 @@ export default function TransferTicketScreen() {
               } else {
                 Alert.alert('失败', response.error || '发起转让失败');
               }
-            } catch (err: any) {
-              Alert.alert('错误', err.message || '发起转让失败');
+            } catch (error: any) {
+              Alert.alert('错误', error.message || '发起转让失败');
             } finally {
               setSubmitting(false);
             }

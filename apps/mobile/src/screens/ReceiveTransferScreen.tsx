@@ -73,8 +73,8 @@ export default function ReceiveTransferScreen() {
       } else {
         setError(response.error || '转让码无效');
       }
-    } catch (err: any) {
-      setError(err.message || '查询失败');
+    } catch (error: any) {
+      setError(error.message || '查询失败');
     } finally {
       setLoading(false);
     }
@@ -111,8 +111,8 @@ export default function ReceiveTransferScreen() {
               } else {
                 Alert.alert('失败', response.error || '接收失败');
               }
-            } catch (err: any) {
-              Alert.alert('错误', err.message || '接收失败');
+            } catch (error: any) {
+              Alert.alert('错误', error.message || '接收失败');
             } finally {
               setActionLoading(false);
             }
@@ -144,8 +144,8 @@ export default function ReceiveTransferScreen() {
               } else {
                 Alert.alert('失败', response.error || '操作失败');
               }
-            } catch (err: any) {
-              Alert.alert('错误', err.message || '操作失败');
+            } catch (error: any) {
+              Alert.alert('错误', error.message || '操作失败');
             } finally {
               setActionLoading(false);
             }
@@ -213,9 +213,9 @@ export default function ReceiveTransferScreen() {
 
             {/* 活动信息 */}
             <View style={styles.eventSection}>
-              {transfer.event?.cover && (
+              {(transfer.event?.coverImage || transfer.event?.cover) && (
                 <Image
-                  source={transfer.event.cover}
+                  source={{ uri: transfer.event.coverImage || transfer.event.cover }}
                   style={styles.eventCover}
                   contentFit="cover"
                 />

@@ -57,8 +57,8 @@ export default function CheckoutScreen() {
       } else {
         setError(response.error || '加载活动详情失败');
       }
-    } catch (err: any) {
-      setError(err.message || '加载活动详情失败');
+    } catch (error: any) {
+      setError(error.message || '加载活动详情失败');
     } finally {
       setLoading(false);
     }
@@ -111,8 +111,8 @@ export default function CheckoutScreen() {
       } else {
         Alert.alert('失败', response.error || '创建订单失败');
       }
-    } catch (err: any) {
-      Alert.alert('错误', err.message || '创建订单失败');
+    } catch (error: any) {
+      Alert.alert('错误', error.message || '创建订单失败');
     } finally {
       setSubmitting(false);
     }

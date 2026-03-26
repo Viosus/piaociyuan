@@ -74,8 +74,8 @@ export default function SearchScreen() {
           setError(response.error || '搜索失败');
         }
       }
-    } catch (err: any) {
-      setError(err.message || '搜索失败');
+    } catch (error: any) {
+      setError(error.message || '搜索失败');
     } finally {
       setLoading(false);
     }
@@ -118,7 +118,7 @@ export default function SearchScreen() {
           </Text>
         )}
         <Text style={styles.userStats}>
-          {item.followersCount || 0} 粉丝 · {item.postsCount || 0} 帖子
+          {item.followersCount || 0} 粉丝 · {item.postCount || 0} 帖子
         </Text>
       </View>
       <Ionicons name="chevron-forward" size={20} color={COLORS.textSecondary} />

@@ -16,7 +16,7 @@ export async function POST(
 ) {
   try {
     // 认证
-    const authHeader = req.headers.get('Authorization');
+    const authHeader = req.headers.get('authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return NextResponse.json(
         { ok: false, code: 'UNAUTHORIZED', message: '未提供认证信息' },
@@ -95,7 +95,7 @@ export async function DELETE(
 ) {
   try {
     // 认证
-    const authHeader = req.headers.get('Authorization');
+    const authHeader = req.headers.get('authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return NextResponse.json(
         { ok: false, code: 'UNAUTHORIZED', message: '未提供认证信息' },
@@ -164,7 +164,7 @@ export async function GET(
 ) {
   try {
     // 认证
-    const authHeader = req.headers.get('Authorization');
+    const authHeader = req.headers.get('authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return NextResponse.json(
         { ok: false, code: 'UNAUTHORIZED', message: '未提供认证信息' },
