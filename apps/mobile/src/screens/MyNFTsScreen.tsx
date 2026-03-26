@@ -50,17 +50,21 @@ export default function MyNFTsScreen() {
         selectedRarity === 'all' ? {} : { rarity: selectedRarity as NFTRarity };
       const result = await getUserNFTs(params);
 
-      if (result.ok && result.data) {
-        setNfts(result.data.data);
-        setStats({
-          total: result.data.stats.total,
-          legendary: result.data.stats.byRarity.legendary,
-          epic: result.data.stats.byRarity.epic,
-          rare: result.data.stats.byRarity.rare,
-          common: result.data.stats.byRarity.common,
-        });
+      // API 返回 { ok, data: [...], stats: {...} }，data 和 stats 是平级的
+      const response = result as any;
+      if (response.ok && response.data) {
+        setNfts(response.data);
+        if (response.stats?.byRarity) {
+          setStats({
+            total: response.stats.total || 0,
+            legendary: response.stats.byRarity.legendary || 0,
+            epic: response.stats.byRarity.epic || 0,
+            rare: response.stats.byRarity.rare || 0,
+            common: response.stats.byRarity.common || 0,
+          });
+        }
       } else {
-        Alert.alert('错误', result.error || '加载 NFT 列表失败');
+        Alert.alert('错误', response.error || '加载 NFT 列表失败');
       }
     } catch (error: any) {
       Alert.alert('错误', error.message || '加载 NFT 列表失败');

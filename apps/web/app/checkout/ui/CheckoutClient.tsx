@@ -319,34 +319,25 @@ export default function CheckoutClient({ event, tier, initialQty, urlLimit }: Pr
   }
 
   return (
-    <main className="min-h-screen p-8 bg-[#C72471]">
+    <main className="min-h-screen p-8">
       <div className="max-w-3xl mx-auto bg-white/80 backdrop-blur-sm rounded-2xl shadow p-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
-          <h1 className="text-2xl font-bold text-[#EAF353]">确认订单</h1>
+          <h1 className="text-2xl font-bold text-[#46467A]">确认订单</h1>
 
           <div className="flex items-center gap-2">
             <span className="text-sm text-[#282828]">锁票剩余</span>
             <span
               className={`px-2 py-1 rounded font-mono text-sm
-                ${mounted && msLeft < 60_000 ? "bg-red-50 text-red-600" : "bg-[#FFFAFD] text-[#FFB6D9]"}`}
+                ${mounted && msLeft < 60_000 ? "bg-red-50 text-red-600" : "bg-[#46467A]/10 text-[#46467A]"}`}
               aria-live="polite"
             >
               {mounted ? formatMMSS(msLeft) : "10:00"}
             </span>
-
-            <button
-              type="button"
-              onClick={resetHold}
-              className="text-xs px-2 py-1 rounded border hover:bg-gray-50"
-              title="重新开始 10 分钟锁票（演示）"
-            >
-              重新锁票
-            </button>
           </div>
         </div>
 
-        <div className="border rounded-xl p-4 mb-6">
-          <div className="font-medium">{event.name}</div>
+        <div className="border border-[#46467A]/30 rounded-xl p-4 mb-6">
+          <div className="font-medium text-[#46467A]">{event.name}</div>
           <div className="text-sm text-[#282828]">
             {event.city} · {event.venue} · {event.date} {event.time}
           </div>
@@ -362,7 +353,7 @@ export default function CheckoutClient({ event, tier, initialQty, urlLimit }: Pr
             单价：¥ {tier.price} · 库存：{tier.remaining} · 限购：每人最多 {maxQty} 张
           </div>
 
-          <div className="mt-3 text-[#FFB6D9] font-semibold">合计：¥ {total}</div>
+          <div className="mt-3 text-[#46467A] font-semibold text-lg">合计：¥ {total}</div>
         </div>
 
         {errorMsg && (
@@ -370,15 +361,15 @@ export default function CheckoutClient({ event, tier, initialQty, urlLimit }: Pr
         )}
 
         <button
-          className="w-full py-3 bg-[#EAF353] text-white rounded-lg hover:bg-[#FFC9E0] disabled:opacity-50"
+          className="w-full py-3 bg-[#46467A] text-white rounded-lg hover:bg-[#46467A]/80 disabled:opacity-50 transition"
           disabled={isExpired || submitting}
           onClick={handleSubmit}
         >
           {submitting ? "提交中..." : "提交订单"}
         </button>
 
-        <div className="mt-4 p-3 rounded bg-[#FFFAFD] text-[#FFA8CC] text-sm leading-relaxed">
-          说明：进入结算页即开始 10 分钟锁票倒计时（演示），刷新页面会延续本事件/票档的剩余时间。
+        <div className="mt-4 p-3 rounded bg-[#46467A]/10 text-[#46467A] text-sm leading-relaxed">
+          说明：进入结算页即开始 10 分钟锁票倒计时，刷新页面会延续本事件/票档的剩余时间。
           若倒计时结束，系统会释放锁票并跳回活动页。
         </div>
       </div>

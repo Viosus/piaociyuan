@@ -1,28 +1,6 @@
 version: '3.8'
 
 services:
-  # PostgreSQL 数据库
-  postgres:
-    image: postgres:15-alpine
-    container_name: piaoyuzhou-db
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-your_secure_password}
-      POSTGRES_DB: ${POSTGRES_DB:-piaociyuan}
-      PGDATA: /var/lib/postgresql/data/pgdata
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-    networks:
-      - piaoyuzhou-network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   # Web 应用 (Next.js + Socket.io)
   web:
     build:
@@ -33,7 +11,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3000
-      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-your_secure_password}@postgres:5432/${POSTGRES_DB:-piaociyuan}?connection_limit=20&pool_timeout=10&connect_timeout=10
+      DATABASE_URL: ${DATABASE_URL}
       JWT_SECRET: ${JWT_SECRET}
       JWT_ACCESS_EXPIRES: ${JWT_ACCESS_EXPIRES:-1d}
       JWT_REFRESH_EXPIRES: ${JWT_REFRESH_EXPIRES:-7d}
@@ -45,9 +23,6 @@ services:
       BLOCKCHAIN_CHAIN_ID: ${BLOCKCHAIN_CHAIN_ID:-80002}
     ports:
       - "3000:3000"
-    depends_on:
-      postgres:
-        condition: service_healthy
     networks:
       - piaoyuzhou-network
     healthcheck:
@@ -98,7 +73,5 @@ networks:
     driver: bridge
 
 volumes:
-  postgres_data:
-    driver: local
   redis_data:
     driver: local

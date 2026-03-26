@@ -22,6 +22,8 @@
     "lint": "next lint",
     "db:seed": "tsx prisma/seed.ts",
     "db:create-tickets": "tsx scripts/create-tickets.ts",
+    "db:fix-tickets": "tsx scripts/fix-missing-tickets.ts",
+    "db:add-3d-nft": "tsx scripts/add-sample-3d-nft.ts",
     "studio": "prisma studio --schema=./prisma/schema.prisma",
     "db:studio": "dotenv -e .env -- prisma studio"
   },

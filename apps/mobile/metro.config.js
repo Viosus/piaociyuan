@@ -22,4 +22,7 @@ config.resolver.disableHierarchicalLookup = true;
 // 4. 确保 Metro 能正确处理 TypeScript 和 JavaScript 文件
 config.resolver.sourceExts = ['js', 'jsx', 'json', 'ts', 'tsx'];
 
+// 5. 启用 package exports 支持，解决 use-latest-callback 等包的警告
+config.resolver.unstable_enablePackageExports = true;
+
 module.exports = config;
