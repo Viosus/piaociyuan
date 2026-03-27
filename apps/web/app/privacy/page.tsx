@@ -1,6 +1,14 @@
+"use client";
+
 export default function PrivacyPage() {
   return (
     <div className="max-w-4xl mx-auto px-6 py-12">
+      <button
+        onClick={() => window.history.length > 1 ? window.history.back() : (window.location.href = "/")}
+        className="mb-6 text-sm text-gray-500 hover:text-[var(--foreground)] transition-colors flex items-center gap-1"
+      >
+        ← 返回
+      </button>
       <h1 className="text-3xl font-bold mb-8 text-[var(--foreground)]">隐私政策</h1>
       <p className="text-sm text-gray-500 mb-8">最后更新日期：2026年3月26日</p>
 

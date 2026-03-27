@@ -4,7 +4,7 @@ import "./globals.css";
 import Sidebar from "@/components/Sidebar";
 import RightSidebar from "@/components/RightSidebar";
 import SearchBar from "@/components/SearchBar";
-import PrivacyConsent from "@/components/PrivacyConsent";
+
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -85,7 +85,6 @@ export default function RootLayout({
             京ICP备XXXXXXXX号
           </a>
         </footer>
-        <PrivacyConsent />
       </body>
     </html>
   );

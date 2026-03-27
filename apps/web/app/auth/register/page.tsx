@@ -20,6 +20,7 @@ function RegisterForm() {
   const [loading, setLoading] = useState(false);
   const [sendingCode, setSendingCode] = useState(false);
   const [countdown, setCountdown] = useState(0);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   // 发送验证码
   const handleSendCode = async () => {
@@ -71,6 +72,11 @@ function RegisterForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    if (!agreedToTerms) {
+      setError("请先阅读并同意隐私政策和服务条款");
+      return;
+    }
 
     // 验证密码匹配
     if (formData.password !== formData.confirmPassword) {
@@ -245,6 +251,23 @@ function RegisterForm() {
               required
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#EAF353] focus:border-transparent"
             />
+          </div>
+
+          {/* 隐私政策同意 */}
+          <div className="flex items-start">
+            <input
+              type="checkbox"
+              id="agreeTerms"
+              checked={agreedToTerms}
+              onChange={(e) => setAgreedToTerms(e.target.checked)}
+              className="w-4 h-4 mt-0.5 text-[#EAF353] border-gray-300 rounded focus:ring-[#EAF353] cursor-pointer"
+            />
+            <label htmlFor="agreeTerms" className="ml-2 text-sm text-[#282828] cursor-pointer select-none">
+              我已阅读并同意
+              <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-[#46467A] underline mx-0.5 hover:text-[#3a3a6a]">隐私政策</a>
+              和
+              <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-[#46467A] underline mx-0.5 hover:text-[#3a3a6a]">服务条款</a>
+            </label>
           </div>
 
           {/* 错误提示 */}
