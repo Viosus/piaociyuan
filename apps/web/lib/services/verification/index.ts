@@ -234,22 +234,25 @@ export async function sendVerificationCodeFull(params: {
     return { success: false, error: '发送过于频繁，请稍后再试' };
   }
 
-  // 2. 生成验证码
-  const code = generateCode();
+  // 2. 生成验证码（测试模式：固定为 1111）
+  // TODO: 正式上线前改回 generateCode()
+  const code = '111111';
 
   // 3. 保存到数据库
   const { expiresAt } = await saveVerificationCode({ email, phone, code, type });
 
-  // 4. 发送验证码
-  const result = await sendVerificationCode({ email, phone, code, type });
+  // 4. 发送验证码（测试模式：跳过实际发送）
+  // TODO: 正式上线前取消注释恢复实际发送
+  // const result = await sendVerificationCode({ email, phone, code, type });
+  // if (!result.success) {
+  //   return { success: false, error: result.error || '验证码发送失败' };
+  // }
 
-  if (!result.success) {
-    return { success: false, error: result.error || '验证码发送失败' };
-  }
+  const channel: NotificationChannel = email ? 'email' : 'sms';
 
   return {
     success: true,
-    channel: result.channel,
+    channel,
     expiresAt,
   };
 }
