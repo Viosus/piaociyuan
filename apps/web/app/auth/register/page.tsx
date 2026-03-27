@@ -25,7 +25,7 @@ function RegisterForm() {
   // 发送验证码
   const handleSendCode = async () => {
     if (!formData.account) {
-      setError("请先输入邮箱");
+      setError(formData.accountType === "email" ? "请先输入邮箱" : "请先输入手机号");
       return;
     }
 
@@ -33,13 +33,17 @@ function RegisterForm() {
     setError("");
 
     try {
+      const body: Record<string, string> = { type: "register" };
+      if (formData.accountType === "email") {
+        body.email = formData.account;
+      } else {
+        body.phone = formData.account;
+      }
+
       const res = await fetch("/api/auth/send-code", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: formData.account,
-          type: "register",
-        }),
+        body: JSON.stringify(body),
       });
 
       const data = await res.json();
@@ -61,7 +65,7 @@ function RegisterForm() {
         });
       }, 1000);
 
-      alert("验证码已发送，请查收邮件");
+      alert(formData.accountType === "email" ? "验证码已发送，请查收邮件" : "验证码已发送，请查收短信");
     } catch (err) {
       setError("网络错误，请稍后重试");
     } finally {
@@ -176,37 +180,35 @@ function RegisterForm() {
             />
           </div>
 
-          {/* 验证码（仅邮箱注册） */}
-          {formData.accountType === "email" && (
-            <div>
-              <label className="block text-sm font-medium text-[#282828] mb-2">
-                邮箱验证码
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={formData.verificationCode}
-                  onChange={(e) => setFormData({ ...formData, verificationCode: e.target.value })}
-                  placeholder="输入6位验证码"
-                  maxLength={6}
-                  required
-                  className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#EAF353] focus:border-transparent"
-                />
-                <button
-                  type="button"
-                  onClick={handleSendCode}
-                  disabled={sendingCode || countdown > 0 || !formData.account}
-                  className="px-4 py-3 bg-[#EAF353] text-white rounded-lg hover:bg-[#FFC9E0] disabled:bg-gray-400 disabled:cursor-not-allowed whitespace-nowrap min-w-[100px]"
-                >
-                  {sendingCode
-                    ? "发送中..."
-                    : countdown > 0
-                    ? `${countdown}s`
-                    : "发送验证码"}
-                </button>
-              </div>
+          {/* 验证码 */}
+          <div>
+            <label className="block text-sm font-medium text-[#282828] mb-2">
+              {formData.accountType === "email" ? "邮箱验证码" : "短信验证码"}
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={formData.verificationCode}
+                onChange={(e) => setFormData({ ...formData, verificationCode: e.target.value })}
+                placeholder="输入6位验证码"
+                maxLength={6}
+                required
+                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#EAF353] focus:border-transparent"
+              />
+              <button
+                type="button"
+                onClick={handleSendCode}
+                disabled={sendingCode || countdown > 0 || !formData.account}
+                className="px-4 py-3 bg-[#EAF353] text-white rounded-lg hover:bg-[#FFC9E0] disabled:bg-gray-400 disabled:cursor-not-allowed whitespace-nowrap min-w-[100px]"
+              >
+                {sendingCode
+                  ? "发送中..."
+                  : countdown > 0
+                  ? `${countdown}s`
+                  : "发送验证码"}
+              </button>
             </div>
-          )}
+          </div>
 
           {/* 昵称（可选） */}
           <div>
