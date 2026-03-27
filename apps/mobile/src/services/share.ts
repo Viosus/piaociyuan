@@ -119,37 +119,6 @@ export async function sharePost(post: {
 }
 
 /**
- * 分享数字藏品
- */
-export async function shareNFT(nft: {
-  id: number;
-  name: string;
-  description?: string;
-  rarity: string;
-  imageUrl?: string;
-}): Promise<ShareResult> {
-  const url = createUniversalLink(`nfts/${nft.id}`);
-
-  let message = `✨ ${nft.name}\n\n🎯 稀有度：${getRarityLabel(nft.rarity)}`;
-
-  if (nft.description) {
-    const desc = nft.description.length > 80
-      ? nft.description.substring(0, 80) + '...'
-      : nft.description;
-    message += `\n\n${desc}`;
-  }
-
-  message += '\n\n快来看看我的数字藏品！';
-
-  return shareContent({
-    title: nft.name,
-    message,
-    url,
-    imageUrl: nft.imageUrl,
-  });
-}
-
-/**
  * 分享门票
  */
 export async function shareTicket(ticket: {
@@ -356,7 +325,6 @@ export async function isShareAvailable(): Promise<boolean> {
 export const SHARE_PRESETS = {
   event: '分享活动',
   post: '分享动态',
-  nft: '分享藏品',
   ticket: '分享门票',
   profile: '分享主页',
   app: '邀请好友',

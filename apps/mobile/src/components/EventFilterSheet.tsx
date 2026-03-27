@@ -37,13 +37,6 @@ const DATE_OPTIONS = [
   { value: 'custom', label: '自定义' },
 ];
 
-// NFT选项
-const NFT_OPTIONS = [
-  { value: undefined, label: '全部' },
-  { value: true, label: '有次元收藏品' },
-  { value: false, label: '无次元收藏品' },
-];
-
 interface EventFilterSheetProps {
   visible: boolean;
   onClose: () => void;
@@ -107,7 +100,6 @@ export default function EventFilterSheet({
     if (localFilters.category) count++;
     if (localFilters.dateFrom || localFilters.dateTo) count++;
     if (localFilters.minPrice !== undefined || localFilters.maxPrice !== undefined) count++;
-    if (localFilters.hasNft !== undefined) count++;
     return count;
   };
 
@@ -219,32 +211,6 @@ export default function EventFilterSheet({
                     });
                   }}
                 />
-              </View>
-            </View>
-
-            {/* NFT纪念品筛选 */}
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>次元收藏品</Text>
-              <View style={styles.optionRow}>
-                {NFT_OPTIONS.map((option, index) => (
-                  <TouchableOpacity
-                    key={index}
-                    style={[
-                      styles.nftChip,
-                      localFilters.hasNft === option.value && styles.nftChipActive,
-                    ]}
-                    onPress={() => setLocalFilters({ ...localFilters, hasNft: option.value })}
-                  >
-                    <Text
-                      style={[
-                        styles.nftChipText,
-                        localFilters.hasNft === option.value && styles.nftChipTextActive,
-                      ]}
-                    >
-                      {option.label}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
               </View>
             </View>
           </ScrollView>
@@ -389,26 +355,6 @@ const styles = StyleSheet.create({
   priceSeparator: {
     marginHorizontal: spacing.md,
     color: colors.textSecondary,
-  },
-  nftChip: {
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-    backgroundColor: colors.background,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  nftChipActive: {
-    backgroundColor: `${colors.primary}20`,
-    borderColor: colors.primary,
-  },
-  nftChipText: {
-    fontSize: fontSize.sm,
-    color: colors.textSecondary,
-  },
-  nftChipTextActive: {
-    color: colors.primary,
-    fontWeight: '600',
   },
   footer: {
     paddingHorizontal: spacing.lg,

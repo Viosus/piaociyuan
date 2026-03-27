@@ -37,13 +37,6 @@ const DATE_OPTIONS = [
   { value: 'month', label: '本月' },
 ];
 
-// NFT选项
-const NFT_OPTIONS = [
-  { value: undefined, label: '全部' },
-  { value: true, label: '有次元收藏品' },
-  { value: false, label: '无次元收藏品' },
-];
-
 // 筛选参数类型（不含状态和分页）
 export interface TicketFilters {
   category?: string;
@@ -51,7 +44,6 @@ export interface TicketFilters {
   dateTo?: string;
   minPrice?: number;
   maxPrice?: number;
-  hasNft?: boolean;
 }
 
 interface TicketFilterSheetProps {
@@ -131,7 +123,6 @@ export default function TicketFilterSheet({
     if (localFilters.category) count++;
     if (localFilters.dateFrom || localFilters.dateTo) count++;
     if (localFilters.minPrice !== undefined || localFilters.maxPrice !== undefined) count++;
-    if (localFilters.hasNft !== undefined) count++;
     return count;
   };
 
@@ -246,31 +237,6 @@ export default function TicketFilterSheet({
               </View>
             </View>
 
-            {/* NFT纪念品筛选 */}
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>次元收藏品</Text>
-              <View style={styles.optionRow}>
-                {NFT_OPTIONS.map((option, index) => (
-                  <TouchableOpacity
-                    key={index}
-                    style={[
-                      styles.nftChip,
-                      localFilters.hasNft === option.value && styles.nftChipActive,
-                    ]}
-                    onPress={() => setLocalFilters({ ...localFilters, hasNft: option.value })}
-                  >
-                    <Text
-                      style={[
-                        styles.nftChipText,
-                        localFilters.hasNft === option.value && styles.nftChipTextActive,
-                      ]}
-                    >
-                      {option.label}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
           </ScrollView>
 
           {/* 底部按钮 */}
@@ -413,26 +379,6 @@ const styles = StyleSheet.create({
   priceSeparator: {
     marginHorizontal: spacing.md,
     color: colors.textSecondary,
-  },
-  nftChip: {
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-    backgroundColor: colors.background,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  nftChipActive: {
-    backgroundColor: `${colors.primary}20`,
-    borderColor: colors.primary,
-  },
-  nftChipText: {
-    fontSize: fontSize.sm,
-    color: colors.textSecondary,
-  },
-  nftChipTextActive: {
-    color: colors.primary,
-    fontWeight: '600',
   },
   footer: {
     paddingHorizontal: spacing.lg,

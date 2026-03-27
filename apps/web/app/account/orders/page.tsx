@@ -575,12 +575,6 @@ function OrdersList() {
           <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 via-[#E0DFFD] to-blue-400 bg-clip-text text-transparent">
             我的订单
           </h1>
-          <Link
-            href="/account/nfts"
-            className="px-4 py-2 bg-[#46467A] text-white rounded-lg hover:bg-[#5a5a9e] transition-all flex items-center gap-2"
-          >
-            🎨 我的次元
-          </Link>
         </div>
 
         {/* 筛选器区域 */}
@@ -805,14 +799,6 @@ function OrdersList() {
                               >
                                 查看详情
                               </Link>
-                              {o.status === "PAID" && (
-                                <Link
-                                  href="/account/nfts"
-                                  className="px-3 py-1.5 rounded bg-emerald-600 text-white hover:bg-emerald-700 text-xs"
-                                >
-                                  我的次元
-                                </Link>
-                              )}
                             </>
                           ) : (
                             <span className="px-3 py-1.5 rounded bg-gray-300 text-[#282828] text-xs cursor-not-allowed">

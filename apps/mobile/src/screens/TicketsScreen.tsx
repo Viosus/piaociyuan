@@ -151,7 +151,6 @@ export default function TicketsScreen() {
     if (filters.category) count++;
     if (filters.dateFrom || filters.dateTo) count++;
     if (filters.minPrice !== undefined || filters.maxPrice !== undefined) count++;
-    if (filters.hasNft !== undefined) count++;
     return count;
   };
 
@@ -188,12 +187,6 @@ export default function TicketsScreen() {
       });
     }
 
-    if (filters.hasNft !== undefined) {
-      tags.push({
-        label: filters.hasNft ? '有次元收藏品' : '无次元收藏品',
-        onRemove: () => setFilters({ ...filters, hasNft: undefined }),
-      });
-    }
 
     if (tags.length === 0) return null;
 

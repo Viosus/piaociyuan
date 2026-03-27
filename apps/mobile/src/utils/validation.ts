@@ -119,16 +119,6 @@ export function validateNickname(nickname: string): {
 }
 
 /**
- * 验证钱包地址（以太坊）
- * @param address 钱包地址
- * @returns 是否有效
- */
-export function validateWalletAddress(address: string): boolean {
-  const addressRegex = /^0x[a-fA-F0-9]{40}$/;
-  return addressRegex.test(address);
-}
-
-/**
  * 验证数字范围
  * @param value 数值
  * @param min 最小值
