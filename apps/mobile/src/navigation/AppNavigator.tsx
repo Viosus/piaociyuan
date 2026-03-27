@@ -44,6 +44,14 @@ import AddressesScreen from '../screens/AddressesScreen';
 import AddAddressScreen from '../screens/AddAddressScreen';
 import MyCollectiblesScreen from '../screens/MyCollectiblesScreen';
 import CollectibleDetailScreen from '../screens/CollectibleDetailScreen';
+import TierSelectionScreen from '../screens/TierSelectionScreen';
+import PaymentSuccessScreen from '../screens/PaymentSuccessScreen';
+import PaymentFailureScreen from '../screens/PaymentFailureScreen';
+import ScanTicketScreen from '../screens/ScanTicketScreen';
+import AboutScreen from '../screens/AboutScreen';
+import ChangePasswordScreen from '../screens/ChangePasswordScreen';
+import NotificationsScreen from '../screens/NotificationsScreen';
+import SearchScreen from '../screens/SearchScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -425,6 +433,77 @@ function MainStackNavigator() {
           headerTitleStyle: {
             fontWeight: 'bold',
           },
+        }}
+      />
+      <MainStack.Screen
+        name="TierSelection"
+        component={TierSelectionScreen}
+        options={{
+          title: '选择票档',
+          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
+          headerTitleStyle: { fontWeight: 'bold' },
+        }}
+      />
+      <MainStack.Screen
+        name="PaymentSuccess"
+        component={PaymentSuccessScreen}
+        options={{
+          title: '支付成功',
+          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
+          headerTitleStyle: { fontWeight: 'bold' },
+        }}
+      />
+      <MainStack.Screen
+        name="PaymentFailure"
+        component={PaymentFailureScreen}
+        options={{
+          title: '支付失败',
+          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
+          headerTitleStyle: { fontWeight: 'bold' },
+        }}
+      />
+      <MainStack.Screen
+        name="ScanTicket"
+        component={ScanTicketScreen}
+        options={{
+          title: '扫码验票',
+          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
+          headerTitleStyle: { fontWeight: 'bold' },
+        }}
+      />
+      <MainStack.Screen
+        name="About"
+        component={AboutScreen}
+        options={{
+          title: '关于',
+          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
+          headerTitleStyle: { fontWeight: 'bold' },
+        }}
+      />
+      <MainStack.Screen
+        name="ChangePassword"
+        component={ChangePasswordScreen}
+        options={{
+          title: '修改密码',
+          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
+          headerTitleStyle: { fontWeight: 'bold' },
+        }}
+      />
+      <MainStack.Screen
+        name="Notifications"
+        component={NotificationsScreen}
+        options={{
+          title: '通知',
+          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
+          headerTitleStyle: { fontWeight: 'bold' },
+        }}
+      />
+      <MainStack.Screen
+        name="Search"
+        component={SearchScreen}
+        options={{
+          title: '搜索',
+          headerShown: false,
         }}
       />
     </MainStack.Navigator>

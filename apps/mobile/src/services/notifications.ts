@@ -1,5 +1,6 @@
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
+import Constants from 'expo-constants';
 import { Platform } from 'react-native';
 import { apiClient } from './api';
 import type { ApiResponse } from '@piaoyuzhou/shared';
@@ -77,9 +78,12 @@ export async function getExpoPushToken(): Promise<string | null> {
       return null;
     }
 
-    const token = await Notifications.getExpoPushTokenAsync({
-      projectId: 'your-project-id', // 替换为实际的 Expo Project ID
-    });
+    const projectId = Constants.expoConfig?.extra?.eas?.projectId;
+    if (!projectId) {
+      console.warn('Expo Project ID 未配置，推送通知不可用');
+      return null;
+    }
+    const token = await Notifications.getExpoPushTokenAsync({ projectId });
 
     return token.data;
   } catch {

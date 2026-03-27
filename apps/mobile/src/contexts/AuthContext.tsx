@@ -48,8 +48,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (savedUser) {
         setUser(savedUser);
       }
-    } catch {
-      // 认证检查失败，用户需要重新登录
+    } catch (error) {
+      console.warn('认证初始化失败:', error);
     } finally {
       setIsLoading(false);
     }

@@ -63,7 +63,7 @@ class SocketService {
       }
 
       // 获取 Socket URL（从 API_URL 转换）
-      const socketUrl = API_URL.replace('/api', '').replace('http', 'ws');
+      const socketUrl = API_URL.replace('/api', '');
 
       // 创建 Socket 连接
       this.socket = io(socketUrl, {

@@ -2,11 +2,11 @@ import { create } from 'zustand';
 import type { Post } from '@piaoyuzhou/shared';
 
 interface FavoriteState {
-  favoritePostIds: Set<number>;
+  favoritePostIds: Set<string>;
   favoritePosts: Post[];
-  addFavorite: (postId: number) => void;
-  removeFavorite: (postId: number) => void;
-  isFavorite: (postId: number) => boolean;
+  addFavorite: (postId: string) => void;
+  removeFavorite: (postId: string) => void;
+  isFavorite: (postId: string) => boolean;
   setFavoritePosts: (posts: Post[]) => void;
   clearFavorites: () => void;
 }

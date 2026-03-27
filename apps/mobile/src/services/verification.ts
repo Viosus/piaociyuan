@@ -80,15 +80,7 @@ export async function uploadVerificationImage(
     type: `image/${fileType}`,
   } as any);
 
-  return apiClient.post<{ url: string }>(
-    '/api/upload',
-    formData,
-    {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    }
-  );
+  return apiClient.post<{ url: string }>('/api/upload', formData);
 }
 
 /**
@@ -146,13 +138,5 @@ export async function uploadAvatar(
     type: `image/${fileType}`,
   } as any);
 
-  return apiClient.post<{ url: string }>(
-    '/api/upload',
-    formData,
-    {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    }
-  );
+  return apiClient.post<{ url: string }>('/api/upload', formData);
 }

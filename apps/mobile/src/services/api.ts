@@ -8,6 +8,8 @@ interface RequestOptions extends RequestInit {
   retryDelay?: number;
   cache?: boolean;
   cacheTime?: number;
+  params?: Record<string, any>;
+  timeout?: number;
 }
 
 interface CacheEntry<T> {
@@ -225,12 +227,29 @@ class ApiClient {
       retryDelay = 1000,
       cache = false,
       cacheTime = this.defaultCacheTime,
+      params,
+      timeout = 15000,
       ...fetchOptions
     } = options;
 
+    // 构建带查询参数的 URL
+    let url = `${this.baseURL}${endpoint}`;
+    if (params) {
+      const searchParams = new URLSearchParams();
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          searchParams.append(key, String(value));
+        }
+      });
+      const qs = searchParams.toString();
+      if (qs) {
+        url += `${endpoint.includes('?') ? '&' : '?'}${qs}`;
+      }
+    }
+
     // 检查缓存
     if (cache && fetchOptions.method === 'GET') {
-      const cacheKey = `${endpoint}:${JSON.stringify(fetchOptions.body || {})}`;
+      const cacheKey = `${url}:${JSON.stringify(fetchOptions.body || {})}`;
       const cachedValue = this.getCacheValue<ApiResponse<T>>(cacheKey, cacheTime);
       if (cachedValue) {
         return cachedValue;
@@ -245,8 +264,11 @@ class ApiClient {
     let lastError: any;
 
     for (let attempt = 0; attempt <= retry; attempt++) {
+      // 设置请求超时
+      const timeoutId = setTimeout(() => controller.abort(), timeout);
+
       try {
-        const response = await fetch(`${this.baseURL}${endpoint}`, {
+        const response = await fetch(url, {
           ...fetchOptions,
           headers: {
             ...this.getHeaders(),
@@ -254,6 +276,8 @@ class ApiClient {
           },
           signal: controller.signal,
         });
+
+        clearTimeout(timeoutId);
 
         // 处理 401 未授权错误（Token 过期）
         if (response.status === 401 && this.refreshToken) {
@@ -306,7 +330,7 @@ class ApiClient {
 
         // 设置缓存
         if (cache && fetchOptions.method === 'GET') {
-          const cacheKey = `${endpoint}:${JSON.stringify(fetchOptions.body || {})}`;
+          const cacheKey = `${url}:${JSON.stringify(fetchOptions.body || {})}`;
           this.setCacheValue(cacheKey, data);
         }
 
@@ -315,11 +339,12 @@ class ApiClient {
 
         return data;
       } catch (error: any) {
+        clearTimeout(timeoutId);
         lastError = error;
 
-        // 如果是取消请求，直接抛出错误
+        // 如果是超时或取消请求，直接抛出错误
         if (error.name === 'AbortError') {
-          throw new Error('请求已取消');
+          throw new Error('请求超时或已取消');
         }
 
         // 如果是最后一次重试，抛出错误

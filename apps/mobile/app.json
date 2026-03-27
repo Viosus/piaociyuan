@@ -26,6 +26,22 @@
         "NSPhotoLibraryAddUsageDescription": "票次元需要保存门票二维码到您的相册",
         "NSLocationWhenInUseUsageDescription": "票次元需要获取您的位置来推荐附近的活动",
         "NSFaceIDUsageDescription": "票次元使用面容ID来保护您的账号安全"
+      },
+      "privacyManifests": {
+        "NSPrivacyAccessedAPITypes": [
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryUserDefaults",
+            "NSPrivacyAccessedAPITypeReasons": ["CA92.1"]
+          },
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryFileTimestamp",
+            "NSPrivacyAccessedAPITypeReasons": ["C617.1"]
+          },
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategorySystemBootTime",
+            "NSPrivacyAccessedAPITypeReasons": ["35F9.1"]
+          }
+        ]
       }
     },
     "android": {
@@ -83,7 +99,19 @@
         {
           "locationWhenInUsePermission": "票次元需要获取您的位置来推荐附近的活动"
         }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#46467A"
+        }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": ""
+      }
+    }
   }
 }

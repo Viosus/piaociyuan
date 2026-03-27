@@ -16,7 +16,7 @@ export const linking: LinkingOptions<any> = {
           Home: 'home',
           Events: 'events',
           Encore: 'encore',
-          Messages: 'messages',
+          Tickets: 'tickets',
           Profile: 'profile',
         },
       },
@@ -116,6 +116,9 @@ export const linking: LinkingOptions<any> = {
 
       // 通知
       Notifications: 'notifications',
+
+      // 搜索
+      Search: 'search',
 
       // 认证
       Login: 'auth/login',

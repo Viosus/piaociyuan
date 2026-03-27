@@ -205,9 +205,5 @@ export async function uploadPostImage(uri: string) {
     type,
   } as any);
 
-  return apiClient.post<{ url: string }>('/api/upload', formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  });
+  return apiClient.post<{ url: string }>('/api/upload', formData);
 }
