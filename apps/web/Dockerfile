@@ -1,5 +1,5 @@
 # 阶段1: 依赖安装和构建
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 RUN apk add --no-cache libc6-compat python3 make g++
 WORKDIR /app
 
@@ -23,7 +23,7 @@ ENV JWT_SECRET=build-placeholder
 RUN npm run build
 
 # 阶段2: 生产镜像
-FROM node:20-alpine AS runner
+FROM node:22-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production

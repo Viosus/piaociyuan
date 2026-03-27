@@ -99,6 +99,18 @@ Web API 路径: `apps/web/app/api/`
 - `/api/collectibles/*` - 收藏品
 - `/api/orders/*` - 订单
 - `/api/admin/*` - 管理后台
+- `/api/banners/*` - 轮播图/横幅
+- `/api/health/*` - 健康检查
+- `/api/holds/*` - 锁定/预留
+- `/api/homepage-sections/*` - 首页板块
+- `/api/messages/*` - 消息
+- `/api/notifications/*` - 通知
+- `/api/pay/*` - 支付
+- `/api/posts/*` - 帖子/动态
+- `/api/tiers/*` - 等级/层级
+- `/api/upload/*` - 文件上传
+- `/api/user/*` - 当前用户
+- `/api/users/*` - 用户管理
 
 ## 认证系统
 
