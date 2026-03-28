@@ -207,7 +207,7 @@ MainStackNavigator
 ### 2. 代码复用
 - 共享组件（EventCard, OrderCard）
 - 统一的 API 客户端
-- 共享的类型定义 (@piaoyuzhou/shared)
+- 共享的类型定义 (@piaociyuan/shared)
 
 ### 3. 性能优化
 - FlatList 虚拟化列表

@@ -7,7 +7,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}/piaoyuzhou-web
+  IMAGE_NAME: ${{ github.repository }}/piaociyuan-web
 
 jobs:
   # Step 1: Build validation
@@ -111,10 +111,10 @@ jobs:
             echo $GHCR_TOKEN | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
 
             # 拉取最新镜像
-            docker pull ghcr.io/viosus/piaociyuan/piaoyuzhou-web:latest
+            docker pull ghcr.io/viosus/piaociyuan/piaociyuan-web:latest
 
             # 更新本地镜像标签
-            docker tag ghcr.io/viosus/piaociyuan/piaoyuzhou-web:latest piaoyuzhou-web:latest
+            docker tag ghcr.io/viosus/piaociyuan/piaociyuan-web:latest piaociyuan-web:latest
 
             # 重启服务
             cd ~/piaociyuan

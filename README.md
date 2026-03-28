@@ -17,7 +17,7 @@
 ## 项目结构
 
 ```
-piaoyuzhou/                    # Monorepo 根目录
+piaociyuan/                    # Monorepo 根目录
 ├── apps/                      # 应用目录
 │   ├── web/                   # Web 应用（Next.js）
 │   │   ├── app/               # Next.js App Router 页面
@@ -101,7 +101,7 @@ piaoyuzhou/                    # Monorepo 根目录
 
 ```bash
 git clone <your-repo-url>
-cd piaoyuzhou
+cd piaociyuan
 ```
 
 ### 2. 安装依赖
@@ -227,14 +227,14 @@ npm run db:studio    # 启动 Prisma Studio
 
 ### 使用共享包
 
-Web 应用已配置使用 `@piaoyuzhou/shared` 共享包：
+Web 应用已配置使用 `@piaociyuan/shared` 共享包：
 
 ```typescript
 // 在 apps/web 中导入共享类型
-import { ApiResponse, UserRole, TicketStatus } from '@piaoyuzhou/shared';
+import { ApiResponse, UserRole, TicketStatus } from '@piaociyuan/shared';
 
 // 使用共享常量
-import { ErrorCode, TICKET_HOLD_DURATION } from '@piaoyuzhou/shared';
+import { ErrorCode, TICKET_HOLD_DURATION } from '@piaociyuan/shared';
 ```
 
 ## 数据库管理
@@ -310,9 +310,9 @@ mkdir apps/mobile
 
 # 2. 在新应用的 package.json 中添加 workspace 依赖
 {
-  "name": "@piaoyuzhou/mobile",
+  "name": "@piaociyuan/mobile",
   "dependencies": {
-    "@piaoyuzhou/shared": "*"
+    "@piaociyuan/shared": "*"
   }
 }
 

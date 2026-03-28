@@ -62,7 +62,7 @@ npm start
 - **导航**: React Navigation 7
 - **状态管理**: React Context API
 - **安全存储**: Expo SecureStore
-- **代码共享**: @piaoyuzhou/shared
+- **代码共享**: @piaociyuan/shared
 
 ## 📖 详细文档说明
 

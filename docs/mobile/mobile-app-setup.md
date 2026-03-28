@@ -4,11 +4,11 @@
 
 ### 1. 项目初始化 ✅
 - 使用 Expo 创建 React Native 项目
-- 配置为 Monorepo 的一部分 (@piaoyuzhou/mobile)
-- 集成 @piaoyuzhou/shared 共享包
+- 配置为 Monorepo 的一部分 (@piaociyuan/mobile)
+- 集成 @piaociyuan/shared 共享包
 
 ### 2. TypeScript 配置 ✅
-- 配置路径映射，支持 `@piaoyuzhou/shared` 导入
+- 配置路径映射，支持 `@piaociyuan/shared` 导入
 - 配置别名 `@/*` 指向项目根目录
 - TypeScript 严格模式开启
 
@@ -36,7 +36,7 @@
 - 创建基础 API 客户端 (`src/services/api.ts`)
 - 支持 GET/POST/PUT/DELETE 请求
 - 自动处理 Authorization header
-- 集成 @piaoyuzhou/shared 的 ApiResponse 类型
+- 集成 @piaociyuan/shared 的 ApiResponse 类型
 
 ### 6. 认证服务 ✅
 - 创建认证相关的 API 封装 (`src/services/auth.ts`)
@@ -141,7 +141,7 @@ npm run mobile:ios
 
 ## 与 Web 端的代码共享
 
-通过 `@piaoyuzhou/shared` 包共享：
+通过 `@piaociyuan/shared` 包共享：
 - TypeScript 类型定义
 - API 响应类型
 - 错误代码常量
@@ -149,14 +149,14 @@ npm run mobile:ios
 
 示例：
 ```typescript
-import { ApiResponse, UserRole, TicketStatus } from '@piaoyuzhou/shared';
-import { ErrorCode, TICKET_HOLD_DURATION } from '@piaoyuzhou/shared';
+import { ApiResponse, UserRole, TicketStatus } from '@piaociyuan/shared';
+import { ErrorCode, TICKET_HOLD_DURATION } from '@piaociyuan/shared';
 ```
 
 ## 注意事项
 
 1. **环境变量**：使用 `EXPO_PUBLIC_` 前缀，例如 `EXPO_PUBLIC_API_URL`
-2. **路径映射**：可以使用 `@piaoyuzhou/shared` 和 `@/*` 别名
+2. **路径映射**：可以使用 `@piaociyuan/shared` 和 `@/*` 别名
 3. **TypeScript**：启用了严格模式，需要显式类型标注
 4. **导航**：使用 TypeScript 进行类型安全的导航
 

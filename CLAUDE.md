@@ -5,7 +5,7 @@
 ## 项目结构
 
 ```
-piaoyuzhou/
+piaociyuan/
 ├── apps/
 │   ├── web/          # Next.js Web 应用
 │   └── mobile/       # Expo React Native 应用
@@ -134,5 +134,5 @@ Web API 路径: `apps/web/app/api/`
 ## GitHub Actions
 
 - **CI/CD**: `.github/workflows/`
-- **Docker Registry**: ghcr.io/viosus/piaociyuan/piaoyuzhou-web
+- **Docker Registry**: ghcr.io/viosus/piaociyuan/piaociyuan-web
 - **部署**: 阿里云 ECS
