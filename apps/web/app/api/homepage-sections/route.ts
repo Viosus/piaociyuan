@@ -29,8 +29,8 @@ export async function GET(req: NextRequest) {
         if (section.type === 'manual') {
           // 手动栏目：使用配置的活动
           events = section.events
-            .map(se => se.event)
-            .filter(event => {
+            .map((se: { event: Event }) => se.event)
+            .filter((event: Event) => {
               // 只显示可售票的活动
               const saleInfo = getSaleStatusInfo(event.saleStatus, event.saleStartTime, event.saleEndTime);
               return saleInfo.saleStatus === 'not_started' || saleInfo.saleStatus === 'on_sale';
@@ -47,7 +47,7 @@ export async function GET(req: NextRequest) {
               orderBy: { createdAt: 'desc' }
             });
 
-            events = autoEvents.filter(event => {
+            events = autoEvents.filter((event: Event) => {
               const saleInfo = getSaleStatusInfo(event.saleStatus, event.saleStartTime, event.saleEndTime);
               return saleInfo.saleStatus === 'not_started' || saleInfo.saleStatus === 'on_sale';
             });
@@ -65,7 +65,7 @@ export async function GET(req: NextRequest) {
               orderBy: { createdAt: 'desc' }
             });
 
-            events = autoEvents.filter(event => {
+            events = autoEvents.filter((event: Event) => {
               const saleInfo = getSaleStatusInfo(event.saleStatus, event.saleStartTime, event.saleEndTime);
               return saleInfo.saleStatus === status;
             });

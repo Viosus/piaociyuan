@@ -111,8 +111,8 @@ export async function GET(req: Request) {
       createdAt: event.createdAt.toISOString(),
       tiers: event.tiers,
       // 最低价格（方便前端显示）
-      minPrice: event.tiers.length > 0 ? Math.min(...event.tiers.map(t => t.price)) : null,
-      maxPrice: event.tiers.length > 0 ? Math.max(...event.tiers.map(t => t.price)) : null,
+      minPrice: event.tiers.length > 0 ? Math.min(...event.tiers.map((t: { price: number }) => t.price)) : null,
+      maxPrice: event.tiers.length > 0 ? Math.max(...event.tiers.map((t: { price: number }) => t.price)) : null,
     }));
 
     return NextResponse.json({ ok: true, data: formattedEvents });

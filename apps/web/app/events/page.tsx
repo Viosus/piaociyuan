@@ -33,8 +33,8 @@ async function getHomepageSections() {
       if (section.type === 'manual') {
         // 手动栏目：使用配置的活动
         events = section.events
-          .map(se => se.event)
-          .filter(event => {
+          .map((se: { event: Event }) => se.event)
+          .filter((event: Event) => {
             const saleInfo = getSaleStatusInfo(event.saleStatus, event.saleStartTime, event.saleEndTime);
             return saleInfo.saleStatus === 'not_started' || saleInfo.saleStatus === 'on_sale';
           });
@@ -50,7 +50,7 @@ async function getHomepageSections() {
             orderBy: { createdAt: 'desc' }
           });
 
-          events = autoEvents.filter(event => {
+          events = autoEvents.filter((event: Event) => {
             const saleInfo = getSaleStatusInfo(event.saleStatus, event.saleStartTime, event.saleEndTime);
             return saleInfo.saleStatus === 'not_started' || saleInfo.saleStatus === 'on_sale';
           });
@@ -68,7 +68,7 @@ async function getHomepageSections() {
             orderBy: { createdAt: 'desc' }
           });
 
-          events = autoEvents.filter(event => {
+          events = autoEvents.filter((event: Event) => {
             const saleInfo = getSaleStatusInfo(event.saleStatus, event.saleStartTime, event.saleEndTime);
             return saleInfo.saleStatus === status;
           });
@@ -116,7 +116,7 @@ export default async function EventsPage() {
               bgGradient={section.bgGradient}
             >
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {section.events.map((event: any, index: number) => (
+                {section.events.map((event: Event, index: number) => (
                   <EventCard
                     key={event.id}
                     event={event}
