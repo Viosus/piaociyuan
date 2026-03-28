@@ -11,6 +11,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
 import { getErrorMessage } from '@/lib/error-utils';
+import { getIO } from '@/lib/socket';
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -22,6 +23,7 @@ export async function GET(req: NextRequest, { params }: Props) {
     const page = parseInt(searchParams.get('page') || '1');
     const pageSize = parseInt(searchParams.get('pageSize') || '20');
     const parentId = searchParams.get('parentId'); // 可选：获取某条评论的回复
+    const sort = searchParams.get('sort') || 'newest'; // newest | hottest
 
     const skip = (page - 1) * pageSize;
 
@@ -83,9 +85,9 @@ export async function GET(req: NextRequest, { params }: Props) {
             },
           },
         },
-        orderBy: {
-          createdAt: 'desc',
-        },
+        orderBy: sort === 'hottest'
+          ? [{ likeCount: 'desc' }, { createdAt: 'desc' }]
+          : { createdAt: 'desc' },
         skip,
         take: pageSize,
       }),
@@ -304,6 +306,39 @@ export async function POST(req: NextRequest, { params }: Props) {
       userId,
       isReply: !!parentId,
     });
+
+    // 6.5️⃣ 通过 WebSocket 广播新评论到帖子房间
+    try {
+      const io = getIO();
+      if (io) {
+        io.to(`post:${postId}`).emit('comment:new', {
+          postId,
+          comment: {
+            id: comment.id,
+            content: comment.content,
+            likeCount: comment.likeCount,
+            createdAt: comment.createdAt.toISOString(),
+            updatedAt: comment.updatedAt.toISOString(),
+            user: {
+              id: comment.user.id,
+              nickname: comment.user.nickname || '匿名用户',
+              avatar: comment.user.avatar || null,
+            },
+            parentComment: comment.parent
+              ? {
+                  id: comment.parent.id,
+                  user: {
+                    id: comment.parent.user.id,
+                    nickname: comment.parent.user.nickname || '匿名用户',
+                  },
+                }
+              : null,
+          },
+        });
+      }
+    } catch (error) {
+      console.error('[COMMENT_BROADCAST_ERROR]', error);
+    }
 
     // 7️⃣ 格式化返回数据
     const formattedComment = {

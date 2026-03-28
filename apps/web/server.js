@@ -1,4 +1,6 @@
 // server.js - 自定义服务器支持 Socket.io
+process.env.TZ = 'Asia/Shanghai';
+
 const { createServer } = require('http');
 const { parse } = require('url');
 const next = require('next');
@@ -58,7 +60,7 @@ app.prepare().then(() => {
 
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
-      socket.userId = decoded.userId;
+      socket.userId = decoded.id;
       next();
     } catch (err) {
       next(new Error('Authentication error: Invalid token'));
@@ -118,6 +120,19 @@ app.prepare().then(() => {
         userId: socket.userId,
         conversationId: data.conversationId,
       });
+    });
+
+    // 加入帖子房间（用于实时评论）
+    socket.on('post:join', (data) => {
+      if (data.postId) {
+        socket.join(`post:${data.postId}`);
+      }
+    });
+
+    socket.on('post:leave', (data) => {
+      if (data.postId) {
+        socket.leave(`post:${data.postId}`);
+      }
     });
 
     // 用户断开连接

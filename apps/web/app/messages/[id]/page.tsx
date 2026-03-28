@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { ArrowLeft, Send } from 'lucide-react';
 import { apiGet, apiPost } from '@/lib/api';
 import { useSocket } from '@/hooks/useSocket';
+import { formatMessageTime, shouldShowTimeDivider } from '@/lib/time';
 
 interface User {
   id: string;
@@ -141,20 +142,7 @@ export default function ConversationPage() {
     }
   };
 
-  const formatTime = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-
-    if (days === 0) {
-      return date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
-    } else if (days === 1) {
-      return '昨天 ' + date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
-    } else {
-      return date.toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
-    }
-  };
+  const formatTime = formatMessageTime;
 
   if (loading) {
     return (
@@ -217,57 +205,71 @@ export default function ConversationPage() {
               const isCurrentUser = msg.senderId === conversation.otherUser.id ? false : true;
               const showAvatar =
                 index === 0 || conversation.messages[index - 1]?.senderId !== msg.senderId;
+              const showTimeDivider =
+                index === 0 ||
+                shouldShowTimeDivider(
+                  conversation.messages[index - 1].createdAt,
+                  msg.createdAt
+                );
 
               return (
-                <div
-                  key={msg.id}
-                  className={`flex gap-3 ${isCurrentUser ? 'flex-row-reverse' : ''}`}
-                >
-                  {/* Avatar */}
-                  <div className="flex-shrink-0 w-10">
-                    {showAvatar && !isCurrentUser && (
-                      <>
-                        {msg.sender.avatar ? (
-                          <Image
-                            src={msg.sender.avatar}
-                            alt={msg.sender.nickname}
-                            width={40}
-                            height={40}
-                            className="rounded-full"
-                          />
-                        ) : (
-                          <div className="w-10 h-10 bg-gradient-to-br from-purple-400 to-[#EAF353] rounded-full flex items-center justify-center text-white font-bold">
-                            {msg.sender.nickname?.charAt(0) || '?'}
-                          </div>
-                        )}
-                      </>
-                    )}
-                  </div>
+                <div key={msg.id}>
+                  {/* 时间分隔线 */}
+                  {showTimeDivider && (
+                    <div className="text-center my-3">
+                      <span className="text-xs text-white/40 bg-white/10 px-3 py-1 rounded-full">
+                        {formatTime(msg.createdAt)}
+                      </span>
+                    </div>
+                  )}
 
-                  {/* Message bubble */}
-                  <div className={`flex-1 max-w-[70%] ${isCurrentUser ? 'items-end' : ''}`}>
-                    {showAvatar && (
+                  <div className={`flex gap-3 ${isCurrentUser ? 'flex-row-reverse' : ''}`}>
+                    {/* Avatar */}
+                    <div className="flex-shrink-0 w-10">
+                      {showAvatar && !isCurrentUser && (
+                        <>
+                          {msg.sender.avatar ? (
+                            <Image
+                              src={msg.sender.avatar}
+                              alt={msg.sender.nickname}
+                              width={40}
+                              height={40}
+                              className="rounded-full"
+                            />
+                          ) : (
+                            <div className="w-10 h-10 bg-gradient-to-br from-purple-400 to-[#EAF353] rounded-full flex items-center justify-center text-white font-bold">
+                              {msg.sender.nickname?.charAt(0) || '?'}
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </div>
+
+                    {/* Message bubble */}
+                    <div className={`flex-1 max-w-[70%] ${isCurrentUser ? 'items-end' : ''}`}>
+                      {showAvatar && (
+                        <div
+                          className={`text-xs text-white/60 mb-1 ${
+                            isCurrentUser ? 'text-right' : ''
+                          }`}
+                        >
+                          {isCurrentUser ? '我' : msg.sender.nickname}
+                        </div>
+                      )}
                       <div
-                        className={`text-xs text-white/60 mb-1 ${
-                          isCurrentUser ? 'text-right' : ''
+                        className={`rounded-lg px-4 py-2 break-words ${
+                          isCurrentUser
+                            ? 'bg-[#EAF353] text-white ml-auto'
+                            : 'bg-white/80 backdrop-blur-sm text-[#282828] border border-[#FFEBF5]'
                         }`}
                       >
-                        {isCurrentUser ? '我' : msg.sender.nickname} • {formatTime(msg.createdAt)}
+                        {msg.content}
                       </div>
-                    )}
-                    <div
-                      className={`rounded-lg px-4 py-2 break-words ${
-                        isCurrentUser
-                          ? 'bg-[#EAF353] text-white ml-auto'
-                          : 'bg-white/80 backdrop-blur-sm text-[#282828] border border-[#FFEBF5]'
-                      }`}
-                    >
-                      {msg.content}
                     </div>
-                  </div>
 
-                  {/* Spacer for current user */}
-                  {isCurrentUser && <div className="flex-shrink-0 w-10" />}
+                    {/* Spacer for current user */}
+                    {isCurrentUser && <div className="flex-shrink-0 w-10" />}
+                  </div>
                 </div>
               );
             })

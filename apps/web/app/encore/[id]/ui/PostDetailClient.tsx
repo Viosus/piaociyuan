@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import FavoriteButton from "@/app/encore/ui/FavoriteButton";
+import { useSocket } from "@/hooks/useSocket";
+import { formatRelativeTime } from "@/lib/time";
 
 type PostDetail = {
   id: string;
@@ -74,6 +76,10 @@ export default function PostDetailClient({ postId }: { postId: string }) {
   const [commentText, setCommentText] = useState('');
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
+  const [commentSort, setCommentSort] = useState<'newest' | 'hottest'>('newest');
+
+  // WebSocket 实时评论
+  const { isConnected, emit, getSocket } = useSocket({ autoConnect: true });
 
   useEffect(() => {
     loadPost();
@@ -86,6 +92,37 @@ export default function PostDetailClient({ postId }: { postId: string }) {
       checkFollowStatus();
     }
   }, [post]);
+
+  // 加入帖子房间 + 监听实时评论
+  useEffect(() => {
+    if (!isConnected || !postId) return;
+
+    const socket = getSocket();
+    if (!socket) return;
+
+    socket.emit('post:join', { postId });
+
+    const handleNewComment = (data: { postId: string; comment: PostDetail['comments'][0] }) => {
+      if (data.postId !== postId) return;
+      setPost((prev) => {
+        if (!prev) return prev;
+        const exists = prev.comments.some((c) => c.id === data.comment.id);
+        if (exists) return prev;
+        return {
+          ...prev,
+          commentCount: prev.commentCount + 1,
+          comments: [data.comment, ...prev.comments],
+        };
+      });
+    };
+
+    socket.on('comment:new', handleNewComment);
+
+    return () => {
+      socket.emit('post:leave', { postId });
+      socket.off('comment:new', handleNewComment);
+    };
+  }, [isConnected, postId, getSocket]);
 
   const loadPost = async () => {
     try {
@@ -338,20 +375,17 @@ export default function PostDetailClient({ postId }: { postId: string }) {
     }
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    const minutes = Math.floor(diff / 60000);
-    const hours = Math.floor(diff / 3600000);
-    const days = Math.floor(diff / 86400000);
+  const formatDate = formatRelativeTime;
 
-    if (minutes < 1) return "刚刚";
-    if (minutes < 60) return `${minutes}分钟前`;
-    if (hours < 24) return `${hours}小时前`;
-    if (days < 7) return `${days}天前`;
-    return date.toLocaleDateString("zh-CN");
-  };
+  // 评论排序（前端排序，配合 API sort 参数）
+  const sortedComments = post
+    ? [...post.comments].sort((a, b) => {
+        if (commentSort === 'hottest') {
+          return b.likeCount - a.likeCount || new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        }
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      })
+    : [];
 
   if (loading) {
     return (
@@ -718,13 +752,37 @@ export default function PostDetailClient({ postId }: { postId: string }) {
             {/* 评论列表 */}
             <div className="divide-y divide-gray-200">
               <div className="p-4">
-                <h3 className="font-semibold text-gray-900 mb-4">
-                  评论 ({post.commentCount})
-                </h3>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-semibold text-gray-900">
+                    评论 ({post.commentCount})
+                  </h3>
+                  <div className="flex gap-1 bg-gray-100 rounded-full p-0.5">
+                    <button
+                      onClick={() => setCommentSort('newest')}
+                      className={`px-3 py-1 text-xs rounded-full transition ${
+                        commentSort === 'newest'
+                          ? 'bg-white text-gray-900 shadow-sm font-medium'
+                          : 'text-gray-500 hover:text-gray-700'
+                      }`}
+                    >
+                      最新
+                    </button>
+                    <button
+                      onClick={() => setCommentSort('hottest')}
+                      className={`px-3 py-1 text-xs rounded-full transition ${
+                        commentSort === 'hottest'
+                          ? 'bg-white text-gray-900 shadow-sm font-medium'
+                          : 'text-gray-500 hover:text-gray-700'
+                      }`}
+                    >
+                      最热
+                    </button>
+                  </div>
+                </div>
 
-                {post.comments.length > 0 ? (
+                {sortedComments.length > 0 ? (
                   <div className="space-y-4">
-                    {post.comments.map((comment) => (
+                    {sortedComments.map((comment) => (
                       <div key={comment.id} className="space-y-2">
                         {/* 主评论 */}
                         <div className="flex items-start gap-3">
@@ -768,9 +826,14 @@ export default function PostDetailClient({ postId }: { postId: string }) {
                                       </div>
                                     )}
                                     <div className="flex-1 min-w-0">
-                                      <span className="text-xs font-medium text-gray-900">
-                                        {reply.user.nickname}
-                                      </span>
+                                      <div className="flex items-center gap-2">
+                                        <span className="text-xs font-medium text-gray-900">
+                                          {reply.user.nickname}
+                                        </span>
+                                        <span className="text-xs text-gray-400">
+                                          {formatDate(reply.createdAt)}
+                                        </span>
+                                      </div>
                                       <p className="text-xs text-gray-600 mt-0.5">
                                         {reply.content}
                                       </p>
