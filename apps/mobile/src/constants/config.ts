@@ -20,19 +20,19 @@ export const COLORS = {
   // 背景色
   background: '#E0DFFD',           // 页面背景（淡紫色，与网站统一）
   backgroundAccent: '#46467A',     // 强调背景（紫色，用于头部/底部导航）
-  surface: '#f8f8f8',              // 卡片背景（浅灰）
+  surface: '#ffffff',              // 卡片背景（白色，与网站统一）
   surfaceElevated: '#ffffff',      // 抬起的卡片背景（纯白）
 
   // 文字色
-  text: '#282828',                 // 主文字（与网站统一）
-  textSecondary: 'rgba(40, 40, 40, 0.6)',  // 次要文字
+  text: '#1a1a1f',                 // 主文字（与网站 --foreground 统一）
+  textSecondary: 'rgba(26, 26, 31, 0.6)',  // 次要文字
   textOnPrimary: '#ffffff',        // 在 primary 色上的文字（白色）
   textLight: '#ffffff',            // 在深色背景上的文字
 
-  // 边框色
-  border: 'rgba(70, 70, 122, 0.2)',        // 默认边框（紫色半透明）
-  borderHover: 'rgba(70, 70, 122, 0.3)',   // hover 边框
-  borderSubtle: 'rgba(70, 70, 122, 0.1)',  // 淡边框
+  // 边框色 - 与网站 cards.css 统一
+  border: '#FFEBF5',                       // 卡片边框（浅粉，与网站统一）
+  borderHover: '#FFE3F0',                  // hover 边框
+  borderSubtle: 'rgba(255, 235, 245, 0.5)', // 淡边框
   borderPrimary: 'rgba(70, 70, 122, 0.3)', // 主色边框
 };
 
@@ -89,3 +89,30 @@ export const { md: medium } = BORDER_RADIUS;
 
 // 小写版本（推荐使用）
 export const borderRadius = BORDER_RADIUS;
+
+// 阴影系统 - 与网站 cards.css 统一
+export const SHADOWS = {
+  sm: {
+    shadowColor: '#46467A',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  md: {
+    shadowColor: '#46467A',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  lg: {
+    shadowColor: '#46467A',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.2,
+    shadowRadius: 15,
+    elevation: 8,
+  },
+};
+
+export const shadows = SHADOWS;
