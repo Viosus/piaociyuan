@@ -185,7 +185,7 @@ body {
 - `/admin/users` - 用户管理
 - `/admin/posts` - 帖子管理
 - `/admin/events` - 活动管理
-- `/admin/nfts` - NFT管理
+- `/admin/collectibles` - 收藏品管理
 - `/admin/verifications` - 认证审核
 
 ### ✅ 用户页面

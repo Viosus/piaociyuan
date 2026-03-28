@@ -119,7 +119,6 @@ Authorization: Bearer <access_token>
 - [订单 API 文档](./订单API文档.md) - 订单创建、查询、管理
 
 ### 增值功能
-- [NFT API 文档](./NFT-API文档.md) - NFT资产、铸造、钱包管理
 - [通知 API 文档](./通知API文档.md) - 通知查询、标记
 - [社交 API 文档](./社交API文档.md) - 关注、互动
 
@@ -191,55 +190,6 @@ const order = await fetch('/api/orders', {
 
 // 5. 查看订单
 const orderDetail = await fetch(`/api/orders/${order.data.id}`, {
-  headers: { 'Authorization': `Bearer ${token}` }
-});
-```
-
-### 4. NFT 铸造流程
-
-```javascript
-// 1. 绑定钱包
-await fetch('/api/nft/wallet/bind', {
-  method: 'POST',
-  headers: {
-    'Authorization': `Bearer ${token}`,
-    'Content-Type': 'application/json'
-  },
-  body: JSON.stringify({
-    walletAddress: '0x...',
-    signature: '0x...',
-    message: 'Sign this message...',
-    walletType: 'metamask'
-  })
-});
-
-// 2. 请求铸造 NFT
-const mint = await fetch('/api/nft/mint/request', {
-  method: 'POST',
-  headers: {
-    'Authorization': `Bearer ${token}`,
-    'Content-Type': 'application/json'
-  },
-  body: JSON.stringify({
-    ticketId: 'ticket-uuid'
-  })
-});
-
-// 3. 轮询铸造状态
-const checkStatus = setInterval(async () => {
-  const status = await fetch(`/api/nft/mint/status/${ticketId}`, {
-    headers: { 'Authorization': `Bearer ${token}` }
-  });
-
-  const data = await status.json();
-  if (data.mintStatus === 'minted') {
-    clearInterval(checkStatus);
-    console.log('NFT铸造成功！');
-  }
-}, 2000);
-
-// 4. 查看 NFT 收藏
-const nfts = await fetch('/api/user/nfts', {
   headers: { 'Authorization': `Bearer ${token}` }
 });
 ```
@@ -332,9 +282,7 @@ GET /api/events?fields=id,name,date,cover
 ## 更新日志
 
 ### 2025-11-02
-- ✅ NFT 功能重构完成
-- ✅ 新增 NFT 相关 API
-- ✅ 完善钱包管理功能
+- ✅ 收藏品系统上线
 - ✅ 优化票务系统
 
 ### 2025-11-01
