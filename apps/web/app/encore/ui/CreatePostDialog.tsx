@@ -192,7 +192,7 @@ export default function CreatePostDialog({
             <textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EAF353] focus:border-transparent resize-none text-gray-800"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#46467A] focus:border-transparent resize-none text-gray-800"
               rows={6}
               placeholder="分享你的演出时刻、观后感想..."
               maxLength={5000}
@@ -252,7 +252,7 @@ export default function CreatePostDialog({
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="aspect-square border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center text-gray-400 hover:border-[#EAF353] hover:text-[#d4db4a] transition"
+                  className="aspect-square border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center text-gray-400 hover:border-[#46467A] hover:text-[#5A5A8E] transition"
                   disabled={loading}
                 >
                   <span className="text-2xl">+</span>
@@ -284,7 +284,7 @@ export default function CreatePostDialog({
               type="text"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EAF353] focus:border-transparent text-gray-800"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#46467A] focus:border-transparent text-gray-800"
               placeholder="例如：北京工人体育场、上海梅赛德斯奔驰文化中心..."
               maxLength={100}
               disabled={loading}
@@ -302,7 +302,7 @@ export default function CreatePostDialog({
             </button>
             <button
               type="submit"
-              className="flex-1 px-6 py-3 bg-[#EAF353] text-gray-900 rounded-lg hover:bg-[#d4db4a] transition disabled:opacity-50 font-medium"
+              className="flex-1 px-6 py-3 bg-[#46467A] text-white rounded-lg hover:bg-[#5A5A8E] transition disabled:opacity-50 font-medium"
               disabled={loading}
             >
               {loading ? "发布中..." : "发布"}

@@ -3,7 +3,7 @@ export function HomePageSkeleton() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Banner Skeleton */}
-      <div className="w-full bg-gradient-to-r from-[#EAF353] to-[#FFE3F0] animate-pulse">
+      <div className="w-full bg-gradient-to-r from-[#46467A] to-[#E0DFFD] animate-pulse">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="h-80"></div>
         </div>

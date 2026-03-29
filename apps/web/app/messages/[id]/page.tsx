@@ -146,9 +146,9 @@ export default function ConversationPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#C72471] flex items-center justify-center">
+      <div className="min-h-screen bg-[#E0DFFD] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#EAF353] mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#46467A] mx-auto mb-4"></div>
           <p className="text-white/60">加载中...</p>
         </div>
       </div>
@@ -160,14 +160,14 @@ export default function ConversationPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#C72471] flex flex-col -mt-20">
+    <div className="min-h-screen bg-[#E0DFFD] flex flex-col -mt-20">
       {/* Header - 使用 fixed 定位覆盖全局搜索栏 */}
       <div className="bg-white/80 backdrop-blur-sm border-b border-[#FFEBF5] px-4 py-3 flex items-center gap-3 fixed top-0 left-20 right-[var(--right-sidebar-width,64px)] z-50">
         <button
           onClick={() => router.push('/messages')}
-          className="p-2 hover:bg-[#FFF9FC] rounded-lg transition"
+          className="p-2 hover:bg-white/90 rounded-lg transition"
         >
-          <ArrowLeft className="w-5 h-5 text-[#282828]" />
+          <ArrowLeft className="w-5 h-5 text-[#1a1a1f]" />
         </button>
 
         {conversation.otherUser?.avatar ? (
@@ -179,13 +179,13 @@ export default function ConversationPage() {
             className="rounded-full"
           />
         ) : (
-          <div className="w-10 h-10 bg-gradient-to-br from-purple-400 to-[#EAF353] rounded-full flex items-center justify-center text-white font-bold">
+          <div className="w-10 h-10 bg-gradient-to-br from-[#46467A] to-[#E0DFFD] rounded-full flex items-center justify-center text-white font-bold">
             {conversation.otherUser?.nickname?.charAt(0) || '?'}
           </div>
         )}
 
         <div>
-          <h1 className="font-semibold text-[#282828]">
+          <h1 className="font-semibold text-[#1a1a1f]">
             {conversation.otherUser?.nickname || '未知用户'}
           </h1>
         </div>
@@ -196,7 +196,7 @@ export default function ConversationPage() {
         <div className="max-w-4xl mx-auto space-y-4">
           {conversation.messages.length === 0 ? (
             <div className="text-center py-12 bg-white/80 backdrop-blur-sm rounded-lg border border-[#FFEBF5] p-8">
-              <p className="text-[#282828]/60">
+              <p className="text-[#1a1a1f]/60">
                 还没有消息，发送第一条消息开始对话吧
               </p>
             </div>
@@ -237,7 +237,7 @@ export default function ConversationPage() {
                               className="rounded-full"
                             />
                           ) : (
-                            <div className="w-10 h-10 bg-gradient-to-br from-purple-400 to-[#EAF353] rounded-full flex items-center justify-center text-white font-bold">
+                            <div className="w-10 h-10 bg-gradient-to-br from-[#46467A] to-[#E0DFFD] rounded-full flex items-center justify-center text-white font-bold">
                               {msg.sender.nickname?.charAt(0) || '?'}
                             </div>
                           )}
@@ -259,8 +259,8 @@ export default function ConversationPage() {
                       <div
                         className={`rounded-lg px-4 py-2 break-words ${
                           isCurrentUser
-                            ? 'bg-[#EAF353] text-white ml-auto'
-                            : 'bg-white/80 backdrop-blur-sm text-[#282828] border border-[#FFEBF5]'
+                            ? 'bg-[#46467A] text-white ml-auto'
+                            : 'bg-white/80 backdrop-blur-sm text-[#1a1a1f] border border-[#FFEBF5]'
                         }`}
                       >
                         {msg.content}
@@ -287,12 +287,12 @@ export default function ConversationPage() {
             onChange={(e) => setMessage(e.target.value)}
             placeholder="输入消息..."
             disabled={sending}
-            className="flex-1 px-4 py-2 bg-white border border-[#FFEBF5] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EAF353] disabled:bg-gray-100 text-[#282828]"
+            className="flex-1 px-4 py-2 bg-white border border-[#FFEBF5] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#46467A] disabled:bg-gray-100 text-[#1a1a1f]"
           />
           <button
             type="submit"
             disabled={!message.trim() || sending}
-            className="px-6 py-2 bg-[#EAF353] text-white rounded-lg hover:bg-[#FFC9E0] disabled:bg-gray-300 disabled:cursor-not-allowed transition flex items-center gap-2"
+            className="px-6 py-2 bg-[#46467A] text-white rounded-lg hover:bg-[#5A5A8E] disabled:bg-gray-300 disabled:cursor-not-allowed transition flex items-center gap-2"
           >
             <Send className="w-4 h-4" />
             发送

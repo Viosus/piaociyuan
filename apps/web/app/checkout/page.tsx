@@ -16,11 +16,11 @@ export default async function CheckoutPage({ searchParams }: Props) {
 
   if (isNaN(eventId) || isNaN(tierId)) {
     return (
-      <div className="min-h-screen bg-[#C72471] flex items-center justify-center p-8">
+      <div className="min-h-screen bg-[#E0DFFD] flex items-center justify-center p-8">
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-2 text-[#EAF353]">订单信息不完整</h1>
-          <p className="text-[#282828]">请从活动详情页重新选择票档。</p>
-          <Link href="/events" className="mt-4 inline-block text-[#EAF353] underline">
+          <h1 className="text-2xl font-bold mb-2 text-[#46467A]">订单信息不完整</h1>
+          <p className="text-[#1a1a1f]">请从活动详情页重新选择票档。</p>
+          <Link href="/events" className="mt-4 inline-block text-[#46467A] underline">
             返回活动列表
           </Link>
         </div>
@@ -34,11 +34,11 @@ export default async function CheckoutPage({ searchParams }: Props) {
 
   if (!event || !tier) {
     return (
-      <div className="min-h-screen bg-[#C72471] flex items-center justify-center p-8">
+      <div className="min-h-screen bg-[#E0DFFD] flex items-center justify-center p-8">
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-2 text-[#EAF353]">订单信息不完整</h1>
-          <p className="text-[#282828]">请从活动详情页重新选择票档。</p>
-          <Link href="/events" className="mt-4 inline-block text-[#EAF353] underline">
+          <h1 className="text-2xl font-bold mb-2 text-[#46467A]">订单信息不完整</h1>
+          <p className="text-[#1a1a1f]">请从活动详情页重新选择票档。</p>
+          <Link href="/events" className="mt-4 inline-block text-[#46467A] underline">
             返回活动列表
           </Link>
         </div>

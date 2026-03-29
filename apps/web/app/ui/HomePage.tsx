@@ -187,7 +187,7 @@ export default async function HomePage() {
             <p className="text-gray-600 mb-6">敬请期待精彩活动</p>
             <Link
               href="/events"
-              className="inline-block px-6 py-3 bg-[#EAF353] text-gray-900 font-medium rounded-lg hover:bg-[#d4db4a] transition-colors"
+              className="inline-block px-6 py-3 bg-[#46467A] text-white font-medium rounded-lg hover:bg-[#5A5A8E] transition-colors"
             >
               浏览所有活动
             </Link>

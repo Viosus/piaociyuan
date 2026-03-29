@@ -23,7 +23,7 @@ export const viewport: Viewport = {
   maximumScale: 5,
   userScalable: true,
   viewportFit: "cover",
-  themeColor: "#C72471",
+  themeColor: "#46467A",
 };
 
 export const metadata: Metadata = {
@@ -48,7 +48,7 @@ export const metadata: Metadata = {
   // 其他设备优化
   other: {
     "mobile-web-app-capable": "yes",
-    "msapplication-TileColor": "#C72471",
+    "msapplication-TileColor": "#46467A",
     "msapplication-tap-highlight": "no",
     "HandheldFriendly": "true",
     "MobileOptimized": "width",

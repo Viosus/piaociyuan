@@ -174,27 +174,27 @@ h1, h2, h3, h4, h5, h6,
 .text-gray-900,
 [class*="text-gray-8"],
 [class*="text-gray-9"] {
-  color: #282828 !important;
+  color: #1a1a1f !important;
 }
 
 .text-gray-700,
 [class*="text-gray-7"] {
-  color: #282828 !important;
+  color: #1a1a1f !important;
 }
 
 .text-gray-600,
 [class*="text-gray-6"] {
-  color: #282828 !important;
+  color: #1a1a1f !important;
 }
 
 .text-gray-500,
 [class*="text-gray-5"] {
-  color: #282828 !important;
+  color: #1a1a1f !important;
 }
 
 .text-gray-400,
 [class*="text-gray-4"] {
-  color: rgba(40, 40, 40, 0.6) !important;
+  color: rgba(26, 26, 31, 0.6) !important;
 }
 
 .border-gray-200,
@@ -242,7 +242,7 @@ h1, h2, h3, h4, h5, h6,
 
 /* 表格样式 */
 table {
-  color: #282828;
+  color: #1a1a1f;
 }
 
 thead tr {

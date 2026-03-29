@@ -325,7 +325,7 @@ export default function CheckoutClient({ event, tier, initialQty, urlLimit }: Pr
           <h1 className="text-2xl font-bold text-[#46467A]">确认订单</h1>
 
           <div className="flex items-center gap-2">
-            <span className="text-sm text-[#282828]">锁票剩余</span>
+            <span className="text-sm text-[#1a1a1f]">锁票剩余</span>
             <span
               className={`px-2 py-1 rounded font-mono text-sm
                 ${mounted && msLeft < 60_000 ? "bg-red-50 text-red-600" : "bg-[#46467A]/10 text-[#46467A]"}`}
@@ -338,18 +338,18 @@ export default function CheckoutClient({ event, tier, initialQty, urlLimit }: Pr
 
         <div className="border border-[#46467A]/30 rounded-xl p-4 mb-6">
           <div className="font-medium text-[#46467A]">{event.name}</div>
-          <div className="text-sm text-[#282828]">
+          <div className="text-sm text-[#1a1a1f]">
             {event.city} · {event.venue} · {event.date} {event.time}
           </div>
 
           <div className="mt-4 flex items-center justify-between">
-            <div className="text-[#282828]">
+            <div className="text-[#1a1a1f]">
               票档：<span className="font-medium">{tier.name}</span>
             </div>
             <QuantityPicker value={qty} onChange={setQty} min={1} max={maxQty} />
           </div>
 
-          <div className="mt-2 text-sm text-[#282828]">
+          <div className="mt-2 text-sm text-[#1a1a1f]">
             单价：¥ {tier.price} · 库存：{tier.remaining} · 限购：每人最多 {maxQty} 张
           </div>
 

@@ -46,7 +46,7 @@ export function HeroBanners() {
 
   if (isLoading) {
     return (
-      <div className="w-full bg-gradient-to-r from-[#EAF353] to-[#FFE3F0] animate-pulse">
+      <div className="w-full bg-gradient-to-r from-[#46467A] to-[#E0DFFD] animate-pulse">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="h-80"></div>
         </div>
@@ -62,7 +62,7 @@ export function HeroBanners() {
 
   return (
     <div
-      className={`w-full ${currentBanner.color || 'bg-gradient-to-r from-[#EAF353] to-[#FFE3F0]'} relative overflow-hidden`}
+      className={`w-full ${currentBanner.color || 'bg-gradient-to-r from-[#46467A] to-[#E0DFFD]'} relative overflow-hidden`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">

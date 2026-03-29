@@ -81,7 +81,7 @@ export default function FollowButton({ eventId, eventName }: FollowButtonProps) 
     return (
       <button
         onClick={() => (window.location.href = '/auth/login')}
-        className="inline-flex items-center gap-2 px-4 py-2 bg-[#EAF353] text-[#282828] rounded-full hover:bg-[#FFC9E0] transition"
+        className="inline-flex items-center gap-2 px-4 py-2 bg-[#46467A] text-[#1a1a1f] rounded-full hover:bg-[#5A5A8E] transition"
       >
         <span>⭐</span>
         <span>登录后关注</span>
@@ -94,7 +94,7 @@ export default function FollowButton({ eventId, eventName }: FollowButtonProps) 
     return (
       <button
         disabled
-        className="inline-flex items-center gap-2 px-4 py-2 bg-gray-200 text-[#282828] rounded-full cursor-not-allowed"
+        className="inline-flex items-center gap-2 px-4 py-2 bg-gray-200 text-[#1a1a1f] rounded-full cursor-not-allowed"
       >
         <span>⏳</span>
         <span>加载中...</span>
@@ -109,8 +109,8 @@ export default function FollowButton({ eventId, eventName }: FollowButtonProps) 
       disabled={actionLoading}
       className={`inline-flex items-center gap-2 px-4 py-2 rounded-full transition ${
         isFollowing
-          ? 'bg-[#FFF5FB] text-[#EAF353] border border-[#EAF353] hover:bg-[#FFFAFD]'
-          : 'bg-[#EAF353] text-white hover:bg-[#FFC9E0]'
+          ? 'bg-[#FFF5FB] text-[#46467A] border border-[#46467A] hover:bg-[#FFFAFD]'
+          : 'bg-[#46467A] text-white hover:bg-[#5A5A8E]'
       } ${actionLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
     >
       <span>{isFollowing ? '⭐' : '☆'}</span>

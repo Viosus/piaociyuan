@@ -116,7 +116,7 @@ export default function AccountPage() {
     <div className="min-h-screen py-12 px-4">
       <div className="max-w-3xl mx-auto">
         <div className="bg-white border border-[#FFEBF5] rounded-2xl shadow-lg p-8">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 via-[#FFE3F0] to-blue-400 bg-clip-text text-transparent mb-2">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-[#46467A] via-[#FFE3F0] to-blue-400 bg-clip-text text-transparent mb-2">
             👤 个人中心
           </h1>
           <p className="text-white/60 mb-8">管理你的个人信息和偏好设置</p>
@@ -125,19 +125,19 @@ export default function AccountPage() {
           <div className="mb-8 p-4 bg-[#FFF9FC] rounded-xl border border-[#FFEBF5]">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
               <div>
-                <span className="text-[#282828]/60">账号ID：</span>
-                <span className="text-[#282828] font-mono">{user?.id}</span>
+                <span className="text-[#1a1a1f]/60">账号ID：</span>
+                <span className="text-[#1a1a1f] font-mono">{user?.id}</span>
               </div>
               {user?.phone && (
                 <div>
-                  <span className="text-[#282828]/60">手机号：</span>
-                  <span className="text-[#282828]">{user.phone}</span>
+                  <span className="text-[#1a1a1f]/60">手机号：</span>
+                  <span className="text-[#1a1a1f]">{user.phone}</span>
                 </div>
               )}
               {user?.email && (
                 <div>
-                  <span className="text-[#282828]/60">邮箱：</span>
-                  <span className="text-[#282828]">{user.email}</span>
+                  <span className="text-[#1a1a1f]/60">邮箱：</span>
+                  <span className="text-[#1a1a1f]">{user.email}</span>
                 </div>
               )}
             </div>
@@ -145,7 +145,7 @@ export default function AccountPage() {
 
           {/* 当前头像预览 */}
           <div className="mb-8">
-            <label className="block text-sm font-medium text-[#282828] mb-3">
+            <label className="block text-sm font-medium text-[#1a1a1f] mb-3">
               当前头像
             </label>
             <div className="flex items-center gap-4">
@@ -156,11 +156,11 @@ export default function AccountPage() {
                   className="w-20 h-20 rounded-full object-cover border-2 border-[#FFE3F0]"
                 />
               ) : (
-                <div className="w-20 h-20 bg-gradient-to-br from-purple-400 to-[#EAF353] rounded-full flex items-center justify-center text-white font-bold text-2xl">
+                <div className="w-20 h-20 bg-gradient-to-br from-[#46467A] to-[#E0DFFD] rounded-full flex items-center justify-center text-white font-bold text-2xl">
                   {user?.nickname?.[0] || user?.email?.[0] || "U"}
                 </div>
               )}
-              <div className="text-sm text-[#282828]/60">
+              <div className="text-sm text-[#1a1a1f]/60">
                 {avatarUrl ? "已设置头像" : "未设置头像"}
               </div>
             </div>
@@ -168,7 +168,7 @@ export default function AccountPage() {
 
           {/* 昵称 */}
           <div className="mb-8">
-            <label className="block text-sm font-medium text-[#282828] mb-2">
+            <label className="block text-sm font-medium text-[#1a1a1f] mb-2">
               昵称
             </label>
             <input
@@ -176,13 +176,13 @@ export default function AccountPage() {
               value={nickname}
               onChange={(e) => setNickname(e.target.value)}
               placeholder="输入你的昵称"
-              className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#EAF353] focus:border-transparent text-[#282828]"
+              className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#46467A] focus:border-transparent text-[#1a1a1f]"
             />
           </div>
 
           {/* 预设头像选择 */}
           <div className="mb-8">
-            <label className="block text-sm font-medium text-[#282828] mb-3">
+            <label className="block text-sm font-medium text-[#1a1a1f] mb-3">
               选择预设头像
             </label>
             <div className="grid grid-cols-6 gap-4">
@@ -192,7 +192,7 @@ export default function AccountPage() {
                   onClick={() => handleSelectPreset(url)}
                   className={`w-full aspect-square rounded-full overflow-hidden border-2 transition ${
                     selectedPreset === url
-                      ? "border-[#EAF353] ring-2 ring-[#EAF353]/30"
+                      ? "border-[#46467A] ring-2 ring-[#46467A]/30"
                       : "border-[#FFEBF5] hover:border-[#FFE3F0]"
                   }`}
                 >
@@ -208,7 +208,7 @@ export default function AccountPage() {
 
           {/* 自定义头像 URL */}
           <div className="mb-8">
-            <label className="block text-sm font-medium text-[#282828] mb-2">
+            <label className="block text-sm font-medium text-[#1a1a1f] mb-2">
               或输入头像 URL
             </label>
             <input
@@ -219,9 +219,9 @@ export default function AccountPage() {
                 setSelectedPreset("");
               }}
               placeholder="https://example.com/avatar.jpg"
-              className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#EAF353] focus:border-transparent text-[#282828]"
+              className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#46467A] focus:border-transparent text-[#1a1a1f]"
             />
-            <p className="mt-2 text-xs text-[#282828]/60">
+            <p className="mt-2 text-xs text-[#1a1a1f]/60">
               提示：可以使用任何公开的图片链接作为头像
             </p>
           </div>
@@ -245,13 +245,13 @@ export default function AccountPage() {
             <button
               onClick={handleSave}
               disabled={saving}
-              className="flex-1 bg-[#EAF353] text-white py-3 rounded-lg font-medium hover:bg-[#FFC9E0] transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 bg-[#46467A] text-white py-3 rounded-lg font-medium hover:bg-[#5A5A8E] transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {saving ? "保存中..." : "保存设置"}
             </button>
             <button
               onClick={() => router.back()}
-              className="px-8 py-3 border border-gray-300 text-[#282828] rounded-lg font-medium hover:bg-gray-50 transition"
+              className="px-8 py-3 border border-gray-300 text-[#1a1a1f] rounded-lg font-medium hover:bg-gray-50 transition"
             >
               取消
             </button>

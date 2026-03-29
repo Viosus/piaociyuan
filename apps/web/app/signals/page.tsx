@@ -80,7 +80,7 @@ export default function SignalsPage() {
     <div className="min-h-screen px-8 pb-8">
       <div className="max-w-6xl mx-auto mb-6">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 via-[#FFE3F0] to-blue-400 bg-clip-text text-transparent mb-2">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-[#46467A] via-[#E0DFFD] to-blue-400 bg-clip-text text-transparent mb-2">
             宇宙信号 📡
           </h1>
           <p className="text-gray-500 text-sm">探索所有进行中的精彩活动</p>
@@ -96,7 +96,7 @@ export default function SignalsPage() {
                 onClick={() => setSelectedCategory(category.value)}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
                   selectedCategory === category.value
-                    ? "bg-[#EAF353] text-white shadow-md"
+                    ? "bg-[#46467A] text-white shadow-md"
                     : "bg-white border border-[#FFEBF5] text-gray-700 hover:border-[#FFE3F0] hover:shadow"
                 }`}
               >
@@ -176,10 +176,10 @@ export default function SignalsPage() {
                 </div>
 
                 <h2 className="text-lg font-bold item-name">{event.name}</h2>
-                <p className="text-[#282828]">
+                <p className="text-[#1a1a1f]">
                   {event.city || ''} {dateStr} {timeStr}
                 </p>
-                <p className="mt-2 text-sm text-[#282828] opacity-80">{event.venue}</p>
+                <p className="mt-2 text-sm text-[#1a1a1f] opacity-80">{event.venue}</p>
               </Link>
             );
           })}

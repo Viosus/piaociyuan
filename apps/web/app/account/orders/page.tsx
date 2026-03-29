@@ -416,7 +416,7 @@ function OrdersList() {
               className="flex-1 px-3 py-2 border rounded-lg"
               placeholder="开始日期"
             />
-            <span className="self-center text-[#282828] opacity-60">~</span>
+            <span className="self-center text-[#1a1a1f] opacity-60">~</span>
             <input
               type="date"
               value={dateValue.end}
@@ -443,7 +443,7 @@ function OrdersList() {
               placeholder="最低金额"
               className="flex-1 px-3 py-2 border rounded-lg"
             />
-            <span className="self-center text-[#282828] opacity-60">~</span>
+            <span className="self-center text-[#1a1a1f] opacity-60">~</span>
             <input
               type="number"
               value={amountValue.max}
@@ -572,7 +572,7 @@ function OrdersList() {
       <div className="max-w-6xl mx-auto">
         {/* 标题和导航 */}
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 via-[#E0DFFD] to-blue-400 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-[#46467A] via-[#E0DFFD] to-blue-400 bg-clip-text text-transparent">
             我的订单
           </h1>
         </div>
@@ -585,7 +585,7 @@ function OrdersList() {
             return (
               <div key={filter.id} className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
                 <span className="text-lg">{option?.icon}</span>
-                <span className="text-sm font-medium text-[#282828] min-w-[80px]">
+                <span className="text-sm font-medium text-[#1a1a1f] min-w-[80px]">
                   {filter.label}
                 </span>
                 {renderFilterEditor(filter)}
@@ -605,7 +605,7 @@ function OrdersList() {
             <div className="relative">
               <button
                 onClick={() => setShowFilterMenu(!showFilterMenu)}
-                className="px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg hover:border-[#46467A] hover:bg-[#f0f0ff] text-[#282828] hover:text-[#46467A] transition-colors"
+                className="px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg hover:border-[#46467A] hover:bg-[#f0f0ff] text-[#1a1a1f] hover:text-[#46467A] transition-colors"
               >
                 {activeFilters.length === 0 ? "+ 添加筛选" : "+ 添加更多筛选"}
               </button>
@@ -614,9 +614,9 @@ function OrdersList() {
               {showFilterMenu && (
                 <div className="absolute top-full left-0 mt-2 w-64 bg-white border rounded-lg shadow-lg z-10">
                   <div className="p-2">
-                    <div className="text-xs text-[#282828] px-2 py-1">选择筛选项</div>
+                    <div className="text-xs text-[#1a1a1f] px-2 py-1">选择筛选项</div>
                     {availableFilters.length === 0 ? (
-                      <div className="px-2 py-3 text-sm text-[#282828] opacity-60 text-center">
+                      <div className="px-2 py-3 text-sm text-[#1a1a1f] opacity-60 text-center">
                         所有筛选项已添加
                       </div>
                     ) : (
@@ -665,7 +665,7 @@ function OrdersList() {
         {/* 排序栏 - 独立显示 */}
         <div className="mb-6 flex items-center gap-3 p-3 bg-gradient-to-r from-[#f0f0ff] to-[#E0DFFD] rounded-lg border border-[#46467A]/20">
           <span className="text-lg">📊</span>
-          <span className="text-sm font-medium text-[#282828] min-w-[60px]">排序</span>
+          <span className="text-sm font-medium text-[#1a1a1f] min-w-[60px]">排序</span>
           <select
             value={`${searchParams.get("sortBy") || "createdAt"}-${searchParams.get("sortOrder") || "desc"}`}
             onChange={(e) => {
@@ -688,7 +688,7 @@ function OrdersList() {
         </div>
 
         {/* 统计信息 */}
-        <div className="text-sm text-[#282828] mb-4">
+        <div className="text-sm text-[#1a1a1f] mb-4">
           共 <span className="font-semibold">{pagination.total}</span> 条订单，
           当前第 <span className="font-semibold">{currentPage}</span> /
           <span className="font-semibold"> {pagination.totalPages}</span> 页
@@ -712,7 +712,7 @@ function OrdersList() {
         <div className="overflow-x-auto">
           <table className="min-w-full">
             <thead>
-              <tr className="text-left text-sm text-[#282828] border-b">
+              <tr className="text-left text-sm text-[#1a1a1f] border-b">
                 <th className="py-3 pr-4">订单号</th>
                 <th className="py-3 pr-4">活动</th>
                 <th className="py-3 pr-4">票档/数量</th>
@@ -725,14 +725,14 @@ function OrdersList() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={7} className="py-10 text-center text-[#282828] opacity-60">
+                  <td colSpan={7} className="py-10 text-center text-[#1a1a1f] opacity-60">
                     加载中...
                   </td>
                 </tr>
               ) : orders.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="py-10 text-center">
-                    <div className="text-[#282828] opacity-60 mb-2">暂无订单</div>
+                    <div className="text-[#1a1a1f] opacity-60 mb-2">暂无订单</div>
                     <Link
                       href="/events"
                       className="inline-block px-4 py-2 bg-[#46467A] text-white rounded-lg hover:bg-[#5a5a9e]"
@@ -758,7 +758,7 @@ function OrdersList() {
                           {o.event?.name ?? `活动 ${o.eventId}`}
                         </div>
                         {o.event && (
-                          <div className="text-[#282828] text-xs">
+                          <div className="text-[#1a1a1f] text-xs">
                             {o.event.city} · {o.event.date} {o.event.time}
                           </div>
                         )}
@@ -769,7 +769,7 @@ function OrdersList() {
                       <td className="py-3 pr-4 font-medium">¥ {o.amount.toFixed(2)}</td>
                       <td className="py-3 pr-4">
                         {allTicketsRefunded ? (
-                          <span className="px-2 py-1 rounded bg-gray-100 text-[#282828] text-xs">
+                          <span className="px-2 py-1 rounded bg-gray-100 text-[#1a1a1f] text-xs">
                             已全部退票
                           </span>
                         ) : o.status === "PAID" ? (
@@ -777,7 +777,7 @@ function OrdersList() {
                             已支付
                           </span>
                         ) : o.status === "refunded" ? (
-                          <span className="px-2 py-1 rounded bg-gray-100 text-[#282828] text-xs">
+                          <span className="px-2 py-1 rounded bg-gray-100 text-[#1a1a1f] text-xs">
                             已退票
                           </span>
                         ) : (
@@ -786,7 +786,7 @@ function OrdersList() {
                           </span>
                         )}
                       </td>
-                      <td className="py-3 pr-4 text-xs text-[#282828]">
+                      <td className="py-3 pr-4 text-xs text-[#1a1a1f]">
                         {new Date(o.createdAt).toLocaleString("zh-CN")}
                       </td>
                       <td className="py-3 pr-4">
@@ -801,7 +801,7 @@ function OrdersList() {
                               </Link>
                             </>
                           ) : (
-                            <span className="px-3 py-1.5 rounded bg-gray-300 text-[#282828] text-xs cursor-not-allowed">
+                            <span className="px-3 py-1.5 rounded bg-gray-300 text-[#1a1a1f] text-xs cursor-not-allowed">
                               已失效
                             </span>
                           )}

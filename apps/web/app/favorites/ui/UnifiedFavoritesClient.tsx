@@ -13,7 +13,7 @@ export default function UnifiedFavoritesClient() {
       <div className="max-w-6xl mx-auto">
         {/* 页面标题 */}
         <div className="mb-6">
-          <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-purple-400 via-[#FFE3F0] to-blue-400 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-[#46467A] via-[#E0DFFD] to-blue-400 bg-clip-text text-transparent">
             ⭐ 我的收藏
           </h1>
           <p className="text-gray-500 text-sm">

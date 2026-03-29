@@ -81,13 +81,13 @@ export default function MessagesPage() {
       <div className="bg-white/80 backdrop-blur-sm border-b border-[#FFEBF5] sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between mb-4">
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-400 via-[#FFE3F0] to-blue-400 bg-clip-text text-transparent flex items-center gap-2">
-              <MessageSquare className="w-6 h-6 text-[#EAF353]" />
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-[#46467A] via-[#FFE3F0] to-blue-400 bg-clip-text text-transparent flex items-center gap-2">
+              <MessageSquare className="w-6 h-6 text-[#46467A]" />
               私信
             </h1>
             <button
               onClick={() => router.push('/messages/new')}
-              className="flex items-center gap-2 px-4 py-2 bg-[#EAF353] text-white rounded-lg hover:bg-[#FFC9E0] transition"
+              className="flex items-center gap-2 px-4 py-2 bg-[#46467A] text-white rounded-lg hover:bg-[#5A5A8E] transition"
             >
               <Plus className="w-4 h-4" />
               新建对话
@@ -96,13 +96,13 @@ export default function MessagesPage() {
 
           {/* Search */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-[#282828]/60" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-[#1a1a1f]/60" />
             <input
               type="text"
               placeholder="搜索对话..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-white border border-[#FFEBF5] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EAF353] text-[#282828]"
+              className="w-full pl-10 pr-4 py-2 bg-white border border-[#FFEBF5] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#46467A] text-[#1a1a1f]"
             />
           </div>
         </div>
@@ -112,19 +112,19 @@ export default function MessagesPage() {
       <div className="max-w-4xl mx-auto px-4 py-4">
         {loading ? (
           <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#EAF353] mx-auto mb-4"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#46467A] mx-auto mb-4"></div>
             <p className="text-white/60">加载中...</p>
           </div>
         ) : filteredConversations.length === 0 ? (
           <div className="text-center py-12 bg-white/80 backdrop-blur-sm rounded-lg border border-[#FFEBF5] p-8">
-            <MessageSquare className="w-16 h-16 mx-auto text-[#EAF353]/60 mb-4" />
-            <p className="text-[#282828] mb-4">
+            <MessageSquare className="w-16 h-16 mx-auto text-[#46467A]/60 mb-4" />
+            <p className="text-[#1a1a1f] mb-4">
               {searchQuery ? '没有找到匹配的对话' : '还没有对话'}
             </p>
             {!searchQuery && (
               <button
                 onClick={() => router.push('/messages/new')}
-                className="mt-4 px-6 py-2 bg-[#EAF353] text-white rounded-lg hover:bg-[#FFC9E0] transition"
+                className="mt-4 px-6 py-2 bg-[#46467A] text-white rounded-lg hover:bg-[#5A5A8E] transition"
               >
                 发起对话
               </button>
@@ -150,13 +150,13 @@ export default function MessagesPage() {
                         className="rounded-full"
                       />
                     ) : (
-                      <div className="w-12 h-12 bg-gradient-to-br from-purple-400 to-[#EAF353] rounded-full flex items-center justify-center text-white font-bold">
+                      <div className="w-12 h-12 bg-gradient-to-br from-[#46467A] to-[#E0DFFD] rounded-full flex items-center justify-center text-white font-bold">
                         {conversation.otherUser?.nickname?.charAt(0) || '?'}
                       </div>
                     )}
                     {/* Unread badge */}
                     {conversation.unreadCount > 0 && (
-                      <div className="absolute -top-1 -right-1 bg-[#EAF353] text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                      <div className="absolute -top-1 -right-1 bg-[#46467A] text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                         {conversation.unreadCount > 99 ? '99+' : conversation.unreadCount}
                       </div>
                     )}
@@ -165,18 +165,18 @@ export default function MessagesPage() {
                   {/* Content */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-1">
-                      <h3 className="font-semibold text-[#282828] truncate">
+                      <h3 className="font-semibold text-[#1a1a1f] truncate">
                         {conversation.otherUser?.nickname || '未知用户'}
                       </h3>
-                      <span className="text-xs text-[#282828]/60 flex-shrink-0 ml-2">
+                      <span className="text-xs text-[#1a1a1f]/60 flex-shrink-0 ml-2">
                         {conversation.lastMessage && formatTime(conversation.lastMessage.createdAt)}
                       </span>
                     </div>
                     <p
                       className={`text-sm truncate ${
                         conversation.unreadCount > 0
-                          ? 'text-[#282828] font-medium'
-                          : 'text-[#282828]/60'
+                          ? 'text-[#1a1a1f] font-medium'
+                          : 'text-[#1a1a1f]/60'
                       }`}
                     >
                       {conversation.lastMessage?.content || '开始对话...'}

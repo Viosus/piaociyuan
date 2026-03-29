@@ -144,7 +144,7 @@ export default function SeatSelection({ eventId, tierId, tierName, tierPrice }: 
       {/* 座位图 */}
       <div className="bg-white/5 border border-white/10 rounded-xl p-6">
         <div className="mb-4 text-center">
-          <div className="inline-block bg-gradient-to-r from-purple-500 to-[#EAF353] text-white text-sm px-6 py-2 rounded-lg">
+          <div className="inline-block bg-gradient-to-r from-purple-500 to-[#E0DFFD] text-white text-sm px-6 py-2 rounded-lg">
             舞台
           </div>
         </div>
@@ -166,7 +166,7 @@ export default function SeatSelection({ eventId, tierId, tierName, tierPrice }: 
                   transition-all duration-200
                   ${isAvailable ? 'bg-green-500/20 hover:bg-green-500/40 text-green-400 border border-green-500/50' : ''}
                   ${isLocked ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/50 cursor-not-allowed' : ''}
-                  ${isSold ? 'bg-gray-500/20 text-[#282828] opacity-50 border border-gray-500/30 cursor-not-allowed' : ''}
+                  ${isSold ? 'bg-gray-500/20 text-[#1a1a1f] opacity-50 border border-gray-500/30 cursor-not-allowed' : ''}
                   ${isSelected ? 'bg-blue-500 text-white border-2 border-blue-400 scale-110' : ''}
                 `}
                 title={
@@ -235,7 +235,7 @@ export default function SeatSelection({ eventId, tierId, tierName, tierPrice }: 
           <button
             onClick={() => handlePurchase(true)}
             disabled={purchasing || availableCount === 0}
-            className="w-full py-4 bg-gradient-to-r from-purple-500 to-[#EAF353] text-white rounded-xl font-semibold hover:from-purple-600 hover:to-pink-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full py-4 bg-gradient-to-r from-purple-500 to-[#E0DFFD] text-white rounded-xl font-semibold hover:from-purple-600 hover:to-pink-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {purchasing ? '处理中...' : availableCount === 0 ? '暂无余票' : '🚀 快速抢票（自动分配座位）'}
           </button>
@@ -249,7 +249,7 @@ export default function SeatSelection({ eventId, tierId, tierName, tierPrice }: 
 
       {/* 总价 */}
       {selectedSeats.length > 0 && (
-        <div className="bg-gradient-to-r from-purple-500/10 to-[#EAF353]/10 border border-[#EAF353]/20 rounded-xl p-4">
+        <div className="bg-gradient-to-r from-purple-500/10 to-[#E0DFFD]/10 border border-[#46467A]/20 rounded-xl p-4">
           <div className="flex items-center justify-between">
             <span className="text-white/80">总价</span>
             <span className="text-2xl font-bold text-white">
