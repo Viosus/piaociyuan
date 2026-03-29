@@ -432,7 +432,7 @@ const styles = StyleSheet.create({
   },
   saveButtonText: {
     fontSize: fontSize.sm,
-    color: '#fff',
+    color: colors.textOnPrimary,
   },
   cancelButtonText: {
     fontSize: fontSize.sm,
@@ -497,7 +497,7 @@ const styles = StyleSheet.create({
   defaultAvatarText: {
     fontSize: fontSize.lg,
     fontWeight: 'bold',
-    color: '#fff',
+    color: colors.textOnPrimary,
   },
   memberInfo: {
     flex: 1,
@@ -529,7 +529,7 @@ const styles = StyleSheet.create({
   },
   roleText: {
     fontSize: 10,
-    color: '#fff',
+    color: colors.textOnPrimary,
     fontWeight: '600',
   },
   groupNickname: {

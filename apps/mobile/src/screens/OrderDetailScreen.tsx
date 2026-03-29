@@ -455,7 +455,7 @@ const styles = StyleSheet.create({
   primaryButtonText: {
     fontSize: fontSize.md,
     fontWeight: 'bold',
-    color: '#ffffff',
+    color: colors.textOnPrimary,
   },
   secondaryButton: {
     flex: 1,

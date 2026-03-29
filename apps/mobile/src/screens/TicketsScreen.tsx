@@ -424,7 +424,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   filterTabTextActive: {
-    color: '#ffffff',
+    color: colors.textOnPrimary,
     fontWeight: '600',
   },
   advancedFilterButton: {
@@ -483,7 +483,7 @@ const styles = StyleSheet.create({
   },
   filterTagRemoveText: {
     fontSize: 12,
-    color: '#fff',
+    color: colors.textOnPrimary,
     fontWeight: 'bold',
   },
   clearFilterButton: {
@@ -495,14 +495,14 @@ const styles = StyleSheet.create({
   },
   clearFilterText: {
     fontSize: fontSize.sm,
-    color: '#000',
+    color: colors.text,
     fontWeight: '600',
   },
   listContent: {
     padding: spacing.md,
   },
   ticketCard: {
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.surface,
     borderRadius: 12,
     marginBottom: spacing.md,
     overflow: 'hidden',
@@ -569,7 +569,7 @@ const styles = StyleSheet.create({
   },
   usedText: {
     fontSize: fontSize.xs,
-    color: '#ffffff',
+    color: colors.textOnPrimary,
     fontWeight: '600',
   },
   emptyContainer: {

@@ -115,10 +115,10 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
+  container: { flex: 1, backgroundColor: COLORS.surface },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  errorText: { fontSize: 16, color: '#999' },
-  heroImage: { width: SCREEN_WIDTH, height: SCREEN_WIDTH, backgroundColor: '#f0f0f0' },
+  errorText: { fontSize: 16, color: COLORS.textSecondary },
+  heroImage: { width: SCREEN_WIDTH, height: SCREEN_WIDTH, backgroundColor: COLORS.surface },
   badge3D: {
     position: 'absolute',
     top: SCREEN_WIDTH - 40,
@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     borderRadius: 12,
   },
-  badge3DText: { color: '#fff', fontSize: 12, fontWeight: '600' },
+  badge3DText: { color: COLORS.textOnPrimary, fontSize: 12, fontWeight: '600' },
   content: { padding: 20 },
   tags: { flexDirection: 'row', gap: 8, marginBottom: 12 },
   tag: {
@@ -138,10 +138,10 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   tagText: { color: '#7c3aed', fontSize: 12, fontWeight: '500' },
-  title: { fontSize: 22, fontWeight: 'bold', color: '#1a1a1f', marginBottom: 10 },
-  description: { fontSize: 14, color: '#666', lineHeight: 22, marginBottom: 20 },
+  title: { fontSize: 22, fontWeight: 'bold', color: COLORS.text, marginBottom: 10 },
+  description: { fontSize: 14, color: COLORS.textSecondary, lineHeight: 22, marginBottom: 20 },
   infoCard: {
-    backgroundColor: '#fafafa',
+    backgroundColor: COLORS.surface,
     borderRadius: 16,
     padding: 16,
   },
@@ -152,6 +152,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: '#eee',
   },
-  infoLabel: { fontSize: 14, color: '#999' },
-  infoValue: { fontSize: 14, color: '#333', fontWeight: '500' },
+  infoLabel: { fontSize: 14, color: COLORS.textSecondary },
+  infoValue: { fontSize: 14, color: COLORS.text, fontWeight: '500' },
 });

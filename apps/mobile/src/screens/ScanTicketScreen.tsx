@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
   retryButtonText: {
     fontSize: fontSize.md,
     fontWeight: '600',
-    color: '#ffffff',
+    color: colors.textOnPrimary,
   },
   manualButton: {
     backgroundColor: colors.surface,
@@ -324,7 +324,7 @@ const styles = StyleSheet.create({
   },
   instructionText: {
     fontSize: fontSize.md,
-    color: '#ffffff',
+    color: colors.textLight,
     backgroundColor: 'rgba(0, 0, 0, 0.6)',
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.sm,
@@ -430,6 +430,6 @@ const styles = StyleSheet.create({
   modalConfirmText: {
     fontSize: fontSize.md,
     fontWeight: '600',
-    color: '#ffffff',
+    color: colors.textOnPrimary,
   },
 });

@@ -267,7 +267,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   tabTextActive: {
-    color: '#ffffff',
+    color: COLORS.textOnPrimary,
     fontWeight: '600',
   },
   listContent: {

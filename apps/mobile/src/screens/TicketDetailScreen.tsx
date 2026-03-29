@@ -338,7 +338,7 @@ export default function TicketDetailScreen() {
               <QRCode
                 value={ticket.ticketCode}
                 size={SCREEN_WIDTH * 0.7}
-                backgroundColor="#ffffff"
+                backgroundColor={colors.surface}
               />
             </View>
             <Text style={styles.modalTicketCode}>{ticket.ticketCode}</Text>
@@ -401,7 +401,7 @@ const styles = StyleSheet.create({
   },
   qrContainer: {
     padding: spacing.lg,
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.surface,
     borderRadius: 12,
     marginBottom: spacing.md,
   },
@@ -433,7 +433,7 @@ const styles = StyleSheet.create({
   shareButtonText: {
     fontSize: fontSize.md,
     fontWeight: '600',
-    color: '#111827', // 深色文字在黄色背景上更易读
+    color: colors.text, // 深色文字在黄色背景上更易读
   },
   section: {
     marginBottom: spacing.lg,
@@ -508,7 +508,7 @@ const styles = StyleSheet.create({
   transferButtonText: {
     fontSize: fontSize.md,
     fontWeight: '600',
-    color: '#111827',
+    color: colors.text,
   },
   refundButton: {
     flex: 1,
@@ -538,14 +538,14 @@ const styles = StyleSheet.create({
   },
   modalQRContainer: {
     padding: spacing.xl,
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.surface,
     borderRadius: 12,
     marginBottom: spacing.lg,
   },
   modalTicketCode: {
     fontSize: fontSize.lg,
     fontWeight: '600',
-    color: '#ffffff',
+    color: colors.textLight,
     letterSpacing: 1,
     marginBottom: spacing.xl,
   },

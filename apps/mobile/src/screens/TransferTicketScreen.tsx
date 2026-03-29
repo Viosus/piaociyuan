@@ -210,7 +210,7 @@ ${message ? `留言：${message}\n` : ''}
               <QRCode
                 value={`piaociyuan://transfer/${transferResult.transferCode}`}
                 size={180}
-                backgroundColor="#ffffff"
+                backgroundColor={colors.surface}
               />
             </View>
           </View>
@@ -388,7 +388,7 @@ ${message ? `留言：${message}\n` : ''}
           activeOpacity={0.8}
         >
           {submitting ? (
-            <ActivityIndicator size="small" color="#111827" />
+            <ActivityIndicator size="small" color={colors.text} />
           ) : (
             <Text style={styles.submitButtonText}>
               {transferType === 'gift' ? '确认赠送' : '确认转让'}
@@ -617,7 +617,7 @@ const styles = StyleSheet.create({
   submitButtonText: {
     fontSize: fontSize.md,
     fontWeight: '600',
-    color: '#111827',
+    color: colors.text,
   },
   // 成功页面
   successContainer: {
@@ -685,7 +685,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   qrContainer: {
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.surface,
     padding: spacing.lg,
     borderRadius: 12,
   },
@@ -711,7 +711,7 @@ const styles = StyleSheet.create({
   shareButtonText: {
     fontSize: fontSize.md,
     fontWeight: '600',
-    color: '#111827',
+    color: colors.text,
   },
   backButton: {
     backgroundColor: colors.surface,

@@ -247,7 +247,7 @@ const styles = StyleSheet.create({
   },
   searchContainer: {
     padding: SPACING.md,
-    backgroundColor: '#ffffff',
+    backgroundColor: COLORS.surface,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.border,
   },
@@ -320,7 +320,7 @@ const styles = StyleSheet.create({
   },
   filterTagRemoveText: {
     fontSize: 12,
-    color: '#fff',
+    color: COLORS.textOnPrimary,
     fontWeight: 'bold',
   },
   listContent: {
@@ -347,7 +347,7 @@ const styles = StyleSheet.create({
   },
   clearFilterText: {
     fontSize: FONT_SIZES.sm,
-    color: '#000',
+    color: COLORS.text,
     fontWeight: '600',
   },
   errorText: {

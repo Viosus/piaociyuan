@@ -286,7 +286,7 @@ export default function CheckoutScreen() {
           activeOpacity={0.8}
         >
           {submitting ? (
-            <ActivityIndicator size="small" color="#ffffff" />
+            <ActivityIndicator size="small" color={colors.textOnPrimary} />
           ) : (
             <Text style={styles.submitButtonText}>提交订单</Text>
           )}
@@ -482,6 +482,6 @@ const styles = StyleSheet.create({
   submitButtonText: {
     fontSize: fontSize.lg,
     fontWeight: 'bold',
-    color: '#ffffff',
+    color: colors.textOnPrimary,
   },
 });

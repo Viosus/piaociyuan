@@ -406,15 +406,15 @@ const styles = StyleSheet.create({
     color: colors.success,
   },
   offlineBanner: {
-    backgroundColor: '#FEF2F2',
+    backgroundColor: 'rgba(239, 68, 68, 0.08)',
     paddingVertical: spacing.xs,
     paddingHorizontal: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: '#FCA5A5',
+    borderBottomColor: colors.error,
   },
   offlineText: {
     fontSize: fontSize.sm,
-    color: '#DC2626',
+    color: colors.error,
     textAlign: 'center',
   },
   messageList: {

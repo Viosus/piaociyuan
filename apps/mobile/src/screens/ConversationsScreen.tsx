@@ -322,7 +322,7 @@ const styles = StyleSheet.create({
   },
   defaultAvatarText: {
     fontSize: fontSize.xl,
-    color: '#fff',
+    color: colors.textOnPrimary,
     fontWeight: 'bold',
   },
   groupIcon: {
@@ -335,15 +335,15 @@ const styles = StyleSheet.create({
     marginLeft: spacing.xs,
   },
   offlineBanner: {
-    backgroundColor: '#FEF2F2',
+    backgroundColor: 'rgba(239, 68, 68, 0.08)',
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: '#FCA5A5',
+    borderBottomColor: colors.error,
   },
   offlineText: {
     fontSize: fontSize.sm,
-    color: '#DC2626',
+    color: colors.error,
     textAlign: 'center',
   },
   conversationItem: {
@@ -378,7 +378,7 @@ const styles = StyleSheet.create({
   unreadBadgeText: {
     fontSize: fontSize.sm,
     fontWeight: 'bold',
-    color: '#ffffff',
+    color: colors.textOnPrimary,
   },
   conversationInfo: {
     flex: 1,
@@ -410,7 +410,7 @@ const styles = StyleSheet.create({
   },
   verifiedIcon: {
     fontSize: 10,
-    color: '#ffffff',
+    color: colors.textOnPrimary,
     fontWeight: 'bold',
   },
   time: {

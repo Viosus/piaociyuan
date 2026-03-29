@@ -309,6 +309,6 @@ const styles = StyleSheet.create({
   checkoutButtonText: {
     fontSize: fontSize.lg,
     fontWeight: 'bold',
-    color: '#ffffff',
+    color: colors.textOnPrimary,
   },
 });

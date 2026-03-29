@@ -122,13 +122,13 @@ export default function MyCollectiblesScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f5f5' },
+  container: { flex: 1, backgroundColor: COLORS.surface },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   list: { padding: 12 },
   row: { justifyContent: 'space-between' },
   card: {
     width: '48%',
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.surface,
     borderRadius: 16,
     marginBottom: 12,
     overflow: 'hidden',
@@ -138,7 +138,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
-  image: { width: '100%', aspectRatio: 1, backgroundColor: '#f0f0f0' },
+  image: { width: '100%', aspectRatio: 1, backgroundColor: COLORS.surface },
   badge3D: {
     position: 'absolute',
     top: 8,
@@ -148,12 +148,12 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
     borderRadius: 8,
   },
-  badge3DText: { color: '#fff', fontSize: 11, fontWeight: '600' },
+  badge3DText: { color: COLORS.textOnPrimary, fontSize: 11, fontWeight: '600' },
   cardInfo: { padding: 10 },
-  cardTitle: { fontSize: 14, fontWeight: '600', color: '#333' },
-  cardCategory: { fontSize: 11, color: '#999', marginTop: 3 },
+  cardTitle: { fontSize: 14, fontWeight: '600', color: COLORS.text },
+  cardCategory: { fontSize: 11, color: COLORS.textSecondary, marginTop: 3 },
   empty: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 40 },
   emptyIcon: { fontSize: 48, marginBottom: 12 },
-  emptyText: { fontSize: 16, color: '#666' },
-  emptySubText: { fontSize: 13, color: '#999', marginTop: 6 },
+  emptyText: { fontSize: 16, color: COLORS.textSecondary },
+  emptySubText: { fontSize: 13, color: COLORS.textSecondary, marginTop: 6 },
 });

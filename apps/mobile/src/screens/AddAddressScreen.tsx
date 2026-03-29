@@ -321,7 +321,7 @@ export default function AddAddressScreen() {
             activeOpacity={0.8}
           >
             {submitting ? (
-              <ActivityIndicator size="small" color="#000" />
+              <ActivityIndicator size="small" color={colors.text} />
             ) : (
               <Text style={styles.submitButtonText}>
                 {isEditing ? '保存修改' : '添加地址'}
@@ -478,6 +478,6 @@ const styles = StyleSheet.create({
   submitButtonText: {
     fontSize: fontSize.md,
     fontWeight: '600',
-    color: '#000',
+    color: colors.text,
   },
 });

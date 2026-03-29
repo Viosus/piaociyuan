@@ -281,7 +281,7 @@ const styles = StyleSheet.create({
   },
   defaultText: {
     fontSize: fontSize.xs,
-    color: '#000',
+    color: colors.text,
     fontWeight: '600',
   },
   moreButton: {
@@ -347,6 +347,6 @@ const styles = StyleSheet.create({
   addButtonText: {
     fontSize: fontSize.md,
     fontWeight: '600',
-    color: '#000',
+    color: colors.text,
   },
 });

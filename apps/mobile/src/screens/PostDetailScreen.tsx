@@ -502,7 +502,7 @@ const styles = StyleSheet.create({
     borderRadius: spacing.md,
   },
   imageIndicatorText: {
-    color: '#FFFFFF',
+    color: colors.textLight,
     fontSize: fontSize.sm,
   },
   userInfo: {
@@ -529,7 +529,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   avatarText: {
-    color: '#FFFFFF',
+    color: colors.textOnPrimary,
     fontSize: fontSize.lg,
     fontWeight: 'bold',
   },
@@ -658,7 +658,7 @@ const styles = StyleSheet.create({
     marginRight: spacing.sm,
   },
   sendButtonText: {
-    color: '#FFFFFF',
+    color: colors.textOnPrimary,
     fontSize: fontSize.sm,
     fontWeight: '600',
   },
@@ -707,7 +707,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   backButtonText: {
-    color: '#FFFFFF',
+    color: colors.textOnPrimary,
     fontSize: fontSize.md,
     fontWeight: '600',
   },

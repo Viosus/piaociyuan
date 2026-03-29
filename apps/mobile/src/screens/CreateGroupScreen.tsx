@@ -252,7 +252,7 @@ export default function CreateGroupScreen() {
           disabled={creating || !groupName.trim() || selectedUsers.length === 0}
         >
           {creating ? (
-            <ActivityIndicator size="small" color="#fff" />
+            <ActivityIndicator size="small" color={colors.textOnPrimary} />
           ) : (
             <Text style={styles.createButtonText}>
               创建群聊（{selectedUsers.length}人）
@@ -319,7 +319,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   removeButtonText: {
-    color: '#fff',
+    color: colors.textOnPrimary,
     fontSize: 12,
     fontWeight: 'bold',
   },
@@ -368,7 +368,7 @@ const styles = StyleSheet.create({
   defaultAvatarText: {
     fontSize: fontSize.lg,
     fontWeight: 'bold',
-    color: '#fff',
+    color: colors.textOnPrimary,
   },
   userInfo: {
     flex: 1,
@@ -399,7 +399,7 @@ const styles = StyleSheet.create({
   },
   addButtonText: {
     fontSize: fontSize.lg,
-    color: '#fff',
+    color: colors.textOnPrimary,
     fontWeight: 'bold',
   },
   centerContainer: {
@@ -438,6 +438,6 @@ const styles = StyleSheet.create({
   createButtonText: {
     fontSize: fontSize.md,
     fontWeight: '600',
-    color: '#fff',
+    color: colors.textOnPrimary,
   },
 });

@@ -715,7 +715,7 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
   mainTabTextActive: {
-    color: '#ffffff',
+    color: colors.textOnPrimary,
   },
   unreadDot: {
     marginLeft: spacing.xs,
@@ -730,7 +730,7 @@ const styles = StyleSheet.create({
   unreadDotText: {
     fontSize: 10,
     fontWeight: 'bold',
-    color: '#ffffff',
+    color: colors.textOnPrimary,
   },
   tabContent: {
     flex: 1,
@@ -763,7 +763,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   sortTabTextActive: {
-    color: '#ffffff',
+    color: colors.textOnPrimary,
     fontWeight: '600',
   },
   listContent: {
@@ -824,7 +824,7 @@ const styles = StyleSheet.create({
   retryButtonText: {
     fontSize: fontSize.md,
     fontWeight: '600',
-    color: '#ffffff',
+    color: colors.textOnPrimary,
   },
   createButton: {
     position: 'absolute',
@@ -866,18 +866,18 @@ const styles = StyleSheet.create({
   newButtonText: {
     fontSize: fontSize.sm,
     fontWeight: '600',
-    color: '#ffffff',
+    color: colors.textOnPrimary,
   },
   offlineBanner: {
-    backgroundColor: '#FEF2F2',
+    backgroundColor: 'rgba(239, 68, 68, 0.08)',
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: '#FCA5A5',
+    borderBottomColor: colors.error,
   },
   offlineText: {
     fontSize: fontSize.sm,
-    color: '#DC2626',
+    color: colors.error,
     textAlign: 'center',
   },
   conversationItem: {
@@ -904,7 +904,7 @@ const styles = StyleSheet.create({
   },
   defaultAvatarText: {
     fontSize: fontSize.xl,
-    color: '#fff',
+    color: colors.textOnPrimary,
     fontWeight: 'bold',
   },
   unreadBadge: {
@@ -922,7 +922,7 @@ const styles = StyleSheet.create({
   unreadBadgeText: {
     fontSize: fontSize.sm,
     fontWeight: 'bold',
-    color: '#ffffff',
+    color: colors.textOnPrimary,
   },
   conversationInfo: {
     flex: 1,
@@ -958,7 +958,7 @@ const styles = StyleSheet.create({
   },
   verifiedIcon: {
     fontSize: 10,
-    color: '#ffffff',
+    color: colors.textOnPrimary,
     fontWeight: 'bold',
   },
   memberCount: {

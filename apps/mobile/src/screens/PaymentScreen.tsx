@@ -281,7 +281,7 @@ export default function PaymentScreen() {
           activeOpacity={0.8}
         >
           {paying ? (
-            <ActivityIndicator size="small" color="#ffffff" />
+            <ActivityIndicator size="small" color={colors.textOnPrimary} />
           ) : (
             <Text style={styles.payButtonText}>
               立即支付 {formatPrice(totalAmount)}
@@ -438,7 +438,7 @@ const styles = StyleSheet.create({
   payButtonText: {
     fontSize: fontSize.lg,
     fontWeight: 'bold',
-    color: '#ffffff',
+    color: colors.textOnPrimary,
   },
   cancelButton: {
     paddingVertical: spacing.md,

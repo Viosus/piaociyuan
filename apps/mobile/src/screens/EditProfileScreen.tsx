@@ -135,7 +135,7 @@ export default function EditProfileScreen() {
         >
           {renderAvatar()}
           <View style={styles.avatarEditIcon}>
-            <Ionicons name="camera" size={20} color="#fff" />
+            <Ionicons name="camera" size={20} color={COLORS.textOnPrimary} />
           </View>
         </TouchableOpacity>
         <Text style={styles.avatarHint}>点击更换头像</Text>
@@ -248,7 +248,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: '#fff',
+    borderColor: COLORS.surface,
   },
   avatarHint: {
     fontSize: FONT_SIZES.sm,

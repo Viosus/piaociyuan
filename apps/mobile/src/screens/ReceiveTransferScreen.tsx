@@ -171,7 +171,7 @@ export default function ReceiveTransferScreen() {
               activeOpacity={0.8}
             >
               {loading ? (
-                <ActivityIndicator size="small" color="#111827" />
+                <ActivityIndicator size="small" color={colors.text} />
               ) : (
                 <Text style={styles.searchButtonText}>查询</Text>
               )}
@@ -319,7 +319,7 @@ export default function ReceiveTransferScreen() {
             activeOpacity={0.8}
           >
             {actionLoading ? (
-              <ActivityIndicator size="small" color="#111827" />
+              <ActivityIndicator size="small" color={colors.text} />
             ) : (
               <Text style={styles.acceptButtonText}>
                 {transfer.transferType === 'gift' ? '接收赠送' : '确认转让'}
@@ -382,7 +382,7 @@ const styles = StyleSheet.create({
   searchButtonText: {
     fontSize: fontSize.md,
     fontWeight: '600',
-    color: '#111827',
+    color: colors.text,
   },
   // 错误
   errorBox: {
@@ -576,7 +576,7 @@ const styles = StyleSheet.create({
   viewTicketButtonText: {
     fontSize: fontSize.md,
     fontWeight: '600',
-    color: '#111827',
+    color: colors.text,
   },
   // 底部按钮
   bottomBar: {
@@ -614,6 +614,6 @@ const styles = StyleSheet.create({
   acceptButtonText: {
     fontSize: fontSize.md,
     fontWeight: '600',
-    color: '#111827',
+    color: colors.text,
   },
 });

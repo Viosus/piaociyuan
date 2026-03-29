@@ -248,7 +248,7 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   tierCard: {
-    backgroundColor: '#ffffff',
+    backgroundColor: COLORS.surface,
     borderRadius: 8,
     padding: SPACING.md,
     marginBottom: SPACING.sm,
@@ -297,7 +297,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: SPACING.md,
-    backgroundColor: '#ffffff',
+    backgroundColor: COLORS.surface,
     borderTopWidth: 1,
     borderTopColor: COLORS.border,
   },

@@ -244,7 +244,7 @@ export default function CreatePostScreen() {
             disabled={!canSubmit}
           >
             {submitting ? (
-              <ActivityIndicator size="small" color="#ffffff" />
+              <ActivityIndicator size="small" color={colors.textOnPrimary} />
             ) : (
               <Text style={styles.submitButtonText}>发布</Text>
             )}
@@ -372,7 +372,7 @@ const styles = StyleSheet.create({
   submitButtonText: {
     fontSize: fontSize.md,
     fontWeight: '600',
-    color: '#ffffff',
+    color: colors.textOnPrimary,
   },
   content: {
     flex: 1,
@@ -417,7 +417,7 @@ const styles = StyleSheet.create({
   },
   removeImageIcon: {
     fontSize: fontSize.sm,
-    color: '#ffffff',
+    color: colors.textOnPrimary,
     fontWeight: 'bold',
   },
   uploadingContainer: {

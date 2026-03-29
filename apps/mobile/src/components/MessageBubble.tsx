@@ -99,7 +99,7 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   messageTextOwn: {
-    color: '#ffffff',
+    color: colors.textOnPrimary,
   },
   statusRow: {
     flexDirection: 'row',

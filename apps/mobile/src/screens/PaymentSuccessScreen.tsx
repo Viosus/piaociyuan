@@ -148,7 +148,7 @@ const styles = StyleSheet.create({
   },
   iconText: {
     fontSize: 48,
-    color: '#ffffff',
+    color: colors.textOnPrimary,
     fontWeight: 'bold',
   },
   title: {
@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
   primaryButtonText: {
     fontSize: fontSize.lg,
     fontWeight: 'bold',
-    color: '#ffffff',
+    color: colors.textOnPrimary,
   },
   secondaryButton: {
     backgroundColor: colors.surface,
