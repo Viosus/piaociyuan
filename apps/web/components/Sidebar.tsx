@@ -108,12 +108,7 @@ export default function Sidebar() {
     setShowUserMenu(false);
 
     // 跳转到首页并刷新页面以清除所有状态
-    router.push("/events");
-
-    // 延迟刷新，确保路由跳转完成
-    setTimeout(() => {
-      window.location.reload();
-    }, 100);
+    window.location.href = "/events";
   };
 
   return (

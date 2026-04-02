@@ -41,7 +41,7 @@ export default function MessagesPage() {
       return;
     }
     loadConversations();
-  }, [router]);
+  }, []);
 
   const loadConversations = async () => {
     try {

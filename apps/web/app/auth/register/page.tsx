@@ -116,8 +116,9 @@ function RegisterForm() {
         return;
       }
 
-      // 保存 token
+      // 保存 token 和 refreshToken
       localStorage.setItem("token", data.data.token);
+      localStorage.setItem("refreshToken", data.data.refreshToken);
 
       // 跳转到指定页面或默认页面（刷新确保 Navbar 重新加载用户信息）
       window.location.href = returnUrl || "/events";

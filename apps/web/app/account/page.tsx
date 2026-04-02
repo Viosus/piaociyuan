@@ -65,7 +65,7 @@ export default function AccountPage() {
       .finally(() => {
         setLoading(false);
       });
-  }, [router]);
+  }, []);
 
   // 选择预设头像
   const handleSelectPreset = (url: string) => {

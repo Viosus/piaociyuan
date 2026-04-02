@@ -26,7 +26,7 @@ export default function NewConversationPage() {
     if (!token) {
       router.push('/auth/login?returnUrl=/messages/new');
     }
-  }, [router]);
+  }, []);
 
   const handleSearch = async (query: string) => {
     // 限制搜索关键词最大长度为50字符，防止 414 错误

@@ -62,7 +62,7 @@ export default function VerificationPage() {
     }
 
     loadRequests();
-  }, [router]);
+  }, []);
 
   const loadRequests = async () => {
     setLoading(true);

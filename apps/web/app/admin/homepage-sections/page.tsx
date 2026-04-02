@@ -13,7 +13,7 @@ export default function HomepageSectionsPage() {
     if (!token) {
       router.push("/auth/login");
     }
-  }, [router]);
+  }, []);
 
   return <HomepageSectionsClient />;
 }

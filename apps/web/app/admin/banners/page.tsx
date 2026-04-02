@@ -13,7 +13,7 @@ export default function BannersManagementPage() {
     if (!token) {
       router.push("/auth/login");
     }
-  }, [router]);
+  }, []);
 
   return <BannersClient />;
 }

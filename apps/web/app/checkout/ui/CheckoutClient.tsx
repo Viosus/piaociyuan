@@ -199,7 +199,7 @@ export default function CheckoutClient({ event, tier, initialQty, urlLimit }: Pr
     };
 
     checkAuth();
-  }, [router]);
+  }, []);
 
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 500);

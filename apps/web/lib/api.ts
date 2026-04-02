@@ -83,8 +83,8 @@ export async function apiFetch(
     headers,
   });
 
-  // 如果是 401 或 404（可能是路由编译导致），且有 refresh token，尝试刷新
-  if (response.status === 401 || (response.status === 404 && url.includes('/api/auth'))) {
+  // 如果是 401，且有 refresh token，尝试刷新
+  if (response.status === 401) {
     const newToken = await refreshAccessToken();
 
     if (newToken) {
@@ -99,10 +99,16 @@ export async function apiFetch(
         headers: retryHeaders,
       });
     } else {
-      // 刷新失败，跳转到登录页
+      // 刷新失败，清除过期的 token
+      localStorage.removeItem('token');
+      localStorage.removeItem('refreshToken');
+      // 跳转到登录页（但不在 auth 页面重复跳转，避免死循环）
       if (typeof window !== 'undefined') {
-        const currentUrl = window.location.pathname + window.location.search;
-        window.location.href = `/auth/login?returnUrl=${encodeURIComponent(currentUrl)}`;
+        const currentPath = window.location.pathname;
+        if (!currentPath.startsWith('/auth/')) {
+          const currentUrl = currentPath + window.location.search;
+          window.location.href = `/auth/login?returnUrl=${encodeURIComponent(currentUrl)}`;
+        }
       }
     }
   }

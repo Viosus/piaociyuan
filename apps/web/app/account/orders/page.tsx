@@ -117,7 +117,7 @@ function OrdersList() {
       .catch(() => {
         // API helper already handles 401 redirects
       });
-  }, [router]);
+  }, []);
 
   // 从 URL 初始化筛选器
   useEffect(() => {

@@ -42,7 +42,7 @@ export default function AdminDashboard() {
       .finally(() => {
         setLoading(false);
       });
-  }, [router]);
+  }, []);
 
   if (loading) {
     return (
