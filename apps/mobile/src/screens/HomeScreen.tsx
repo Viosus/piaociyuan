@@ -5,9 +5,12 @@ import {
   StyleSheet,
   ScrollView,
   RefreshControl,
+  TouchableOpacity,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { colors, spacing, fontSize } from '../constants/config';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
+import { colors, spacing, fontSize, GRADIENTS } from '../constants/config';
 import { Carousel } from '../components/Carousel';
 import { BannerCard } from '../components/BannerCard';
 import { ErrorState } from '../components/ErrorState';
@@ -36,7 +39,6 @@ export default function HomeScreen() {
       }
       setError(null);
 
-      // 并行加载 Banner 和栏目数据
       const [bannersData, sectionsData] = await Promise.all([
         getBanners(),
         getHomepageSections(),
@@ -65,29 +67,54 @@ export default function HomeScreen() {
   };
 
   const handleSearch = (query: string) => {
-    // 跳转到搜索页面（稍后实现）
-    void query;
+    if (query.trim()) {
+      (navigation as any).navigate('Search', { query });
+    }
   };
 
   const handleSearchFocus = () => {
-    // 跳转到专门的搜索页面
-    // navigation.navigate('Search' as never);
+    (navigation as any).navigate('Search');
   };
 
   const handleCategorySelect = (categoryId: string) => {
     setSelectedCategory(categoryId);
-    // 可以跳转到活动列表页并筛选对应分类
     navigation.navigate('Events' as never, { category: categoryId } as never);
   };
+
+  const renderHeader = () => (
+    <LinearGradient
+      colors={GRADIENTS.header as [string, string]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={styles.header}
+    >
+      <View style={styles.headerTop}>
+        <View>
+          <Text style={styles.title}>票次元</Text>
+          <Text style={styles.subtitle}>发现精彩活动</Text>
+        </View>
+        <TouchableOpacity
+          style={styles.notificationButton}
+          onPress={() => (navigation as any).navigate('Notifications')}
+        >
+          <Ionicons name="notifications-outline" size={24} color="#ffffff" />
+        </TouchableOpacity>
+      </View>
+      <TouchableOpacity
+        style={styles.searchBarWrapper}
+        activeOpacity={0.8}
+        onPress={handleSearchFocus}
+      >
+        <Ionicons name="search-outline" size={16} color="rgba(255,255,255,0.7)" />
+        <Text style={styles.searchPlaceholder}>搜索活动、艺人...</Text>
+      </TouchableOpacity>
+    </LinearGradient>
+  );
 
   if (isLoading && !isRefreshing) {
     return (
       <View style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.title}>票次元</Text>
-          <Text style={styles.subtitle}>发现精彩活动</Text>
-        </View>
-        <SearchBar editable={false} />
+        {renderHeader()}
         <View style={styles.loadingContainer}>
           <Skeleton width="90%" height={180} style={{ marginBottom: spacing.md }} />
           <Skeleton width="90%" height={200} style={{ marginBottom: spacing.md }} />
@@ -100,11 +127,7 @@ export default function HomeScreen() {
   if (error && !isRefreshing) {
     return (
       <View style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.title}>票次元</Text>
-          <Text style={styles.subtitle}>发现精彩活动</Text>
-        </View>
-        <SearchBar editable={false} />
+        {renderHeader()}
         <ErrorState message={error} onRetry={handleRetry} />
       </View>
     );
@@ -117,18 +140,7 @@ export default function HomeScreen() {
         <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />
       }
     >
-      {/* 顶部标题 */}
-      <View style={styles.header}>
-        <Text style={styles.title}>票次元</Text>
-        <Text style={styles.subtitle}>发现精彩活动</Text>
-      </View>
-
-      {/* 搜索栏 */}
-      <SearchBar
-        onSearch={handleSearch}
-        onFocus={handleSearchFocus}
-        editable={true}
-      />
+      {renderHeader()}
 
       {/* 分类导航 */}
       <CategoryNav
@@ -158,6 +170,7 @@ export default function HomeScreen() {
       {sections.length === 0 && (
         <View style={styles.section}>
           <View style={styles.placeholder}>
+            <Ionicons name="sparkles-outline" size={32} color={colors.textSecondary} />
             <Text style={styles.placeholderText}>暂无推荐内容</Text>
           </View>
         </View>
@@ -171,12 +184,48 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
-  header: { padding: spacing.lg, backgroundColor: colors.secondary,
+  header: {
+    paddingTop: spacing.xl,
+    paddingBottom: spacing.lg,
+    paddingHorizontal: spacing.lg,
   },
-  title: { fontSize: fontSize.xxxl, fontWeight: 'bold', color: colors.textLight,
+  headerTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: spacing.md,
+  },
+  title: {
+    fontSize: fontSize.xxxl,
+    fontWeight: 'bold',
+    color: '#ffffff',
     marginBottom: spacing.xs,
   },
-  subtitle: { fontSize: fontSize.md, color: colors.textLight, opacity: 0.9 },
+  subtitle: {
+    fontSize: fontSize.md,
+    color: 'rgba(255,255,255,0.8)',
+  },
+  notificationButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  searchBarWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    borderRadius: 20,
+    paddingHorizontal: spacing.md,
+    height: 40,
+  },
+  searchPlaceholder: {
+    fontSize: fontSize.sm,
+    color: 'rgba(255,255,255,0.7)',
+    marginLeft: spacing.sm,
+  },
   loadingContainer: {
     flex: 1,
     alignItems: 'center',
@@ -188,12 +237,6 @@ const styles = StyleSheet.create({
   section: {
     padding: spacing.md,
   },
-  sectionTitle: {
-    fontSize: fontSize.xl,
-    fontWeight: 'bold',
-    color: colors.text,
-    marginBottom: spacing.md,
-  },
   placeholder: {
     padding: spacing.xl,
     backgroundColor: colors.surface,
@@ -203,5 +246,6 @@ const styles = StyleSheet.create({
   placeholderText: {
     fontSize: fontSize.md,
     color: colors.textSecondary,
+    marginTop: spacing.sm,
   },
 });

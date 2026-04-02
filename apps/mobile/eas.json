@@ -37,8 +37,10 @@
     },
     "china": {
       "extends": "production",
-      "buildType": "apk",
-      "distribution": "internal"
+      "distribution": "store",
+      "android": {
+        "buildType": "apk"
+      }
     }
   },
   "submit": {

@@ -234,9 +234,8 @@ export async function sendVerificationCodeFull(params: {
     return { success: false, error: '发送过于频繁，请稍后再试' };
   }
 
-  // 2. 生成验证码（测试模式：固定为 1111）
-  // TODO: 正式上线前改回 generateCode()
-  const code = '111111';
+  // 2. 生成验证码
+  const code = generateCode();
 
   // 3. 保存到数据库
   const { expiresAt } = await saveVerificationCode({ email, phone, code, type });

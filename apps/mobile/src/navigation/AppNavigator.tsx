@@ -4,7 +4,9 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useAuth } from '../contexts/AuthContext';
 import { View, ActivityIndicator, StyleSheet, Text, Image } from 'react-native';
-import { COLORS } from '../constants/config';
+import { LinearGradient } from 'expo-linear-gradient';
+import { COLORS, GRADIENTS } from '../constants/config';
+import GradientHeader from '../components/GradientHeader';
 
 // Auth Screens
 import LoginScreen from '../screens/LoginScreen';
@@ -63,14 +65,21 @@ function MainTabs() {
     <Tab.Navigator
       screenOptions={{
         tabBarActiveTintColor: '#ffffff',
-        tabBarInactiveTintColor: 'rgba(255,255,255,0.6)',
+        tabBarInactiveTintColor: 'rgba(255,255,255,0.5)',
         tabBarStyle: {
-          backgroundColor: COLORS.secondary,
-          borderTopColor: 'rgba(70, 70, 122, 0.3)',
+          borderTopColor: 'rgba(255,255,255,0.1)',
+          height: 60,
+          paddingBottom: 8,
         },
-        headerStyle: {
-          backgroundColor: COLORS.secondary,
-        },
+        tabBarBackground: () => (
+          <LinearGradient
+            colors={GRADIENTS.header as [string, string]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={{ flex: 1 }}
+          />
+        ),
+        headerBackground: () => <GradientHeader />,
         headerTintColor: '#ffffff',
         headerTitleStyle: {
           fontWeight: 'bold',
@@ -84,8 +93,8 @@ function MainTabs() {
         options={{
           title: '首页',
           headerShown: false,
-          tabBarIcon: ({ size }) => (
-            <Image source={require('../../assets/icons/search.png')} style={{ width: size, height: size }} resizeMode="contain" />
+          tabBarIcon: ({ size, focused }) => (
+            <Image source={require('../../assets/icons/search.png')} style={{ width: size, height: size, tintColor: focused ? '#ffffff' : 'rgba(255,255,255,0.5)' }} resizeMode="contain" />
           ),
         }}
       />
@@ -94,8 +103,8 @@ function MainTabs() {
         component={EventsScreen}
         options={{
           title: '宇宙信号',
-          tabBarIcon: ({ size }) => (
-            <Image source={require('../../assets/icons/signals.png')} style={{ width: size, height: size }} resizeMode="contain" />
+          tabBarIcon: ({ size, focused }) => (
+            <Image source={require('../../assets/icons/signals.png')} style={{ width: size, height: size, tintColor: focused ? '#ffffff' : 'rgba(255,255,255,0.5)' }} resizeMode="contain" />
           ),
         }}
       />
@@ -104,8 +113,8 @@ function MainTabs() {
         component={EncoreScreen}
         options={{
           title: '安可区',
-          tabBarIcon: ({ size }) => (
-            <Image source={require('../../assets/icons/encore.png')} style={{ width: size, height: size }} resizeMode="contain" />
+          tabBarIcon: ({ size, focused }) => (
+            <Image source={require('../../assets/icons/encore.png')} style={{ width: size, height: size, tintColor: focused ? '#ffffff' : 'rgba(255,255,255,0.5)' }} resizeMode="contain" />
           ),
         }}
       />
@@ -114,8 +123,8 @@ function MainTabs() {
         component={TicketsScreen}
         options={{
           title: '票夹',
-          tabBarIcon: ({ size }) => (
-            <Image source={require('../../assets/icons/orders.png')} style={{ width: size, height: size }} resizeMode="contain" />
+          tabBarIcon: ({ size, focused }) => (
+            <Image source={require('../../assets/icons/orders.png')} style={{ width: size, height: size, tintColor: focused ? '#ffffff' : 'rgba(255,255,255,0.5)' }} resizeMode="contain" />
           ),
         }}
       />
@@ -124,8 +133,8 @@ function MainTabs() {
         component={ProfileScreen}
         options={{
           title: '我的',
-          tabBarIcon: ({ size }) => (
-            <Image source={require('../../assets/icons/profile.png')} style={{ width: size, height: size }} resizeMode="contain" />
+          tabBarIcon: ({ size, focused }) => (
+            <Image source={require('../../assets/icons/profile.png')} style={{ width: size, height: size, tintColor: focused ? '#ffffff' : 'rgba(255,255,255,0.5)' }} resizeMode="contain" />
           ),
         }}
       />
@@ -136,376 +145,54 @@ function MainTabs() {
 // 主应用 Stack 导航（包含 Tab 和详情页）
 function MainStackNavigator() {
   return (
-    <MainStack.Navigator>
+    <MainStack.Navigator
+      screenOptions={{
+        headerBackground: () => <GradientHeader />,
+        headerTintColor: '#ffffff',
+        headerTitleStyle: { fontWeight: 'bold' },
+      }}
+    >
       <MainStack.Screen
         name="MainTabs"
         component={MainTabs}
         options={{ headerShown: false }}
       />
-      <MainStack.Screen
-        name="EventDetail"
-        component={EventDetailScreen}
-        options={{
-          title: '活动详情',
-          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
-        }}
-      />
-      <MainStack.Screen
-        name="Checkout"
-        component={CheckoutScreen}
-        options={{
-          title: '确认订单',
-          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
-        }}
-      />
-      <MainStack.Screen
-        name="Payment"
-        component={PaymentScreen}
-        options={{
-          title: '支付订单',
-          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
-        }}
-      />
-      <MainStack.Screen
-        name="TicketDetail"
-        component={TicketDetailScreen}
-        options={{
-          title: '门票详情',
-          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
-        }}
-      />
-      <MainStack.Screen
-        name="Orders"
-        component={OrdersScreen}
-        options={{
-          title: '我的订单',
-          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
-        }}
-      />
-      <MainStack.Screen
-        name="OrderDetail"
-        component={OrderDetailScreen}
-        options={{
-          title: '订单详情',
-          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
-        }}
-      />
-      <MainStack.Screen
-        name="Favorites"
-        component={FavoritesScreen}
-        options={{
-          title: '我的收藏',
-          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
-        }}
-      />
-      <MainStack.Screen
-        name="EditProfile"
-        component={EditProfileScreen}
-        options={{
-          title: '编辑资料',
-          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
-        }}
-      />
-      <MainStack.Screen
-        name="Verification"
-        component={VerificationScreen}
-        options={{
-          title: '身份认证',
-          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
-        }}
-      />
-      <MainStack.Screen
-        name="Settings"
-        component={SettingsScreen}
-        options={{
-          title: '设置',
-          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
-        }}
-      />
-      <MainStack.Screen
-        name="FollowingList"
-        component={FollowingListScreen}
-        options={{
-          title: '关注列表',
-          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
-        }}
-      />
-      <MainStack.Screen
-        name="FollowerList"
-        component={FollowerListScreen}
-        options={{
-          title: '粉丝列表',
-          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
-        }}
-      />
-      <MainStack.Screen
-        name="TransferTicket"
-        component={TransferTicketScreen}
-        options={{
-          title: '转让门票',
-          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
-        }}
-      />
-      <MainStack.Screen
-        name="ReceiveTransfer"
-        component={ReceiveTransferScreen}
-        options={{
-          title: '接收转让',
-          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
-        }}
-      />
-      <MainStack.Screen
-        name="CreatePost"
-        component={CreatePostScreen}
-        options={{
-          title: '发帖',
-          headerShown: false,
-        }}
-      />
-      <MainStack.Screen
-        name="PostDetail"
-        component={PostDetailScreen}
-        options={{
-          title: '帖子详情',
-          headerShown: false,
-        }}
-      />
-      <MainStack.Screen
-        name="UserProfile"
-        component={UserProfileScreen}
-        options={{
-          title: '用户主页',
-          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
-        }}
-      />
-      <MainStack.Screen
-        name="Conversations"
-        component={ConversationsScreen}
-        options={{
-          title: '消息',
-          headerShown: false,
-        }}
-      />
-      <MainStack.Screen
-        name="Chat"
-        component={ChatScreen}
-        options={{
-          title: '聊天',
-          headerShown: false,
-        }}
-      />
-      <MainStack.Screen
-        name="SelectUser"
-        component={SelectUserScreen}
-        options={{
-          title: '选择用户',
-          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
-        }}
-      />
-      <MainStack.Screen
-        name="CreateGroup"
-        component={CreateGroupScreen}
-        options={{
-          title: '创建群聊',
-          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
-        }}
-      />
-      <MainStack.Screen
-        name="GroupDetail"
-        component={GroupDetailScreen}
-        options={{
-          title: '群聊详情',
-          headerShown: false,
-        }}
-      />
-      <MainStack.Screen
-        name="IdDocuments"
-        component={IdDocumentsScreen}
-        options={{
-          title: '证件管理',
-          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
-        }}
-      />
-      <MainStack.Screen
-        name="AddIdDocument"
-        component={AddIdDocumentScreen}
-        options={{
-          title: '添加证件',
-          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
-        }}
-      />
-      <MainStack.Screen
-        name="Addresses"
-        component={AddressesScreen}
-        options={{
-          title: '地址管理',
-          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
-        }}
-      />
-      <MainStack.Screen
-        name="AddAddress"
-        component={AddAddressScreen}
-        options={{
-          title: '添加地址',
-          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
-        }}
-      />
-      <MainStack.Screen
-        name="MyCollectibles"
-        component={MyCollectiblesScreen}
-        options={{
-          title: '我的收藏品',
-          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
-        }}
-      />
-      <MainStack.Screen
-        name="CollectibleDetail"
-        component={CollectibleDetailScreen}
-        options={{
-          title: '收藏品详情',
-          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
-        }}
-      />
-      <MainStack.Screen
-        name="TierSelection"
-        component={TierSelectionScreen}
-        options={{
-          title: '选择票档',
-          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
-          headerTitleStyle: { fontWeight: 'bold' },
-        }}
-      />
-      <MainStack.Screen
-        name="PaymentSuccess"
-        component={PaymentSuccessScreen}
-        options={{
-          title: '支付成功',
-          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
-          headerTitleStyle: { fontWeight: 'bold' },
-        }}
-      />
-      <MainStack.Screen
-        name="PaymentFailure"
-        component={PaymentFailureScreen}
-        options={{
-          title: '支付失败',
-          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
-          headerTitleStyle: { fontWeight: 'bold' },
-        }}
-      />
-      <MainStack.Screen
-        name="ScanTicket"
-        component={ScanTicketScreen}
-        options={{
-          title: '扫码验票',
-          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
-          headerTitleStyle: { fontWeight: 'bold' },
-        }}
-      />
-      <MainStack.Screen
-        name="About"
-        component={AboutScreen}
-        options={{
-          title: '关于',
-          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
-          headerTitleStyle: { fontWeight: 'bold' },
-        }}
-      />
-      <MainStack.Screen
-        name="ChangePassword"
-        component={ChangePasswordScreen}
-        options={{
-          title: '修改密码',
-          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
-          headerTitleStyle: { fontWeight: 'bold' },
-        }}
-      />
-      <MainStack.Screen
-        name="Notifications"
-        component={NotificationsScreen}
-        options={{
-          title: '通知',
-          headerStyle: { backgroundColor: COLORS.secondary }, headerTintColor: '#ffffff',
-          headerTitleStyle: { fontWeight: 'bold' },
-        }}
-      />
-      <MainStack.Screen
-        name="Search"
-        component={SearchScreen}
-        options={{
-          title: '搜索',
-          headerShown: false,
-        }}
-      />
+      <MainStack.Screen name="EventDetail" component={EventDetailScreen} options={{ title: '活动详情' }} />
+      <MainStack.Screen name="Checkout" component={CheckoutScreen} options={{ title: '确认订单' }} />
+      <MainStack.Screen name="Payment" component={PaymentScreen} options={{ title: '支付订单' }} />
+      <MainStack.Screen name="TicketDetail" component={TicketDetailScreen} options={{ title: '门票详情' }} />
+      <MainStack.Screen name="Orders" component={OrdersScreen} options={{ title: '我的订单' }} />
+      <MainStack.Screen name="OrderDetail" component={OrderDetailScreen} options={{ title: '订单详情' }} />
+      <MainStack.Screen name="Favorites" component={FavoritesScreen} options={{ title: '我的收藏' }} />
+      <MainStack.Screen name="EditProfile" component={EditProfileScreen} options={{ title: '编辑资料' }} />
+      <MainStack.Screen name="Verification" component={VerificationScreen} options={{ title: '身份认证' }} />
+      <MainStack.Screen name="Settings" component={SettingsScreen} options={{ title: '设置' }} />
+      <MainStack.Screen name="FollowingList" component={FollowingListScreen} options={{ title: '关注列表' }} />
+      <MainStack.Screen name="FollowerList" component={FollowerListScreen} options={{ title: '粉丝列表' }} />
+      <MainStack.Screen name="TransferTicket" component={TransferTicketScreen} options={{ title: '转让门票' }} />
+      <MainStack.Screen name="ReceiveTransfer" component={ReceiveTransferScreen} options={{ title: '接收转让' }} />
+      <MainStack.Screen name="CreatePost" component={CreatePostScreen} options={{ title: '发帖', headerShown: false }} />
+      <MainStack.Screen name="PostDetail" component={PostDetailScreen} options={{ title: '帖子详情', headerShown: false }} />
+      <MainStack.Screen name="UserProfile" component={UserProfileScreen} options={{ title: '用户主页' }} />
+      <MainStack.Screen name="Conversations" component={ConversationsScreen} options={{ title: '消息', headerShown: false }} />
+      <MainStack.Screen name="Chat" component={ChatScreen} options={{ title: '聊天', headerShown: false }} />
+      <MainStack.Screen name="SelectUser" component={SelectUserScreen} options={{ title: '选择用户' }} />
+      <MainStack.Screen name="CreateGroup" component={CreateGroupScreen} options={{ title: '创建群聊' }} />
+      <MainStack.Screen name="GroupDetail" component={GroupDetailScreen} options={{ title: '群聊详情', headerShown: false }} />
+      <MainStack.Screen name="IdDocuments" component={IdDocumentsScreen} options={{ title: '证件管理' }} />
+      <MainStack.Screen name="AddIdDocument" component={AddIdDocumentScreen} options={{ title: '添加证件' }} />
+      <MainStack.Screen name="Addresses" component={AddressesScreen} options={{ title: '地址管理' }} />
+      <MainStack.Screen name="AddAddress" component={AddAddressScreen} options={{ title: '添加地址' }} />
+      <MainStack.Screen name="MyCollectibles" component={MyCollectiblesScreen} options={{ title: '我的收藏品' }} />
+      <MainStack.Screen name="CollectibleDetail" component={CollectibleDetailScreen} options={{ title: '收藏品详情' }} />
+      <MainStack.Screen name="TierSelection" component={TierSelectionScreen} options={{ title: '选择票档' }} />
+      <MainStack.Screen name="PaymentSuccess" component={PaymentSuccessScreen} options={{ title: '支付成功' }} />
+      <MainStack.Screen name="PaymentFailure" component={PaymentFailureScreen} options={{ title: '支付失败' }} />
+      <MainStack.Screen name="ScanTicket" component={ScanTicketScreen} options={{ title: '扫码验票' }} />
+      <MainStack.Screen name="About" component={AboutScreen} options={{ title: '关于' }} />
+      <MainStack.Screen name="ChangePassword" component={ChangePasswordScreen} options={{ title: '修改密码' }} />
+      <MainStack.Screen name="Notifications" component={NotificationsScreen} options={{ title: '通知' }} />
+      <MainStack.Screen name="Search" component={SearchScreen} options={{ title: '搜索', headerShown: false }} />
     </MainStack.Navigator>
   );
 }

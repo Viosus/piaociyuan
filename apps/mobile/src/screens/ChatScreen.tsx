@@ -1,8 +1,10 @@
 /**
  * 聊天页面
+ * 使用 Zustand messagingStore 集中管理消息状态
+ * Socket 事件由 SocketContext 统一处理，此页面仅读取 store 数据
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -16,15 +18,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { colors, spacing, fontSize } from '../constants/config';
 import {
-  getMessages,
   getConversation,
-  sendMessage as sendMessageApi,
-  markConversationAsRead,
   type Message,
   type Conversation,
 } from '../services/messages';
 import { useSocket } from '../contexts/SocketContext';
-import { SocketEvent } from '../services/socket';
+import { useMessagingStore } from '../stores/messagingStore';
 import { MessageBubble } from '../components/MessageBubble';
 import { MessageInput } from '../components/MessageInput';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
@@ -41,31 +40,61 @@ export default function ChatScreen() {
     groupName?: string;
   };
 
-  const { isConnected, sendMessage, sendTyping, sendStopTyping, joinConversation, leaveConversation, on, off } = useSocket();
+  const { isConnected, sendTyping, sendStopTyping, joinConversation, leaveConversation } = useSocket();
 
   const [conversation, setConversation] = useState<Conversation | null>(null);
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
-  const [otherUserTyping, setOtherUserTyping] = useState(false);
+  const [currentUserName, setCurrentUserName] = useState<string>('');
   const [otherUserId, setOtherUserId] = useState<number | null>(null);
 
   const flatListRef = useRef<FlatList>(null);
-  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // 从 store 读取消息（不再用 useState）
+  const messages = useMessagingStore(
+    (s) => (conversationId ? s.messagesByConversation[conversationId] || [] : [])
+  );
+
+  // 分页状态
+  const pagination = useMessagingStore(
+    (s) => (conversationId ? s.messagePagination[conversationId] : undefined)
+  );
+
+  // 打字状态：从 store 读取，过滤出当前会话中非自己的用户
+  const typingUsers = useMessagingStore((s) => s.typingUsers);
+  const otherUserTyping = useMemo(() => {
+    if (!conversationId || currentUserId === null) return false;
+    return Object.entries(typingUsers).some(([key, info]) => {
+      return key.startsWith(`${conversationId}_`) && info.userId !== currentUserId;
+    });
+  }, [typingUsers, conversationId, currentUserId]);
+
+  // Store actions
+  const storeLoadMessages = useMessagingStore((s) => s.loadMessages);
+  const storeLoadOlderMessages = useMessagingStore((s) => s.loadOlderMessages);
+  const storeSetActiveConversation = useMessagingStore((s) => s.setActiveConversation);
+  const storeMarkAsRead = useMessagingStore((s) => s.markConversationAsRead);
+  const storeAddOptimisticMessage = useMessagingStore((s) => s.addOptimisticMessage);
+  const storeReplaceOptimisticMessage = useMessagingStore((s) => s.replaceOptimisticMessage);
+  const storeSendMessage = useMessagingStore((s) => s.sendMessage);
 
   // 在线状态
   const { isUserOnline } = useOnlineStatus(otherUserId ? [otherUserId] : []);
+
+  // 初始化的loading状态由pagination推断
+  const loading = pagination?.loading ?? true;
 
   useEffect(() => {
     loadCurrentUser();
   }, []);
 
+  // 设置 activeConversation，加载消息，加入房间
   useEffect(() => {
     if (conversationId) {
+      storeSetActiveConversation(conversationId);
       loadConversation();
-      loadMessages();
-      markAsRead();
+      storeLoadMessages(conversationId);
+      storeMarkAsRead(conversationId);
 
       // 加入对话房间
       if (isConnected) {
@@ -74,6 +103,8 @@ export default function ChatScreen() {
     }
 
     return () => {
+      // 清除 activeConversation
+      storeSetActiveConversation(null);
       // 离开对话房间
       if (conversationId && isConnected) {
         leaveConversation(conversationId);
@@ -81,67 +112,14 @@ export default function ChatScreen() {
     };
   }, [conversationId, isConnected]);
 
-  useEffect(() => {
-    // 监听新消息
-    const handleNewMessage = (message: Message) => {
-      if (message.conversationId === conversationId) {
-        setMessages((prev) => [message, ...prev]);
-        // 标记为已读
-        markAsRead();
-        // 滚动到底部
-        setTimeout(() => {
-          flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
-        }, 100);
-      }
-    };
-
-    // 监听对方正在输入
-    const handleTyping = (data: { conversationId: string; userId: number }) => {
-      if (data.conversationId === conversationId && data.userId !== currentUserId) {
-        setOtherUserTyping(true);
-
-        // 清除之前的超时
-        if (typingTimeoutRef.current) {
-          clearTimeout(typingTimeoutRef.current);
-        }
-
-        // 3秒后自动隐藏
-        typingTimeoutRef.current = setTimeout(() => {
-          setOtherUserTyping(false);
-        }, 3000);
-      }
-    };
-
-    // 监听对方停止输入
-    const handleStopTyping = (data: { conversationId: string; userId: number }) => {
-      if (data.conversationId === conversationId && data.userId !== currentUserId) {
-        setOtherUserTyping(false);
-        if (typingTimeoutRef.current) {
-          clearTimeout(typingTimeoutRef.current);
-        }
-      }
-    };
-
-    if (isConnected) {
-      on(SocketEvent.NewMessage, handleNewMessage);
-      on(SocketEvent.Typing, handleTyping);
-      on(SocketEvent.StopTyping, handleStopTyping);
-    }
-
-    return () => {
-      off(SocketEvent.NewMessage, handleNewMessage);
-      off(SocketEvent.Typing, handleTyping);
-      off(SocketEvent.StopTyping, handleStopTyping);
-    };
-  }, [conversationId, currentUserId, isConnected]);
-
   const loadCurrentUser = async () => {
     try {
       const user = await getUser();
       if (user) {
         setCurrentUserId(user.id);
+        setCurrentUserName(user.nickname || user.username || '');
       }
-    } catch (error) {
+    } catch {
       // 静默处理，用户未登录时不影响页面
     }
   };
@@ -163,55 +141,40 @@ export default function ChatScreen() {
     }
   };
 
-  const loadMessages = async () => {
-    if (!conversationId) return;
-
-    try {
-      setLoading(true);
-      const response = await getMessages(conversationId, 1, 50);
-      if (response.ok && response.data) {
-        setMessages(response.data.reverse());
-      }
-    } catch {
-      // 静默处理加载错误
-    } finally {
-      setLoading(false);
+  // 加载更多消息（上拉加载，inverted FlatList 的 onEndReached）
+  const handleLoadOlder = useCallback(() => {
+    if (conversationId) {
+      storeLoadOlderMessages(conversationId);
     }
-  };
-
-  const markAsRead = async () => {
-    if (!conversationId) return;
-
-    try {
-      await markConversationAsRead(conversationId);
-    } catch {
-      // 静默处理标记已读错误
-    }
-  };
+  }, [conversationId, storeLoadOlderMessages]);
 
   const handleSendMessage = async (content: string) => {
-    if (!conversationId || sending) return;
+    if (!conversationId || sending || currentUserId === null) return;
 
     try {
       setSending(true);
 
-      // 通过 Socket 发送（实时）
-      if (isConnected) {
-        sendMessage(conversationId, content);
-      }
+      // 1. 乐观添加消息到 store
+      const tempId = storeAddOptimisticMessage(
+        conversationId,
+        content,
+        currentUserId,
+        currentUserName
+      );
 
-      // 同时通过 API 发送（备份）
-      const response = await sendMessageApi(conversationId, content);
-      if (response.ok && response.data) {
-        // 如果 Socket 未连接，手动添加消息
-        if (!isConnected) {
-          setMessages((prev) => [response.data!, ...prev]);
-          setTimeout(() => {
-            flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
-          }, 100);
-        }
+      // 滚动到底部
+      setTimeout(() => {
+        flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+      }, 100);
+
+      // 2. 通过 store 的 sendMessage（API 调用）发送
+      const realMessage = await storeSendMessage(conversationId, content);
+
+      if (realMessage) {
+        // 3. 用真实消息替换临时消息
+        storeReplaceOptimisticMessage(conversationId, tempId, realMessage);
       } else {
-        Alert.alert('错误', response.error || '发送失败');
+        Alert.alert('错误', '发送失败');
       }
     } catch (error) {
       Alert.alert('错误', formatErrorMessage(error) || '发送失败');
@@ -256,6 +219,15 @@ export default function ChatScreen() {
     return (
       <View style={styles.typingIndicator}>
         <Text style={styles.typingText}>对方正在输入...</Text>
+      </View>
+    );
+  };
+
+  const renderFooter = () => {
+    if (!pagination?.loading || messages.length === 0) return null;
+    return (
+      <View style={styles.loadingMore}>
+        <ActivityIndicator size="small" color={colors.primary} />
       </View>
     );
   };
@@ -332,8 +304,11 @@ export default function ChatScreen() {
         renderItem={renderMessage}
         inverted
         ListHeaderComponent={renderHeader}
+        ListFooterComponent={renderFooter}
         ListEmptyComponent={renderEmpty}
         contentContainerStyle={messages.length === 0 ? styles.emptyList : styles.messageList}
+        onEndReached={handleLoadOlder}
+        onEndReachedThreshold={0.3}
       />
 
       {/* 消息输入框 */}
@@ -444,5 +419,9 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: fontSize.lg,
     color: colors.textSecondary,
+  },
+  loadingMore: {
+    paddingVertical: spacing.sm,
+    alignItems: 'center',
   },
 });

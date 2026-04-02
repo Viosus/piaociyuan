@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Text,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, fontSize } from '../constants/config';
 
 interface SearchBarProps {
@@ -37,7 +38,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   return (
     <View style={styles.container}>
       <View style={styles.searchBox}>
-        <Text style={styles.searchIcon}>🔍</Text>
+        <Ionicons name="search-outline" size={18} color={colors.textSecondary} style={styles.searchIcon} />
         <TextInput
           style={styles.input}
           placeholder={placeholder}
@@ -51,7 +52,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         />
         {query.length > 0 && (
           <TouchableOpacity onPress={handleClear} style={styles.clearButton}>
-            <Text style={styles.clearIcon}>✕</Text>
+            <Ionicons name="close-circle" size={18} color={colors.textSecondary} />
           </TouchableOpacity>
         )}
       </View>
@@ -76,7 +77,6 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   searchIcon: {
-    fontSize: fontSize.lg,
     marginRight: spacing.sm,
   },
   input: {
@@ -90,9 +90,5 @@ const styles = StyleSheet.create({
   clearButton: {
     padding: spacing.xs,
     marginLeft: spacing.xs,
-  },
-  clearIcon: {
-    fontSize: fontSize.lg,
-    color: colors.textSecondary,
   },
 });

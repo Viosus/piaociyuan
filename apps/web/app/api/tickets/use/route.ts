@@ -130,17 +130,16 @@ export async function POST(req: Request) {
     today.setHours(0, 0, 0, 0);
     eventDate.setHours(0, 0, 0, 0);
 
-    // TODO: 生产环境取消注释以下代码
-    // if (today < eventDate) {
-    //   return NextResponse.json(
-    //     {
-    //       ok: false,
-    //       code: 'EVENT_NOT_STARTED',
-    //       message: `活动尚未开始，演出日期: ${event.date}`,
-    //     },
-    //     { status: 400 }
-    //   );
-    // }
+    if (today < eventDate) {
+      return NextResponse.json(
+        {
+          ok: false,
+          code: 'EVENT_NOT_STARTED',
+          message: `活动尚未开始，演出日期: ${event.date}`,
+        },
+        { status: 400 }
+      );
+    }
 
     // 6️⃣ 执行检票（标记票为已使用）
     await prisma.ticket.update({

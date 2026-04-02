@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -6,25 +6,32 @@ import {
   FlatList,
   RefreshControl,
   ActivityIndicator,
-  TextInput,
   TouchableOpacity,
+  ScrollView,
+  Animated,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, FONT_SIZES } from '../constants/config';
 import { getEvents, searchEvents, type Event, type EventFilters } from '../services/events';
 import EventCard from '../components/EventCard';
 import EventFilterSheet from '../components/EventFilterSheet';
+import { SearchBar } from '../components/SearchBar';
 
-// 类别标签配置
-const CATEGORY_LABELS: Record<string, string> = {
-  concert: '演唱会',
-  festival: '音乐节',
-  exhibition: '展览',
-  musicale: '音乐会',
-  show: '演出',
-  sports: '体育赛事',
-  other: '其他',
-};
+const CATEGORY_TABS = [
+  { id: 'all', label: '全部' },
+  { id: 'concert', label: '演唱会' },
+  { id: 'festival', label: '音乐节' },
+  { id: 'exhibition', label: '展览' },
+  { id: 'musicale', label: '音乐会' },
+  { id: 'show', label: '演出' },
+  { id: 'sports', label: '体育赛事' },
+  { id: 'other', label: '其他' },
+];
+
+const CATEGORY_LABELS: Record<string, string> = Object.fromEntries(
+  CATEGORY_TABS.filter(t => t.id !== 'all').map(t => [t.id, t.label])
+);
 
 export default function EventsScreen() {
   const navigation = useNavigation();
@@ -35,6 +42,8 @@ export default function EventsScreen() {
   const [error, setError] = useState<string | null>(null);
   const [showFilter, setShowFilter] = useState(false);
   const [filters, setFilters] = useState<EventFilters>({ status: 'upcoming' });
+  const [activeCategory, setActiveCategory] = useState('all');
+  const underlineAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     loadEvents();
@@ -49,8 +58,9 @@ export default function EventsScreen() {
       } else {
         setError(response.error || '加载活动失败');
       }
-    } catch (error: any) {
-      setError(error.message || '加载活动失败');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : '加载活动失败';
+      setError(message);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -78,30 +88,36 @@ export default function EventsScreen() {
     }
   };
 
-  const handleApplyFilters = (newFilters: EventFilters) => {
-    setFilters({ ...newFilters, status: 'upcoming' });
-    setSearchQuery(''); // 清空搜索词
+  const handleCategorySelect = (categoryId: string, index: number) => {
+    setActiveCategory(categoryId);
+    Animated.spring(underlineAnim, {
+      toValue: index,
+      useNativeDriver: true,
+      tension: 300,
+      friction: 20,
+    }).start();
+    if (categoryId === 'all') {
+      setFilters({ ...filters, category: undefined });
+    } else {
+      setFilters({ ...filters, category: categoryId });
+    }
+    setSearchQuery('');
   };
 
-  // 计算当前激活的筛选器数量
+  const handleApplyFilters = (newFilters: EventFilters) => {
+    setFilters({ ...newFilters, status: 'upcoming' });
+    setSearchQuery('');
+  };
+
   const getActiveFilterCount = () => {
     let count = 0;
-    if (filters.category) count++;
     if (filters.dateFrom || filters.dateTo) count++;
     if (filters.minPrice !== undefined || filters.maxPrice !== undefined) count++;
     return count;
   };
 
-  // 渲染当前筛选条件标签
   const renderFilterTags = () => {
     const tags: { label: string; onRemove: () => void }[] = [];
-
-    if (filters.category) {
-      tags.push({
-        label: CATEGORY_LABELS[filters.category] || filters.category,
-        onRemove: () => setFilters({ ...filters, category: undefined }),
-      });
-    }
 
     if (filters.dateFrom || filters.dateTo) {
       const dateLabel = filters.dateFrom && filters.dateTo
@@ -125,7 +141,6 @@ export default function EventsScreen() {
       });
     }
 
-
     if (tags.length === 0) return null;
 
     return (
@@ -134,7 +149,7 @@ export default function EventsScreen() {
           <View key={index} style={styles.filterTag}>
             <Text style={styles.filterTagText}>{tag.label}</Text>
             <TouchableOpacity onPress={tag.onRemove} style={styles.filterTagRemove}>
-              <Text style={styles.filterTagRemoveText}>×</Text>
+              <Ionicons name="close" size={10} color="#ffffff" />
             </TouchableOpacity>
           </View>
         ))}
@@ -157,7 +172,7 @@ export default function EventsScreen() {
   if (error) {
     return (
       <View style={styles.centerContainer}>
-        <Text style={styles.errorText}>😕</Text>
+        <Ionicons name="alert-circle-outline" size={64} color={COLORS.error} />
         <Text style={styles.errorMessage}>{error}</Text>
         <Text style={styles.errorHint}>下拉刷新重试</Text>
       </View>
@@ -168,29 +183,50 @@ export default function EventsScreen() {
 
   return (
     <View style={styles.container}>
-      {/* 搜索栏和筛选按钮 */}
+      {/* 搜索栏和筛选 */}
       <View style={styles.searchContainer}>
         <View style={styles.searchRow}>
-          <TextInput
-            style={styles.searchInput}
-            placeholder="搜索活动..."
-            value={searchQuery}
-            onChangeText={handleSearch}
-            placeholderTextColor={COLORS.textSecondary}
-          />
+          <View style={styles.searchBarFlex}>
+            <SearchBar
+              placeholder="搜索活动..."
+              onSearch={handleSearch}
+            />
+          </View>
           <TouchableOpacity
             style={[styles.filterButton, filterCount > 0 && styles.filterButtonActive]}
             onPress={() => setShowFilter(true)}
           >
-            <Text style={styles.filterIcon}>🔍</Text>
-            <Text style={[styles.filterButtonText, filterCount > 0 && styles.filterButtonTextActive]}>
-              筛选{filterCount > 0 ? ` (${filterCount})` : ''}
-            </Text>
+            <Ionicons name="options-outline" size={20} color={filterCount > 0 ? COLORS.primary : COLORS.textSecondary} />
+            {filterCount > 0 && <View style={styles.filterDot} />}
           </TouchableOpacity>
         </View>
-
-        {/* 筛选条件标签 */}
         {renderFilterTags()}
+      </View>
+
+      {/* 分类 Tab 栏 */}
+      <View style={styles.categoryTabContainer}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.categoryTabScroll}
+        >
+          {CATEGORY_TABS.map((tab, index) => {
+            const isActive = activeCategory === tab.id;
+            return (
+              <TouchableOpacity
+                key={tab.id}
+                style={styles.categoryTab}
+                onPress={() => handleCategorySelect(tab.id, index)}
+                activeOpacity={0.7}
+              >
+                <Text style={[styles.categoryTabText, isActive && styles.categoryTabTextActive]}>
+                  {tab.label}
+                </Text>
+                {isActive && <View style={styles.categoryTabIndicator} />}
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
       </View>
 
       <FlatList
@@ -209,12 +245,15 @@ export default function EventsScreen() {
         }
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>🎫</Text>
+            <Ionicons name="ticket-outline" size={64} color={COLORS.textSecondary} />
             <Text style={styles.emptyMessage}>暂无活动</Text>
-            {filterCount > 0 && (
+            {(filterCount > 0 || activeCategory !== 'all') && (
               <TouchableOpacity
                 style={styles.clearFilterButton}
-                onPress={() => setFilters({ status: 'upcoming' })}
+                onPress={() => {
+                  setFilters({ status: 'upcoming' });
+                  setActiveCategory('all');
+                }}
               >
                 <Text style={styles.clearFilterText}>清除筛选条件</Text>
               </TouchableOpacity>
@@ -223,7 +262,6 @@ export default function EventsScreen() {
         }
       />
 
-      {/* 筛选弹窗 */}
       <EventFilterSheet
         visible={showFilter}
         onClose={() => setShowFilter(false)}
@@ -246,50 +284,39 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
   },
   searchContainer: {
-    padding: SPACING.md,
+    paddingHorizontal: SPACING.md,
+    paddingTop: SPACING.sm,
+    paddingBottom: SPACING.sm,
     backgroundColor: COLORS.surface,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
   },
   searchRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.sm,
   },
-  searchInput: {
+  searchBarFlex: {
     flex: 1,
-    backgroundColor: COLORS.surface,
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
-    borderRadius: 8,
-    fontSize: FONT_SIZES.md,
-    color: COLORS.text,
   },
   filterButton: {
-    flexDirection: 'row',
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: COLORS.background,
+    justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
-    backgroundColor: COLORS.surface,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: COLORS.border,
+    position: 'relative',
   },
   filterButtonActive: {
-    backgroundColor: `${COLORS.primary}20`,
-    borderColor: COLORS.primary,
+    backgroundColor: `${COLORS.primary}15`,
   },
-  filterIcon: {
-    fontSize: 14,
-    marginRight: SPACING.xs,
-  },
-  filterButtonText: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.textSecondary,
-  },
-  filterButtonTextActive: {
-    color: COLORS.primary,
-    fontWeight: '600',
+  filterDot: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: COLORS.priceCTA,
   },
   filterTagsContainer: {
     flexDirection: 'row',
@@ -300,7 +327,7 @@ const styles = StyleSheet.create({
   filterTag: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: `${COLORS.primary}15`,
+    backgroundColor: `${COLORS.primary}12`,
     paddingHorizontal: SPACING.sm,
     paddingVertical: SPACING.xs,
     borderRadius: 12,
@@ -308,6 +335,7 @@ const styles = StyleSheet.create({
   filterTagText: {
     fontSize: FONT_SIZES.xs,
     color: COLORS.primary,
+    fontWeight: '500',
   },
   filterTagRemove: {
     marginLeft: SPACING.xs,
@@ -318,10 +346,35 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  filterTagRemoveText: {
-    fontSize: 12,
-    color: COLORS.textOnPrimary,
-    fontWeight: 'bold',
+  categoryTabContainer: {
+    backgroundColor: COLORS.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
+  },
+  categoryTabScroll: {
+    paddingHorizontal: SPACING.md,
+  },
+  categoryTab: {
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    marginRight: SPACING.xs,
+    alignItems: 'center',
+  },
+  categoryTabText: {
+    fontSize: FONT_SIZES.sm,
+    color: COLORS.textSecondary,
+    fontWeight: '500',
+  },
+  categoryTabTextActive: {
+    color: COLORS.primary,
+    fontWeight: '700',
+  },
+  categoryTabIndicator: {
+    width: 20,
+    height: 3,
+    borderRadius: 1.5,
+    backgroundColor: COLORS.primary,
+    marginTop: SPACING.xs,
   },
   listContent: {
     padding: SPACING.md,
@@ -330,13 +383,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: SPACING.xxl,
   },
-  emptyText: {
-    fontSize: 64,
-    marginBottom: SPACING.md,
-  },
   emptyMessage: {
     fontSize: FONT_SIZES.lg,
     color: COLORS.textSecondary,
+    marginTop: SPACING.md,
   },
   clearFilterButton: {
     marginTop: SPACING.md,
@@ -347,16 +397,13 @@ const styles = StyleSheet.create({
   },
   clearFilterText: {
     fontSize: FONT_SIZES.sm,
-    color: COLORS.text,
+    color: '#ffffff',
     fontWeight: '600',
-  },
-  errorText: {
-    fontSize: 64,
-    marginBottom: SPACING.md,
   },
   errorMessage: {
     fontSize: FONT_SIZES.lg,
     color: COLORS.error,
+    marginTop: SPACING.md,
     marginBottom: SPACING.sm,
   },
   errorHint: {

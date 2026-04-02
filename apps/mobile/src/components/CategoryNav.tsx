@@ -6,23 +6,24 @@ import {
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, fontSize } from '../constants/config';
 
 export interface Category {
   id: string;
   name: string;
-  icon: string;
+  icon: keyof typeof Ionicons.glyphMap;
 }
 
 const CATEGORIES: Category[] = [
-  { id: 'all', name: '全部', icon: '🎭' },
-  { id: 'concert', name: '演唱会', icon: '🎤' },
-  { id: 'festival', name: '音乐节', icon: '🎸' },
-  { id: 'exhibition', name: '展览', icon: '🎨' },
-  { id: 'musicale', name: '音乐会', icon: '🎼' },
-  { id: 'show', name: '演出', icon: '🎪' },
-  { id: 'sports', name: '体育赛事', icon: '⚽' },
-  { id: 'other', name: '其他', icon: '🎯' },
+  { id: 'all', name: '全部', icon: 'apps-outline' },
+  { id: 'concert', name: '演唱会', icon: 'mic-outline' },
+  { id: 'festival', name: '音乐节', icon: 'musical-notes-outline' },
+  { id: 'exhibition', name: '展览', icon: 'color-palette-outline' },
+  { id: 'musicale', name: '音乐会', icon: 'headset-outline' },
+  { id: 'show', name: '演出', icon: 'film-outline' },
+  { id: 'sports', name: '体育赛事', icon: 'football-outline' },
+  { id: 'other', name: '其他', icon: 'ellipsis-horizontal-outline' },
 ];
 
 interface CategoryNavProps {
@@ -50,7 +51,12 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({
               onPress={() => onSelectCategory?.(category.id)}
               activeOpacity={0.7}
             >
-              <Text style={styles.categoryIcon}>{category.icon}</Text>
+              <Ionicons
+                name={category.icon}
+                size={22}
+                color={isSelected ? '#ffffff' : colors.primary}
+                style={styles.categoryIcon}
+              />
               <Text
                 style={[
                   styles.categoryName,
@@ -91,7 +97,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
   },
   categoryIcon: {
-    fontSize: fontSize.xl,
     marginBottom: 4,
   },
   categoryName: {

@@ -6,15 +6,9 @@ import type { SmsProvider, SmsProviderType, SendSmsParams, SendSmsResult } from 
  */
 class MockSmsProvider implements SmsProvider {
   async send(params: SendSmsParams): Promise<SendSmsResult> {
-    console.log('='.repeat(50));
-    console.log('📱 短信（Mock 模式）');
-    console.log(`手机号: ${params.phone}`);
-    console.log(`内容: ${params.content}`);
-    if (params.templateId) {
-      console.log(`模板ID: ${params.templateId}`);
-      console.log(`模板参数:`, params.templateParams);
+    if (process.env.NODE_ENV === 'development') {
+      console.log('📱 短信（Mock 模式）', `手机号: ${params.phone}`);
     }
-    console.log('='.repeat(50));
     return { success: true, messageId: 'mock-sms-id' };
   }
 }
@@ -33,15 +27,7 @@ class AliyunSmsProvider implements SmsProvider {
   async send(params: SendSmsParams): Promise<SendSmsResult> {
     // TODO: 实现阿里云短信发送
     // 参考文档: https://help.aliyun.com/document_detail/101414.html
-
     console.warn('阿里云短信服务尚未实现，回退到 Mock 模式');
-    console.log('='.repeat(50));
-    console.log('📱 短信（阿里云 - 未实现）');
-    console.log(`手机号: ${params.phone}`);
-    console.log(`模板ID: ${params.templateId}`);
-    console.log(`模板参数:`, params.templateParams);
-    console.log('='.repeat(50));
-
     return { success: true, messageId: 'aliyun-mock-id' };
   }
 }
@@ -60,15 +46,7 @@ class TencentSmsProvider implements SmsProvider {
   async send(params: SendSmsParams): Promise<SendSmsResult> {
     // TODO: 实现腾讯云短信发送
     // 参考文档: https://cloud.tencent.com/document/product/382/43197
-
     console.warn('腾讯云短信服务尚未实现，回退到 Mock 模式');
-    console.log('='.repeat(50));
-    console.log('📱 短信（腾讯云 - 未实现）');
-    console.log(`手机号: ${params.phone}`);
-    console.log(`模板ID: ${params.templateId}`);
-    console.log(`模板参数:`, params.templateParams);
-    console.log('='.repeat(50));
-
     return { success: true, messageId: 'tencent-mock-id' };
   }
 }

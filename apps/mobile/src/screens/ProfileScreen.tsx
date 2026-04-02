@@ -150,9 +150,9 @@ export default function ProfileScreen() {
                 onPress={() => navigation.navigate(item.screen as never)}
               >
                 <View style={styles.menuItemLeft}>
-                  {item.emoji && (
-                    <Text style={styles.menuItemEmoji}>{item.emoji}</Text>
-                  )}
+                  <View style={styles.menuItemIconBg}>
+                    <Ionicons name={item.icon} size={20} color={COLORS.primary} />
+                  </View>
                   <Text style={styles.menuItemText}>{item.label}</Text>
                 </View>
                 <Ionicons
@@ -172,7 +172,7 @@ export default function ProfileScreen() {
           style={styles.logoutButton}
           onPress={logout}
         >
-          <Text style={styles.logoutEmoji}>🚪</Text>
+          <Ionicons name="log-out-outline" size={20} color={COLORS.error} style={{ marginRight: SPACING.sm }} />
           <Text style={styles.logoutText}>退出登录</Text>
         </TouchableOpacity>
       </View>
@@ -296,8 +296,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  menuItemEmoji: {
-    fontSize: 24,
+  menuItemIconBg: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: `${COLORS.primary}15`,
+    justifyContent: 'center',
+    alignItems: 'center',
     marginRight: SPACING.sm,
   },
   menuItemText: {
@@ -317,10 +322,6 @@ const styles = StyleSheet.create({
     borderRadius: BORDER_RADIUS.medium,
     borderWidth: 1,
     borderColor: COLORS.error,
-  },
-  logoutEmoji: {
-    fontSize: 20,
-    marginRight: SPACING.sm,
   },
   logoutText: {
     fontSize: FONT_SIZES.md,

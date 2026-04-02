@@ -1,17 +1,19 @@
 /**
  * Socket Context - 全局管理 Socket 连接
+ * Socket 事件统一在此处监听，写入 Zustand messagingStore
+ * 页面只从 store 读取数据，不直接监听 Socket 事件
  */
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { socketService, SocketEvent } from '../services/socket';
 import { useAuth } from './AuthContext';
+import { useMessagingStore } from '../stores/messagingStore';
+import type { Message, Conversation } from '../services/messages';
 
 interface SocketContextValue {
   isConnected: boolean;
   connect: () => Promise<void>;
   disconnect: () => void;
-  sendMessage: (conversationId: string, content: string) => void;
-  markMessageAsRead: (messageId: string) => void;
   sendTyping: (conversationId: string) => void;
   sendStopTyping: (conversationId: string) => void;
   joinConversation: (conversationId: string) => void;
@@ -31,7 +33,6 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    // 当用户登录时自动连接
     if (isAuthenticated) {
       handleConnect();
     } else {
@@ -39,19 +40,20 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     }
 
     return () => {
-      // 组件卸载时断开连接
       handleDisconnect();
     };
   }, [isAuthenticated]);
 
+  // 连接状态监听
   useEffect(() => {
-    // 监听连接状态变化
     const handleConnectEvent = () => {
       setIsConnected(true);
     };
 
     const handleDisconnectEvent = () => {
       setIsConnected(false);
+      // 断连时清除所有打字指示器
+      useMessagingStore.getState().clearAllTyping();
     };
 
     socketService.on(SocketEvent.Connect, handleConnectEvent);
@@ -62,6 +64,62 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
       socketService.off(SocketEvent.Disconnect, handleDisconnectEvent);
     };
   }, []);
+
+  // 集中监听所有消息相关 Socket 事件，写入 Zustand store
+  useEffect(() => {
+    const handleNewMessage = (message: Message) => {
+      const store = useMessagingStore.getState();
+      // 添加消息（store 内部会去重）
+      store.addMessage(message.conversationId, message);
+      // 更新会话列表
+      store.updateConversationWithMessage(message);
+      // 如果当前正在查看这个会话，自动标记已读
+      if (store.activeConversationId === message.conversationId) {
+        store.markConversationAsRead(message.conversationId);
+      }
+    };
+
+    const handleConversationUpdated = (conversation: Conversation) => {
+      useMessagingStore.getState().updateConversation(conversation);
+    };
+
+    const handleTyping = (data: { conversationId: string; userId: number }) => {
+      useMessagingStore.getState().setTyping(data.conversationId, data.userId);
+    };
+
+    const handleStopTyping = (data: { conversationId: string; userId: number }) => {
+      useMessagingStore.getState().clearTyping(data.conversationId, data.userId);
+    };
+
+    const handleReconnect = () => {
+      // 重连后同步最新状态
+      useMessagingStore.getState().syncAfterReconnect();
+    };
+
+    socketService.on(SocketEvent.NewMessage, handleNewMessage);
+    socketService.on(SocketEvent.ConversationUpdated, handleConversationUpdated);
+    socketService.on(SocketEvent.Typing, handleTyping);
+    socketService.on(SocketEvent.StopTyping, handleStopTyping);
+    socketService.on(SocketEvent.Reconnect, handleReconnect);
+
+    return () => {
+      socketService.off(SocketEvent.NewMessage, handleNewMessage);
+      socketService.off(SocketEvent.ConversationUpdated, handleConversationUpdated);
+      socketService.off(SocketEvent.Typing, handleTyping);
+      socketService.off(SocketEvent.StopTyping, handleStopTyping);
+      socketService.off(SocketEvent.Reconnect, handleReconnect);
+    };
+  }, []);
+
+  // 登录后自动加载会话列表
+  useEffect(() => {
+    if (isAuthenticated && isConnected) {
+      const store = useMessagingStore.getState();
+      if (!store.conversationsLoaded) {
+        store.loadConversations();
+      }
+    }
+  }, [isAuthenticated, isConnected]);
 
   const handleConnect = async () => {
     try {
@@ -79,8 +137,6 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     isConnected,
     connect: handleConnect,
     disconnect: handleDisconnect,
-    sendMessage: socketService.sendMessage.bind(socketService),
-    markMessageAsRead: socketService.markMessageAsRead.bind(socketService),
     sendTyping: socketService.sendTyping.bind(socketService),
     sendStopTyping: socketService.sendStopTyping.bind(socketService),
     joinConversation: socketService.joinConversation.bind(socketService),
@@ -92,9 +148,6 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   return <SocketContext.Provider value={value}>{children}</SocketContext.Provider>;
 };
 
-/**
- * 使用 Socket Context
- */
 export const useSocket = (): SocketContextValue => {
   const context = useContext(SocketContext);
   if (!context) {

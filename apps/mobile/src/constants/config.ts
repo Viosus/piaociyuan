@@ -9,8 +9,9 @@ export const APP_CONFIG = {
 export const COLORS = {
   // 主色调
   primary: '#46467A',              // 票次元紫色（主色）
-  secondary: '#46467A',            // 紫色（强调色，用于导航栏）
+  secondary: '#5A5A8E',            // 次紫色（略浅，用于导航栏渐变）
   accent: '#46467A',               // 强调色（用于标题、项目名称）
+  priceCTA: '#FF4D6A',             // 暖色CTA（购票按钮、价格文字）
 
   // 功能色
   success: '#10b981',
@@ -20,6 +21,7 @@ export const COLORS = {
   // 背景色
   background: '#E0DFFD',           // 页面背景（淡紫色，与网站统一）
   backgroundAccent: '#46467A',     // 强调背景（紫色，用于头部/底部导航）
+  backgroundDark: '#2D2D5E',       // 深色背景
   surface: '#ffffff',              // 卡片背景（白色，与网站统一）
   surfaceElevated: '#ffffff',      // 抬起的卡片背景（纯白）
 
@@ -41,7 +43,10 @@ export const GRADIENTS = {
   primary: ['#46467A', '#E0DFFD'],        // 紫色到淡紫
   secondary: ['#46467A', '#7A7AAE'],      // 紫色渐变
   accent: ['#46467A', '#5A5A8E'],         // 紫色渐变（与网站统一）
+  header: ['#3D3D6E', '#5A5A8E'],         // Header 渐变（深紫到浅紫）
+  cta: ['#FF4D6A', '#FF6B8A'],            // CTA 按钮渐变（暖红）
   card: ['rgba(255,255,255,0.9)', 'rgba(255,255,255,0.7)'],  // 卡片渐变
+  imageOverlay: ['transparent', 'rgba(0,0,0,0.6)'],  // 图片底部遮罩
 };
 
 // 小写版本（推荐使用）

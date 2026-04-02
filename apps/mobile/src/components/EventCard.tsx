@@ -1,12 +1,36 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
-import { COLORS, SPACING, FONT_SIZES } from '../constants/config';
-import type { Event, Tier } from '../services/events';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
+import { COLORS, SPACING, FONT_SIZES, GRADIENTS } from '../constants/config';
+import { useCountdown } from '../hooks/useCountdown';
+import type { Event } from '../services/events';
 
 interface EventCardProps {
   event: Event;
   onPress: () => void;
 }
+
+function CountdownLabel({ startTime }: { startTime: string }) {
+  const { label, isUpcoming, isUrgent } = useCountdown(startTime);
+  if (!isUpcoming) return null;
+  return (
+    <View style={[styles.countdownBadge, isUrgent && styles.countdownUrgent]}>
+      <Ionicons name="time-outline" size={12} color={isUrgent ? COLORS.priceCTA : COLORS.primary} />
+      <Text style={[styles.countdownText, isUrgent && styles.countdownTextUrgent]}>{label}</Text>
+    </View>
+  );
+}
+
+const CATEGORY_LABELS: Record<string, string> = {
+  concert: '演唱会',
+  festival: '音乐节',
+  exhibition: '展览',
+  musicale: '音乐会',
+  show: '演出',
+  sports: '体育赛事',
+  other: '其他',
+};
 
 export default function EventCard({ event, onPress }: EventCardProps) {
   const formatDate = (dateString: string) => {
@@ -21,72 +45,73 @@ export default function EventCard({ event, onPress }: EventCardProps) {
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'upcoming':
-        return '即将开始';
-      case 'ongoing':
-        return '进行中';
-      case 'ended':
-        return '已结束';
-      default:
-        return '';
+      case 'upcoming': return '即将开始';
+      case 'ongoing': return '进行中';
+      case 'ended': return '已结束';
+      default: return '';
     }
   };
 
-  
-  const getMinPrice = () => {
-    if (!event.tiers || event.tiers.length === 0) return null;
-    return Math.min(...event.tiers.map((t: Tier) => t.price));
-  };
-
-  const minPrice = getMinPrice();
+  const minPrice = event.minPrice ?? null;
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'upcoming':
-        return COLORS.primary;
-      case 'ongoing':
-        return COLORS.success;
-      case 'ended':
-        return COLORS.textSecondary;
-      default:
-        return COLORS.textSecondary;
+      case 'upcoming': return COLORS.primary;
+      case 'ongoing': return COLORS.success;
+      case 'ended': return COLORS.textSecondary;
+      default: return COLORS.textSecondary;
     }
   };
 
   return (
-    <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.7}>
-      {event.coverImage ? (
-        <Image source={{ uri: event.coverImage }} style={styles.image} />
-      ) : (
-        <View style={styles.imagePlaceholder}>
-          <Text style={styles.placeholderText}>📸</Text>
+    <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.85}>
+      <View style={styles.imageContainer}>
+        {event.coverImage ? (
+          <Image source={{ uri: event.coverImage }} style={styles.image} />
+        ) : (
+          <View style={styles.imagePlaceholder}>
+            <Ionicons name="image-outline" size={48} color={COLORS.textSecondary} />
+          </View>
+        )}
+        <LinearGradient
+          colors={GRADIENTS.imageOverlay as [string, string]}
+          style={styles.imageOverlay}
+        />
+        {/* 状态标签 */}
+        <View style={[styles.statusBadge, { backgroundColor: getStatusColor(event.status) }]}>
+          <Text style={styles.statusText}>{getStatusText(event.status)}</Text>
         </View>
-      )}
+      </View>
 
       <View style={styles.content}>
-        <View style={styles.header}>
-          <Text style={styles.title} numberOfLines={2}>
-            {event.name}
-          </Text>
-          <View style={[styles.statusBadge, { backgroundColor: getStatusColor(event.status) }]}>
-            <Text style={styles.statusText}>{getStatusText(event.status)}</Text>
-          </View>
-        </View>
+        <Text style={styles.title} numberOfLines={2}>{event.name}</Text>
+
+        {/* 倒计时 */}
+        {event.status === 'upcoming' && (
+          <CountdownLabel startTime={event.startTime} />
+        )}
 
         <View style={styles.info}>
-          <Text style={styles.infoText}>📍 {event.venue}</Text>
-          <Text style={styles.infoText}>🕐 {formatDate(event.startTime)}</Text>
+          <View style={styles.infoRow}>
+            <Ionicons name="location-outline" size={14} color={COLORS.textSecondary} style={styles.infoIcon} />
+            <Text style={styles.infoText} numberOfLines={1}>{event.venue}</Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Ionicons name="time-outline" size={14} color={COLORS.textSecondary} style={styles.infoIcon} />
+            <Text style={styles.infoText}>{formatDate(event.startTime)}</Text>
+          </View>
         </View>
 
-        {minPrice !== null && (
-          <Text style={styles.priceText}>¥{minPrice}起</Text>
-        )}
-
-        {event.category && (
-          <View style={styles.categoryBadge}>
-            <Text style={styles.categoryText}>{event.category}</Text>
-          </View>
-        )}
+        <View style={styles.footer}>
+          {minPrice !== null && (
+            <Text style={styles.priceText}>¥{minPrice}<Text style={styles.priceUnit}>起</Text></Text>
+          )}
+          {event.category && (
+            <View style={styles.categoryBadge}>
+              <Text style={styles.categoryText}>{CATEGORY_LABELS[event.category] || event.category}</Text>
+            </View>
+          )}
+        </View>
       </View>
     </TouchableOpacity>
   );
@@ -95,14 +120,17 @@ export default function EventCard({ event, onPress }: EventCardProps) {
 const styles = StyleSheet.create({
   card: {
     backgroundColor: '#ffffff',
-    borderRadius: 12,
+    borderRadius: 16,
     marginBottom: SPACING.md,
     overflow: 'hidden',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowColor: COLORS.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  imageContainer: {
+    position: 'relative',
   },
   image: {
     width: '100%',
@@ -116,59 +144,96 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  placeholderText: {
-    fontSize: 48,
-  },
-  content: {
-    padding: SPACING.md,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: SPACING.sm,
-  },
-  title: {
-    flex: 1,
-    fontSize: FONT_SIZES.lg,
-    fontWeight: 'bold',
-    color: COLORS.text,
-    marginRight: SPACING.sm,
+  imageOverlay: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 60,
   },
   statusBadge: {
+    position: 'absolute',
+    top: SPACING.sm,
+    left: SPACING.sm,
     paddingHorizontal: SPACING.sm,
     paddingVertical: SPACING.xs,
-    borderRadius: 4,
+    borderRadius: 6,
   },
   statusText: {
     fontSize: FONT_SIZES.xs,
     color: '#ffffff',
     fontWeight: '600',
   },
+  content: {
+    padding: SPACING.md,
+  },
+  title: {
+    fontSize: FONT_SIZES.lg,
+    fontWeight: 'bold',
+    color: COLORS.text,
+    marginBottom: SPACING.sm,
+  },
+  countdownBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    backgroundColor: `${COLORS.primary}12`,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: SPACING.xs,
+    borderRadius: 6,
+    marginBottom: SPACING.sm,
+  },
+  countdownUrgent: {
+    backgroundColor: `${COLORS.priceCTA}15`,
+  },
+  countdownText: {
+    fontSize: FONT_SIZES.xs,
+    color: COLORS.primary,
+    fontWeight: '600',
+    marginLeft: 4,
+  },
+  countdownTextUrgent: {
+    color: COLORS.priceCTA,
+  },
   info: {
     marginBottom: SPACING.sm,
   },
-  infoText: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.textSecondary,
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: SPACING.xs,
   },
-  categoryBadge: {
-    alignSelf: 'flex-start',
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: SPACING.xs,
-    backgroundColor: COLORS.surface,
-    borderRadius: 4,
+  infoIcon: {
+    marginRight: SPACING.xs,
+  },
+  infoText: {
+    flex: 1,
+    fontSize: FONT_SIZES.sm,
+    color: COLORS.textSecondary,
+  },
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   priceText: {
-    fontSize: FONT_SIZES.lg,
+    fontSize: FONT_SIZES.xl,
     fontWeight: 'bold',
-    color: COLORS.error,
-    marginBottom: SPACING.sm,
+    color: COLORS.priceCTA,
+  },
+  priceUnit: {
+    fontSize: FONT_SIZES.sm,
+    fontWeight: '400',
+  },
+  categoryBadge: {
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: SPACING.xs,
+    backgroundColor: `${COLORS.primary}12`,
+    borderRadius: 6,
   },
   categoryText: {
     fontSize: FONT_SIZES.xs,
-    color: COLORS.text,
+    color: COLORS.primary,
     fontWeight: '500',
   },
 });

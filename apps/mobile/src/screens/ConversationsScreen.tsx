@@ -1,8 +1,9 @@
 /**
  * 对话列表页面
+ * 使用集中化的 messagingStore 管理会话数据
  */
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -16,114 +17,42 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { colors, spacing, fontSize } from '../constants/config';
-import { getConversations, type Conversation, type Message } from '../services/messages';
+import type { Conversation } from '../services/messages';
 import { useSocket } from '../contexts/SocketContext';
-import { SocketEvent } from '../services/socket';
+import { useMessagingStore } from '../stores/messagingStore';
 import { getRelativeTime } from '../utils/date';
 
 export default function ConversationsScreen() {
   const navigation = useNavigation();
-  const { isConnected, on, off } = useSocket();
+  const { isConnected } = useSocket();
 
-  const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
+  const conversations = useMessagingStore((s) => s.conversations);
+  const conversationsLoading = useMessagingStore((s) => s.conversationsLoading);
+  const conversationsLoaded = useMessagingStore((s) => s.conversationsLoaded);
+  const loadConversations = useMessagingStore((s) => s.loadConversations);
 
-  // 页面获得焦点时刷新数据
+  const [refreshing, setRefreshing] = React.useState(false);
+
+  // 首次加载
+  React.useEffect(() => {
+    if (!conversationsLoaded) {
+      loadConversations();
+    }
+  }, [conversationsLoaded, loadConversations]);
+
+  // 页面获得焦点时静默刷新数据
   useFocusEffect(
     React.useCallback(() => {
-      if (conversations.length > 0) {
+      if (conversationsLoaded) {
         loadConversations(true);
       }
-    }, [])
+    }, [conversationsLoaded, loadConversations])
   );
 
-  useEffect(() => {
-    loadConversations();
-  }, []);
-
-  useEffect(() => {
-    // 监听新消息
-    const handleNewMessage = (message: Message) => {
-      updateConversationWithMessage(message);
-    };
-
-    // 监听对话更新
-    const handleConversationUpdated = (conversation: Conversation) => {
-      updateConversation(conversation);
-    };
-
-    if (isConnected) {
-      on(SocketEvent.NewMessage, handleNewMessage);
-      on(SocketEvent.ConversationUpdated, handleConversationUpdated);
-    }
-
-    return () => {
-      off(SocketEvent.NewMessage, handleNewMessage);
-      off(SocketEvent.ConversationUpdated, handleConversationUpdated);
-    };
-  }, [isConnected]);
-
-  const loadConversations = async (silent: boolean = false) => {
-    try {
-      if (!silent) {
-        setLoading(true);
-      }
-
-      const response = await getConversations(1, 50);
-      if (response.ok && response.data) {
-        setConversations(response.data);
-      }
-    } catch {
-      // 静默处理加载错误
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  };
-
-  const handleRefresh = () => {
+  const handleRefresh = async () => {
     setRefreshing(true);
-    loadConversations();
-  };
-
-  const updateConversationWithMessage = (message: Message) => {
-    setConversations((prev) => {
-      const index = prev.findIndex((c) => c.id === message.conversationId);
-      if (index >= 0) {
-        const updated = [...prev];
-        updated[index] = {
-          ...updated[index],
-          lastMessage: {
-            id: message.id,
-            content: message.content,
-            senderId: message.senderId,
-            createdAt: message.createdAt,
-            isRead: false,
-          },
-          unreadCount: updated[index].unreadCount + 1,
-          lastMessageAt: message.createdAt,
-        };
-        // 移到列表顶部
-        updated.unshift(...updated.splice(index, 1));
-        return updated;
-      }
-      return prev;
-    });
-  };
-
-  const updateConversation = (conversation: Conversation) => {
-    setConversations((prev) => {
-      const index = prev.findIndex((c) => c.id === conversation.id);
-      if (index >= 0) {
-        const updated = [...prev];
-        updated[index] = conversation;
-        return updated;
-      } else {
-        // 新对话，添加到顶部
-        return [conversation, ...prev];
-      }
-    });
+    await loadConversations(true);
+    setRefreshing(false);
   };
 
   const handleConversationPress = (conversation: Conversation) => {
@@ -214,7 +143,7 @@ export default function ConversationsScreen() {
   };
 
   const renderEmpty = () => {
-    if (loading) return null;
+    if (conversationsLoading) return null;
     return (
       <View style={styles.emptyContainer}>
         <Text style={styles.emptyIcon}>💬</Text>
@@ -224,7 +153,7 @@ export default function ConversationsScreen() {
     );
   };
 
-  if (loading && conversations.length === 0) {
+  if (conversationsLoading && conversations.length === 0) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.centerContainer}>

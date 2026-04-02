@@ -21,10 +21,10 @@ import { colors, spacing, fontSize } from '../constants/config';
 import { PostCard } from '../components/PostCard';
 import { getPosts, likePost, unlikePost, type Post } from '../services/posts';
 import { favoritePost, unfavoritePost } from '../services/favorites';
-import { getConversations, getUnreadCount, type Conversation, type Message } from '../services/messages';
+import type { Conversation } from '../services/messages';
 import { useAuth } from '../contexts/AuthContext';
 import { useSocket } from '../contexts/SocketContext';
-import { SocketEvent } from '../services/socket';
+import { useMessagingStore } from '../stores/messagingStore';
 import { getRelativeTime } from '../utils/date';
 
 // 主 Tab 配置
@@ -43,14 +43,21 @@ const SORT_TABS = [
 export default function EncoreScreen() {
   const navigation = useNavigation();
   const { logout } = useAuth();
-  const { isConnected, on, off } = useSocket();
+  const { isConnected } = useSocket();
+
+  // 从 Zustand store 读取消息状态（唯一数据源）
+  const conversations = useMessagingStore((s) => s.conversations);
+  const conversationsLoading = useMessagingStore((s) => s.conversationsLoading);
+  const conversationsLoaded = useMessagingStore((s) => s.conversationsLoaded);
+  const storeLoadConversations = useMessagingStore((s) => s.loadConversations);
+  const totalUnreadCount = useMessagingStore((s) => s.getTotalUnreadCount());
 
   // 主 Tab 状态
   const [activeTab, setActiveTab] = useState<'messages' | 'posts'>('posts');
-  const [unreadCount, setUnreadCount] = useState(0);
   const [initialTabSet, setInitialTabSet] = useState(false);
+  const [messagesRefreshing, setMessagesRefreshing] = useState(false);
 
-  // 帖子状态
+  // 帖子状态（保持本地管理）
   const [posts, setPosts] = useState<Post[]>([]);
   const [postsLoading, setPostsLoading] = useState(true);
   const [postsRefreshing, setPostsRefreshing] = useState(false);
@@ -60,44 +67,21 @@ export default function EncoreScreen() {
   const [selectedSort, setSelectedSort] = useState<'latest' | 'hot' | 'following'>('latest');
   const [postsError, setPostsError] = useState<string | null>(null);
 
-  // 消息状态
-  const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [messagesLoading, setMessagesLoading] = useState(true);
-  const [messagesRefreshing, setMessagesRefreshing] = useState(false);
-
-  // 初始化时检测未读消息，决定默认 Tab
+  // 初始化时根据未读数决定默认 Tab
   useEffect(() => {
-    checkUnreadAndSetTab();
-  }, []);
-
-  const checkUnreadAndSetTab = async () => {
-    try {
-      const response = await getUnreadCount();
-      if (response.ok && response.data) {
-        const count = response.data.count;
-        setUnreadCount(count);
-        // 如果有未读消息，默认显示私聊群聊
-        if (count > 0 && !initialTabSet) {
-          setActiveTab('messages');
-        }
-      }
-    } catch {
-      // 静默处理
-    } finally {
-      setInitialTabSet(true);
+    if (totalUnreadCount > 0 && !initialTabSet) {
+      setActiveTab('messages');
     }
-  };
+    setInitialTabSet(true);
+  }, [conversationsLoaded]);
 
   // 页面获得焦点时刷新数据
   useFocusEffect(
     React.useCallback(() => {
-      // 刷新未读数
-      checkUnreadAndSetTab();
-
       if (activeTab === 'posts' && posts.length > 0) {
         loadPosts(1, true);
-      } else if (activeTab === 'messages' && conversations.length > 0) {
-        loadConversations(true);
+      } else if (activeTab === 'messages' && conversationsLoaded) {
+        storeLoadConversations(true);
       }
     }, [activeTab, selectedSort])
   );
@@ -109,34 +93,12 @@ export default function EncoreScreen() {
     }
   }, [selectedSort, activeTab]);
 
-  // 加载对话
+  // 加载对话（首次）
   useEffect(() => {
-    if (activeTab === 'messages') {
-      loadConversations();
+    if (activeTab === 'messages' && !conversationsLoaded) {
+      storeLoadConversations();
     }
   }, [activeTab]);
-
-  // Socket 监听
-  useEffect(() => {
-    const handleNewMessage = (message: Message) => {
-      updateConversationWithMessage(message);
-      setUnreadCount((prev) => prev + 1);
-    };
-
-    const handleConversationUpdated = (conversation: Conversation) => {
-      updateConversation(conversation);
-    };
-
-    if (isConnected) {
-      on(SocketEvent.NewMessage, handleNewMessage);
-      on(SocketEvent.ConversationUpdated, handleConversationUpdated);
-    }
-
-    return () => {
-      off(SocketEvent.NewMessage, handleNewMessage);
-      off(SocketEvent.ConversationUpdated, handleConversationUpdated);
-    };
-  }, [isConnected]);
 
   // ==================== 帖子相关函数 ====================
 
@@ -300,66 +262,10 @@ export default function EncoreScreen() {
 
   // ==================== 消息相关函数 ====================
 
-  const loadConversations = async (silent: boolean = false) => {
-    try {
-      if (!silent) {
-        setMessagesLoading(true);
-      }
-
-      const response = await getConversations(1, 50);
-      if (response.ok && response.data) {
-        setConversations(response.data);
-        // 计算未读数
-        const totalUnread = response.data.reduce((sum, c) => sum + c.unreadCount, 0);
-        setUnreadCount(totalUnread);
-      }
-    } catch {
-      // 静默处理
-    } finally {
-      setMessagesLoading(false);
-      setMessagesRefreshing(false);
-    }
-  };
-
-  const handleMessagesRefresh = () => {
+  const handleMessagesRefresh = async () => {
     setMessagesRefreshing(true);
-    loadConversations();
-  };
-
-  const updateConversationWithMessage = (message: Message) => {
-    setConversations((prev) => {
-      const index = prev.findIndex((c) => c.id === message.conversationId);
-      if (index >= 0) {
-        const updated = [...prev];
-        updated[index] = {
-          ...updated[index],
-          lastMessage: {
-            id: message.id,
-            content: message.content,
-            senderId: String(message.senderId),
-            createdAt: message.createdAt,
-            isRead: false,
-          },
-          unreadCount: updated[index].unreadCount + 1,
-          lastMessageAt: message.createdAt,
-        };
-        updated.unshift(...updated.splice(index, 1));
-        return updated;
-      }
-      return prev;
-    });
-  };
-
-  const updateConversation = (conversation: Conversation) => {
-    setConversations((prev) => {
-      const index = prev.findIndex((c) => c.id === conversation.id);
-      if (index >= 0) {
-        const updated = [...prev];
-        updated[index] = conversation;
-        return updated;
-      }
-      return [conversation, ...prev];
-    });
+    await storeLoadConversations(true);
+    setMessagesRefreshing(false);
   };
 
   const handleConversationPress = (conversation: Conversation) => {
@@ -401,10 +307,10 @@ export default function EncoreScreen() {
             >
               {tab.label}
             </Text>
-            {tab.value === 'messages' && unreadCount > 0 && (
+            {tab.value === 'messages' && totalUnreadCount > 0 && (
               <View style={styles.unreadDot}>
                 <Text style={styles.unreadDotText}>
-                  {unreadCount > 99 ? '99+' : unreadCount}
+                  {totalUnreadCount > 99 ? '99+' : totalUnreadCount}
                 </Text>
               </View>
             )}
@@ -528,7 +434,7 @@ export default function EncoreScreen() {
   };
 
   const renderMessagesEmpty = () => {
-    if (messagesLoading) return null;
+    if (conversationsLoading) return null;
     return (
       <View style={styles.emptyContainer}>
         <Text style={styles.emptyIcon}>💬</Text>
@@ -616,7 +522,7 @@ export default function EncoreScreen() {
   };
 
   const renderMessagesTab = () => {
-    if (messagesLoading && conversations.length === 0) {
+    if (conversationsLoading && conversations.length === 0) {
       return (
         <View style={styles.centerContainer}>
           <ActivityIndicator size="large" color={colors.primary} />
