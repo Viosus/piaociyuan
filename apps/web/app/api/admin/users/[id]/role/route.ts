@@ -74,6 +74,21 @@ export async function PUT(req: NextRequest, { params }: Props) {
       );
     }
 
+    // 只有超级管理员才能将用户提升为 admin
+    if (role === UserRole.ADMIN) {
+      const superAdminId = process.env.SUPER_ADMIN_ID;
+      if (superAdminId && payload.id !== superAdminId) {
+        return NextResponse.json(
+          {
+            ok: false,
+            code: ErrorCode.FORBIDDEN,
+            message: '仅超级管理员可以授予管理员权限，请通过 CLI 脚本添加管理员',
+          },
+          { status: 403 }
+        );
+      }
+    }
+
     // 3️⃣ 查找目标用户
     const targetUser = await prisma.user.findUnique({
       where: { id: userId },

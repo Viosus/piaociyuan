@@ -85,12 +85,11 @@ export async function POST(
       return NextResponse.json({ error: '无权发送消息' }, { status: 403 });
     }
 
-    // 获取对话信息和其他参与者
+    // 获取对话信息和所有参与者（包括发送者，用于多端同步推送）
     const conversation = await prisma.conversation.findUnique({
       where: { id: conversationId },
       include: {
         participants: {
-          where: { userId: { not: user.id } },
           select: { userId: true },
         },
       },
@@ -102,12 +101,17 @@ export async function POST(
 
     const isGroup = conversation.type === 'group';
 
+    // 单聊场景下，从所有参与者中选出"非发送者"作为接收方
+    const otherParticipant = conversation.participants.find(
+      (p: { userId: string }) => p.userId !== user.id
+    );
+
     // 创建消息
     const message = await prisma.message.create({
       data: {
         conversationId,
         senderId: user.id,
-        receiverId: isGroup ? null : conversation.participants[0]?.userId,
+        receiverId: isGroup ? null : otherParticipant?.userId,
         content,
         messageType: 'text',
       },
@@ -139,16 +143,17 @@ export async function POST(
       },
     });
 
-    // 实时推送：通过 WebSocket 推送新消息给所有其他参与者
+    // 实时推送：通过 WebSocket 推送新消息给所有参与者（含发送者，用于多端同步）
     try {
-      const otherUserIds = conversation.participants.map((p: { userId: string }) => p.userId);
-      for (const userId of otherUserIds) {
+      const allParticipantIds = conversation.participants.map((p: { userId: string }) => p.userId);
+      for (const userId of allParticipantIds) {
         emitToUser(userId, 'message:new', {
           ...message,
           conversationId,
+          isSelfEcho: userId === user.id,
         });
       }
-      console.log(`[实时推送] 消息已推送给 ${otherUserIds.length} 个用户`);
+      console.log(`[实时推送] 消息已推送给 ${allParticipantIds.length} 个用户(含发送者)`);
     } catch (error) {
       console.error('[实时推送] 推送失败:', error);
     }

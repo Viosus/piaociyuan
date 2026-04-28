@@ -154,6 +154,11 @@ model User {
   // 用户角色
   role          String   @default("user")
 
+  // ============ 封禁状态 ============
+  isBanned        Boolean  @default(false)
+  bannedAt        DateTime?
+  bannedReason    String?  @db.Text
+
   // ============ 个人信息扩展 ============
   bio                 String?  @db.Text // 个人简介
   coverImage          String?  // 个人主页封面图

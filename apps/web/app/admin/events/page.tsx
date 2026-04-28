@@ -2,8 +2,19 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { apiGet } from '@/lib/api';
-import { getEventStatus, EVENT_CATEGORY_LABELS, EVENT_CATEGORY_ICONS, EVENT_CATEGORY_COLORS, EventCategory } from '@/lib/eventUtils';
+import { apiGet, apiDelete, apiPatch } from '@/lib/api';
+import { getEventStatus, EVENT_CATEGORY_LABELS, EVENT_CATEGORY_ICONS, EVENT_CATEGORY_COLORS, EventCategory, SALE_STATUS_LABELS, SaleStatus } from '@/lib/eventUtils';
+import CreateEventDialog from './ui/CreateEventDialog';
+import EditEventDialog from './ui/EditEventDialog';
+
+type Tier = {
+  id: number;
+  name: string;
+  price: number;
+  capacity: number;
+  remaining: number;
+  sold: number;
+};
 
 type Event = {
   id: number;
@@ -16,14 +27,11 @@ type Event = {
   cover: string;
   artist: string;
   desc: string;
+  saleStatus: string;
+  saleStartTime: string;
+  saleEndTime: string;
   createdAt: string;
-  tiers: Array<{
-    id: number;
-    name: string;
-    price: number;
-    capacity: number;
-    remaining: number;
-  }>;
+  tiers: Tier[];
   _count: {
     posts: number;
     followers: number;
@@ -43,6 +51,14 @@ type EventsResponse = {
   };
 };
 
+const SALE_STATUS_OPTIONS: { value: string; label: string; color: string }[] = [
+  { value: 'not_started', label: '未开售', color: 'bg-gray-500' },
+  { value: 'on_sale', label: '售票中', color: 'bg-green-500' },
+  { value: 'paused', label: '暂停售票', color: 'bg-yellow-500' },
+  { value: 'sold_out', label: '已售罄', color: 'bg-red-500' },
+  { value: 'ended', label: '已结束', color: 'bg-gray-700' },
+];
+
 export default function EventsManagement() {
   const router = useRouter();
   const [events, setEvents] = useState<Event[]>([]);
@@ -51,8 +67,11 @@ export default function EventsManagement() {
   const [cityFilter, setCityFilter] = useState('all');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [editingEvent, setEditingEvent] = useState<Event | null>(null);
+  const [processing, setProcessing] = useState<number | null>(null);
+  const [saleStatusMenuId, setSaleStatusMenuId] = useState<number | null>(null);
 
-  // 加载活动列表
   const loadEvents = async () => {
     setLoading(true);
     try {
@@ -66,7 +85,6 @@ export default function EventsManagement() {
         alert('加载失败');
       }
     } catch {
-      // 静默处理加载活动列表失败
       alert('加载失败');
     } finally {
       setLoading(false);
@@ -79,30 +97,78 @@ export default function EventsManagement() {
       router.push("/auth/login");
       return;
     }
-
     loadEvents();
   }, [search, cityFilter, page, router]);
 
+  const handleDelete = async (eventId: number, eventName: string) => {
+    if (!confirm(`确定删除活动「${eventName}」？此操作不可撤销。`)) return;
+    setProcessing(eventId);
+    try {
+      const res = await apiDelete(`/api/admin/events/${eventId}`);
+      if (res.ok) {
+        alert('活动已删除');
+        loadEvents();
+      } else {
+        alert(`删除失败: ${res.message}`);
+      }
+    } catch {
+      alert('删除失败');
+    } finally {
+      setProcessing(null);
+    }
+  };
+
+  const handleSaleStatusChange = async (eventId: number, newStatus: string) => {
+    setSaleStatusMenuId(null);
+    setProcessing(eventId);
+    try {
+      const res = await apiPatch(`/api/admin/events/${eventId}/sale-status`, {
+        saleStatus: newStatus,
+      });
+      if (res.ok) {
+        setEvents(events.map(e =>
+          e.id === eventId ? { ...e, saleStatus: newStatus } : e
+        ));
+      } else {
+        alert(`操作失败: ${res.message}`);
+      }
+    } catch {
+      alert('操作失败');
+    } finally {
+      setProcessing(null);
+    }
+  };
+
+  const getSaleStatusBadge = (status: string) => {
+    const opt = SALE_STATUS_OPTIONS.find(o => o.value === status);
+    return opt || { value: status, label: status, color: 'bg-gray-400' };
+  };
+
   return (
     <div className="page-background">
-      {/* 顶部导航栏 */}
       <header className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold text-gray-900">活动管理</h1>
-            <button
-              onClick={() => router.push('/admin')}
-              className="text-sm text-blue-600 hover:text-blue-700"
-            >
-              返回管理后台
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setShowCreateDialog(true)}
+                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition text-sm font-medium"
+              >
+                + 新建活动
+              </button>
+              <button
+                onClick={() => router.push('/admin')}
+                className="text-sm text-blue-600 hover:text-blue-700"
+              >
+                返回管理后台
+              </button>
+            </div>
           </div>
         </div>
       </header>
 
-      {/* 主内容区 */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-
         {/* 筛选器 */}
         <div className="bg-white rounded-lg shadow p-4 mb-6">
           <div className="flex gap-4">
@@ -136,17 +202,24 @@ export default function EventsManagement() {
           </div>
         ) : events.length === 0 ? (
           <div className="bg-white rounded-lg shadow p-8 text-center">
-            <p className="text-gray-500">暂无活动</p>
+            <p className="text-gray-500 mb-4">暂无活动</p>
+            <button
+              onClick={() => setShowCreateDialog(true)}
+              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition text-sm"
+            >
+              创建第一个活动
+            </button>
           </div>
         ) : (
           <div className="space-y-4">
             {events.map((event) => {
               const statusInfo = getEventStatus(event.date, event.time);
+              const saleBadge = getSaleStatusBadge(event.saleStatus);
 
               return (
                 <div key={event.id} className="bg-white rounded-lg shadow p-6">
                   <div className="flex gap-6">
-                    {/* 活动封面 */}
+                    {/* 封面 */}
                     <div className="relative">
                       <img
                         src={event.cover}
@@ -155,7 +228,6 @@ export default function EventsManagement() {
                           statusInfo.status === 'ended' ? 'grayscale opacity-70' : ''
                         }`}
                       />
-                      {/* 状态标签 */}
                       <div className="absolute top-1 right-1">
                         <span
                           className={`px-2 py-1 rounded text-xs font-semibold ${
@@ -171,54 +243,72 @@ export default function EventsManagement() {
                       </div>
                     </div>
 
-                    {/* 活动信息 */}
+                    {/* 信息 */}
                     <div className="flex-1">
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex-1">
-                          <h3 className="text-xl font-bold text-gray-900">
-                            {event.name}
-                          </h3>
-                          {/* 活动类型标签 */}
-                          <div className="mt-2">
+                          <h3 className="text-xl font-bold text-gray-900">{event.name}</h3>
+                          <div className="mt-2 flex items-center gap-2">
                             <span className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full ${EVENT_CATEGORY_COLORS[event.category as EventCategory]}`}>
                               <span>{EVENT_CATEGORY_ICONS[event.category as EventCategory]}</span>
                               <span>{EVENT_CATEGORY_LABELS[event.category as EventCategory]}</span>
                             </span>
+                            {/* 售票状态 */}
+                            <div className="relative">
+                              <button
+                                onClick={() => setSaleStatusMenuId(saleStatusMenuId === event.id ? null : event.id)}
+                                className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full text-white ${saleBadge.color} cursor-pointer hover:opacity-80`}
+                                disabled={processing === event.id}
+                              >
+                                {saleBadge.label}
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                </svg>
+                              </button>
+                              {saleStatusMenuId === event.id && (
+                                <div className="absolute top-full left-0 mt-1 bg-white border rounded-lg shadow-lg z-10 py-1 min-w-[120px]">
+                                  {SALE_STATUS_OPTIONS.map(opt => (
+                                    <button
+                                      key={opt.value}
+                                      onClick={() => handleSaleStatusChange(event.id, opt.value)}
+                                      className={`block w-full text-left px-3 py-2 text-sm hover:bg-gray-100 ${
+                                        event.saleStatus === opt.value ? 'font-bold text-purple-600' : 'text-gray-700'
+                                      }`}
+                                    >
+                                      {opt.label}
+                                    </button>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
 
                       <div className="space-y-1 text-sm text-gray-600 mb-3">
-                        <p>🎤 艺人：{event.artist}</p>
-                        <p>📍 地点：{event.city} - {event.venue}</p>
-                        <p>📅 时间：{event.date} {event.time}</p>
-                        {statusInfo.status === 'ended' && (
-                          <p className="text-red-600 font-medium">⚠️ 此活动已结束，无法购票</p>
-                        )}
-                        {statusInfo.status === 'ongoing' && (
-                          <p className="text-green-600 font-medium">🎭 活动进行中</p>
-                        )}
+                        <p>艺人：{event.artist}</p>
+                        <p>地点：{event.city} - {event.venue}</p>
+                        <p>时间：{event.date} {event.time}</p>
                       </div>
 
-                      {/* 票档信息 */}
+                      {/* 票档 */}
                       <div className="mb-3">
                         <p className="text-sm font-semibold text-gray-700 mb-1">票档信息：</p>
                         <div className="flex gap-2 flex-wrap">
                           {event.tiers.map((tier) => (
-                            <div
-                              key={tier.id}
-                              className="px-3 py-1 bg-gray-100 rounded text-xs"
-                            >
+                            <div key={tier.id} className="px-3 py-1 bg-gray-100 rounded text-xs">
                               {tier.name} - ¥{tier.price} ({tier.remaining}/{tier.capacity})
                             </div>
                           ))}
+                          {event.tiers.length === 0 && (
+                            <span className="text-xs text-gray-400">暂无票档</span>
+                          )}
                         </div>
                       </div>
 
-                      {/* 统计信息 */}
                       <div className="flex gap-4 text-sm text-gray-600 mb-3">
-                        <span>📝 {event._count.posts} 帖子</span>
-                        <span>❤️ {event._count.followers} 关注</span>
+                        <span>{event._count.posts} 帖子</span>
+                        <span>{event._count.followers} 关注</span>
                       </div>
 
                       {/* 操作按钮 */}
@@ -227,7 +317,20 @@ export default function EventsManagement() {
                           onClick={() => router.push(`/events/${event.id}`)}
                           className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
                         >
-                          查看活动页面
+                          查看页面
+                        </button>
+                        <button
+                          onClick={() => setEditingEvent(event)}
+                          className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 text-sm"
+                        >
+                          编辑
+                        </button>
+                        <button
+                          onClick={() => handleDelete(event.id, event.name)}
+                          disabled={processing === event.id}
+                          className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 text-sm disabled:opacity-50"
+                        >
+                          删除
                         </button>
                       </div>
                     </div>
@@ -260,8 +363,29 @@ export default function EventsManagement() {
             </button>
           </div>
         )}
-
       </main>
+
+      {/* 弹窗 */}
+      {showCreateDialog && (
+        <CreateEventDialog
+          onClose={() => setShowCreateDialog(false)}
+          onSuccess={() => {
+            setShowCreateDialog(false);
+            loadEvents();
+          }}
+        />
+      )}
+
+      {editingEvent && (
+        <EditEventDialog
+          event={editingEvent}
+          onClose={() => setEditingEvent(null)}
+          onSuccess={() => {
+            setEditingEvent(null);
+            loadEvents();
+          }}
+        />
+      )}
     </div>
   );
 }

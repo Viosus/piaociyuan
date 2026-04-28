@@ -58,6 +58,8 @@ export async function GET(req: NextRequest) {
           nickname: true,
           avatar: true,
           role: true,
+          isBanned: true,
+          bannedReason: true,
           isVerified: true,
           verifiedType: true,
           followerCount: true,

@@ -10,10 +10,29 @@ type User = {
   role: string;
 };
 
+type Stats = {
+  overview: {
+    totalUsers: number;
+    totalEvents: number;
+    totalOrders: number;
+    totalRevenue: number;
+    activeEvents: number;
+  };
+  ordersByStatus: Record<string, number>;
+  topEvents: Array<{
+    eventId: number;
+    eventName: string;
+    totalOrders: number;
+    totalRevenue: number;
+    ticketsSold: number;
+  }>;
+};
+
 export default function AdminDashboard() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState<Stats | null>(null);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -22,7 +41,6 @@ export default function AdminDashboard() {
       return;
     }
 
-    // 获取当前用户信息并验证是否为管理员
     apiGet('/api/user/me')
       .then((res) => {
         if (res.ok && res.data) {
@@ -42,6 +60,17 @@ export default function AdminDashboard() {
       .finally(() => {
         setLoading(false);
       });
+
+    // 加载统计数据
+    apiGet('/api/admin/stats')
+      .then((res) => {
+        if (res.ok && res.data) {
+          setStats(res.data);
+        }
+      })
+      .catch(() => {
+        // 静默处理
+      });
   }, []);
 
   if (loading) {
@@ -58,7 +87,6 @@ export default function AdminDashboard() {
 
   return (
     <div className="page-background">
-      {/* 顶部导航栏 */}
       <header className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
@@ -78,11 +106,129 @@ export default function AdminDashboard() {
         </div>
       </header>
 
-      {/* 主内容区 */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* 数据统计卡片 */}
+        {stats && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div className="bg-white rounded-lg shadow p-5">
+              <div className="text-sm text-gray-500">总用户数</div>
+              <div className="text-3xl font-bold text-gray-900 mt-1">{stats.overview.totalUsers}</div>
+            </div>
+            <div className="bg-white rounded-lg shadow p-5">
+              <div className="text-sm text-gray-500">总活动数</div>
+              <div className="text-3xl font-bold text-gray-900 mt-1">
+                {stats.overview.totalEvents}
+                <span className="text-sm font-normal text-green-600 ml-2">
+                  {stats.overview.activeEvents} 售票中
+                </span>
+              </div>
+            </div>
+            <div className="bg-white rounded-lg shadow p-5">
+              <div className="text-sm text-gray-500">总订单数</div>
+              <div className="text-3xl font-bold text-gray-900 mt-1">{stats.overview.totalOrders}</div>
+              <div className="text-xs text-gray-400 mt-1">
+                已支付 {stats.ordersByStatus.PAID || 0} | 待支付 {stats.ordersByStatus.PENDING || 0}
+              </div>
+            </div>
+            <div className="bg-white rounded-lg shadow p-5">
+              <div className="text-sm text-gray-500">总收入</div>
+              <div className="text-3xl font-bold text-purple-600 mt-1">
+                ¥{stats.overview.totalRevenue.toLocaleString()}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 热门活动 */}
+        {stats && stats.topEvents.length > 0 && (
+          <div className="bg-white rounded-lg shadow p-6 mb-8">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">热门活动 TOP 5</h3>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="text-gray-500 border-b">
+                  <tr>
+                    <th className="text-left pb-2 font-medium">活动名称</th>
+                    <th className="text-right pb-2 font-medium">订单数</th>
+                    <th className="text-right pb-2 font-medium">售出票数</th>
+                    <th className="text-right pb-2 font-medium">收入</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y">
+                  {stats.topEvents.map((event, index) => (
+                    <tr key={event.eventId} className="hover:bg-gray-50">
+                      <td className="py-2">
+                        <span className="text-gray-400 mr-2">{index + 1}.</span>
+                        {event.eventName}
+                      </td>
+                      <td className="py-2 text-right">{event.totalOrders}</td>
+                      <td className="py-2 text-right">{event.ticketsSold}</td>
+                      <td className="py-2 text-right font-medium text-purple-600">¥{event.totalRevenue.toLocaleString()}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* 功能模块卡片 */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
-          {/* 举报管理卡片 */}
+          {/* 活动管理 */}
+          <div
+            onClick={() => router.push('/admin/events')}
+            className="bg-white rounded-lg shadow p-6 cursor-pointer hover:shadow-lg transition-shadow"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">活动管理</h3>
+                <p className="text-sm text-gray-600">创建、编辑、上架演出活动</p>
+              </div>
+            </div>
+          </div>
+
+          {/* 订单管理 */}
+          <div
+            onClick={() => router.push('/admin/orders')}
+            className="bg-white rounded-lg shadow p-6 cursor-pointer hover:shadow-lg transition-shadow"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
+                <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">订单管理</h3>
+                <p className="text-sm text-gray-600">查看订单、处理退款</p>
+              </div>
+            </div>
+          </div>
+
+          {/* 用户管理 */}
+          <div
+            onClick={() => router.push('/admin/users')}
+            className="bg-white rounded-lg shadow p-6 cursor-pointer hover:shadow-lg transition-shadow"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">用户管理</h3>
+                <p className="text-sm text-gray-600">管理用户账户、封禁</p>
+              </div>
+            </div>
+          </div>
+
+          {/* 举报管理 */}
           <div
             onClick={() => router.push('/admin/reports')}
             className="bg-white rounded-lg shadow p-6 cursor-pointer hover:shadow-lg transition-shadow"
@@ -100,7 +246,7 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          {/* 认证审核卡片 */}
+          {/* 认证审核 */}
           <div
             onClick={() => router.push('/admin/verifications')}
             className="bg-white rounded-lg shadow p-6 cursor-pointer hover:shadow-lg transition-shadow"
@@ -118,25 +264,7 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          {/* 用户管理卡片 */}
-          <div
-            onClick={() => router.push('/admin/users')}
-            className="bg-white rounded-lg shadow p-6 cursor-pointer hover:shadow-lg transition-shadow"
-          >
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">用户管理</h3>
-                <p className="text-sm text-gray-600">管理用户账户</p>
-              </div>
-            </div>
-          </div>
-
-          {/* 帖子管理卡片 */}
+          {/* 帖子管理 */}
           <div
             onClick={() => router.push('/admin/posts')}
             className="bg-white rounded-lg shadow p-6 cursor-pointer hover:shadow-lg transition-shadow"
@@ -154,25 +282,7 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          {/* 活动管理卡片 */}
-          <div
-            onClick={() => router.push('/admin/events')}
-            className="bg-white rounded-lg shadow p-6 cursor-pointer hover:shadow-lg transition-shadow"
-          >
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-                <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">活动管理</h3>
-                <p className="text-sm text-gray-600">管理演出活动</p>
-              </div>
-            </div>
-          </div>
-
-          {/* 首页栏目管理卡片 */}
+          {/* 首页栏目管理 */}
           <div
             onClick={() => router.push('/admin/homepage-sections')}
             className="bg-white rounded-lg shadow p-6 cursor-pointer hover:shadow-lg transition-shadow"
@@ -190,7 +300,7 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          {/* 轮播广告栏管理卡片 */}
+          {/* 轮播广告栏管理 */}
           <div
             onClick={() => router.push('/admin/banners')}
             className="bg-white rounded-lg shadow p-6 cursor-pointer hover:shadow-lg transition-shadow"
@@ -208,21 +318,20 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          {/* 系统设置卡片 */}
+          {/* 收藏品管理 */}
           <div
-            onClick={() => router.push('/admin/settings')}
-            className="bg-white rounded-lg shadow p-6 cursor-pointer hover:shadow-lg transition-shadow opacity-50"
+            onClick={() => router.push('/admin/collectibles')}
+            className="bg-white rounded-lg shadow p-6 cursor-pointer hover:shadow-lg transition-shadow"
           >
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
-                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center">
+                <svg className="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                 </svg>
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">系统设置</h3>
-                <p className="text-sm text-gray-600">系统配置管理（即将推出）</p>
+                <h3 className="text-lg font-semibold text-gray-900">收藏品管理</h3>
+                <p className="text-sm text-gray-600">管理数字收藏品</p>
               </div>
             </div>
           </div>

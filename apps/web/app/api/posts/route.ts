@@ -15,6 +15,8 @@ export async function GET(req: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1');
     const pageSize = parseInt(searchParams.get('pageSize') || '20');
     const eventId = searchParams.get('eventId'); // 可选：按活动筛选
+    const userId = searchParams.get('userId'); // 可选：按用户筛选(用户主页)
+    const sort = (searchParams.get('sort') || 'latest') as 'latest' | 'hot' | 'following';
 
     const skip = (page - 1) * pageSize;
 
@@ -37,6 +39,46 @@ export async function GET(req: NextRequest) {
     if (eventId) {
       where.eventId = parseInt(eventId);
     }
+
+    if (userId) {
+      where.userId = userId;
+    }
+
+    // 「关注」排序：仅显示当前用户关注的人发的帖子
+    if (sort === 'following') {
+      if (!currentUserId) {
+        // 未登录用户访问关注 Tab：直接返回空列表（前端可据此提示登录）
+        return NextResponse.json({
+          ok: true,
+          data: [],
+          pagination: { page, pageSize, total: 0, totalPages: 0 },
+        });
+      }
+      const followings = await prisma.userFollow.findMany({
+        where: { followerId: currentUserId },
+        select: { followingId: true },
+      });
+      const followingIds = followings.map((f) => f.followingId);
+      if (followingIds.length === 0) {
+        return NextResponse.json({
+          ok: true,
+          data: [],
+          pagination: { page, pageSize, total: 0, totalPages: 0 },
+        });
+      }
+      where.userId = { in: followingIds };
+    }
+
+    // 「热门」排序：仅最近 7 天的帖子，按互动量综合排序
+    if (sort === 'hot') {
+      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+      where.createdAt = { gte: sevenDaysAgo };
+    }
+
+    const orderBy: Prisma.PostOrderByWithRelationInput[] =
+      sort === 'hot'
+        ? [{ likeCount: 'desc' }, { commentCount: 'desc' }, { createdAt: 'desc' }]
+        : [{ createdAt: 'desc' }];
 
     // 查询帖子列表
     const [posts, total] = await Promise.all([
@@ -90,9 +132,7 @@ export async function GET(req: NextRequest) {
               }
             : false,
         },
-        orderBy: {
-          createdAt: 'desc',
-        },
+        orderBy,
         skip,
         take: pageSize,
       }),
