@@ -8,7 +8,6 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  Image,
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
@@ -19,6 +18,9 @@ import { colors, spacing, fontSize } from '../constants/config';
 import { getUserProfile, followUser, unfollowUser, getUserPosts, type UserProfile } from '../services/users';
 import { PostCard } from '../components/PostCard';
 import { Post } from '../services/posts';
+import { Avatar } from '../components/Avatar';
+import { createConversation } from '../services/messages';
+import { useToast } from '../components/Toast';
 
 export default function UserProfileScreen() {
   const route = useRoute();
@@ -170,10 +172,7 @@ export default function UserProfileScreen() {
     <View style={styles.header}>
       {/* 用户头像和基本信息 */}
       <View style={styles.userSection}>
-        <Image
-          source={{ uri: user.avatar || 'https://via.placeholder.com/100' }}
-          style={styles.avatar}
-        />
+        <Avatar uri={user.avatar} name={user.nickname} size={80} elevated />
         <View style={styles.userInfo}>
           <View style={styles.nameRow}>
             <Text style={styles.nickname}>{user.nickname}</Text>

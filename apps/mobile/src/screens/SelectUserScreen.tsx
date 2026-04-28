@@ -15,7 +15,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { colors, spacing, fontSize } from '../constants/config';
+import { colors, spacing, fontSize, shadows } from '../constants/config';
 import { UserListItem } from '../components/UserListItem';
 import { createConversation, addGroupMembers } from '../services/messages';
 import { apiClient } from '../services/api';
@@ -184,16 +184,19 @@ const styles = StyleSheet.create({
   searchContainer: {
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceGlass,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
+    ...shadows.sm,
   },
   searchInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.background,
+    backgroundColor: colors.surfaceGlassTint,
     borderRadius: 24,
     paddingHorizontal: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   searchIcon: {
     fontSize: fontSize.lg,

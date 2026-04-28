@@ -12,13 +12,13 @@ import {
   TouchableOpacity,
   Alert,
   FlatList,
-  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { FlashList } from '@shopify/flash-list';
 import { colors, spacing, fontSize } from '../constants/config';
 import { PostCard } from '../components/PostCard';
+import { Avatar } from '../components/Avatar';
 import { getPosts, likePost, unlikePost, type Post } from '../services/posts';
 import { favoritePost, unfavoritePost } from '../services/favorites';
 import type { Conversation } from '../services/messages';
@@ -384,22 +384,14 @@ export default function EncoreScreen() {
         activeOpacity={0.7}
       >
         <View style={styles.avatarContainer}>
-          {displayAvatar ? (
-            <Image source={{ uri: displayAvatar }} style={styles.avatar} />
-          ) : (
-            <View style={[styles.avatar, styles.defaultAvatar]}>
-              <Text style={styles.defaultAvatarText}>
-                {isGroup ? '👥' : (displayName || '?')[0]}
-              </Text>
-            </View>
-          )}
-          {item.unreadCount > 0 && (
-            <View style={styles.unreadBadge}>
-              <Text style={styles.unreadBadgeText}>
-                {item.unreadCount > 99 ? '99+' : item.unreadCount}
-              </Text>
-            </View>
-          )}
+          <Avatar
+            uri={displayAvatar}
+            name={displayName}
+            size={56}
+            fallbackText={isGroup ? '👥' : undefined}
+            showBadge={item.unreadCount > 0}
+            badgeContent={item.unreadCount}
+          />
         </View>
 
         <View style={styles.conversationInfo}>
@@ -481,10 +473,10 @@ export default function EncoreScreen() {
     return (
       <View style={styles.tabContent}>
         {renderPostsSortTabs()}
-        {React.createElement(FlashList as any, {
-          data: posts,
-          keyExtractor: (item: Post) => item.id.toString(),
-          renderItem: ({ item }: { item: Post }) => (
+        <FlashList
+          data={posts}
+          keyExtractor={(item: Post) => item.id.toString()}
+          renderItem={({ item }: { item: Post }) => (
             <PostCard
               post={item}
               onPress={() => handlePostPress(item)}
@@ -494,21 +486,21 @@ export default function EncoreScreen() {
               onUserPress={() => handleUserPress(item.userId)}
               onEventPress={() => item.eventId && handleEventPress(item.eventId)}
             />
-          ),
-          estimatedItemSize: 400,
-          ListFooterComponent: renderPostsFooter,
-          ListEmptyComponent: renderPostsEmpty,
-          contentContainerStyle: styles.listContent,
-          refreshControl: (
+          )}
+          estimatedItemSize={400}
+          ListFooterComponent={renderPostsFooter}
+          ListEmptyComponent={renderPostsEmpty}
+          contentContainerStyle={styles.listContent}
+          refreshControl={
             <RefreshControl
               refreshing={postsRefreshing}
               onRefresh={handlePostsRefresh}
               colors={[colors.primary]}
             />
-          ),
-          onEndReached: handleLoadMore,
-          onEndReachedThreshold: 0.3,
-        })}
+          }
+          onEndReached={handleLoadMore}
+          onEndReachedThreshold={0.3}
+        />
         {/* 发帖按钮 */}
         <TouchableOpacity
           style={styles.createButton}

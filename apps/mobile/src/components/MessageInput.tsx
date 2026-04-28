@@ -12,7 +12,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { colors, spacing, fontSize } from '../constants/config';
+import { colors, spacing, fontSize, shadows } from '../constants/config';
 
 interface MessageInputProps {
   onSend: (message: string) => void;
@@ -109,21 +109,24 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-end',
     padding: spacing.sm,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceGlass,
     borderTopWidth: 1,
     borderTopColor: colors.border,
+    ...shadows.md,
   },
   input: {
     flex: 1,
     minHeight: 40,
     maxHeight: 100,
-    backgroundColor: colors.background,
+    backgroundColor: colors.surfaceGlassTint,
     borderRadius: 20,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     marginRight: spacing.sm,
     fontSize: fontSize.sm,
     color: colors.text,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   sendButton: {
     backgroundColor: colors.primary,

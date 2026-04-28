@@ -8,11 +8,11 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  Image,
   ActivityIndicator,
 } from 'react-native';
-import { colors, spacing, fontSize } from '../constants/config';
+import { colors, spacing, fontSize, shadows, borderRadius } from '../constants/config';
 import { FollowUser } from '../services/users';
+import { Avatar } from './Avatar';
 
 interface UserListItemProps {
   user: FollowUser;
@@ -30,10 +30,7 @@ export const UserListItem: React.FC<UserListItemProps> = ({
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.userInfo} onPress={onPress} activeOpacity={0.7}>
-        <Image
-          source={{ uri: user.avatar || 'https://via.placeholder.com/48' }}
-          style={styles.avatar}
-        />
+        <Avatar uri={user.avatar} name={user.nickname} size={48} />
         <View style={styles.details}>
           <View style={styles.nameRow}>
             <Text style={styles.nickname}>{user.nickname}</Text>
@@ -86,20 +83,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: spacing.md,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceGlass,
     marginBottom: spacing.sm,
-    borderRadius: 12,
+    borderRadius: borderRadius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    ...shadows.sm,
   },
   userInfo: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  avatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: colors.border,
   },
   details: {
     flex: 1,

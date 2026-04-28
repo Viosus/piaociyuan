@@ -4,7 +4,7 @@
 
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { colors, spacing, fontSize } from '../constants/config';
+import { colors, spacing, fontSize, shadows } from '../constants/config';
 import { Message } from '../services/messages';
 import { getTimeString } from '../utils/date';
 
@@ -86,12 +86,14 @@ const styles = StyleSheet.create({
     borderRadius: 16,
   },
   bubbleOther: {
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceGlass,
     borderTopLeftRadius: 4,
+    ...shadows.sm,
   },
   bubbleOwn: {
     backgroundColor: colors.primary,
     borderTopRightRadius: 4,
+    ...shadows.sm,
   },
   messageText: {
     fontSize: fontSize.md,

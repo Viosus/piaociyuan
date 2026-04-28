@@ -105,12 +105,14 @@ export async function getConversation(conversationId: string) {
 }
 
 /**
- * 创建对话
+ * 创建/获取与目标用户的私聊会话
+ * 后端如果已存在则返回现有 conversation（含 isNew=false）
  */
-export async function createConversation(participantId: number) {
-  return apiClient.post<Conversation>('/api/messages/conversations', {
-    participantId,
-  });
+export async function createConversation(otherUserId: string) {
+  return apiClient.post<{ id: string; otherUser?: any; isNew: boolean }>(
+    '/api/messages/conversations',
+    { otherUserId }
+  );
 }
 
 /**

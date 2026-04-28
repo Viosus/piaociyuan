@@ -6,6 +6,7 @@ import { SocketProvider } from './src/contexts/SocketContext';
 import AppNavigator from './src/navigation/AppNavigator';
 import ErrorBoundary from './src/components/ErrorBoundary';
 import PrivacyConsent from './src/components/PrivacyConsent';
+import { ToastProvider } from './src/components/Toast';
 
 const CONSENT_KEY = 'privacy_consent_accepted';
 
@@ -42,12 +43,14 @@ export default function App() {
   // User has consented - render the full app
   return (
     <ErrorBoundary>
-      <AuthProvider>
-        <SocketProvider>
-          <AppNavigator />
-          <StatusBar style="auto" />
-        </SocketProvider>
-      </AuthProvider>
+      <ToastProvider>
+        <AuthProvider>
+          <SocketProvider>
+            <AppNavigator />
+            <StatusBar style="auto" />
+          </SocketProvider>
+        </AuthProvider>
+      </ToastProvider>
     </ErrorBoundary>
   );
 }

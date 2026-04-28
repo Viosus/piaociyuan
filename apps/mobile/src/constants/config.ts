@@ -24,6 +24,8 @@ export const COLORS = {
   backgroundDark: '#2D2D5E',       // 深色背景
   surface: '#ffffff',              // 卡片背景（白色，与网站统一）
   surfaceElevated: '#ffffff',      // 抬起的卡片背景（纯白）
+  surfaceGlass: 'rgba(255, 255, 255, 0.8)',  // 毛玻璃白卡（与网站 .card-bg 统一）
+  surfaceGlassTint: 'rgba(224, 223, 253, 0.5)', // 半透明淡紫（搜索框等输入区）
 
   // 文字色
   text: '#1a1a1f',                 // 主文字（与网站 --foreground 统一）

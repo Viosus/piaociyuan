@@ -163,10 +163,31 @@ export const useMessagingStore = create<MessagingState>((set, get) => ({
   addMessage: (conversationId: string, message: Message) => {
     set((state) => {
       const existing = state.messagesByConversation[conversationId] || [];
-      // 去重：如果消息 ID 已存在则跳过
+      // 1. 真实 ID 已存在 -> 直接跳过
       if (existing.some((m) => m.id === message.id)) {
         return state;
       }
+      // 2. 来自当前用户自己的 echo -> 尝试替换 optimistic 临时消息（temp_ 前缀）
+      //    匹配条件：同 senderId + 同 content + 还是 temp_ 前缀
+      const optimisticIdx = existing.findIndex((m) => {
+        const mid = String(m.id);
+        return (
+          mid.startsWith('temp_') &&
+          m.senderId === message.senderId &&
+          m.content === message.content
+        );
+      });
+      if (optimisticIdx >= 0) {
+        const updated = [...existing];
+        updated[optimisticIdx] = message;
+        return {
+          messagesByConversation: {
+            ...state.messagesByConversation,
+            [conversationId]: updated,
+          },
+        };
+      }
+      // 3. 普通新消息 -> prepend 到列表头
       return {
         messagesByConversation: {
           ...state.messagesByConversation,

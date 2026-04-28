@@ -10,16 +10,16 @@ import {
   StyleSheet,
   FlatList,
   TouchableOpacity,
-  Image,
   ActivityIndicator,
   RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import { colors, spacing, fontSize } from '../constants/config';
+import { colors, spacing, fontSize, shadows, borderRadius } from '../constants/config';
 import type { Conversation } from '../services/messages';
 import { useSocket } from '../contexts/SocketContext';
 import { useMessagingStore } from '../stores/messagingStore';
+import { Avatar } from '../components/Avatar';
 import { getRelativeTime } from '../utils/date';
 
 export default function ConversationsScreen() {
@@ -92,22 +92,14 @@ export default function ConversationsScreen() {
         activeOpacity={0.7}
       >
         <View style={styles.avatarContainer}>
-          {displayAvatar ? (
-            <Image source={{ uri: displayAvatar }} style={styles.avatar} />
-          ) : (
-            <View style={[styles.avatar, styles.defaultAvatar]}>
-              <Text style={styles.defaultAvatarText}>
-                {isGroup ? '👥' : (displayName || '?')[0]}
-              </Text>
-            </View>
-          )}
-          {item.unreadCount > 0 && (
-            <View style={styles.unreadBadge}>
-              <Text style={styles.unreadBadgeText}>
-                {item.unreadCount > 99 ? '99+' : item.unreadCount}
-              </Text>
-            </View>
-          )}
+          <Avatar
+            uri={displayAvatar}
+            name={displayName}
+            size={56}
+            fallbackText={isGroup ? '👥' : undefined}
+            showBadge={item.unreadCount > 0}
+            badgeContent={item.unreadCount}
+          />
         </View>
 
         <View style={styles.conversationInfo}>
@@ -278,9 +270,13 @@ const styles = StyleSheet.create({
   conversationItem: {
     flexDirection: 'row',
     padding: spacing.md,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceGlass,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
+    borderRadius: borderRadius.md,
+    marginHorizontal: spacing.sm,
+    marginVertical: spacing.xs / 2,
+    ...shadows.sm,
   },
   avatarContainer: {
     position: 'relative',

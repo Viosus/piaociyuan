@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -10,26 +10,17 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { BarCodeScanner } from 'expo-barcode-scanner';
+import { CameraView, useCameraPermissions } from 'expo-camera';
 import { colors, spacing, fontSize } from '../constants/config';
 import { verifyTicket } from '../services/tickets';
 
 export default function ScanTicketScreen() {
-  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
+  const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
   const [scanning, setScanning] = useState(false);
   const [showManualInput, setShowManualInput] = useState(false);
   const [manualCode, setManualCode] = useState('');
   const [verifying, setVerifying] = useState(false);
-
-  useEffect(() => {
-    requestCameraPermission();
-  }, []);
-
-  const requestCameraPermission = async () => {
-    const { status } = await BarCodeScanner.requestPermissionsAsync();
-    setHasPermission(status === 'granted');
-  };
 
   const handleBarCodeScanned = async ({ type, data }: { type: string; data: string }) => {
     if (scanned || scanning) return;
@@ -83,7 +74,7 @@ export default function ScanTicketScreen() {
     setManualCode('');
   };
 
-  if (hasPermission === null) {
+  if (!permission) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.centerContainer}>
@@ -94,7 +85,7 @@ export default function ScanTicketScreen() {
     );
   }
 
-  if (hasPermission === false) {
+  if (!permission.granted) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.centerContainer}>
@@ -103,7 +94,7 @@ export default function ScanTicketScreen() {
           <Text style={styles.errorHint}>请在设置中允许应用访问相机</Text>
           <TouchableOpacity
             style={styles.retryButton}
-            onPress={requestCameraPermission}
+            onPress={requestPermission}
           >
             <Text style={styles.retryButtonText}>重新请求权限</Text>
           </TouchableOpacity>
@@ -121,9 +112,12 @@ export default function ScanTicketScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.scannerContainer}>
-        <BarCodeScanner
-          onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
+        <CameraView
           style={StyleSheet.absoluteFillObject}
+          barcodeScannerSettings={{
+            barcodeTypes: ['qr', 'ean13', 'ean8', 'code128', 'code39'],
+          }}
+          onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
         />
 
         {/* 扫描框 */}

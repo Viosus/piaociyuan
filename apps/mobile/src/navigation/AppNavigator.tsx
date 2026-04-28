@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense, ComponentType } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -8,52 +8,70 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, GRADIENTS } from '../constants/config';
 import GradientHeader from '../components/GradientHeader';
 
-// Auth Screens
+// Auth Screens (eager - needed immediately)
 import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
 
-// Main Screens
+// Core tab screens (eager - shown on main tabs)
 import HomeScreen from '../screens/HomeScreen';
 import EventsScreen from '../screens/EventsScreen';
-import EventDetailScreen from '../screens/EventDetailScreen';
-import CheckoutScreen from '../screens/CheckoutScreen';
-import PaymentScreen from '../screens/PaymentScreen';
 import EncoreScreen from '../screens/EncoreScreen';
 import TicketsScreen from '../screens/TicketsScreen';
-import TicketDetailScreen from '../screens/TicketDetailScreen';
 import ProfileScreen from '../screens/ProfileScreen';
-import OrdersScreen from '../screens/OrdersScreen';
-import OrderDetailScreen from '../screens/OrderDetailScreen';
-import FavoritesScreen from '../screens/FavoritesScreen';
-import EditProfileScreen from '../screens/EditProfileScreen';
-import VerificationScreen from '../screens/VerificationScreen';
-import SettingsScreen from '../screens/SettingsScreen';
-import FollowingListScreen from '../screens/FollowingListScreen';
-import FollowerListScreen from '../screens/FollowerListScreen';
-import TransferTicketScreen from '../screens/TransferTicketScreen';
-import ReceiveTransferScreen from '../screens/ReceiveTransferScreen';
-import CreatePostScreen from '../screens/CreatePostScreen';
-import PostDetailScreen from '../screens/PostDetailScreen';
-import UserProfileScreen from '../screens/UserProfileScreen';
-import ConversationsScreen from '../screens/ConversationsScreen';
-import ChatScreen from '../screens/ChatScreen';
-import SelectUserScreen from '../screens/SelectUserScreen';
-import CreateGroupScreen from '../screens/CreateGroupScreen';
-import GroupDetailScreen from '../screens/GroupDetailScreen';
-import IdDocumentsScreen from '../screens/IdDocumentsScreen';
-import AddIdDocumentScreen from '../screens/AddIdDocumentScreen';
-import AddressesScreen from '../screens/AddressesScreen';
-import AddAddressScreen from '../screens/AddAddressScreen';
-import MyCollectiblesScreen from '../screens/MyCollectiblesScreen';
-import CollectibleDetailScreen from '../screens/CollectibleDetailScreen';
-import TierSelectionScreen from '../screens/TierSelectionScreen';
-import PaymentSuccessScreen from '../screens/PaymentSuccessScreen';
-import PaymentFailureScreen from '../screens/PaymentFailureScreen';
-import ScanTicketScreen from '../screens/ScanTicketScreen';
-import AboutScreen from '../screens/AboutScreen';
-import ChangePasswordScreen from '../screens/ChangePasswordScreen';
-import NotificationsScreen from '../screens/NotificationsScreen';
-import SearchScreen from '../screens/SearchScreen';
+
+// Lazy wrapper for non-core screens
+function lazy(factory: () => Promise<{ default: ComponentType<any> }>) {
+  const LazyComponent = React.lazy(factory);
+  return function LazyScreen(props: any) {
+    return (
+      <Suspense fallback={
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: COLORS.background }}>
+          <ActivityIndicator size="large" color={COLORS.primary} />
+        </View>
+      }>
+        <LazyComponent {...props} />
+      </Suspense>
+    );
+  };
+}
+
+// Non-core screens (lazy - loaded on demand)
+const EventDetailScreen = lazy(() => import('../screens/EventDetailScreen'));
+const CheckoutScreen = lazy(() => import('../screens/CheckoutScreen'));
+const PaymentScreen = lazy(() => import('../screens/PaymentScreen'));
+const TicketDetailScreen = lazy(() => import('../screens/TicketDetailScreen'));
+const OrdersScreen = lazy(() => import('../screens/OrdersScreen'));
+const OrderDetailScreen = lazy(() => import('../screens/OrderDetailScreen'));
+const FavoritesScreen = lazy(() => import('../screens/FavoritesScreen'));
+const EditProfileScreen = lazy(() => import('../screens/EditProfileScreen'));
+const VerificationScreen = lazy(() => import('../screens/VerificationScreen'));
+const SettingsScreen = lazy(() => import('../screens/SettingsScreen'));
+const FollowingListScreen = lazy(() => import('../screens/FollowingListScreen'));
+const FollowerListScreen = lazy(() => import('../screens/FollowerListScreen'));
+const TransferTicketScreen = lazy(() => import('../screens/TransferTicketScreen'));
+const ReceiveTransferScreen = lazy(() => import('../screens/ReceiveTransferScreen'));
+const CreatePostScreen = lazy(() => import('../screens/CreatePostScreen'));
+const PostDetailScreen = lazy(() => import('../screens/PostDetailScreen'));
+const UserProfileScreen = lazy(() => import('../screens/UserProfileScreen'));
+const ConversationsScreen = lazy(() => import('../screens/ConversationsScreen'));
+const ChatScreen = lazy(() => import('../screens/ChatScreen'));
+const SelectUserScreen = lazy(() => import('../screens/SelectUserScreen'));
+const CreateGroupScreen = lazy(() => import('../screens/CreateGroupScreen'));
+const GroupDetailScreen = lazy(() => import('../screens/GroupDetailScreen'));
+const IdDocumentsScreen = lazy(() => import('../screens/IdDocumentsScreen'));
+const AddIdDocumentScreen = lazy(() => import('../screens/AddIdDocumentScreen'));
+const AddressesScreen = lazy(() => import('../screens/AddressesScreen'));
+const AddAddressScreen = lazy(() => import('../screens/AddAddressScreen'));
+const MyCollectiblesScreen = lazy(() => import('../screens/MyCollectiblesScreen'));
+const CollectibleDetailScreen = lazy(() => import('../screens/CollectibleDetailScreen'));
+const TierSelectionScreen = lazy(() => import('../screens/TierSelectionScreen'));
+const PaymentSuccessScreen = lazy(() => import('../screens/PaymentSuccessScreen'));
+const PaymentFailureScreen = lazy(() => import('../screens/PaymentFailureScreen'));
+const ScanTicketScreen = lazy(() => import('../screens/ScanTicketScreen'));
+const AboutScreen = lazy(() => import('../screens/AboutScreen'));
+const ChangePasswordScreen = lazy(() => import('../screens/ChangePasswordScreen'));
+const NotificationsScreen = lazy(() => import('../screens/NotificationsScreen'));
+const SearchScreen = lazy(() => import('../screens/SearchScreen'));
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();

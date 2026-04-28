@@ -14,6 +14,7 @@ import { Image } from 'expo-image';
 import { colors, spacing, fontSize } from '../constants/config';
 import { Post } from '../services/posts';
 import { getRelativeTime } from '../utils/date';
+import { Avatar } from './Avatar';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const IMAGE_WIDTH = (SCREEN_WIDTH - spacing.lg * 2 - spacing.sm * 2) / 3;
@@ -95,11 +96,10 @@ export const PostCard: React.FC<PostCardProps> = ({
         onPress={onUserPress}
         activeOpacity={0.7}
       >
-        <Image
-          source={post.user?.avatar || 'https://via.placeholder.com/40'}
-          style={styles.avatar}
-          contentFit="cover"
-          transition={200}
+        <Avatar
+          uri={post.user?.avatar}
+          name={post.user?.nickname}
+          size={40}
         />
         <View style={styles.userInfo}>
           <View style={styles.nameRow}>
