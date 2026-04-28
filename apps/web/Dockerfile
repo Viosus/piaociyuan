@@ -61,4 +61,5 @@ USER nextjs
 EXPOSE 3000
 
 # 使用自定义服务器启动（支持 Socket.io）
-CMD ["node", "server.js"]
+# --max-old-space-size=900：与 docker-compose 的 1G 内存上限对齐，留出余量给原生模块
+CMD ["node", "--max-old-space-size=900", "server.js"]

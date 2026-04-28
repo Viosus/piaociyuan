@@ -1,5 +1,5 @@
 // lib/auth.ts
-import bcrypt from 'bcryptjs';
+import { hash as bcryptHash, verify as bcryptVerify } from '@node-rs/bcrypt';
 import jwt from 'jsonwebtoken';
 import { headers } from 'next/headers';
 import prisma from './prisma';
@@ -8,7 +8,7 @@ const JWT_SECRET = process.env.JWT_SECRET as string;
 if (!JWT_SECRET) {
   throw new Error('JWT_SECRET environment variable is required');
 }
-const SALT_ROUNDS = 12; // 从 10 提升到 12，增强安全性
+const SALT_ROUNDS = 12;
 
 export type UserPayload = {
   id: string;
@@ -19,14 +19,14 @@ export type UserPayload = {
   role: string; // 'user' | 'staff' | 'admin'
 };
 
-// 密码加密
+// 密码加密（@node-rs/bcrypt 是 Rust 实现的 async 原生模块，与 bcryptjs 生成的 $2a$/$2b$ hash 完全兼容）
 export async function hashPassword(password: string): Promise<string> {
-  return bcrypt.hash(password, SALT_ROUNDS);
+  return bcryptHash(password, SALT_ROUNDS);
 }
 
 // 密码验证
 export async function verifyPassword(password: string, hash: string): Promise<boolean> {
-  return bcrypt.compare(password, hash);
+  return bcryptVerify(password, hash);
 }
 
 // 生成 Access Token（短期，1天 - 方便测试，记住我时为7天）
@@ -150,6 +150,12 @@ export async function getCurrentUser() {
 
     // 从数据库获取完整的用户信息
     const user = await findUserById(payload.id);
+
+    // 检查用户是否被封禁
+    if (user && user.isBanned) {
+      return null;
+    }
+
     return user;
   } catch {
     return null;
@@ -162,6 +168,10 @@ export async function requireAdmin() {
 
   if (!user) {
     return { error: 'UNAUTHORIZED', message: '请先登录', status: 401 };
+  }
+
+  if (user.isBanned) {
+    return { error: 'FORBIDDEN', message: '账户已被封禁', status: 403 };
   }
 
   if (user.role !== 'admin') {

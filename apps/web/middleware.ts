@@ -23,8 +23,11 @@ interface RateLimitConfig {
   windowMs: number;
 }
 
+// 注意：此处是 IP 级粗粒度防刷（防扫号/防爬）。
+// 真正的账号级失败退避已下沉到 /api/auth/login 路由内（lib/login-throttle.ts），用 Redis 持久化、跨重启有效、按账号指数退避。
+// 因此 login 这里放宽到 30/15分钟，避免同一 NAT 后多个真实用户互相误伤。
 const RATE_LIMITS: Record<string, RateLimitConfig> = {
-  '/api/auth/login': { maxRequests: 5, windowMs: 15 * 60 * 1000 },
+  '/api/auth/login': { maxRequests: 30, windowMs: 15 * 60 * 1000 },
   '/api/auth/register': { maxRequests: 3, windowMs: 60 * 60 * 1000 },
   '/api/auth/send-code': { maxRequests: 3, windowMs: 60 * 60 * 1000 },
   '/api/upload': { maxRequests: 20, windowMs: 60 * 1000 },
