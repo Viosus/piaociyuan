@@ -4,7 +4,8 @@
  * 页面只从 store 读取数据，不直接监听 Socket 事件
  */
 
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useState, useRef, ReactNode } from 'react';
+import { AppState, AppStateStatus } from 'react-native';
 import { socketService, SocketEvent } from '../services/socket';
 import { useAuth } from './AuthContext';
 import { useMessagingStore } from '../stores/messagingStore';
@@ -79,6 +80,8 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
       }
     };
 
+    // 注意：服务端 server.js 当前没有 emit conversation:updated 事件，
+    // 这一段保留是为了将来服务端支持时直接生效；目前不会触发。
     const handleConversationUpdated = (conversation: Conversation) => {
       useMessagingStore.getState().updateConversation(conversation);
     };
@@ -97,14 +100,14 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     };
 
     socketService.on(SocketEvent.NewMessage, handleNewMessage);
-    socketService.on(SocketEvent.ConversationUpdated, handleConversationUpdated);
+    socketService.on('conversation:updated', handleConversationUpdated);
     socketService.on(SocketEvent.Typing, handleTyping);
     socketService.on(SocketEvent.StopTyping, handleStopTyping);
     socketService.on(SocketEvent.Reconnect, handleReconnect);
 
     return () => {
       socketService.off(SocketEvent.NewMessage, handleNewMessage);
-      socketService.off(SocketEvent.ConversationUpdated, handleConversationUpdated);
+      socketService.off('conversation:updated', handleConversationUpdated);
       socketService.off(SocketEvent.Typing, handleTyping);
       socketService.off(SocketEvent.StopTyping, handleStopTyping);
       socketService.off(SocketEvent.Reconnect, handleReconnect);
@@ -119,6 +122,78 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
         store.loadConversations();
       }
     }
+  }, [isAuthenticated, isConnected]);
+
+  // App 切回前台时主动重连 + 同步消息（修复"切回前台需要刷新"的问题）
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const appStateRef = { current: AppState.currentState as AppStateStatus };
+    const subscription = AppState.addEventListener('change', (nextState) => {
+      const prev = appStateRef.current;
+      appStateRef.current = nextState;
+      // 从后台/不活跃 -> 活跃：重连 socket + 同步最新消息
+      if ((prev === 'background' || prev === 'inactive') && nextState === 'active') {
+        socketService.connect().catch(() => {
+          // 静默处理，下面的 syncAfterReconnect 仍会拉取最新数据兜底
+        });
+        useMessagingStore.getState().syncAfterReconnect();
+      }
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, [isAuthenticated]);
+
+  // Polling fallback：Socket 长时间断连时降级为 HTTP 轮询，避免漏消息
+  const pollingTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const disconnectStartRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      if (pollingTimerRef.current) {
+        clearInterval(pollingTimerRef.current);
+        pollingTimerRef.current = null;
+      }
+      disconnectStartRef.current = null;
+      return;
+    }
+
+    if (isConnected) {
+      // 已连上 -> 取消 polling
+      disconnectStartRef.current = null;
+      if (pollingTimerRef.current) {
+        clearInterval(pollingTimerRef.current);
+        pollingTimerRef.current = null;
+      }
+      return;
+    }
+
+    // 未连上 -> 30s 后启动 polling
+    if (disconnectStartRef.current === null) {
+      disconnectStartRef.current = Date.now();
+    }
+
+    const startupDelay = setTimeout(() => {
+      if (pollingTimerRef.current) return;
+      pollingTimerRef.current = setInterval(() => {
+        const store = useMessagingStore.getState();
+        store.loadConversations(true);
+        const activeId = store.activeConversationId;
+        if (activeId) {
+          store.loadMessages(activeId, 1);
+        }
+      }, 15000);
+    }, 30000);
+
+    return () => {
+      clearTimeout(startupDelay);
+      if (pollingTimerRef.current) {
+        clearInterval(pollingTimerRef.current);
+        pollingTimerRef.current = null;
+      }
+    };
   }, [isAuthenticated, isConnected]);
 
   const handleConnect = async () => {

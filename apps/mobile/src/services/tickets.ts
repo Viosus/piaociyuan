@@ -90,10 +90,22 @@ export async function refundTicket(ticketId: string | number) {
 }
 
 /**
- * 验票
+ * 验票（仅查验票券有效性，不核销）
  */
 export async function verifyTicket(ticketCode: string) {
   return apiClient.post<{ status: string; ticket?: Ticket }>('/api/tickets/verify', {
+    ticketCode,
+  });
+}
+
+/**
+ * 检票核销（工作人员入场口扫码后调用，把票从 sold 改为 used）
+ *
+ * 注意：本接口要求调用者具有相应权限。verify 是只读校验，use 是写操作。
+ * 现场工作流：先 verify 弹出确认，确认后再 use。
+ */
+export async function useTicket(ticketCode: string) {
+  return apiClient.post<{ ok: boolean; ticket?: Ticket }>('/api/tickets/use', {
     ticketCode,
   });
 }

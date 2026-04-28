@@ -16,6 +16,7 @@ import { useRoute, useNavigation } from '@react-navigation/native';
 import { getAccessToken } from '../services/storage';
 import { API_URL } from '../config/api';
 import { colors, spacing, fontSize } from '../constants/config';
+import { socketService, SocketEvent } from '../services/socket';
 
 const { width } = Dimensions.get('window');
 
@@ -65,6 +66,28 @@ export default function PostDetailScreen() {
   useEffect(() => {
     loadPost();
     checkLikeStatus();
+  }, [postId]);
+
+  // 实时评论：订阅 comment:new 事件（commit 451008d Web 端引入，Mobile 现在补齐）
+  // 服务端在 api/posts/[id]/comments/route.ts:314 emit 到 post:${postId} 房间
+  useEffect(() => {
+    if (!postId) return;
+
+    socketService.joinPost(postId);
+
+    const handleNewComment = (data: { postId: string }) => {
+      if (data?.postId === postId) {
+        // 简单做法：收到新评论时重新拉取整个 post（包含 comments 列表）
+        loadPost();
+      }
+    };
+
+    socketService.on(SocketEvent.NewComment, handleNewComment);
+
+    return () => {
+      socketService.off(SocketEvent.NewComment, handleNewComment);
+      socketService.leavePost(postId);
+    };
   }, [postId]);
 
   const loadPost = async () => {

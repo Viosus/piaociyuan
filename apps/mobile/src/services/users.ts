@@ -61,6 +61,9 @@ export async function getMyProfile() {
 
 /**
  * 更新用户资料
+ *
+ * 服务端路由是 POST /api/user/update（不是 PUT /api/user/me——后者只有 GET）。
+ * 历史曾误用 PUT /api/user/me，导致 EditProfileScreen 表面成功实则没存。
  */
 export async function updateProfile(data: {
   nickname?: string;
@@ -68,22 +71,27 @@ export async function updateProfile(data: {
   website?: string;
   location?: string;
   avatar?: string;
+  coverImage?: string;
 }) {
-  return apiClient.put<UserProfile>('/api/user/me', data);
+  return apiClient.post<UserProfile>('/api/user/update', data);
 }
 
 /**
  * 关注用户
  */
 export async function followUser(userId: string) {
-  return apiClient.post<{ isFollowing: boolean }>(`/api/user/follows/${userId}`);
+  return apiClient.post<{ isFollowing: boolean; followerCount: number }>(
+    `/api/users/${userId}/follow`
+  );
 }
 
 /**
  * 取消关注用户
  */
 export async function unfollowUser(userId: string) {
-  return apiClient.delete<{ isFollowing: boolean }>(`/api/user/follows/${userId}`);
+  return apiClient.delete<{ isFollowing: boolean; followerCount: number }>(
+    `/api/users/${userId}/follow`
+  );
 }
 
 /**

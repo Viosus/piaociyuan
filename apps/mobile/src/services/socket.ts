@@ -8,6 +8,9 @@ import { API_URL } from '../config/api';
 
 /**
  * Socket 事件类型
+ *
+ * 服务端发出列表：apps/web/server.js + apps/web/app/api/posts/[id]/comments/route.ts
+ * 名称必须与服务端 emit 完全一致，否则 Mobile 监听不到。
  */
 export enum SocketEvent {
   // 连接事件
@@ -20,15 +23,15 @@ export enum SocketEvent {
   NewMessage = 'message:new',
   MessageSent = 'message:sent',
   MessageRead = 'message:read',
-  Typing = 'typing',
+  Typing = 'typing:start',       // 服务端 emit 的是 typing:start，历史误填为 'typing'
   StopTyping = 'typing:stop',
 
   // 在线状态事件
   UserOnline = 'user:online',
   UserOffline = 'user:offline',
 
-  // 对话事件
-  ConversationUpdated = 'conversation:updated',
+  // 帖子实时评论事件（commit 451008d 在 Web 端引入，Mobile 现在补齐订阅）
+  NewComment = 'comment:new',
 }
 
 // Socket 配置常量
@@ -229,16 +232,30 @@ class SocketService {
 
   /**
    * 加入对话房间
+   * 注意：服务端 server.js 当前没有处理 conversation:join/leave 事件——
+   * 私聊房间是登录时自动加入 user:${userId} 房间，这两个方法保留以防服务端未来支持。
    */
   joinConversation(conversationId: string): void {
     this.emit('conversation:join', { conversationId });
   }
 
-  /**
-   * 离开对话房间
-   */
   leaveConversation(conversationId: string): void {
     this.emit('conversation:leave', { conversationId });
+  }
+
+  /**
+   * 加入帖子房间（用于实时接收 comment:new 事件）
+   * 服务端 server.js:127 监听 post:join 事件
+   */
+  joinPost(postId: string): void {
+    this.emit('post:join', { postId });
+  }
+
+  /**
+   * 离开帖子房间
+   */
+  leavePost(postId: string): void {
+    this.emit('post:leave', { postId });
   }
 }
 

@@ -1,4 +1,4 @@
-// 共享类型定义
+// 共享类型定义入口
 
 /**
  * API 响应通用格式
@@ -8,6 +8,7 @@ export interface ApiResponse<T = any> {
   data?: T;
   error?: string;
   message?: string;
+  code?: string;
 }
 
 /**
@@ -21,7 +22,7 @@ export interface PaginatedResponse<T> extends ApiResponse<T[]> {
 }
 
 /**
- * 用户角色
+ * 用户角色 enum（保留向后兼容）
  */
 export enum UserRole {
   USER = 'user',
@@ -29,32 +30,44 @@ export enum UserRole {
 }
 
 /**
- * 票据状态
+ * 票据状态 enum（保留向后兼容）
  */
 export enum TicketStatus {
-  AVAILABLE = 'available',   // 可售
-  HELD = 'held',              // 锁定中
-  SOLD = 'sold',              // 已售出
-  USED = 'used',              // 已使用
-  REFUNDED = 'refunded',      // 已退款
+  AVAILABLE = 'available',
+  HELD = 'held',
+  SOLD = 'sold',
+  USED = 'used',
+  REFUNDED = 'refunded',
 }
 
 /**
- * 订单状态
+ * 订单状态 enum（保留向后兼容）
  */
 export enum OrderStatus {
-  PENDING = 'pending',        // 待支付
-  PAID = 'paid',              // 已支付
-  CANCELLED = 'cancelled',    // 已取消
-  REFUNDED = 'refunded',      // 已退款
+  PENDING = 'pending',
+  PAID = 'paid',
+  CANCELLED = 'cancelled',
+  REFUNDED = 'refunded',
 }
 
 /**
- * 通知类型
+ * 通知类型 enum（保留向后兼容）
  */
 export enum NotificationType {
-  SYSTEM = 'system',          // 系统通知
-  ORDER = 'order',            // 订单通知
-  EVENT = 'event',            // 活动通知
-  SOCIAL = 'social',          // 社交通知
+  SYSTEM = 'system',
+  ORDER = 'order',
+  EVENT = 'event',
+  SOCIAL = 'social',
 }
+
+// ==================== 业务实体类型 ====================
+// 严格对齐 apps/web/prisma/schema.prisma；DateTime 序列化为 ISO 字符串
+
+export * from './user';
+export * from './event';
+export * from './ticket';
+export * from './order';
+export * from './message';
+export * from './notification';
+export * from './collectible';
+export * from './post';
