@@ -111,7 +111,7 @@ export default function CreatePostScreen() {
         { text: '取消', style: 'cancel' },
         {
           text: '确定',
-          onPress: (eventId) => {
+          onPress: (eventId: string | undefined) => {
             if (eventId && eventId.trim()) {
               setSelectedEvent({
                 id: eventId.trim(),
@@ -198,7 +198,7 @@ export default function CreatePostScreen() {
       const response = await createPost({
         content: content.trim(),
         images: uploadedImageUrls,
-        eventId: selectedEvent?.id,
+        eventId: selectedEvent?.id ? Number(selectedEvent.id) : undefined,
         location: location || undefined,
       });
 

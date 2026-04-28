@@ -6,8 +6,16 @@ import type { Order } from '../services/orders';
 interface OrderCardProps {
   order: Order;
   onPress: () => void;
+  /** 待支付订单可选回调（仅在 status === 'pending' 时显示） */
+  onPay?: () => void;
+  /** 取消订单可选回调 */
+  onCancel?: () => void;
+  /** 退款可选回调 */
+  onRefund?: () => void;
 }
 
+// 注意：onPay/onCancel/onRefund 当前仅作类型暴露给 OrdersScreen 调用，UI 内未渲染按钮——
+// 后续若要在卡片上加快捷操作按钮再补 JSX
 export default function OrderCard({ order, onPress }: OrderCardProps) {
   const getStatusText = (status: string) => {
     switch (status) {

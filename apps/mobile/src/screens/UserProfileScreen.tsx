@@ -36,6 +36,8 @@ export default function UserProfileScreen() {
   const [page, setPage] = useState(1);
   const [isFollowing, setIsFollowing] = useState(false);
   const [followLoading, setFollowLoading] = useState(false);
+  const [messageLoading, setMessageLoading] = useState(false);
+  const toast = useToast();
 
   useEffect(() => {
     loadUserProfile();
@@ -69,12 +71,13 @@ export default function UserProfileScreen() {
 
       const response = await getUserPosts(userId, pageNum, 20);
       if (response.ok && response.data) {
+        const list = response.data;
         if (pageNum === 1) {
-          setPosts(response.data);
+          setPosts(list);
         } else {
-          setPosts((prev) => [...prev, ...response.data]);
+          setPosts((prev) => [...prev, ...list]);
         }
-        setHasMore(response.data.length >= 20);
+        setHasMore(list.length >= 20);
       }
     } catch {
       // 静默处理加载错误
@@ -132,8 +135,24 @@ export default function UserProfileScreen() {
     }
   };
 
-  const handleSendMessage = () => {
-    navigation.navigate('Chat' as never, { userId } as never);
+  const handleSendMessage = async () => {
+    if (messageLoading) return;
+    try {
+      setMessageLoading(true);
+      const response = await createConversation(userId);
+      if (response.ok && response.data?.id) {
+        navigation.navigate('Chat' as never, {
+          conversationId: response.data.id,
+          userId,
+        } as never);
+      } else {
+        toast.error(response.error || '无法发起私聊');
+      }
+    } catch (e: any) {
+      toast.error(e?.message || '无法发起私聊');
+    } finally {
+      setMessageLoading(false);
+    }
   };
 
   const handlePostPress = (post: Post) => {
@@ -228,8 +247,16 @@ export default function UserProfileScreen() {
             </Text>
           )}
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.actionButton, styles.messageButton]} onPress={handleSendMessage}>
-          <Text style={styles.actionButtonText}>私信</Text>
+        <TouchableOpacity
+          style={[styles.actionButton, styles.messageButton]}
+          onPress={handleSendMessage}
+          disabled={messageLoading}
+        >
+          {messageLoading ? (
+            <ActivityIndicator size="small" color="#ffffff" />
+          ) : (
+            <Text style={styles.actionButtonText}>私信</Text>
+          )}
         </TouchableOpacity>
       </View>
 

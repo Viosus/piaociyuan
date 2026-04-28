@@ -44,12 +44,13 @@ export default function FollowerListScreen() {
 
       const response = await getFollowers(userId, pageNum, 20);
       if (response.ok && response.data) {
+        const list = response.data;
         if (pageNum === 1) {
-          setUsers(response.data);
+          setUsers(list);
         } else {
-          setUsers((prev) => [...prev, ...response.data]);
+          setUsers((prev) => [...prev, ...list]);
         }
-        setHasMore(response.data.length >= 20);
+        setHasMore(list.length >= 20);
       }
     } catch {
       // 静默处理加载错误

@@ -252,7 +252,7 @@ export default function EncoreScreen() {
     (navigation as any).navigate('UserProfile', { userId });
   };
 
-  const handleEventPress = (eventId: string) => {
+  const handleEventPress = (eventId: number) => {
     (navigation as any).navigate('EventDetail', { eventId });
   };
 
@@ -487,7 +487,6 @@ export default function EncoreScreen() {
               onEventPress={() => item.eventId && handleEventPress(item.eventId)}
             />
           )}
-          estimatedItemSize={400}
           ListFooterComponent={renderPostsFooter}
           ListEmptyComponent={renderPostsEmpty}
           contentContainerStyle={styles.listContent}

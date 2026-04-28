@@ -40,7 +40,8 @@ interface PostDetail {
     city: string;
     venue: string;
     date: string;
-    coverImage: string;
+    coverImage?: string;  // 后端有时返回 coverImage
+    cover?: string;       // 有时返回 cover（schema 字段名）——两个都兼容
   };
   images: {
     id: string;

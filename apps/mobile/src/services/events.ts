@@ -34,7 +34,9 @@ export interface Tier {
   name: string;
   price: number;
   capacity: number;
-  available: number;
+  available?: number;       // API 历史字段，等价于 remaining
+  remaining?: number;       // 与 schema 对齐的字段名
+  sold?: number;
   description?: string;
 }
 

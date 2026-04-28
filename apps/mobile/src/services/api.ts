@@ -3,10 +3,11 @@ import type { ApiResponse } from '@piaoyuzhou/shared';
 import { handleApiError } from '../utils/error';
 import * as StorageService from './storage';
 
-interface RequestOptions extends RequestInit {
+// 注：避免与 RequestInit.cache (RequestCache) 冲突，自定义字段独立存放
+interface RequestOptions extends Omit<RequestInit, 'cache'> {
   retry?: number;
   retryDelay?: number;
-  cache?: boolean;
+  cache?: boolean;             // 是否启用本地缓存（不是 fetch 的 RequestCache）
   cacheTime?: number;
   params?: Record<string, any>;
   timeout?: number;

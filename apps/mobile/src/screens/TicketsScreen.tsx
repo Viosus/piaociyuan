@@ -60,7 +60,7 @@ export default function TicketsScreen() {
     try {
       setError(null);
       const response = await getMyTickets({
-        status: selectedStatus || undefined,
+        status: (selectedStatus || undefined) as 'available' | 'sold' | 'used' | 'refunded' | undefined,
         ...filters,
       });
       if (response.ok && response.data) {

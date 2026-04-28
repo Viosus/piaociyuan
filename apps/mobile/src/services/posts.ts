@@ -5,12 +5,13 @@
 import { apiClient } from './api';
 
 // 帖子类型定义
+// 对齐 schema：Post.id 是 UUID（string）；Post.eventId 引用 Event.id 是 Int（number）
 export interface Post {
   id: string;
   content: string;
   images: string[];
-  userId: string;
-  eventId?: string;
+  userId: string;            // ref User.id (UUID)
+  eventId?: number;          // ref Event.id (Int)
   location?: string;
   likeCount: number;
   commentCount: number;
@@ -26,9 +27,10 @@ export interface Post {
     isVerified?: boolean;
   };
   event?: {
-    id: string;
+    id: number;
     name: string;
     coverImage?: string;
+    cover?: string;
   };
 }
 

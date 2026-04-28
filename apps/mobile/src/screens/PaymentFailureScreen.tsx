@@ -15,7 +15,7 @@ export default function PaymentFailureScreen() {
   const { orderId, reason } = route.params as { orderId: string; reason?: string };
 
   const handleRetry = () => {
-    navigation.replace('Payment' as never, { orderId } as never);
+    (navigation as any).replace('Payment', { orderId });
   };
 
   const handleBackHome = () => {

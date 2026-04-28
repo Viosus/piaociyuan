@@ -85,7 +85,7 @@ export default function SearchScreen() {
     navigation.navigate('UserProfile' as never, { userId } as never);
   };
 
-  const handlePostPress = (postId: number) => {
+  const handlePostPress = (postId: string) => {
     navigation.navigate('PostDetail' as never, { postId } as never);
   };
 

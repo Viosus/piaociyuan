@@ -92,18 +92,19 @@ export default function CheckoutScreen() {
 
       // 创建订单（使用第一个票档，后续可以支持多票档）
       const response = await createOrder({
-        eventId,
-        tierId: firstTier.tierId,
+        eventId: String(eventId),
+        tierId: String(firstTier.tierId),
         qty: firstTier.quantity,
       });
 
       if (response.ok && response.data) {
+        const order = response.data;
         Alert.alert('成功', '订单创建成功', [
           {
             text: '去支付',
             onPress: () => {
               navigation.navigate('Payment' as never, {
-                orderId: response.data.id,
+                orderId: order.id,
               } as never);
             },
           },

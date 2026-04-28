@@ -54,12 +54,13 @@ export default function FavoritesScreen() {
 
       const response = await getFavorites(pageNum, 20);
       if (response.ok && response.data) {
+        const list = response.data;
         if (pageNum === 1) {
-          setPosts(response.data);
+          setPosts(list);
         } else {
-          setPosts((prev) => [...prev, ...response.data]);
+          setPosts((prev) => [...prev, ...list]);
         }
-        setHasMore(response.data.length >= 20);
+        setHasMore(list.length >= 20);
       }
     } catch {
       // 静默处理加载错误
@@ -111,7 +112,7 @@ export default function FavoritesScreen() {
     ]);
   };
 
-  const handleUserPress = (userId: number) => {
+  const handleUserPress = (userId: string) => {
     navigation.navigate('UserProfile' as never, { userId } as never);
   };
 

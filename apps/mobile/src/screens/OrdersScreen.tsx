@@ -46,16 +46,16 @@ export default function OrdersScreen() {
       const response = await getMyOrders({
         status: selectedStatus || undefined,
         page: pageNum,
-        limit: 20,
+        pageSize: 20,
       });
       if (response.ok && response.data) {
+        const list = response.data;
         if (pageNum === 1) {
-          setOrders(response.data);
+          setOrders(list);
         } else {
-          setOrders((prev) => [...prev, ...response.data]);
+          setOrders((prev) => [...prev, ...list]);
         }
-        // 如果返回的数据少于 20 条，说明没有更多了
-        if (response.data.length < 20) {
+        if (list.length < 20) {
           setHasMore(false);
         }
       } else {

@@ -160,6 +160,6 @@ const styles = StyleSheet.create({
   indicator: {
     height: 8,
     borderRadius: 4,
-    transition: 'width 0.3s',
+    // 注：'transition' 是 web CSS 属性，RN 不支持。要做宽度动画用 Animated.View 实现。
   },
 });

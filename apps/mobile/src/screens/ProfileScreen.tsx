@@ -99,7 +99,7 @@ export default function ProfileScreen() {
         <View style={styles.userInfo}>
           <View style={styles.nameRow}>
             <Text style={styles.name}>{user?.nickname || '未设置昵称'}</Text>
-            {user?.verified && (
+            {user?.isVerified && (
               <Ionicons name="checkmark-circle" size={20} color={COLORS.primary} />
             )}
           </View>
@@ -120,14 +120,14 @@ export default function ProfileScreen() {
       <View style={styles.statsContainer}>
         <TouchableOpacity
           style={styles.statItem}
-          onPress={() => navigation.navigate('FollowingList' as never, { userId: user?.id })}
+          onPress={() => (navigation as any).navigate('FollowingList', { userId: user?.id })}
         >
           <Text style={styles.statValue}>{stats.following}</Text>
           <Text style={styles.statLabel}>关注</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.statItem}
-          onPress={() => navigation.navigate('FollowerList' as never, { userId: user?.id })}
+          onPress={() => (navigation as any).navigate('FollowerList', { userId: user?.id })}
         >
           <Text style={styles.statValue}>{stats.followers}</Text>
           <Text style={styles.statLabel}>粉丝</Text>

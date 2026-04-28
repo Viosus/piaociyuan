@@ -28,7 +28,7 @@ export default function SelectUserScreen() {
   const { mode, groupId, existingMemberIds = [] } = (route.params as {
     mode?: 'addToGroup';
     groupId?: string;
-    existingMemberIds?: number[];
+    existingMemberIds?: string[];
   }) || {};
 
   const isAddToGroupMode = mode === 'addToGroup' && groupId;
@@ -36,7 +36,7 @@ export default function SelectUserScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [users, setUsers] = useState<FollowUser[]>([]);
   const [loading, setLoading] = useState(false);
-  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
 
   const debouncedSearch = useDebounce(searchQuery, 500);
 

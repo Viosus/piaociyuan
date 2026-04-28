@@ -135,6 +135,7 @@ export interface TicketTransfer {
     date: string;
     venue: string;
     cover?: string;
+    coverImage?: string;
   };
   tier?: {
     id: number;

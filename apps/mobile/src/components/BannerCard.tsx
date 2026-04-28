@@ -14,8 +14,8 @@ import type { HeroBanner } from '../services/banners';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-// 默认渐变色
-const DEFAULT_GRADIENT = ['rgba(0, 0, 0, 0.3)', 'rgba(0, 0, 0, 0.7)'];
+// 默认渐变色（声明为 readonly tuple，满足 expo-linear-gradient 的 colors 类型要求）
+const DEFAULT_GRADIENT = ['rgba(0, 0, 0, 0.3)', 'rgba(0, 0, 0, 0.7)'] as const;
 
 interface BannerCardProps {
   banner: HeroBanner;

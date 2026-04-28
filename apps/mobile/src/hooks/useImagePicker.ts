@@ -78,8 +78,8 @@ export function useImagePicker(): UseImagePickerResult {
           uri: asset.uri,
           width: asset.width,
           height: asset.height,
-          type: asset.type,
-          fileName: asset.fileName,
+          type: asset.type ?? undefined,
+          fileName: asset.fileName ?? undefined,
           fileSize: asset.fileSize,
         }));
 
@@ -126,8 +126,8 @@ export function useImagePicker(): UseImagePickerResult {
           uri: asset.uri,
           width: asset.width,
           height: asset.height,
-          type: asset.type,
-          fileName: asset.fileName,
+          type: asset.type ?? undefined,
+          fileName: asset.fileName ?? undefined,
           fileSize: asset.fileSize,
         };
 

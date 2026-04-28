@@ -92,7 +92,7 @@ export default function PaymentScreen() {
 
         // 如果订单已支付，直接跳转到成功页
         if (response.data.status === 'paid') {
-          navigation.replace('PaymentSuccess' as never, { orderId } as never);
+          (navigation as any).replace('PaymentSuccess', { orderId });
         }
       } else {
         setError(response.error || '加载订单详情失败');
@@ -179,7 +179,7 @@ export default function PaymentScreen() {
   const handleMockPay = async () => {
     const response = await payOrder(orderId);
     if (response.ok) {
-      navigation.replace('PaymentSuccess' as never, { orderId } as never);
+      (navigation as any).replace('PaymentSuccess', { orderId });
     } else {
       Alert.alert('支付失败', response.error || '支付失败，请重试');
     }

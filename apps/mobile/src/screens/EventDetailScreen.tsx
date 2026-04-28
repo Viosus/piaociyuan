@@ -112,7 +112,7 @@ export default function EventDetailScreen() {
       return;
     }
 
-    if (selectedTier.available <= 0) {
+    if ((selectedTier.available ?? selectedTier.remaining ?? 0) <= 0) {
       Alert.alert('抱歉', '该票档已售罄');
       return;
     }
@@ -202,7 +202,8 @@ export default function EventDetailScreen() {
             <Text style={styles.sectionTitle}>票档信息</Text>
             {event.tiers.map((tier) => {
               const isSelected = selectedTier?.id === tier.id;
-              const isSoldOut = tier.available <= 0;
+              const remaining = tier.available ?? tier.remaining ?? 0;
+              const isSoldOut = remaining <= 0;
               return (
                 <TouchableOpacity
                   key={tier.id}
@@ -223,12 +224,12 @@ export default function EventDetailScreen() {
                     <View style={styles.tierStock}>
                       <View style={styles.tierStockBar}>
                         <View style={[styles.tierStockFill, {
-                          width: `${Math.max(0, ((tier.capacity - tier.available) / tier.capacity) * 100)}%`,
+                          width: `${Math.max(0, ((tier.capacity - remaining) / tier.capacity) * 100)}%`,
                           backgroundColor: isSoldOut ? COLORS.error : COLORS.primary,
                         }]} />
                       </View>
                       <Text style={styles.tierAvailable}>
-                        {isSoldOut ? '已售罄' : `剩余 ${tier.available}/${tier.capacity}`}
+                        {isSoldOut ? '已售罄' : `剩余 ${remaining}/${tier.capacity}`}
                       </Text>
                     </View>
                     {isSelected && !isSoldOut && (
@@ -249,13 +250,13 @@ export default function EventDetailScreen() {
           <Text style={styles.priceValue}>¥{selectedTier?.price || 0}</Text>
         </View>
         <TouchableOpacity
-          style={[styles.buyButton, (!selectedTier || selectedTier.available <= 0) && styles.buyButtonDisabled]}
+          style={[styles.buyButton, (!selectedTier || (selectedTier.available ?? selectedTier.remaining ?? 0) <= 0) && styles.buyButtonDisabled]}
           onPress={handleBuyTicket}
-          disabled={!selectedTier || selectedTier.available <= 0}
+          disabled={!selectedTier || (selectedTier.available ?? selectedTier.remaining ?? 0) <= 0}
           activeOpacity={0.8}
         >
           <LinearGradient
-            colors={(!selectedTier || selectedTier.available <= 0) ? ['#ccc', '#bbb'] : GRADIENTS.cta as [string, string]}
+            colors={(!selectedTier || (selectedTier.available ?? selectedTier.remaining ?? 0) <= 0) ? ['#ccc', '#bbb'] as const : GRADIENTS.cta}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
             style={styles.buyButtonGradient}

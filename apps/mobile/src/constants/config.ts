@@ -41,6 +41,7 @@ export const COLORS = {
 };
 
 // 渐变色配置（单独导出，避免与 COLORS 混淆）
+// 使用 as const 把每个数组定为 readonly tuple，满足 expo-linear-gradient 的 colors 类型要求
 export const GRADIENTS = {
   primary: ['#46467A', '#E0DFFD'],        // 紫色到淡紫
   secondary: ['#46467A', '#7A7AAE'],      // 紫色渐变
@@ -49,7 +50,7 @@ export const GRADIENTS = {
   cta: ['#FF4D6A', '#FF6B8A'],            // CTA 按钮渐变（暖红）
   card: ['rgba(255,255,255,0.9)', 'rgba(255,255,255,0.7)'],  // 卡片渐变
   imageOverlay: ['transparent', 'rgba(0,0,0,0.6)'],  // 图片底部遮罩
-};
+} as const;
 
 // 小写版本（推荐使用）
 export const colors = COLORS;
@@ -82,6 +83,7 @@ export const FONT_SIZES = {
 export const fontSize = FONT_SIZES;
 
 // 圆角半径 - 与网站 cards.css 统一
+// 同时提供 small/medium/large 别名，兼容历史代码
 export const BORDER_RADIUS = {
   xs: 4,              // 超小
   sm: 8,              // 小 (--card-radius-sm)
@@ -89,10 +91,14 @@ export const BORDER_RADIUS = {
   lg: 16,             // 大 (--card-radius-lg)
   xl: 24,             // 超大 (--card-radius-xl)
   full: 9999,         // 圆形
+  // 别名（不要再新增使用，沿用即可）
+  small: 8,
+  medium: 12,
+  large: 16,
 };
 
-// 兼容旧代码
-export const { md: medium } = BORDER_RADIUS;
+// 顶层 medium 兼容（旧代码直接 import { medium }）
+export const medium = BORDER_RADIUS.medium;
 
 // 小写版本（推荐使用）
 export const borderRadius = BORDER_RADIUS;

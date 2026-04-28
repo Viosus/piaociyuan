@@ -193,10 +193,10 @@ export default function OrderDetailScreen() {
               <>
                 <View style={styles.timelineLine} />
                 <View style={styles.timelineItem}>
-                  <View style={[styles.timelineDot, order.paidAt && styles.timelineDotActive]} />
+                  <View style={[styles.timelineDot, order.paidAt != null && styles.timelineDotActive]} />
                   <View style={styles.timelineContent}>
                     <Text style={styles.timelineLabel}>支付完成</Text>
-                    {order.paidAt && (
+                    {order.paidAt != null && (
                       <Text style={styles.timelineTime}>
                         {formatDateTime(new Date(Number(order.paidAt)))}
                       </Text>

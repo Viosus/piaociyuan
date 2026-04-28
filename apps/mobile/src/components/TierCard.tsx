@@ -14,7 +14,8 @@ interface Tier {
   name: string;
   price: number;
   capacity: number;
-  remaining: number;
+  remaining?: number;       // 与 schema 对齐（剩余票数）
+  available?: number;       // API 历史字段（等价 remaining）
 }
 
 interface TierCardProps {
@@ -30,9 +31,11 @@ export const TierCard: React.FC<TierCardProps> = ({
   onQuantityChange,
   disabled = false,
 }) => {
-  const isSoldOut = tier.remaining === 0;
-  const maxQuantity = Math.min(10, tier.remaining);
-  const stockPercentage = (tier.remaining / tier.capacity) * 100;
+  // 兼容 API 返回 remaining 或 available 任一字段
+  const remainingCount = tier.remaining ?? tier.available ?? 0;
+  const isSoldOut = remainingCount === 0;
+  const maxQuantity = Math.min(10, remainingCount);
+  const stockPercentage = (remainingCount / tier.capacity) * 100;
 
   // 库存状态
   const getStockStatus = () => {
@@ -40,12 +43,12 @@ export const TierCard: React.FC<TierCardProps> = ({
       return { text: '已售罄', color: colors.error };
     }
     if (stockPercentage <= 10) {
-      return { text: `仅剩 ${tier.remaining} 张`, color: colors.warning };
+      return { text: `仅剩 ${remainingCount} 张`, color: colors.warning };
     }
     if (stockPercentage <= 30) {
-      return { text: `剩余 ${tier.remaining} 张`, color: colors.warning };
+      return { text: `剩余 ${remainingCount} 张`, color: colors.warning };
     }
-    return { text: `剩余 ${tier.remaining} 张`, color: colors.success };
+    return { text: `剩余 ${remainingCount} 张`, color: colors.success };
   };
 
   const stockStatus = getStockStatus();

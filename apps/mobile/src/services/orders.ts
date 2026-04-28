@@ -14,6 +14,8 @@ export interface Order {
   totalPrice: number;
   status: 'pending' | 'paid' | 'cancelled' | 'refunded';
   createdAt: string;
+  paidAt?: string | number | null;
+  refundedAt?: string | number | null;
   event?: {
     id: number;
     name: string;

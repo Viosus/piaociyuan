@@ -144,11 +144,10 @@ export default function IdDocumentsScreen() {
               '',
               [
                 { text: '取消', style: 'cancel' },
-                {
+                ...(document.isDefault ? [] : [{
                   text: '设为默认',
                   onPress: () => handleSetDefault(document),
-                  disabled: document.isDefault,
-                },
+                }]),
                 {
                   text: '删除',
                   style: 'destructive',
