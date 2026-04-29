@@ -1,6 +1,6 @@
 import { apiClient } from './api';
 import { getRefreshToken, clearAuth } from './storage';
-import type { ApiResponse, User, UserAuthSummary } from '@piaoyuzhou/shared';
+import type { ApiResponse, User, UserAuthSummary } from '@piaociyuan/shared';
 
 /**
  * 用户认证相关的 API

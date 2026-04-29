@@ -102,33 +102,33 @@ export default function NotificationsScreen() {
     switch (type) {
       case 'event_reminder':
         if (data?.eventId) {
-          navigation.navigate('EventDetail' as never, { eventId: data.eventId } as never);
+          navigation.navigate('EventDetail', { eventId: data.eventId });
         }
         break;
       case 'order_status':
         if (data?.orderId) {
-          navigation.navigate('OrderDetail' as never, { orderId: data.orderId } as never);
+          navigation.navigate('OrderDetail', { orderId: data.orderId });
         }
         break;
       case 'ticket_status':
         if (data?.ticketId) {
-          navigation.navigate('TicketDetail' as never, { ticketId: data.ticketId } as never);
+          navigation.navigate('TicketDetail', { ticketId: data.ticketId });
         }
         break;
       case 'post_like':
       case 'post_comment':
         if (data?.postId) {
-          navigation.navigate('PostDetail' as never, { postId: data.postId } as never);
+          navigation.navigate('PostDetail', { postId: data.postId });
         }
         break;
       case 'new_follower':
         if (data?.userId) {
-          navigation.navigate('UserProfile' as never, { userId: data.userId } as never);
+          navigation.navigate('UserProfile', { userId: data.userId });
         }
         break;
       case 'new_message':
         if (data?.conversationId) {
-          navigation.navigate('Chat' as never, { conversationId: data.conversationId } as never);
+          navigation.navigate('Chat', { conversationId: data.conversationId });
         }
         break;
       default:

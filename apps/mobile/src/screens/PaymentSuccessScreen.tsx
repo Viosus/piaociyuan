@@ -39,15 +39,15 @@ export default function PaymentSuccessScreen() {
   };
 
   const handleViewTickets = () => {
-    navigation.navigate('Tickets' as never);
+    navigation.navigate('Tickets');
   };
 
   const handleBackHome = () => {
-    navigation.navigate('Home' as never);
+    navigation.navigate('Home');
   };
 
   const handleViewOrder = () => {
-    navigation.navigate('OrderDetail' as never, { orderId } as never);
+    navigation.navigate('OrderDetail', { orderId });
   };
 
   return (

@@ -59,7 +59,7 @@ src/
 
 - ✅ 底部导航栏（首页、活动、门票、我的）
 - ✅ TypeScript 支持
-- ✅ 共享代码包集成 (@piaoyuzhou/shared)
+- ✅ 共享代码包集成 (@piaociyuan/shared)
 - ✅ API 客户端配置
 - 🚧 用户认证
 - 🚧 活动浏览和购票

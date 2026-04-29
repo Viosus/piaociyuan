@@ -1,5 +1,4 @@
 import * as FileSystem from 'expo-file-system';
-import * as Crypto from 'expo-crypto';
 
 /**
  * 图片缓存服务
@@ -12,7 +11,7 @@ import * as Crypto from 'expo-crypto';
  */
 const CACHE_CONFIG = {
   // 缓存目录
-  cacheDir: FileSystem.cacheDirectory + 'images/',
+  cacheDir: (FileSystem as any).cacheDirectory + 'images/',
   // 最大缓存大小（字节）100MB
   maxCacheSize: 100 * 1024 * 1024,
   // 缓存过期时间（毫秒）7天
@@ -47,13 +46,15 @@ async function initCacheDir(): Promise<void> {
 }
 
 /**
- * 生成缓存键（基于 URL）
+ * 生成缓存键（基于 URL 的非加密 hash，仅用于去重，不需要密码学强度）
  */
-function getCacheKey(url: string): string {
-  return Crypto.digestStringAsync(
-    Crypto.CryptoDigestAlgorithm.SHA256,
-    url
-  ).then((hash) => hash);
+async function getCacheKey(url: string): Promise<string> {
+  let hash = 0;
+  for (let i = 0; i < url.length; i++) {
+    hash = ((hash << 5) - hash) + url.charCodeAt(i);
+    hash |= 0;
+  }
+  return Math.abs(hash).toString(16);
 }
 
 /**

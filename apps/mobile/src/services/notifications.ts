@@ -3,7 +3,7 @@ import * as Device from 'expo-device';
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
 import { apiClient } from './api';
-import type { ApiResponse } from '@piaoyuzhou/shared';
+import type { ApiResponse } from '@piaociyuan/shared';
 
 /**
  * 推送通知服务
@@ -17,6 +17,8 @@ Notifications.setNotificationHandler({
     shouldShowAlert: true,
     shouldPlaySound: true,
     shouldSetBadge: true,
+    shouldShowBanner: true,
+    shouldShowList: true,
   }),
 });
 
@@ -247,7 +249,7 @@ export function addNotificationClickListener(
   return Notifications.addNotificationResponseReceivedListener((response) => {
     const data = response.notification.request.content.data;
     if (data) {
-      handler(data as AppNotification);
+      handler(data as unknown as AppNotification);
     }
   });
 }

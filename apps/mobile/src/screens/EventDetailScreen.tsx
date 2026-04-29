@@ -117,7 +117,7 @@ export default function EventDetailScreen() {
       return;
     }
 
-    navigation.navigate('Checkout' as never, {
+    navigation.navigate('Checkout', {
       eventId: eventId,
       selectedTiers: [
         {
@@ -127,7 +127,7 @@ export default function EventDetailScreen() {
           quantity: 1,
         },
       ],
-    } as never);
+    });
   };
 
   if (loading) {

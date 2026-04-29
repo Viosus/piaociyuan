@@ -62,11 +62,11 @@ export default function IdDocumentsScreen() {
   };
 
   const handleAdd = () => {
-    navigation.navigate('AddIdDocument' as never);
+    navigation.navigate('AddIdDocument');
   };
 
   const handleEdit = (document: UserIdDocument) => {
-    navigation.navigate('AddIdDocument' as never, { document } as never);
+    navigation.navigate('AddIdDocument', { document });
   };
 
   const handleSetDefault = async (document: UserIdDocument) => {

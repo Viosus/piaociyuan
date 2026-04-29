@@ -1,5 +1,5 @@
 import { APP_CONFIG } from '../constants/config';
-import type { ApiResponse } from '@piaoyuzhou/shared';
+import type { ApiResponse } from '@piaociyuan/shared';
 import { handleApiError } from '../utils/error';
 import * as StorageService from './storage';
 

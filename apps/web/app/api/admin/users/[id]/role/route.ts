@@ -11,7 +11,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
-import { UserRole, ErrorCode } from '@piaoyuzhou/shared';
+import { UserRole, ErrorCode } from '@piaociyuan/shared';
 
 type Props = { params: Promise<{ id: string }> };
 

@@ -94,9 +94,9 @@ export default function SelectUserScreen() {
 
         if (response.ok && response.data) {
           // 跳转到聊天页面
-          navigation.navigate('Chat' as never, {
+          navigation.navigate('Chat', {
             conversationId: response.data.id,
-          } as never);
+          });
         } else {
           Alert.alert('错误', response.error || '创建对话失败');
         }

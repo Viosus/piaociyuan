@@ -99,11 +99,11 @@ export default function CreateGroupScreen() {
 
       if (response.ok && response.data) {
         // 跳转到聊天页面
-        navigation.navigate('Chat' as never, {
+        navigation.navigate('Chat', {
           conversationId: response.data.id,
           isGroup: true,
           groupName: response.data.name,
-        } as never);
+        });
       } else {
         Alert.alert('错误', response.error || '创建群聊失败');
       }

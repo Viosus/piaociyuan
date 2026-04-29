@@ -46,7 +46,7 @@ export default function SettingsScreen() {
     {
       icon: 'key-outline' as const,
       title: '修改密码',
-      onPress: () => navigation.navigate('ChangePassword' as never),
+      onPress: () => navigation.navigate('ChangePassword'),
     },
   ];
 
@@ -86,7 +86,7 @@ export default function SettingsScreen() {
     {
       icon: 'information-circle-outline' as const,
       title: '关于票次元',
-      onPress: () => navigation.navigate('About' as never),
+      onPress: () => navigation.navigate('About'),
     },
     {
       icon: 'document-text-outline' as const,

@@ -281,7 +281,7 @@ export default function ChatScreen() {
           )}
         </View>
         {isGroup ? (
-          <TouchableOpacity onPress={() => navigation.navigate('GroupDetail' as never, { groupId: conversationId } as never)}>
+          <TouchableOpacity onPress={() => navigation.navigate('GroupDetail', { groupId: conversationId })}>
             <Text style={styles.settingsButton}>⚙️</Text>
           </TouchableOpacity>
         ) : (

@@ -141,10 +141,10 @@ export default function UserProfileScreen() {
       setMessageLoading(true);
       const response = await createConversation(userId);
       if (response.ok && response.data?.id) {
-        navigation.navigate('Chat' as never, {
+        navigation.navigate('Chat', {
           conversationId: response.data.id,
           userId,
-        } as never);
+        });
       } else {
         toast.error(response.error || '无法发起私聊');
       }
@@ -156,15 +156,15 @@ export default function UserProfileScreen() {
   };
 
   const handlePostPress = (post: Post) => {
-    navigation.navigate('PostDetail' as never, { postId: post.id } as never);
+    navigation.navigate('PostDetail', { postId: post.id });
   };
 
   const handleFollowingPress = () => {
-    navigation.navigate('FollowingList' as never, { userId } as never);
+    navigation.navigate('FollowingList', { userId });
   };
 
   const handleFollowersPress = () => {
-    navigation.navigate('FollowerList' as never, { userId } as never);
+    navigation.navigate('FollowerList', { userId });
   };
 
   if (loading && !user) {

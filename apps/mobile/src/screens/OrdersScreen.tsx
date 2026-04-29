@@ -87,11 +87,11 @@ export default function OrdersScreen() {
   };
 
   const handleOrderPress = (order: Order) => {
-    navigation.navigate('OrderDetail' as never, { orderId: order.id } as never);
+    navigation.navigate('OrderDetail', { orderId: order.id });
   };
 
   const handlePay = async (orderId: string) => {
-    navigation.navigate('Payment' as never, { orderId } as never);
+    navigation.navigate('Payment', { orderId });
   };
 
   const handleCancel = async (orderId: string) => {

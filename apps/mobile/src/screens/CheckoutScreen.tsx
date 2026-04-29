@@ -103,9 +103,9 @@ export default function CheckoutScreen() {
           {
             text: '去支付',
             onPress: () => {
-              navigation.navigate('Payment' as never, {
+              navigation.navigate('Payment', {
                 orderId: order.id,
-              } as never);
+              });
             },
           },
         ]);

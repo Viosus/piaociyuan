@@ -1,5 +1,5 @@
 // 导出 shared 包的类型
-export * from '@piaoyuzhou/shared';
+export * from '@piaociyuan/shared';
 
 // Mobile 特有的类型定义
 export interface NavigationParams {

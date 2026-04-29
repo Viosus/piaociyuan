@@ -109,7 +109,7 @@ export default function ProfileScreen() {
 
         <TouchableOpacity
           style={styles.editButton}
-          onPress={() => navigation.navigate('EditProfile' as never)}
+          onPress={() => navigation.navigate('EditProfile')}
         >
           <Ionicons name="create-outline" size={20} color={COLORS.primary} />
           <Text style={styles.editButtonText}>编辑资料</Text>
@@ -147,7 +147,7 @@ export default function ProfileScreen() {
               <TouchableOpacity
                 key={itemIndex}
                 style={styles.menuItem}
-                onPress={() => navigation.navigate(item.screen as never)}
+                onPress={() => (navigation as any).navigate(item.screen)}
               >
                 <View style={styles.menuItemLeft}>
                   <View style={styles.menuItemIconBg}>

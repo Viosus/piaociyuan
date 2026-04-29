@@ -140,7 +140,7 @@ export default function GroupDetailScreen() {
               const response = await leaveGroup(groupId);
               if (response.ok) {
                 Alert.alert('成功', response.data?.message || '已退出群聊');
-                navigation.navigate('Conversations' as never);
+                navigation.navigate('Conversations');
               } else {
                 Alert.alert('错误', response.error || '退出失败');
               }
@@ -167,7 +167,7 @@ export default function GroupDetailScreen() {
               const response = await disbandGroup(groupId);
               if (response.ok) {
                 Alert.alert('成功', response.data?.message || '群聊已解散');
-                navigation.navigate('Conversations' as never);
+                navigation.navigate('Conversations');
               } else {
                 Alert.alert('错误', response.error || '解散失败');
               }
@@ -181,11 +181,11 @@ export default function GroupDetailScreen() {
   };
 
   const handleAddMembers = () => {
-    navigation.navigate('SelectUser' as never, {
+    navigation.navigate('SelectUser', {
       mode: 'addToGroup',
       groupId: groupId,
       existingMemberIds: group?.participants.map((p) => p.id) || [],
-    } as never);
+    });
   };
 
   const getRoleText = (role: string) => {

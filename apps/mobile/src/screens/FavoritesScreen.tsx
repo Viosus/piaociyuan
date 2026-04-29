@@ -87,7 +87,7 @@ export default function FavoritesScreen() {
   };
 
   const handlePostPress = (post: Post) => {
-    navigation.navigate('PostDetail' as never, { postId: post.id } as never);
+    navigation.navigate('PostDetail', { postId: post.id });
   };
 
   const handleUnfavorite = async (post: Post) => {
@@ -113,11 +113,11 @@ export default function FavoritesScreen() {
   };
 
   const handleUserPress = (userId: string) => {
-    navigation.navigate('UserProfile' as never, { userId } as never);
+    navigation.navigate('UserProfile', { userId });
   };
 
   const handleEventPress = (eventId: number) => {
-    navigation.navigate('EventDetail' as never, { eventId: eventId } as never);
+    navigation.navigate('EventDetail', { eventId: eventId });
   };
 
   const renderFooter = () => {

@@ -107,7 +107,7 @@ export default function FollowerListScreen() {
   };
 
   const handleUserPress = (user: FollowUser) => {
-    navigation.navigate('UserProfile' as never, { userId: user.id } as never);
+    navigation.navigate('UserProfile', { userId: user.id });
   };
 
   const renderFooter = () => {

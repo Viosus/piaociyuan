@@ -14,7 +14,7 @@ import {
   getUser,
   clearAuth,
 } from '../services/storage';
-import type { UserAuthSummary } from '@piaoyuzhou/shared';
+import type { UserAuthSummary } from '@piaociyuan/shared';
 
 // AuthContext 持有的 User 形状：登录最小集（UserAuthSummary）+ 个人资料编辑用得到的字段。
 // 启动时由 getCurrentUser() 拉取的完整资料填充。

@@ -56,19 +56,19 @@ export default function ConversationsScreen() {
   };
 
   const handleConversationPress = (conversation: Conversation) => {
-    navigation.navigate('Chat' as never, {
+    navigation.navigate('Chat', {
       conversationId: conversation.id,
       isGroup: conversation.type === 'group',
       groupName: conversation.name,
-    } as never);
+    });
   };
 
   const handleNewConversation = () => {
-    navigation.navigate('SelectUser' as never);
+    navigation.navigate('SelectUser');
   };
 
   const handleCreateGroup = () => {
-    navigation.navigate('CreateGroup' as never);
+    navigation.navigate('CreateGroup');
   };
 
   const renderConversationItem = ({ item }: { item: Conversation }) => {

@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { Post } from '@piaoyuzhou/shared';
+import type { Post } from '@piaociyuan/shared';
 
 interface FavoriteState {
   favoritePostIds: Set<string>;

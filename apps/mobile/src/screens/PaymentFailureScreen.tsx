@@ -19,11 +19,11 @@ export default function PaymentFailureScreen() {
   };
 
   const handleBackHome = () => {
-    navigation.navigate('Home' as never);
+    navigation.navigate('Home');
   };
 
   const handleViewOrders = () => {
-    navigation.navigate('Orders' as never);
+    navigation.navigate('Orders');
   };
 
   return (

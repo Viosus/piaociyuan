@@ -82,11 +82,11 @@ export default function SearchScreen() {
   };
 
   const handleUserPress = (userId: number) => {
-    navigation.navigate('UserProfile' as never, { userId } as never);
+    navigation.navigate('UserProfile', { userId });
   };
 
   const handlePostPress = (postId: string) => {
-    navigation.navigate('PostDetail' as never, { postId } as never);
+    navigation.navigate('PostDetail', { postId });
   };
 
   const handleClear = () => {

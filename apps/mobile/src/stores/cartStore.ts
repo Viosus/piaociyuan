@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { Event, Tier } from '@piaoyuzhou/shared';
+import type { Event, Tier } from '@piaociyuan/shared';
 
 export interface CartItem {
   event: Event;

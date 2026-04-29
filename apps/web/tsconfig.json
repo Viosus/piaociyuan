@@ -26,7 +26,7 @@
       "@/*": [
         "./*"
       ],
-      "@piaoyuzhou/shared": [
+      "@piaociyuan/shared": [
         "../../packages/shared/src"
       ]
     }

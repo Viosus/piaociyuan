@@ -103,10 +103,10 @@ export default function TierSelectionScreen() {
     });
 
     // 跳转到下单确认页面
-    navigation.navigate('Checkout' as never, {
+    navigation.navigate('Checkout', {
       eventId,
       selectedTiers,
-    } as never);
+    });
   };
 
   if (loading) {

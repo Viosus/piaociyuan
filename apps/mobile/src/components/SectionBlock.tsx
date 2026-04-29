@@ -23,7 +23,7 @@ export const SectionBlock: React.FC<SectionBlockProps> = ({ section }) => {
   const navigation = useNavigation();
 
   const handleEventPress = (eventId: number) => {
-    navigation.navigate('EventDetail' as never, { eventId: eventId } as never);
+    navigation.navigate('EventDetail', { eventId: eventId });
   };
 
   const handleMorePress = () => {
@@ -36,7 +36,7 @@ export const SectionBlock: React.FC<SectionBlockProps> = ({ section }) => {
         '/favorites': 'Favorites',
       };
       const screenName = linkToScreenMap[section.moreLink] || 'Events';
-      navigation.navigate(screenName as never);
+      (navigation as any).navigate(screenName);
     }
   };
 

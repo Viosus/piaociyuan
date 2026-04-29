@@ -58,7 +58,7 @@ export default function OrderDetailScreen() {
 
   const handlePay = () => {
     if (!order) return;
-    navigation.navigate('Payment' as never, { orderId: order.id } as never);
+    navigation.navigate('Payment', { orderId: order.id });
   };
 
   const handleCancel = () => {
@@ -114,7 +114,7 @@ export default function OrderDetailScreen() {
   };
 
   const handleViewTickets = () => {
-    navigation.navigate('Tickets' as never);
+    navigation.navigate('Tickets');
   };
 
   if (loading) {

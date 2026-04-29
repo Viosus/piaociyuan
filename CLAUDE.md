@@ -1,4 +1,4 @@
-# 票次元 (Piaoyuzhou) - Claude 环境配置
+# 票次元 (Piaociyuan) - Claude 环境配置
 
 > 这是一个 monorepo 项目，包含 Web 和 Mobile 应用，用于票务和收藏品管理。
 

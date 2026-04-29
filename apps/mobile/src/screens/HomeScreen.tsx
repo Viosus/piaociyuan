@@ -78,7 +78,7 @@ export default function HomeScreen() {
 
   const handleCategorySelect = (categoryId: string) => {
     setSelectedCategory(categoryId);
-    navigation.navigate('Events' as never, { category: categoryId } as never);
+    navigation.navigate('Events', { category: categoryId });
   };
 
   const renderHeader = () => (

@@ -1,5 +1,5 @@
 import { apiClient } from './api';
-import type { ApiResponse } from '@piaoyuzhou/shared';
+import type { ApiResponse } from '@piaociyuan/shared';
 
 /**
  * 活动相关的 API

@@ -245,7 +245,7 @@ export async function shareImage(
 ): Promise<ShareResult> {
   try {
     // 下载图片到本地
-    const fileUri = FileSystem.cacheDirectory + 'share_image.jpg';
+    const fileUri = (FileSystem as any).cacheDirectory + 'share_image.jpg';
     await FileSystem.downloadAsync(imageUrl, fileUri);
 
     const shareOptions: any = {

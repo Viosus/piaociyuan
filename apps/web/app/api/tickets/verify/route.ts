@@ -10,7 +10,7 @@
 
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { TicketStatus, ErrorCode } from '@piaoyuzhou/shared';
+import { TicketStatus, ErrorCode } from '@piaociyuan/shared';
 
 export async function POST(req: Request) {
   try {

@@ -62,11 +62,11 @@ export default function AddressesScreen() {
   };
 
   const handleAdd = () => {
-    navigation.navigate('AddAddress' as never);
+    navigation.navigate('AddAddress');
   };
 
   const handleEdit = (address: UserAddress) => {
-    navigation.navigate('AddAddress' as never, { address } as never);
+    navigation.navigate('AddAddress', { address });
   };
 
   const handleSetDefault = async (address: UserAddress) => {

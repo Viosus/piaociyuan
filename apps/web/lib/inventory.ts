@@ -14,7 +14,7 @@
 
 import prisma from './prisma';
 import { Prisma } from '@prisma/client';
-import { TicketStatus } from '@piaoyuzhou/shared';
+import { TicketStatus } from '@piaociyuan/shared';
 
 // ✅ 清理过期 hold（释放锁定的票）
 export async function purgeExpiredHolds(nowMs: number): Promise<number> {

@@ -1,5 +1,5 @@
 {
-  "name": "@piaoyuzhou/web",
+  "name": "@piaociyuan/web",
   "version": "1.0.0",
   "private": true,
   "browserslist": [
@@ -29,7 +29,7 @@
   "dependencies": {
     "@google/model-viewer": "^4.1.0",
     "@hello-pangea/dnd": "^18.0.1",
-    "@piaoyuzhou/shared": "*",
+    "@piaociyuan/shared": "*",
     "@prisma/client": "^6.18.0",
     "@node-rs/bcrypt": "^1.10.4",
     "argon2": "^0.44.0",

@@ -110,7 +110,7 @@ export default function TicketsScreen() {
               // 导航到登录页面
               navigation.reset({
                 index: 0,
-                routes: [{ name: 'Login' as never }],
+                routes: [{ name: 'Login' }],
               });
             } catch {
               // 静默处理退出登录失败
@@ -128,7 +128,7 @@ export default function TicketsScreen() {
   };
 
   const handleTicketPress = (ticket: Ticket) => {
-    navigation.navigate('TicketDetail' as never, { ticketId: ticket.id } as never);
+    navigation.navigate('TicketDetail', { ticketId: ticket.id });
   };
 
   const formatDate = (dateString: string) => {
@@ -254,7 +254,7 @@ export default function TicketsScreen() {
       {/* 接收转让入口 */}
       <TouchableOpacity
         style={styles.receiveTransferBar}
-        onPress={() => navigation.navigate('ReceiveTransfer' as never)}
+        onPress={() => navigation.navigate('ReceiveTransfer')}
         activeOpacity={0.7}
       >
         <Text style={styles.receiveTransferIcon}>🎁</Text>
