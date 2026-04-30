@@ -68,8 +68,6 @@ jobs:
             type=raw,value=latest
             type=sha,prefix=
 
-      # Build with build-push-action（注意：之前发现这个 action 在 push 失败时会
-      # 静默成功，所以下面跟一个手动 push 兜底，把真实错误暴露出来）
       - name: Build and push Docker image
         id: build_push
         uses: docker/build-push-action@v5
@@ -82,32 +80,43 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      # 直接 docker manifest inspect 看 build-push-action 是否真的 push 上去了
-      # 如果没 push，下面手动 docker push 会抛真实错误信息
+      # 诊断 step：用 env: 传值避免上一次出现的 commit message 特殊字符
+      # 把脚本搞坏的问题
       - name: Diagnose push state with raw docker
         if: always()
+        env:
+          REG: ${{ env.REGISTRY }}
+          IMG: ${{ env.IMAGE_NAME }}
+          SHA: ${{ github.sha }}
+          BP_IMAGEID: ${{ steps.build_push.outputs.imageid }}
+          BP_DIGEST: ${{ steps.build_push.outputs.digest }}
+          GH_USER: ${{ github.actor }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set +e
           echo "=== build_push action outputs ==="
-          echo "imageid: ${{ steps.build_push.outputs.imageid }}"
-          echo "digest:  ${{ steps.build_push.outputs.digest }}"
-          echo "metadata: ${{ steps.build_push.outputs.metadata }}"
+          echo "imageid: $BP_IMAGEID"
+          echo "digest:  $BP_DIGEST"
           echo
-          echo "=== docker manifest inspect :sha ==="
-          docker manifest inspect ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          echo "=== docker manifest inspect :SHA ==="
+          docker manifest inspect "$REG/$IMG:$SHA"
           echo "exit=$?"
           echo
           echo "=== docker manifest inspect :latest ==="
-          docker manifest inspect ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          docker manifest inspect "$REG/$IMG:latest"
           echo "exit=$?"
           echo
-          echo "=== docker images locally ==="
-          docker images
+          echo "=== curl GHCR /v2/IMG/tags/list ==="
+          AUTH=$(echo -n "$GH_USER:$GH_TOKEN" | base64 -w0)
+          curl -sS -H "Authorization: Basic $AUTH" "https://ghcr.io/v2/$IMG/tags/list"
           echo
-          echo "=== curl GHCR API directly to list tags ==="
-          AUTH_TOKEN=$(echo -n "${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}" | base64 -w0)
-          curl -sS -H "Authorization: Basic $AUTH_TOKEN" \
-            https://ghcr.io/v2/${{ env.IMAGE_NAME }}/tags/list || echo "curl failed"
+          echo "=== curl GHCR /v2/IMG/manifests/SHA ==="
+          curl -sS -I -H "Authorization: Basic $AUTH" -H "Accept: application/vnd.docker.distribution.manifest.v2+json" "https://ghcr.io/v2/$IMG/manifests/$SHA"
+          echo
+          echo "=== if BP_DIGEST set, try resolving via digest ==="
+          if [ -n "$BP_DIGEST" ]; then
+            curl -sS -I -H "Authorization: Basic $AUTH" -H "Accept: application/vnd.docker.distribution.manifest.v2+json" "https://ghcr.io/v2/$IMG/manifests/$BP_DIGEST"
+          fi
 
       # 显式验证 :latest tag 真的指向了刚 build 的 image
       # 之前 5 次 deploy 链路就是因为 build-push-action 静默 noop 导致 :latest 没更新
