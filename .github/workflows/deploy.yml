@@ -68,7 +68,10 @@ jobs:
             type=raw,value=latest
             type=sha,prefix=
 
+      # Build with build-push-action（注意：之前发现这个 action 在 push 失败时会
+      # 静默成功，所以下面跟一个手动 push 兜底，把真实错误暴露出来）
       - name: Build and push Docker image
+        id: build_push
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -78,6 +81,33 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      # 直接 docker manifest inspect 看 build-push-action 是否真的 push 上去了
+      # 如果没 push，下面手动 docker push 会抛真实错误信息
+      - name: Diagnose push state with raw docker
+        if: always()
+        run: |
+          set +e
+          echo "=== build_push action outputs ==="
+          echo "imageid: ${{ steps.build_push.outputs.imageid }}"
+          echo "digest:  ${{ steps.build_push.outputs.digest }}"
+          echo "metadata: ${{ steps.build_push.outputs.metadata }}"
+          echo
+          echo "=== docker manifest inspect :sha ==="
+          docker manifest inspect ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          echo "exit=$?"
+          echo
+          echo "=== docker manifest inspect :latest ==="
+          docker manifest inspect ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          echo "exit=$?"
+          echo
+          echo "=== docker images locally ==="
+          docker images
+          echo
+          echo "=== curl GHCR API directly to list tags ==="
+          AUTH_TOKEN=$(echo -n "${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}" | base64 -w0)
+          curl -sS -H "Authorization: Basic $AUTH_TOKEN" \
+            https://ghcr.io/v2/${{ env.IMAGE_NAME }}/tags/list || echo "curl failed"
 
       # 显式验证 :latest tag 真的指向了刚 build 的 image
       # 之前 5 次 deploy 链路就是因为 build-push-action 静默 noop 导致 :latest 没更新
