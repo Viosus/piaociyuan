@@ -41,8 +41,6 @@ jobs:
   build:
     needs: validate
     runs-on: ubuntu-latest
-    # GHCR_TOKEN 是 production environment 范围的 secret，build 也需要声明 environment 才能拿到
-    environment: production
     permissions:
       contents: read
       packages: write
@@ -59,7 +57,7 @@ jobs:
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
-          password: ${{ secrets.GHCR_TOKEN }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Extract metadata
         id: meta
