@@ -56,7 +56,7 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
-          username: Viosus
+          username: ${{ github.actor }}
           password: ${{ secrets.GHCR_TOKEN }}
 
       - name: Extract metadata
