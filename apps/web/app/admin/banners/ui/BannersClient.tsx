@@ -2,7 +2,15 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
+import {
+  DragDropContext,
+  Droppable,
+  Draggable,
+  DropResult,
+  DroppableProvided,
+  DraggableProvided,
+  DraggableStateSnapshot,
+} from "@hello-pangea/dnd";
 import CreateBannerDialog from "./CreateBannerDialog";
 import EditBannerDialog from "./EditBannerDialog";
 
@@ -185,7 +193,7 @@ export default function BannersClient() {
         ) : (
           <DragDropContext onDragEnd={handleDragEnd}>
             <Droppable droppableId="banners">
-              {(provided) => (
+              {(provided: DroppableProvided) => (
                 <div
                   {...provided.droppableProps}
                   ref={provided.innerRef}
@@ -193,7 +201,7 @@ export default function BannersClient() {
                 >
                   {banners.map((banner, index) => (
                     <Draggable key={banner.id} draggableId={banner.id} index={index}>
-                      {(provided, snapshot) => (
+                      {(provided: DraggableProvided, snapshot: DraggableStateSnapshot) => (
                         <div
                           ref={provided.innerRef}
                           {...provided.draggableProps}

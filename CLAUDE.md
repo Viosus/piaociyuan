@@ -275,6 +275,21 @@ cd apps/web && npx prisma generate && npm run build # 验证
 ```
 然后才能 commit lockfile 推送。**不要**信任 incremental install 后的 lock。
 
+### 本地"npm run build" 不能 mirror CI（2026-05-02 新增）
+**症状**：今天反复出现"本地 npm run build PASS 但 ECS CI build fail"，主要原因有 3 类：
+1. **OS 差异**：Windows/macOS 的 npm workspace hoisting 跟 Linux/Alpine musl 不同 → 同一个 lockfile 装出不同 node_modules tree
+2. **typecheck 差异**：tsserver 在 Windows 跟 Linux 上对某些 callback 推导不同（如 `(provided) =>` from @hello-pangea/dnd 在 Windows 推断成功，Linux 报 implicit any）
+3. **node_modules 残留**：`npm install` 不激进 prune，本地 node_modules 可能有已删 deps 残留，build 还能 work；CI `npm ci` clean install 没残留就挂
+
+**铁律**：**本地必须用 `docker compose build web` 做最终验证**（要求 Docker Desktop 运行）。这一条命令同时覆盖 OS、TS、模块解析所有差异，是**唯一**跟 CI 100% 等价的本地验证。
+```bash
+# 任何修改 deps / lib 边界 / 共享组件 / build 配置后的最终验证：
+docker compose build web         # ~10 min，跟 CI 100% 等价
+```
+本地 `npm run build` 只能作为**快速 sanity check**，不能 ship。
+
+不愿意每次都跑 docker build 也无所谓——但要明白每次 push 没 docker 验证 = 概率性 CI fail + 一次 ECS deploy 周期延误（~6 min/次）。3 次 fail 的累计成本 > 一次 docker build 的成本。
+
 ### npm workspace hoisting：peer dep 必须能被 root 包找到（2026-05-02 新增）
 **症状**：上面的 three 案例还有一层 hoisting 微妙：删了又加 three 后，CI 的 `npm ci` 把 `three` 装在 `apps/web/node_modules/three`，但 `@google/model-viewer` 的 transitive dep `@monogrid/gainmap-js` 被 hoist 到 root `/node_modules/@monogrid/`。从 `/node_modules/@monogrid/gainmap-js/` 走 Node 模块解析找不到 `apps/web/node_modules/three`（属于另一棵子树）。
 

@@ -1,7 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
+import {
+  DragDropContext,
+  Droppable,
+  Draggable,
+  DropResult,
+  DroppableProvided,
+  DraggableProvided,
+  DraggableStateSnapshot,
+} from "@hello-pangea/dnd";
 
 type Event = {
   id: number;
@@ -243,7 +251,7 @@ export default function ManageEventsDialog({ section, onClose, onSuccess }: Prop
             ) : (
               <DragDropContext onDragEnd={handleDragEnd}>
                 <Droppable droppableId="events">
-                  {(provided) => (
+                  {(provided: DroppableProvided) => (
                     <div
                       {...provided.droppableProps}
                       ref={provided.innerRef}
@@ -255,7 +263,7 @@ export default function ManageEventsDialog({ section, onClose, onSuccess }: Prop
                           draggableId={sectionEvent.id}
                           index={index}
                         >
-                          {(provided, snapshot) => (
+                          {(provided: DraggableProvided, snapshot: DraggableStateSnapshot) => (
                             <div
                               ref={provided.innerRef}
                               {...provided.draggableProps}

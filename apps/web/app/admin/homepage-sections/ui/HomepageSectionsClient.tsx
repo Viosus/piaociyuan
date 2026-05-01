@@ -1,7 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
+import {
+  DragDropContext,
+  Droppable,
+  Draggable,
+  DropResult,
+  DroppableProvided,
+  DraggableProvided,
+  DraggableStateSnapshot,
+} from "@hello-pangea/dnd";
 import CreateSectionDialog from "./CreateSectionDialog";
 import EditSectionDialog from "./EditSectionDialog";
 import ManageEventsDialog from "./ManageEventsDialog";
@@ -192,7 +200,7 @@ export default function HomepageSectionsClient() {
         {/* 栏目列表 */}
         <DragDropContext onDragEnd={handleDragEnd}>
           <Droppable droppableId="sections">
-            {(provided) => (
+            {(provided: DroppableProvided) => (
               <div
                 {...provided.droppableProps}
                 ref={provided.innerRef}
@@ -200,7 +208,7 @@ export default function HomepageSectionsClient() {
               >
                 {sections.map((section, index) => (
                   <Draggable key={section.id} draggableId={section.id} index={index}>
-                    {(provided, snapshot) => (
+                    {(provided: DraggableProvided, snapshot: DraggableStateSnapshot) => (
                       <div
                         ref={provided.innerRef}
                         {...provided.draggableProps}
