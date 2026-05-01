@@ -74,17 +74,22 @@ jobs:
             echo "=== clean up dangling images ==="
             docker image prune -f
 
-            echo "=== deployment OK ==="
+            echo "=== container status ==="
             docker compose ps
 
-      - name: Health check
-        run: |
-          echo "Waiting for service to fully boot..."
-          sleep 20
-          STATUS=$(curl -sS -o /dev/null -w "%{http_code}" https://piaociyuan.com/api/health)
-          if [ "$STATUS" != "200" ]; then
-            echo "::error::Health check failed: HTTP $STATUS"
+            echo "=== health check (local curl) ==="
+            # 在 ECS 本地 curl，避免 GitHub runner 跨海连接被防火墙拦截
+            for i in 1 2 3 4 5 6; do
+              STATUS=$(curl -sS -o /dev/null -w "%{http_code}" http://localhost:3000/api/health || echo "000")
+              if [ "$STATUS" = "200" ]; then
+                echo "Health check passed (HTTP 200) on attempt $i"
+                curl -sS http://localhost:3000/api/health
+                echo
+                exit 0
+              fi
+              echo "Attempt $i: HTTP $STATUS, retrying in 5s..."
+              sleep 5
+            done
+            echo "::error::Health check failed after 6 attempts"
+            docker compose logs web --tail=30
             exit 1
-          fi
-          echo "Health check passed (HTTP $STATUS)"
-          curl -sS https://piaociyuan.com/api/health
