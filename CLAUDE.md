@@ -131,8 +131,54 @@ Web API 路径: `apps/web/app/api/`
 3. **TypeScript**: 严格模式，勿使用 `any`
 4. **提交规范**: 使用中文 commit message，格式如 `feat:`, `fix:`, `style:` 等
 
-## GitHub Actions
+## 部署系统（2026-05-01 重构）
 
-- **CI/CD**: `.github/workflows/`
-- **Docker Registry**: ghcr.io/viosus/piaociyuan/piaociyuan-web
-- **部署**: 阿里云 ECS
+### 当前状态
+- **主路径**：ECS 本地 build。SSH 进 ECS → `git pull` → `docker compose build web` → `up -d web`
+- **GHCR 路径已废弃**：`ghcr.io/viosus/piaociyuan/piaociyuan-web` 不再使用，token / package 关系混乱无法可靠 push
+- **CI 工作流**：`.github/workflows/deploy.yml` —— validate 部分有用（typecheck），build/deploy 部分待 Stage B 改造
+
+### Dockerfile 国内 ECS 优化（已加在 `apps/web/Dockerfile`）
+- apk 用 `mirrors.aliyun.com` 镜像（默认 dl-cdn.alpinelinux.org 国内超时）
+- npm registry 用 `https://registry.npmmirror.com`，timeout 调到 10 分钟
+- Prisma 引擎下载走 `PRISMA_ENGINES_MIRROR=https://registry.npmmirror.com/-/binary/prisma`
+
+### 手动部署（current source of truth）
+```bash
+ssh root@8.159.155.134
+cd ~/piaociyuan
+git pull origin main
+docker compose build web        # 5-8 分钟
+docker compose up -d web        # web 短暂重启
+docker compose exec -T web npx prisma db push --skip-generate
+curl -sS http://localhost:3000/api/health
+```
+
+---
+
+## ⚠️ 不得再犯的错误（2026-05-01 总结）
+
+### Next.js 16 + Turbopack 与 native module 不兼容
+**症状**：登录 500，日志报 `Cannot find module @node-rs/bcrypt-<hex hash>`
+**原因**：Next.js 16 默认 `next build` 用 Turbopack，但 Turbopack 对 napi-rs 的 try/catch fallback binding 加载机制处理不全。即使配置 `serverExternalPackages` 也没用。
+**铁律**：
+- **服务端密码加密用 `bcryptjs`（pure JS）**，不要用 `@node-rs/bcrypt` / `bcrypt`（npm 包） / `argon2` 等 native binding
+- 如果未来要切回原生加密，必须先验证 Turbopack 支持，或者把 build 强制切回 webpack（`next build --webpack`）
+- bcryptjs 性能差 ~10x，但登录已有 Redis 账号级退避保护，性能不是攻击面
+
+### CI/CD 部署链路的痛苦教训
+- **`docker/build-push-action@v5` 在 push 失败时会 silent success（绿勾但 image 没 push）**。曾有 5 个 commit 共 3 周时间 deploy "成功" 但 ghcr 上 `:latest` 一字未变。
+- **铁律**：任何 push 操作后必须有显式 verify assertion（`docker pull :sha` 或 manifest inspect 对比 image ID），不能信 build action 的退出码
+- **GHCR token / package 权限模型很脆**：user-owned package 跟 repo `GITHUB_TOKEN` 默认不绑定，需要在 package settings 显式 Add Repository。即使绑定了，`docker pull` 也可能突然 denied
+- **当前结论**：除非有强需求，避免用 GHCR。直接 ECS 本地 build（项目自带 `deploy.sh build` 命令）更稳
+
+### 排错方法论
+- **沉没成本陷阱**：改一个地方不 work 不要立刻又改一处再 push 试，要停下来质疑是不是路径错了。今天前后 7 个 commit 修 GHCR 都没用，最后绕过 GHCR 一次性解决
+- **先读完所有相关 docs 再动手**：`docs/项目架构与部署说明.md` `docs/阿里云部署指南.md` `docs/管理员使用手册-含运行位置.md` 等部署相关 docs 必须读全。今天因为没读全，3 个小时都在修一条死链路，没意识到项目自带 `deploy.sh` 是原生稳定路径
+- **不要假设工具链历史上 work 过**：看到 `.github/workflows/deploy.yml` 不等于它真的部署成功过。要看 commit 历史 + 实际跑结果验证
+- **加 verify assertion 比反复猜测更有效**：debug 应该是"先加断言定位"而不是"改一处试一下"
+
+### Native module / monorepo 陷阱
+- **napi-rs 包（`@node-rs/*`）的 platform-specific binding 通过 `optionalDependencies` 分发**：`npm install` 在 macOS/Windows 上不会装 linux-musl binding，只有在 alpine container 里跑 `npm ci` 才会装
+- Dockerfile 里 `COPY . .` 会把 host 的 `node_modules` 也 copy 进 builder stage，但随后的 `RUN npm ci` 会清空重装——这个流程是对的，**不要跳过 `npm ci` 直接用 host 的 node_modules**
+- napi-rs binding 的 `binding.js` 用 try/catch fallback 加载多个备选 native 文件名，这个 pattern 跟 bundler 的 static analysis 冲突 → Turbopack/某些版本 webpack 会编译错
