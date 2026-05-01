@@ -213,11 +213,13 @@ Import traces:
 **早期发现**：每次写完新代码本地跑 `cd apps/web && npm run build`（不是 typecheck，是真正的 build）能立即捕获这类错误。typecheck 不会捕获——它只看类型不看 client/server 边界。
 
 ### 删依赖前必须真 build 验证（2026-05-02 新增）
-**踩坑**：删 `@google/model-viewer` 时用了 `grep -rE "from ['\"]@google/model-viewer|require\(['\"]@google/model-viewer"` 验证 0 引用 → 但漏了 `Model3DViewer.tsx:31` 里的**动态 import**：
+**踩坑 1**：删 `@google/model-viewer` 时用了 `grep -rE "from ['\"]@google/model-viewer|require\(['\"]@google/model-viewer"` 验证 0 引用 → 但漏了 `Model3DViewer.tsx:31` 里的**动态 import**：
 ```ts
 import('@google/model-viewer')   // 函数调用形式，没有 from / require
 ```
 ECS 上 `next build` 直接 fail：`Module not found: Can't resolve '@google/model-viewer'`。
+
+**踩坑 2**（更糟）：删 `three` 时项目代码 0 引用确实 → 但 `three` 是 `@google/model-viewer` 的 **peerDependency**，删了之后 `npm ci` 不再装 three → model-viewer 的内部模块 `import { Mesh, ... } from 'three'` 全部 404 → CI build 挂上千行错误。本地 `npm run build` 当时 PASS 因为本地 `node_modules` 还有 three 的残留（npm install 不激进 prune）。
 
 **铁律**：
 - 删任何 dep 前的 grep **必须覆盖所有 import 形态**：
@@ -227,13 +229,29 @@ ECS 上 `next build` 直接 fail：`Module not found: Can't resolve '@google/mod
   ```
   匹配任何 quote 后跟包名（`'pkg'` `"pkg"` `` `pkg` `` `'pkg/sub'` 等），覆盖：
   - `import x from 'pkg'`
-  - `import('pkg')` ← 之前漏的动态 import
+  - `import('pkg')` ← 容易漏的动态 import
   - `require('pkg')`
   - `require.resolve('pkg')`
   - `declare module 'pkg' {}` ← 类型声明也算引用，需要保留
 
-- **typecheck 不捕获 bundling 错误**——`npm run build` 才行
-- **删 dep + 改 lib 边界 + 任何动到 import / module resolution 的改动**，commit 前**必须本地跑 `cd apps/web && npm run build`** 验证不报错（5-10 分钟，远比 ECS CI 跑一次 + 修补一次 + push 再跑一次的循环短）
+- **检查 peerDependencies**：如果某个 dep 是其他 dep 的 peerDependency，即使你的代码 0 引用也**不能删**。命令：
+  ```bash
+  for pkg in $(ls apps/web/node_modules/ apps/web/node_modules/@*/); do
+    grep -l "<候选删除包名>" "$pkg/package.json" 2>/dev/null
+  done
+  ```
+  或更直接：删之前先看 `apps/web/node_modules/<候选包>/package.json` 里有没有别的包列它为 peerDependency。
+
+- **typecheck 不捕获 bundling 错误**——`npx tsc --noEmit` 只看类型不看模块解析，必须 `npm run build`
+
+- **本地 `npm run build` 也不可信**！原因：本地 `node_modules` 可能含已删 deps 的残留。要真 mirror CI 必须先**清空 node_modules 再装再 build**：
+  ```bash
+  # 删 dep / 改 import / 改 module resolution 后必跑：
+  rm -rf node_modules apps/*/node_modules packages/*/node_modules
+  npm install
+  cd apps/web && npx prisma generate && npm run build
+  ```
+  这一套等价 ECS CI 的 Docker build。15 分钟，但远比 push → CI 跑 15 分钟 → 失败 → 修补 → 再 push 的循环快。
 
 ### 多 session 并行协作（2026-05-02 新增）
 
