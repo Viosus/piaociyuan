@@ -156,7 +156,16 @@ curl -sS http://localhost:3000/api/health
 
 ---
 
-## ⚠️ 不得再犯的错误（2026-05-01 总结）
+## ⚠️ 不得再犯的错误
+
+> **元规则**（2026-05-02 用户明确要求）：但凡部署、build、运行时发生的错误，**修复后必须立即把诊断 + 根因 + 修复 + 验证流程总结成一条新章节**写入本节。目的：让未来 session（包括其他 chat / 其他 Claude 实例）启动时通过 CLAUDE.md 自动加载这些教训，不再重复踩坑。新错误总结模板：
+> - **症状**：用户看到的现象 + 关键日志/错误信息
+> - **根因**：技术上为什么发生（一句话能讲清）
+> - **铁律 / 修复**：以后该怎么避免 / 该怎么修
+
+---
+
+### 2026-05-01 总结
 
 ### Next.js 16 + Turbopack 与 native module 不兼容
 **症状**：登录 500，日志报 `Cannot find module @node-rs/bcrypt-<hex hash>`
@@ -252,6 +261,36 @@ ECS 上 `next build` 直接 fail：`Module not found: Can't resolve '@google/mod
   cd apps/web && npx prisma generate && npm run build
   ```
   这一套等价 ECS CI 的 Docker build。15 分钟，但远比 push → CI 跑 15 分钟 → 失败 → 修补 → 再 push 的循环快。
+
+### npm workspace lockfile drift（2026-05-02 新增）
+**症状**：CI 在 `npm ci --legacy-peer-deps` 之后 `next build` 报 `Module not found: Can't resolve 'three'`，但本地 `npm run build` PASS。检查 lockfile 发现 `"three":` 同时有 `"^0.172.0"` 和 `"^0.182.0"` 两个版本声明（之前删 dep 又加回来时 incremental npm install 没清干净）。
+
+**根因**：incremental `npm install`（特别是反复加/删 dep 时）可能让 `package-lock.json` 出现 stale 引用。`npm ci` 在 CI 上严格按 lockfile 装，drift 的 lock 会产生跟本地 `npm install`（更宽松）不一致的 node_modules tree → 模块解析失败。
+
+**铁律**：任何**删/加 dep** 操作后必须**重新生成 lockfile**：
+```bash
+rm -rf node_modules apps/*/node_modules packages/*/node_modules package-lock.json
+npm install                                        # 生成全新 lock
+cd apps/web && npx prisma generate && npm run build # 验证
+```
+然后才能 commit lockfile 推送。**不要**信任 incremental install 后的 lock。
+
+### npm workspace hoisting：peer dep 必须能被 root 包找到（2026-05-02 新增）
+**症状**：上面的 three 案例还有一层 hoisting 微妙：删了又加 three 后，CI 的 `npm ci` 把 `three` 装在 `apps/web/node_modules/three`，但 `@google/model-viewer` 的 transitive dep `@monogrid/gainmap-js` 被 hoist 到 root `/node_modules/@monogrid/`。从 `/node_modules/@monogrid/gainmap-js/` 走 Node 模块解析找不到 `apps/web/node_modules/three`（属于另一棵子树）。
+
+**根因**：npm workspace hoisting 的非确定性。当某个根级 package（被 hoist 到 root）的 peer dep 只在 child workspace 装了，模块解析会失败。
+
+**修复**：重新生成 lockfile 后 `three` 同时出现在 root `/node_modules/three` 和 `apps/web/node_modules/three`（lockfile-based determinism）→ root 的 @monogrid 也能找到。
+
+**铁律**：当一个 transitive dep（像 model-viewer 这种带 peer dep 的）出问题，先看 lockfile 是否干净。如果 lockfile 没问题但 hoisting 还诡异，把那个 peer dep 也加到**根 package.json** 强制 hoist 到 root：
+```json
+// 根 package.json
+{
+  "dependencies": {
+    "three": "^0.182.0"  // 强制 root level
+  }
+}
+```
 
 ### 多 session 并行协作（2026-05-02 新增）
 
