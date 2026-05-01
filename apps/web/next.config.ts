@@ -1,6 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // native modules (napi-rs bindings) 必须排除在 turbopack 打包之外，
+  // 否则 turbopack 会把动态 require 当成 module name 导致运行时
+  // "Cannot find module @node-rs/bcrypt-<hash>" 错误
+  serverExternalPackages: ['@node-rs/bcrypt', 'argon2'],
   images: {
     remotePatterns: [
       {
