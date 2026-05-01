@@ -19,6 +19,9 @@
     "mobile:android": "cd apps/mobile && npm run android",
     "mobile:ios": "cd apps/mobile && npm run ios"
   },
+  "dependencies": {
+    "three": "^0.182.0"
+  },
   "devDependencies": {
     "turbo": "^2.0.0"
   },
