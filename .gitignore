@@ -83,6 +83,13 @@ web-build/
 small_parts/
 tiny_parts/
 
+# 备份文件
+*.bak
+*.backup
+backup_*.dump
+backup_*.sql
+*.dump
+
 # NFT 备份（不推送到远端，避免触发 ECS 自动部署）
 _backup/
 

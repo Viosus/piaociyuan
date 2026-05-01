@@ -53,3 +53,27 @@ apps/mobile
 Thumbs.db
 *.pem
 .turbo
+
+# 备份/打包文件（避免污染 build context）
+*.tar
+*.tar.part_*
+*.bak
+*.backup
+backup_*.dump
+backup_*.sql
+*.dump
+
+# 移除的功能备份（commit 历史可恢复，build 时不需要）
+_backup
+**/_backup
+
+# 杂项 SQL 文件（生产 prisma migrate 走 schema 流程，不需要 ad-hoc SQL 进 image）
+/add_*.sql
+/update_*.sql
+
+# 开发用的 nginx 静态、备份 docker-compose 等
+nginx/static
+docker-compose.yml.bak
+
+# 仓库里的部署/调试脚本（容器内不需要）
+deploy.sh

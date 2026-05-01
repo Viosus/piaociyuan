@@ -107,6 +107,14 @@ export default function AboutScreen() {
             © 2024 票次元 Piaociyuan.com
           </Text>
           <Text style={styles.copyrightText}>All rights reserved.</Text>
+          <TouchableOpacity
+            onPress={() => Linking.openURL('https://beian.miit.gov.cn/')}
+            accessibilityRole="link"
+          >
+            <Text style={[styles.copyrightText, styles.icpText]}>
+              沪ICP备2026014419号
+            </Text>
+          </TouchableOpacity>
         </View>
       </View>
     </ScrollView>
@@ -207,5 +215,9 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZES.sm,
     color: COLORS.textSecondary,
     marginTop: SPACING.xs,
+  },
+  icpText: {
+    textDecorationLine: 'underline',
+    marginTop: SPACING.sm,
   },
 });

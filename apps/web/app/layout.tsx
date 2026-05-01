@@ -86,7 +86,7 @@ export default function RootLayout({
               rel="noopener noreferrer"
               className="text-xs text-gray-400 hover:text-gray-500 transition-colors"
             >
-              京ICP备XXXXXXXX号
+              沪ICP备2026014419号
             </a>
           </footer>
         </ToastProvider>
