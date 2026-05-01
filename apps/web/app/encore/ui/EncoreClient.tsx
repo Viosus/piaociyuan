@@ -3,6 +3,7 @@
 
 import { useEffect, useState, useRef, useCallback } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import CreatePostDialog from "./CreatePostDialog";
 import FavoriteButton from "./FavoriteButton";
 
@@ -42,6 +43,7 @@ const SORT_TABS: { key: SortKey; label: string; icon: string }[] = [
 ];
 
 export default function EncoreClient() {
+  const router = useRouter();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -308,7 +310,23 @@ export default function EncoreClient() {
                 )}
 
                 {/* 用户信息 */}
-                <div className="flex items-center gap-2 mb-3">
+                <div
+                  role="link"
+                  tabIndex={0}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    router.push(`/u/${post.user.id}`);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      router.push(`/u/${post.user.id}`);
+                    }
+                  }}
+                  className="flex items-center gap-2 mb-3 cursor-pointer hover:opacity-80 transition"
+                >
                   {post.user.avatar ? (
                     <img
                       src={post.user.avatar}
@@ -320,7 +338,7 @@ export default function EncoreClient() {
                       {post.user.nickname[0]}
                     </div>
                   )}
-                  <span className="text-xs text-[#1a1a1f]/80 truncate">
+                  <span className="text-xs text-[#1a1a1f]/80 truncate hover:text-[#46467A]">
                     {post.user.nickname}
                   </span>
                 </div>

@@ -577,7 +577,10 @@ export default function PostDetailClient({ postId }: { postId: string }) {
             {/* 用户信息 */}
             <div className="p-4 border-b border-gray-200">
               <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3">
+                <Link
+                  href={`/u/${post.user.id}`}
+                  className="flex items-center gap-3 hover:opacity-80 transition"
+                >
                   {post.user.avatar ? (
                     <img
                       src={post.user.avatar}
@@ -592,7 +595,7 @@ export default function PostDetailClient({ postId }: { postId: string }) {
 
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="font-semibold text-gray-900">
+                      <span className="font-semibold text-gray-900 hover:text-[#46467A]">
                         {post.user.nickname}
                       </span>
                       {post.user.isVerified && (
@@ -613,7 +616,7 @@ export default function PostDetailClient({ postId }: { postId: string }) {
                       <p className="text-xs text-gray-500 mt-0.5">{post.user.bio}</p>
                     )}
                   </div>
-                </div>
+                </Link>
 
                 <button
                   onClick={handleFollow}
@@ -786,23 +789,31 @@ export default function PostDetailClient({ postId }: { postId: string }) {
                       <div key={comment.id} className="space-y-2">
                         {/* 主评论 */}
                         <div className="flex items-start gap-3">
-                          {comment.user.avatar ? (
-                            <img
-                              src={comment.user.avatar}
-                              alt={comment.user.nickname}
-                              className="w-8 h-8 rounded-full object-cover flex-shrink-0"
-                            />
-                          ) : (
-                            <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                              {comment.user.nickname[0]}
-                            </div>
-                          )}
+                          <Link
+                            href={`/u/${comment.user.id}`}
+                            className="flex-shrink-0 hover:opacity-80 transition"
+                          >
+                            {comment.user.avatar ? (
+                              <img
+                                src={comment.user.avatar}
+                                alt={comment.user.nickname}
+                                className="w-8 h-8 rounded-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                                {comment.user.nickname[0]}
+                              </div>
+                            )}
+                          </Link>
 
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1">
-                              <span className="text-sm font-medium text-gray-900">
+                              <Link
+                                href={`/u/${comment.user.id}`}
+                                className="text-sm font-medium text-gray-900 hover:text-[#46467A] transition"
+                              >
                                 {comment.user.nickname}
-                              </span>
+                              </Link>
                               <span className="text-xs text-gray-400">
                                 {formatDate(comment.createdAt)}
                               </span>
@@ -814,22 +825,30 @@ export default function PostDetailClient({ postId }: { postId: string }) {
                               <div className="mt-2 ml-4 space-y-2">
                                 {comment.replies.map((reply) => (
                                   <div key={reply.id} className="flex items-start gap-2">
-                                    {reply.user.avatar ? (
-                                      <img
-                                        src={reply.user.avatar}
-                                        alt={reply.user.nickname}
-                                        className="w-6 h-6 rounded-full object-cover flex-shrink-0"
-                                      />
-                                    ) : (
-                                      <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                                        {reply.user.nickname[0]}
-                                      </div>
-                                    )}
+                                    <Link
+                                      href={`/u/${reply.user.id}`}
+                                      className="flex-shrink-0 hover:opacity-80 transition"
+                                    >
+                                      {reply.user.avatar ? (
+                                        <img
+                                          src={reply.user.avatar}
+                                          alt={reply.user.nickname}
+                                          className="w-6 h-6 rounded-full object-cover"
+                                        />
+                                      ) : (
+                                        <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                                          {reply.user.nickname[0]}
+                                        </div>
+                                      )}
+                                    </Link>
                                     <div className="flex-1 min-w-0">
                                       <div className="flex items-center gap-2">
-                                        <span className="text-xs font-medium text-gray-900">
+                                        <Link
+                                          href={`/u/${reply.user.id}`}
+                                          className="text-xs font-medium text-gray-900 hover:text-[#46467A] transition"
+                                        >
                                           {reply.user.nickname}
-                                        </span>
+                                        </Link>
                                         <span className="text-xs text-gray-400">
                                           {formatDate(reply.createdAt)}
                                         </span>

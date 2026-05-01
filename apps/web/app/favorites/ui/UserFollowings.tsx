@@ -159,7 +159,7 @@ export default function UserFollowings() {
               >
                 {/* 用户信息 */}
                 <div className="flex items-start gap-3 mb-3">
-                  <Link href={`/users/${following.user.id}`}>
+                  <Link href={`/u/${following.user.id}`}>
                     {following.user.avatar ? (
                       <img
                         src={following.user.avatar}
@@ -173,7 +173,7 @@ export default function UserFollowings() {
                     )}
                   </Link>
                   <div className="flex-1 min-w-0">
-                    <Link href={`/users/${following.user.id}`}>
+                    <Link href={`/u/${following.user.id}`}>
                       <div className="flex items-center gap-1 mb-1">
                         <h3 className="font-medium text-gray-900 truncate hover:text-purple-600 transition">
                           {following.user.nickname}
@@ -210,7 +210,7 @@ export default function UserFollowings() {
                 {/* 操作按钮 */}
                 <div className="flex gap-2">
                   <Link
-                    href={`/users/${following.user.id}`}
+                    href={`/u/${following.user.id}`}
                     className="flex-1 text-center px-4 py-2 bg-purple-50 text-purple-600 rounded-full hover:bg-purple-100 transition text-sm"
                   >
                     查看主页

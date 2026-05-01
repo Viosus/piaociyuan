@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 type Post = {
   id: string;
@@ -42,6 +43,7 @@ type Favorite = {
 };
 
 export default function PostFavorites() {
+  const router = useRouter();
   const [favorites, setFavorites] = useState<Favorite[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -178,7 +180,23 @@ export default function PostFavorites() {
                 {/* 内容 */}
                 <div className="p-4">
                   {/* 用户信息 */}
-                  <div className="flex items-center gap-2 mb-2">
+                  <div
+                    role="link"
+                    tabIndex={0}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      router.push(`/u/${favorite.post.user.id}`);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        router.push(`/u/${favorite.post.user.id}`);
+                      }
+                    }}
+                    className="flex items-center gap-2 mb-2 cursor-pointer hover:opacity-80 transition"
+                  >
                     {favorite.post.user.avatar ? (
                       <img
                         src={favorite.post.user.avatar}
@@ -191,7 +209,7 @@ export default function PostFavorites() {
                       </div>
                     )}
                     <div className="flex items-center gap-1">
-                      <span className="text-sm font-medium text-gray-900 truncate max-w-[100px]">
+                      <span className="text-sm font-medium text-gray-900 truncate max-w-[100px] hover:text-[#46467A]">
                         {favorite.post.user.nickname}
                       </span>
                       {favorite.post.user.isVerified && (

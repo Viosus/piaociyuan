@@ -140,7 +140,26 @@ export default function MessagesPage() {
               >
                 <div className="flex items-center gap-3">
                   {/* Avatar */}
-                  <div className="relative flex-shrink-0">
+                  <div
+                    role="link"
+                    tabIndex={0}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (conversation.otherUser?.id) {
+                        router.push(`/u/${conversation.otherUser.id}`);
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (conversation.otherUser?.id) {
+                          router.push(`/u/${conversation.otherUser.id}`);
+                        }
+                      }
+                    }}
+                    className="relative flex-shrink-0 cursor-pointer hover:opacity-80 transition"
+                  >
                     {conversation.otherUser?.avatar ? (
                       <Image
                         src={conversation.otherUser.avatar}
