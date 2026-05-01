@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
+import { useToast } from "@/components/Toast";
 
 interface UserProfile {
   id: string;
@@ -50,6 +51,7 @@ function authHeaders(): HeadersInit {
 }
 
 export default function UserProfileClient({ userId }: { userId: string }) {
+  const toast = useToast();
   const [user, setUser] = useState<UserProfile | null>(null);
   const [profileLoading, setProfileLoading] = useState(true);
   const [profileError, setProfileError] = useState<string | null>(null);
@@ -142,12 +144,13 @@ export default function UserProfileClient({ userId }: { userId: string }) {
     if (!user || followBusy) return;
     const token = localStorage.getItem("token");
     if (!token) {
-      alert("请先登录");
+      toast.warning("请先登录");
       return;
     }
     setFollowBusy(true);
+    const wasFollowing = user.isFollowing;
     try {
-      const method = user.isFollowing ? "DELETE" : "POST";
+      const method = wasFollowing ? "DELETE" : "POST";
       const res = await fetch(`/api/users/${userId}/follow`, {
         method,
         headers: authHeaders(),
@@ -162,11 +165,12 @@ export default function UserProfileClient({ userId }: { userId: string }) {
             followerCount: data.data.followerCount ?? user.stats.followerCount,
           },
         });
+        toast.success(wasFollowing ? "已取消关注" : `已关注 ${user.nickname}`);
       } else {
-        alert(data.message || "操作失败");
+        toast.error(data.message || "操作失败");
       }
     } catch {
-      alert("网络错误");
+      toast.error("网络错误，请稍后再试");
     } finally {
       setFollowBusy(false);
     }

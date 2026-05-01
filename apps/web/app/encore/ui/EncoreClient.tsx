@@ -33,6 +33,14 @@ type Post = {
   }[];
 };
 
+type SortKey = "latest" | "hot" | "following";
+
+const SORT_TABS: { key: SortKey; label: string; icon: string }[] = [
+  { key: "latest", label: "最新", icon: "🆕" },
+  { key: "hot", label: "热门", icon: "🔥" },
+  { key: "following", label: "关注", icon: "⭐" },
+];
+
 export default function EncoreClient() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
@@ -40,14 +48,29 @@ export default function EncoreClient() {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [sort, setSort] = useState<SortKey>("latest");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
+  // 检查登录态（用于关注 Tab 的引导）
+  useEffect(() => {
+    setIsLoggedIn(!!localStorage.getItem("token"));
+  }, []);
+
   // 加载帖子
-  const loadPosts = useCallback(async (pageNum: number) => {
+  const loadPosts = useCallback(async (pageNum: number, currentSort: SortKey) => {
     try {
       setLoading(true);
-      const res = await fetch(`/api/posts?page=${pageNum}&pageSize=20`);
+      const headers: HeadersInit = {};
+      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+      const res = await fetch(
+        `/api/posts?page=${pageNum}&pageSize=20&sort=${currentSort}`,
+        { headers }
+      );
       const data = await res.json();
 
       if (!data.ok) {
@@ -68,10 +91,13 @@ export default function EncoreClient() {
     }
   }, []);
 
-  // 初始加载
+  // 初始加载 / 切换排序时重新加载
   useEffect(() => {
-    loadPosts(1);
-  }, [loadPosts]);
+    setError(null);
+    setPage(1);
+    setHasMore(true);
+    loadPosts(1, sort);
+  }, [sort, loadPosts]);
 
   // 无限滚动
   useEffect(() => {
@@ -102,66 +128,133 @@ export default function EncoreClient() {
   // 加载下一页
   useEffect(() => {
     if (page > 1) {
-      loadPosts(page);
+      loadPosts(page, sort);
     }
-  }, [page, loadPosts]);
+  }, [page, loadPosts, sort]);
+
+  // 排序 Tab
+  const renderSortTabs = () => (
+    <div
+      className="flex items-center gap-1 mb-6 p-1 rounded-2xl border border-[#FFEBF5]"
+      style={{
+        background: "rgba(255, 255, 255, 0.8)",
+        backdropFilter: "blur(10px)",
+        WebkitBackdropFilter: "blur(10px)",
+        boxShadow: "0 1px 3px 0 rgba(70, 70, 122, 0.2)",
+      }}
+    >
+      {SORT_TABS.map((tab) => {
+        const active = tab.key === sort;
+        return (
+          <button
+            key={tab.key}
+            onClick={() => setSort(tab.key)}
+            className={`flex-1 px-4 py-2 rounded-xl text-sm font-medium transition-all flex items-center justify-center gap-1.5 ${
+              active
+                ? "bg-[#46467A] text-white shadow"
+                : "text-[#1a1a1f]/70 hover:text-[#46467A] hover:bg-white/60"
+            }`}
+          >
+            <span>{tab.icon}</span>
+            <span>{tab.label}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
 
   if (error && posts.length === 0) {
     return (
-      <div className="text-center py-12">
-        <p className="text-red-400 mb-4">{error}</p>
-        <button
-          onClick={() => {
-            setError(null);
-            loadPosts(1);
-          }}
-          className="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
-        >
-          重试
-        </button>
+      <div>
+        {renderSortTabs()}
+        <div className="text-center py-12">
+          <p className="text-[#46467A] mb-4">{error}</p>
+          <button
+            onClick={() => {
+              setError(null);
+              loadPosts(1, sort);
+            }}
+            className="px-6 py-2 bg-[#46467A] text-white rounded-xl hover:bg-[#5A5A8E] transition"
+          >
+            重试
+          </button>
+        </div>
       </div>
     );
   }
 
   if (loading && posts.length === 0) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#46467A] mx-auto mb-4"></div>
-          <p className="text-white/60">加载中...</p>
+      <div>
+        {renderSortTabs()}
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#46467A] mx-auto mb-4"></div>
+            <p className="text-[#1a1a1f]/60">加载中...</p>
+          </div>
         </div>
       </div>
     );
   }
 
   if (posts.length === 0) {
-    return (
-      <div className="text-center py-12">
-        <div className="text-6xl mb-4">📭</div>
-        <h2 className="text-xl font-semibold text-white mb-2">还没有内容</h2>
-        <p className="text-white/60 mb-6">成为第一个分享演出时刻的人吧！</p>
-        <button
-          onClick={() => setIsCreateDialogOpen(true)}
-          className="px-6 py-3 bg-[#46467A] text-white rounded-lg font-medium hover:bg-[#5A5A8E] transition"
-        >
-          📝 发布第一篇帖子
-        </button>
+    // 「关注」Tab 的特殊空态
+    if (sort === "following") {
+      return (
+        <div>
+          {renderSortTabs()}
+          <div className="text-center py-12">
+            <div className="text-6xl mb-4">⭐</div>
+            <h2 className="text-xl font-semibold text-[#46467A] mb-2">
+              {isLoggedIn ? "还没有关注的人" : "登录后查看关注"}
+            </h2>
+            <p className="text-[#1a1a1f]/60 mb-6">
+              {isLoggedIn
+                ? "去发现更多有趣的人，关注他们后可以在这里看到他们的动态"
+                : "登录账号后，关注感兴趣的用户即可在这里看到他们的动态"}
+            </p>
+            <button
+              onClick={() => setSort("latest")}
+              className="px-6 py-2.5 bg-[#46467A] text-white rounded-xl font-medium hover:bg-[#5A5A8E] transition"
+            >
+              去逛逛最新动态
+            </button>
+          </div>
+        </div>
+      );
+    }
 
-        {/* 发帖对话框 */}
-        <CreatePostDialog
-          isOpen={isCreateDialogOpen}
-          onClose={() => setIsCreateDialogOpen(false)}
-          onSuccess={() => {
-            setPage(1);
-            loadPosts(1);
-          }}
-        />
+    return (
+      <div>
+        {renderSortTabs()}
+        <div className="text-center py-12">
+          <div className="text-6xl mb-4">📭</div>
+          <h2 className="text-xl font-semibold text-[#46467A] mb-2">还没有内容</h2>
+          <p className="text-[#1a1a1f]/60 mb-6">成为第一个分享演出时刻的人吧！</p>
+          <button
+            onClick={() => setIsCreateDialogOpen(true)}
+            className="px-6 py-3 bg-[#46467A] text-white rounded-xl font-medium hover:bg-[#5A5A8E] transition"
+          >
+            📝 发布第一篇帖子
+          </button>
+
+          {/* 发帖对话框 */}
+          <CreatePostDialog
+            isOpen={isCreateDialogOpen}
+            onClose={() => setIsCreateDialogOpen(false)}
+            onSuccess={() => {
+              setPage(1);
+              loadPosts(1, sort);
+            }}
+          />
+        </div>
       </div>
     );
   }
 
   return (
     <div>
+      {renderSortTabs()}
       {/* 瀑布流网格 */}
       <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4 space-y-4">
         {posts.map((post) => (
@@ -296,7 +389,7 @@ export default function EncoreClient() {
         onClose={() => setIsCreateDialogOpen(false)}
         onSuccess={() => {
           setPage(1);
-          loadPosts(1); // 刷新列表
+          loadPosts(1, sort); // 刷新列表
         }}
       />
     </div>
