@@ -1,5 +1,11 @@
 // lib/auth.ts
-import { hash as bcryptHash, verify as bcryptVerify } from '@node-rs/bcrypt';
+// 切回 bcryptjs（pure JS）：@node-rs/bcrypt 是 napi-rs native binding，
+// Next.js 16 默认 Turbopack build 对 napi-rs 的 try/catch fallback 加载机制
+// 处理不全（即使 serverExternalPackages 配置也没用），运行时报
+// "Cannot find module @node-rs/bcrypt-<hash>"。
+// bcryptjs 性能差但稳，且 hash 格式与 @node-rs/bcrypt 完全兼容，
+// 旧用户密码可以无缝校验。
+import { hash as bcryptHash, compare as bcryptVerify } from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { headers } from 'next/headers';
 import prisma from './prisma';
