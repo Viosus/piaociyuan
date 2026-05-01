@@ -117,25 +117,9 @@ export async function createUser(data: {
   });
 }
 
-// 验证邮箱格式
-export function isValidEmail(email: string): boolean {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email);
-}
-
-// 验证手机号格式（中国大陆）
-export function isValidPhone(phone: string): boolean {
-  const phoneRegex = /^1[3-9]\d{9}$/;
-  return phoneRegex.test(phone);
-}
-
-// 验证密码强度（至少8位，包含字母和数字）
-export function isValidPassword(password: string): boolean {
-  if (password.length < 8) return false;
-  const hasLetter = /[a-zA-Z]/.test(password);
-  const hasNumber = /\d/.test(password);
-  return hasLetter && hasNumber;
-}
+// 校验器已拆到 lib/validators.ts（纯函数，client 和 server 都安全）
+// 这里 re-export 保持向后兼容（server-side 文件原本 import from '@/lib/auth'）
+export { isValidEmail, isValidPhone, isValidPassword } from './validators';
 
 // 从请求头获取当前用户
 export async function getCurrentUser() {

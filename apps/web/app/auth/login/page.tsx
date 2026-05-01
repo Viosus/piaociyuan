@@ -3,7 +3,7 @@
 import { useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { isValidEmail, isValidPhone } from "@/lib/auth";
+import { isValidEmail, isValidPhone } from "@/lib/validators";
 
 function LoginForm() {
   const router = useRouter();

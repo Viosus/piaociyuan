@@ -3,7 +3,7 @@
 import { useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { isValidEmail, isValidPhone, isValidPassword } from "@/lib/auth";
+import { isValidEmail, isValidPhone, isValidPassword } from "@/lib/validators";
 import { useToast } from "@/components/Toast";
 
 function RegisterForm() {
