@@ -182,3 +182,42 @@ curl -sS http://localhost:3000/api/health
 - **napi-rs 包（`@node-rs/*`）的 platform-specific binding 通过 `optionalDependencies` 分发**：`npm install` 在 macOS/Windows 上不会装 linux-musl binding，只有在 alpine container 里跑 `npm ci` 才会装
 - Dockerfile 里 `COPY . .` 会把 host 的 `node_modules` 也 copy 进 builder stage，但随后的 `RUN npm ci` 会清空重装——这个流程是对的，**不要跳过 `npm ci` 直接用 host 的 node_modules**
 - napi-rs binding 的 `binding.js` 用 try/catch fallback 加载多个备选 native 文件名，这个 pattern 跟 bundler 的 static analysis 冲突 → Turbopack/某些版本 webpack 会编译错
+
+### Next.js 16 client/server 模块边界（2026-05-02 新增）
+**症状**：CI build 在 `npm run build` 阶段挂，错误：
+```
+You're importing a component that needs "next/headers". That only works in a Server Component
+Import traces:
+  Client Component Browser:
+    ./apps/web/lib/auth.ts [Client Component Browser]
+    ./apps/web/app/auth/login/page.tsx [Client Component Browser]
+```
+
+**原因**：Next.js 16 + Turbopack 做严格的 client/server 静态分析。任何 `"use client"` 组件 import 的模块**整个 transitive 链**不能含 server-only 依赖（`next/headers`、`prisma`、`fs`、`server-only` 等）。曾有 W-F1 让 client 页面 import `@/lib/auth` 拿 `isValid*` 校验函数，但 `lib/auth.ts` 顶部 `import { headers } from 'next/headers'` 导致整个文件被标记 server-only → build fail。
+
+**铁律**：
+- **`"use client"` 文件绝对不要 import `@/lib/auth` / `@/lib/prisma` / 其他 server lib**
+- 纯函数（校验器、格式化器、常量等）放 `lib/validators.ts`、`lib/format.ts` 这种 zero-dep 文件，client/server 都安全
+- **新增 lib 文件前先想**：是 server-only（有 next/headers / prisma / 文件系统）还是 universal（纯函数 / 类型）？两类不能混在同一个文件
+- **既有 lib 重构**：如果发现 mixed 文件，把 universal 部分拆出去，server 文件 re-export 保持 server caller 兼容
+  示例：`lib/auth.ts` 含 server function `getCurrentUser()` 和纯函数 `isValidEmail()`。重构成：
+  - `lib/validators.ts` → 纯函数（client/server 共用）
+  - `lib/auth.ts` → 保留 server function + `export { isValidEmail } from './validators'`（向后兼容旧 server caller）
+- **怎么判断一个 lib 文件是 server-only**：看顶部 imports，含以下任一就是 server-only：
+  - `next/headers`、`next/cookies`、`next/server`（除了 `NextRequest/NextResponse` 在 route 用 OK）
+  - `prisma` / `@/lib/prisma`
+  - `fs`、`path`、`crypto` 的 node 内置版（不是 web crypto）
+  - `import 'server-only'` 显式标记
+  - `process.env.SOMETHING`（实际上只在 server 跑也算运行时 server-only）
+
+**早期发现**：每次写完新代码本地跑 `cd apps/web && npm run build`（不是 typecheck，是真正的 build）能立即捕获这类错误。typecheck 不会捕获——它只看类型不看 client/server 边界。
+
+### 多 session 并行协作（2026-05-02 新增）
+本项目可能多个 Claude session 同时跑（用户在不同 terminal 起多个 `claude`）。冲突防范：
+
+- **commit 前必跑** `git status` + `git fetch origin` + `git log HEAD..origin/main`，确认远端有没有新 commit / 本地有没有别的 session 的 uncommitted 改动
+- **stage 文件用 explicit path**（`git add path/file1 path/file2`），**不要** `git add -A` 或 `git add .`——会把别的 session uncommitted 改动也带走
+- **commit 前再次 `git diff --cached --stat`** 确认只 staged 自己改的文件
+- **push 前再 `git fetch && git rebase origin/main`**（如果 remote 有新）。如果 rebase 报冲突 → 别瞎解，告诉用户让两个 session 协调
+- **每次 push 后告诉用户**："push 完成（commit XXX），让另一个 session `git pull --rebase origin main` 拿到我这边改动"
+- **改 client/server 边界文件**（`lib/auth.ts`、共享 components、layout 等）前 grep 一下其他 session 的工作区文件有没有引用，影响范围大的话先跟用户对一下
