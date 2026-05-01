@@ -27,6 +27,7 @@
     "db:studio": "dotenv -e .env -- prisma studio"
   },
   "dependencies": {
+    "@google/model-viewer": "^4.1.0",
     "@hello-pangea/dnd": "^18.0.1",
     "@piaociyuan/shared": "*",
     "@prisma/client": "^6.18.0",

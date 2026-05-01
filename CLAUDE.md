@@ -212,6 +212,31 @@ Import traces:
 
 **早期发现**：每次写完新代码本地跑 `cd apps/web && npm run build`（不是 typecheck，是真正的 build）能立即捕获这类错误。typecheck 不会捕获——它只看类型不看 client/server 边界。
 
+### 删依赖前必须真 build 验证（2026-05-02 新增）
+**踩坑**：删 `@google/model-viewer` 时用了 `grep -rE "from ['\"]@google/model-viewer|require\(['\"]@google/model-viewer"` 验证 0 引用 → 但漏了 `Model3DViewer.tsx:31` 里的**动态 import**：
+```ts
+import('@google/model-viewer')   // 函数调用形式，没有 from / require
+```
+ECS 上 `next build` 直接 fail：`Module not found: Can't resolve '@google/model-viewer'`。
+
+**铁律**：
+- 删任何 dep 前的 grep **必须覆盖所有 import 形态**：
+  ```bash
+  # 正确的全形态 grep
+  grep -rE "['\"\`]<package-name>['\"/]" apps/web --include='*.ts' --include='*.tsx' --include='*.js'
+  ```
+  匹配任何 quote 后跟包名（`'pkg'` `"pkg"` `` `pkg` `` `'pkg/sub'` 等），覆盖：
+  - `import x from 'pkg'`
+  - `import('pkg')` ← 之前漏的动态 import
+  - `require('pkg')`
+  - `require.resolve('pkg')`
+  - `declare module 'pkg' {}` ← 类型声明也算引用，需要保留
+
+- **typecheck 不捕获 bundling 错误**——`npm run build` 才行
+- **删 dep + 改 lib 边界 + 任何动到 import / module resolution 的改动**，commit 前**必须本地跑 `cd apps/web && npm run build`** 验证不报错（5-10 分钟，远比 ECS CI 跑一次 + 修补一次 + push 再跑一次的循环短）
+
+### 多 session 并行协作（2026-05-02 新增）
+
 ### 多 session 并行协作（2026-05-02 新增）
 本项目可能多个 Claude session 同时跑（用户在不同 terminal 起多个 `claude`）。冲突防范：
 
