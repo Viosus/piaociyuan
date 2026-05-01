@@ -3,11 +3,14 @@
 import { useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { isValidEmail, isValidPhone, isValidPassword } from "@/lib/auth";
+import { useToast } from "@/components/Toast";
 
 function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const returnUrl = searchParams.get('returnUrl');
+  const toast = useToast();
   const [formData, setFormData] = useState({
     account: "",
     password: "",
@@ -17,10 +20,42 @@ function RegisterForm() {
     accountType: "email", // email 或 phone
   });
   const [error, setError] = useState("");
+  const [accountError, setAccountError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [confirmPasswordError, setConfirmPasswordError] = useState("");
   const [loading, setLoading] = useState(false);
   const [sendingCode, setSendingCode] = useState(false);
   const [countdown, setCountdown] = useState(0);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+
+  const validateAccount = (value: string, type: string = formData.accountType) => {
+    const trimmed = value.trim();
+    if (!trimmed) {
+      setAccountError("");
+      return;
+    }
+    if (type === "email") {
+      setAccountError(isValidEmail(trimmed) ? "" : "邮箱格式不正确");
+    } else {
+      setAccountError(isValidPhone(trimmed) ? "" : "手机号格式不正确（中国大陆 11 位）");
+    }
+  };
+
+  const validatePassword = (value: string) => {
+    if (!value) {
+      setPasswordError("");
+      return;
+    }
+    setPasswordError(isValidPassword(value) ? "" : "密码至少 8 位，需同时包含字母和数字");
+  };
+
+  const validateConfirmPassword = (value: string, passwordValue: string = formData.password) => {
+    if (!value) {
+      setConfirmPasswordError("");
+      return;
+    }
+    setConfirmPasswordError(value === passwordValue ? "" : "两次输入的密码不一致");
+  };
 
   // 发送验证码
   const handleSendCode = async () => {
@@ -65,7 +100,7 @@ function RegisterForm() {
         });
       }, 1000);
 
-      alert(formData.accountType === "email" ? "验证码已发送，请查收邮件" : "验证码已发送，请查收短信");
+      toast.success(formData.accountType === "email" ? "验证码已发送，请查收邮件" : "验证码已发送，请查收短信");
     } catch (err) {
       setError("网络错误，请稍后重试");
     } finally {
@@ -144,7 +179,10 @@ function RegisterForm() {
           <div className="flex gap-4 mb-4">
             <button
               type="button"
-              onClick={() => setFormData({ ...formData, accountType: "email", account: "" })}
+              onClick={() => {
+                setFormData({ ...formData, accountType: "email", account: "" });
+                setAccountError("");
+              }}
               className={`flex-1 py-2 rounded-lg transition ${
                 formData.accountType === "email"
                   ? "bg-[#46467A] text-white"
@@ -155,7 +193,10 @@ function RegisterForm() {
             </button>
             <button
               type="button"
-              onClick={() => setFormData({ ...formData, accountType: "phone", account: "" })}
+              onClick={() => {
+                setFormData({ ...formData, accountType: "phone", account: "" });
+                setAccountError("");
+              }}
               className={`flex-1 py-2 rounded-lg transition ${
                 formData.accountType === "phone"
                   ? "bg-[#46467A] text-white"
@@ -174,11 +215,24 @@ function RegisterForm() {
             <input
               type={formData.accountType === "email" ? "email" : "tel"}
               value={formData.account}
-              onChange={(e) => setFormData({ ...formData, account: e.target.value })}
+              onChange={(e) => {
+                setFormData({ ...formData, account: e.target.value });
+                if (accountError) setAccountError("");
+              }}
+              onBlur={(e) => validateAccount(e.target.value)}
               placeholder={formData.accountType === "email" ? "your@email.com" : "13800138000"}
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#46467A] focus:border-transparent"
+              aria-invalid={!!accountError}
+              aria-describedby={accountError ? "register-account-error" : undefined}
+              className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#46467A] focus:border-transparent ${
+                accountError ? "border-red-400" : "border-gray-300"
+              }`}
             />
+            {accountError && (
+              <p id="register-account-error" className="text-xs text-red-500 mt-1">
+                {accountError}
+              </p>
+            )}
           </div>
 
           {/* 验证码 */}
@@ -233,12 +287,29 @@ function RegisterForm() {
             <input
               type="password"
               value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              onChange={(e) => {
+                const next = e.target.value;
+                setFormData({ ...formData, password: next });
+                if (passwordError) setPasswordError("");
+                if (formData.confirmPassword) {
+                  validateConfirmPassword(formData.confirmPassword, next);
+                }
+              }}
+              onBlur={(e) => validatePassword(e.target.value)}
               placeholder="至少8位，包含字母和数字"
               required
               minLength={8}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#46467A] focus:border-transparent"
+              aria-invalid={!!passwordError}
+              aria-describedby={passwordError ? "register-password-error" : undefined}
+              className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#46467A] focus:border-transparent ${
+                passwordError ? "border-red-400" : "border-gray-300"
+              }`}
             />
+            {passwordError && (
+              <p id="register-password-error" className="text-xs text-red-500 mt-1">
+                {passwordError}
+              </p>
+            )}
           </div>
 
           {/* 确认密码 */}
@@ -249,11 +320,24 @@ function RegisterForm() {
             <input
               type="password"
               value={formData.confirmPassword}
-              onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+              onChange={(e) => {
+                setFormData({ ...formData, confirmPassword: e.target.value });
+                if (confirmPasswordError) setConfirmPasswordError("");
+              }}
+              onBlur={(e) => validateConfirmPassword(e.target.value)}
               placeholder="再次输入密码"
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#46467A] focus:border-transparent"
+              aria-invalid={!!confirmPasswordError}
+              aria-describedby={confirmPasswordError ? "register-confirm-error" : undefined}
+              className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#46467A] focus:border-transparent ${
+                confirmPasswordError ? "border-red-400" : "border-gray-300"
+              }`}
             />
+            {confirmPasswordError && (
+              <p id="register-confirm-error" className="text-xs text-red-500 mt-1">
+                {confirmPasswordError}
+              </p>
+            )}
           </div>
 
           {/* 隐私政策同意 */}

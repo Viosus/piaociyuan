@@ -3,6 +3,7 @@
 import { useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { isValidEmail, isValidPhone } from "@/lib/auth";
 
 function LoginForm() {
   const router = useRouter();
@@ -15,7 +16,21 @@ function LoginForm() {
   });
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState("");
+  const [accountError, setAccountError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const validateAccount = (value: string) => {
+    const trimmed = value.trim();
+    if (!trimmed) {
+      setAccountError("");
+      return;
+    }
+    if (isValidEmail(trimmed) || isValidPhone(trimmed)) {
+      setAccountError("");
+    } else {
+      setAccountError("邮箱或手机号格式不正确");
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,11 +83,24 @@ function LoginForm() {
             <input
               type="text"
               value={formData.account}
-              onChange={(e) => setFormData({ ...formData, account: e.target.value })}
+              onChange={(e) => {
+                setFormData({ ...formData, account: e.target.value });
+                if (accountError) setAccountError("");
+              }}
+              onBlur={(e) => validateAccount(e.target.value)}
               placeholder="输入邮箱或手机号"
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#46467A] focus:border-transparent"
+              aria-invalid={!!accountError}
+              aria-describedby={accountError ? "login-account-error" : undefined}
+              className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#46467A] focus:border-transparent ${
+                accountError ? "border-red-400" : "border-gray-300"
+              }`}
             />
+            {accountError && (
+              <p id="login-account-error" className="text-xs text-red-500 mt-1">
+                {accountError}
+              </p>
+            )}
           </div>
 
           {/* 密码 */}
