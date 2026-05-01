@@ -1,10 +1,23 @@
 # 阶段1: 依赖安装和构建
 FROM node:22-alpine AS builder
-RUN apk add --no-cache libc6-compat python3 make g++
+
+# 中国 ECS 网络优化：apk 用阿里云镜像（默认 dl-cdn.alpinelinux.org 在国内慢/超时）
+RUN sed -i 's|dl-cdn.alpinelinux.org|mirrors.aliyun.com|g' /etc/apk/repositories \
+    && apk add --no-cache libc6-compat python3 make g++
+
 WORKDIR /app
 
 # 复制所有文件
 COPY . .
+
+# npm 用淘宝镜像 + 调高 timeout（国内 ECS 直连 npmjs 经常超时）
+# Prisma 引擎下载也走国内镜像
+RUN npm config set registry https://registry.npmmirror.com \
+    && npm config set fetch-timeout 600000 \
+    && npm config set fetch-retry-mintimeout 60000 \
+    && npm config set fetch-retry-maxtimeout 600000
+
+ENV PRISMA_ENGINES_MIRROR=https://registry.npmmirror.com/-/binary/prisma
 
 # 安装依赖
 RUN npm ci --legacy-peer-deps
