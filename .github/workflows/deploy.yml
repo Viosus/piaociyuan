@@ -1,17 +1,16 @@
 name: Deploy to ECS
 
+# 部署策略（2026-05-01 重构）：
+# - 抛弃 GHCR build/push 链路（详见 CLAUDE.md "不得再犯的错误"）
+# - CI 只做 validate（typecheck），通过后 SSH 到 ECS 跑 git pull + docker compose build
+# - ECS 本地 build = 项目原生路径（docker-compose.yml 的 build: 段 + Dockerfile 国内镜像优化）
+
 on:
   push:
     branches: [main]
-  workflow_dispatch:  # 允许手动触发
-
-env:
-  REGISTRY: ghcr.io
-  # 写死小写避免 ghcr push 大小写不匹配（github.repository = Viosus/piaociyuan，含大写）
-  IMAGE_NAME: viosus/piaociyuan/piaociyuan-web
+  workflow_dispatch:
 
 jobs:
-  # Step 1: Build validation
   validate:
     runs-on: ubuntu-latest
     steps:
@@ -37,127 +36,55 @@ jobs:
         run: cd apps/web && npx next lint
         continue-on-error: true
 
-  # Step 2: Build and push Docker image
-  build:
-    needs: validate
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v5
-
-      # 诊断后确认：build-push-action 在 push 阶段 silent fail（imageid==digest 即铁证）
-      # 改用 raw docker，任何错误都大声报。
-      - name: Log in to Container Registry
-        env:
-          GH_USER: ${{ github.actor }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: echo "$GH_TOKEN" | docker login ${{ env.REGISTRY }} -u "$GH_USER" --password-stdin
-
-      - name: Build image
-        env:
-          REG: ${{ env.REGISTRY }}
-          IMG: ${{ env.IMAGE_NAME }}
-          SHA: ${{ github.sha }}
-        run: |
-          docker build \
-            -t "$REG/$IMG:$SHA" \
-            -t "$REG/$IMG:latest" \
-            -f apps/web/Dockerfile \
-            .
-
-      - name: Push image (loud failures)
-        env:
-          REG: ${{ env.REGISTRY }}
-          IMG: ${{ env.IMAGE_NAME }}
-          SHA: ${{ github.sha }}
-        run: |
-          set -e
-          echo "=== pushing :SHA ==="
-          docker push "$REG/$IMG:$SHA"
-          echo "=== pushing :latest ==="
-          docker push "$REG/$IMG:latest"
-
-      # Verify :latest 真的指向了刚 build 的 image
-      - name: Verify :latest tag was actually pushed
-        env:
-          REG: ${{ env.REGISTRY }}
-          IMG: ${{ env.IMAGE_NAME }}
-          SHA: ${{ github.sha }}
-        run: |
-          set -e
-          docker pull "$REG/$IMG:$SHA"
-          docker pull "$REG/$IMG:latest"
-          SHA_ID=$(docker inspect --format='{{.Id}}' "$REG/$IMG:$SHA")
-          LATEST_ID=$(docker inspect --format='{{.Id}}' "$REG/$IMG:latest")
-          echo "SHA tag points to:    $SHA_ID"
-          echo "LATEST tag points to: $LATEST_ID"
-          if [ "$SHA_ID" != "$LATEST_ID" ]; then
-            echo "::error:::latest tag did not update — push assertion failed"
-            exit 1
-          fi
-
-  # Step 3: Deploy to production (requires manual approval for workflow_dispatch)
   deploy:
-    needs: build
+    needs: validate
     runs-on: ubuntu-latest
     environment: production
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v5
-
-      - name: Sync docker-compose.yml to ECS
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.ECS_HOST }}
-          username: ${{ secrets.ECS_USERNAME }}
-          key: ${{ secrets.ECS_SSH_KEY }}
-          source: "docker-compose.yml"
-          target: "~/piaociyuan/"
-
-      - name: Deploy to ECS
+      - name: Deploy to ECS via SSH
         uses: appleboy/ssh-action@v1.0.3
-        env:
-          GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
-          GITHUB_ACTOR: ${{ github.actor }}
         with:
           host: ${{ secrets.ECS_HOST }}
           username: ${{ secrets.ECS_USERNAME }}
           key: ${{ secrets.ECS_SSH_KEY }}
-          envs: GHCR_TOKEN,GITHUB_ACTOR
           command_timeout: 30m
           script: |
-            # 登录GitHub Container Registry
-            echo $GHCR_TOKEN | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
-
-            # 拉取最新镜像
-            docker pull ghcr.io/viosus/piaociyuan/piaociyuan-web:latest
-
-            # 更新本地镜像标签
-            docker tag ghcr.io/viosus/piaociyuan/piaociyuan-web:latest piaociyuan-web:latest
-
-            # 重启服务
+            set -e
             cd ~/piaociyuan
-            docker-compose down
-            docker-compose up -d --no-build
 
-            # 等待容器就绪后同步数据库 schema
-            sleep 10
-            docker-compose exec -T web npx prisma db push --skip-generate
+            echo "=== git fetch + reset to origin/main ==="
+            git fetch origin
+            # reset --hard 用于清掉 ECS 上历史 scp 推过的 docker-compose.yml 等本地 drift
+            # 任何未 commit 的修改都会被覆盖（这是 deploy 的预期行为）
+            git reset --hard origin/main
 
-            # 清理旧镜像
+            echo "=== docker compose build web ==="
+            docker compose build web
+
+            echo "=== docker compose up -d web ==="
+            docker compose up -d web
+
+            echo "=== waiting for container health ==="
+            sleep 15
+
+            echo "=== prisma schema sync ==="
+            docker compose exec -T web npx prisma db push --skip-generate
+
+            echo "=== clean up dangling images ==="
             docker image prune -f
 
-            echo "Deployment completed successfully!"
+            echo "=== deployment OK ==="
+            docker compose ps
 
       - name: Health check
         run: |
-          echo "Waiting for service to start..."
-          sleep 30
-          if [ -n "${{ secrets.ECS_HOST }}" ]; then
-            echo "Deployment completed. Please verify health at https://piaociyuan.com/api/health"
+          echo "Waiting for service to fully boot..."
+          sleep 20
+          STATUS=$(curl -sS -o /dev/null -w "%{http_code}" https://piaociyuan.com/api/health)
+          if [ "$STATUS" != "200" ]; then
+            echo "::error::Health check failed: HTTP $STATUS"
+            exit 1
           fi
+          echo "Health check passed (HTTP $STATUS)"
+          curl -sS https://piaociyuan.com/api/health
