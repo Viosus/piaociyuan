@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { apiPost } from '@/lib/api';
+import { useToast } from "@/components/Toast";
 
 type Ticket = {
   id: string;
@@ -36,6 +37,7 @@ function StatusBadge({ status }: { status: Order["status"] }) {
 }
 
 export default function OrderClient({ id }: { id: string }) {
+  const toast = useToast();
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
@@ -96,7 +98,7 @@ export default function OrderClient({ id }: { id: string }) {
       // 立即刷新订单状态
       await fetchOrder();
     } catch (error: unknown) {
-      alert(`支付失败：${error instanceof Error ? error.message : "未知错误"}`);
+      toast.error(`支付失败：${error instanceof Error ? error.message : "未知错误"}`);
     } finally {
       setPaying(false);
     }
@@ -145,15 +147,15 @@ export default function OrderClient({ id }: { id: string }) {
 
       // 显示获得的纪念品
       if (data.data.badges && data.data.badges.length > 0) {
-        const badgeNames = data.data.badges.map((b: { name: string }) => b.name).join('\n');
-        alert(`检票成功！🎉\n\n获得纪念品:\n${badgeNames}\n\n可在"我的次元"中查看`);
+        const badgeNames = data.data.badges.map((b: { name: string }) => b.name).join('、');
+        toast.success(`检票成功！获得纪念品：${badgeNames}（可在"我的次元"中查看）`);
       } else {
-        alert('检票成功！');
+        toast.success('检票成功！');
       }
 
       await fetchOrder();
     } catch (error: unknown) {
-      alert(`检票失败：${error instanceof Error ? error.message : "未知错误"}`);
+      toast.error(`检票失败：${error instanceof Error ? error.message : "未知错误"}`);
     } finally {
       setUsingTicket(null);
     }
@@ -161,7 +163,7 @@ export default function OrderClient({ id }: { id: string }) {
 
   async function refundSelectedTickets() {
     if (selectedTickets.size === 0) {
-      alert('请至少选择一张票');
+      toast.warning('请至少选择一张票');
       return;
     }
 
@@ -185,17 +187,17 @@ export default function OrderClient({ id }: { id: string }) {
       }
 
       if (successCount > 0) {
-        alert(`成功退票 ${successCount} 张${failCount > 0 ? `，失败 ${failCount} 张` : ''}`);
+        toast.success(`成功退票 ${successCount} 张${failCount > 0 ? `，失败 ${failCount} 张` : ''}`);
         await fetchOrder();
         setShowRefundModal(false);
         setSelectedTickets(new Set());
         // 退票成功后跳转到订单列表页
         router.push('/account/orders');
       } else {
-        alert('退票失败，请稍后重试');
+        toast.error('退票失败，请稍后重试');
       }
     } catch (error: unknown) {
-      alert(`退票失败：${error instanceof Error ? error.message : "未知错误"}`);
+      toast.error(`退票失败：${error instanceof Error ? error.message : "未知错误"}`);
     } finally {
       setRefunding(false);
     }

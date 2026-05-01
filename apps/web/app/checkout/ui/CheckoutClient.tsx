@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiGet, apiPost } from '@/lib/api';
+import { useToast } from '@/components/Toast';
 
 type Event = {
   id: number;
@@ -147,6 +148,7 @@ type Props = {
 
 export default function CheckoutClient({ event, tier, initialQty, urlLimit }: Props) {
   const router = useRouter();
+  const toast = useToast();
 
   const perEventLimit = PER_EVENT_LIMIT[event.id];
   const baseLimit =
@@ -213,7 +215,7 @@ export default function CheckoutClient({ event, tier, initialQty, urlLimit }: Pr
     if (isExpired && !expiredRef.current) {
       expiredRef.current = true;
       sessionStorage.removeItem(holdKey);
-      alert("锁票已过期，已为你释放库存。请返回活动页重新选择票档。");
+      toast.warning("锁票已过期，已为你释放库存。请返回活动页重新选择票档。");
       router.push(`/events/${event.id}`);
     }
   }, [isExpired, router, event.id, holdKey]);
@@ -296,7 +298,7 @@ export default function CheckoutClient({ event, tier, initialQty, urlLimit }: Pr
 
   async function handleSubmit() {
     if (isExpired) {
-      alert("锁票已过期，请重新锁票或返回活动页重选。");
+      toast.warning("锁票已过期，请重新锁票或返回活动页重选。");
       return;
     }
     setSubmitting(true);

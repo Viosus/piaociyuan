@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { apiGet } from '@/lib/api';
+import { useToast } from "@/components/Toast";
 
 type Order = {
   id: string;
@@ -80,6 +81,7 @@ const FILTER_OPTIONS = [
 function OrdersList() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const toast = useToast();
 
   const [orders, setOrders] = useState<Order[]>([]);
   const [pagination, setPagination] = useState<Pagination>({
@@ -298,7 +300,7 @@ function OrdersList() {
     
     // 检查是否已存在
     if (activeFilters.some((f) => f.type === type)) {
-      alert("该筛选项已添加");
+      toast.warning("该筛选项已添加");
       return;
     }
     

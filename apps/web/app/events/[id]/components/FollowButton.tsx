@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { apiGet, apiPost, apiDelete } from '@/lib/api';
+import { useToast } from '@/components/Toast';
 
 interface FollowButtonProps {
   eventId: number;
@@ -9,6 +10,7 @@ interface FollowButtonProps {
 }
 
 export default function FollowButton({ eventId, eventName }: FollowButtonProps) {
+  const toast = useToast();
   const [isFollowing, setIsFollowing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
@@ -59,18 +61,16 @@ export default function FollowButton({ eventId, eventName }: FollowButtonProps) 
       if (result.ok) {
         setIsFollowing(!isFollowing);
 
-        // 显示提示消息
         if (!isFollowing) {
-          alert(`✨ ${result.message || '已关注活动'}`);
+          toast.success(result.message || '已关注活动');
         } else {
-          alert(`👋 ${result.message || '已取消关注'}`);
+          toast.success(result.message || '已取消关注');
         }
       } else {
-        alert(`❌ ${result.message || '操作失败'}`);
+        toast.error(result.message || '操作失败');
       }
     } catch {
-      // 静默处理关注操作失败
-      alert('❌ 网络错误，请稍后重试');
+      toast.error('网络错误，请稍后重试');
     } finally {
       setActionLoading(false);
     }

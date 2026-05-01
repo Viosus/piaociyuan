@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { ArrowLeft, Search, MessageSquare } from 'lucide-react';
 import { apiGet, apiPost } from '@/lib/api';
+import { useToast } from '@/components/Toast';
 
 interface User {
   id: string;
@@ -15,6 +16,7 @@ interface User {
 
 export default function NewConversationPage() {
   const router = useRouter();
+  const toast = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<User[]>([]);
   const [searching, setSearching] = useState(false);
@@ -56,8 +58,7 @@ export default function NewConversationPage() {
       const data = await apiPost('/api/messages/conversations', { otherUserId: userId });
       router.push(`/messages/${data.id}`);
     } catch (error: any) {
-      // 静默处理创建对话失败
-      alert(error?.error || '创建对话失败，请重试');
+      toast.error(error?.error || '创建对话失败，请重试');
     } finally {
       setCreating(false);
     }

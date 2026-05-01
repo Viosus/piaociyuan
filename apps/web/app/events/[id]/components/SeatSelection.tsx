@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiPost } from '@/lib/api';
+import { useToast } from '@/components/Toast';
 
 type SeatStatus = 'available' | 'locked' | 'sold';
 
@@ -24,6 +25,7 @@ type Props = {
 
 export default function SeatSelection({ eventId, tierId, tierName, tierPrice }: Props) {
   const router = useRouter();
+  const toast = useToast();
   const [seats, setSeats] = useState<Seat[]>([]);
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -68,7 +70,7 @@ export default function SeatSelection({ eventId, tierId, tierName, tierPrice }: 
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        alert('请先登录');
+        toast.warning('请先登录');
         router.push('/auth/login');
         return;
       }
@@ -83,22 +85,20 @@ export default function SeatSelection({ eventId, tierId, tierName, tierPrice }: 
         setMode(result.mode);
 
         if (result.mode === 'AUTO') {
-          alert(`${result.message}\n已为您分配座位，请在 10 分钟内完成支付`);
+          toast.success(`${result.message}，已为您分配座位，请在 10 分钟内完成支付`);
         } else {
-          alert(`${result.message}\n请在 10 分钟内完成支付`);
+          toast.success(`${result.message}，请在 10 分钟内完成支付`);
         }
 
         // 跳转到订单页面
         router.push(`/order/${result.data.holdId}`);
       } else {
-        alert(result.error || '购票失败');
-        // 刷新座位状态
+        toast.error(result.error || '购票失败');
         fetchSeats();
         setSelectedSeats([]);
       }
     } catch {
-      // 静默处理购票失败
-      alert('网络错误，请重试');
+      toast.error('网络错误，请重试');
     } finally {
       setPurchasing(false);
     }

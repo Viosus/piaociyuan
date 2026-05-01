@@ -7,6 +7,7 @@ import { ArrowLeft, Send } from 'lucide-react';
 import { apiGet, apiPost } from '@/lib/api';
 import { useSocket } from '@/hooks/useSocket';
 import { formatMessageTime, shouldShowTimeDivider } from '@/lib/time';
+import { useToast } from '@/components/Toast';
 
 interface User {
   id: string;
@@ -32,6 +33,7 @@ interface ConversationData {
 export default function ConversationPage() {
   const params = useParams();
   const router = useRouter();
+  const toast = useToast();
   const conversationId = params.id as string;
 
   const [conversation, setConversation] = useState<ConversationData | null>(null);
@@ -135,8 +137,7 @@ export default function ConversationPage() {
       );
       setMessage('');
     } catch {
-      // 静默处理发送消息失败
-      alert('发送失败，请重试');
+      toast.error('发送失败，请重试');
     } finally {
       setSending(false);
     }

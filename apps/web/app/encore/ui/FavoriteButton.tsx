@@ -3,12 +3,14 @@
 
 import { useState, useEffect } from "react";
 import { apiGet, apiPost, apiDelete } from "@/lib/api";
+import { useToast } from "@/components/Toast";
 
 interface FavoriteButtonProps {
   postId: string;
 }
 
 export default function FavoriteButton({ postId }: FavoriteButtonProps) {
+  const toast = useToast();
   const [isFavorited, setIsFavorited] = useState(false);
   const [loading, setLoading] = useState(false);
   const [checking, setChecking] = useState(true);
@@ -49,7 +51,7 @@ export default function FavoriteButton({ postId }: FavoriteButtonProps) {
         if (result.ok) {
           setIsFavorited(false);
         } else {
-          alert(`❌ ${result.message || "取消收藏失败"}`);
+          toast.error(result.message || "取消收藏失败");
         }
       } else {
         // 添加收藏
@@ -60,13 +62,12 @@ export default function FavoriteButton({ postId }: FavoriteButtonProps) {
           if (result.code === "ALREADY_FAVORITED") {
             setIsFavorited(true);
           } else {
-            alert(`❌ ${result.message || "收藏失败"}`);
+            toast.error(result.message || "收藏失败");
           }
         }
       }
     } catch {
-      // 静默处理切换收藏状态失败
-      alert("❌ 网络错误，请稍后重试");
+      toast.error("网络错误，请稍后重试");
     } finally {
       setLoading(false);
     }

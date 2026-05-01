@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/components/Toast";
 
 type User = {
   id: string;
@@ -23,6 +24,7 @@ type Following = {
 
 export default function UserFollowings() {
   const router = useRouter();
+  const toast = useToast();
   const [followings, setFollowings] = useState<Following[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -88,13 +90,12 @@ export default function UserFollowings() {
         // 从列表中移除
         setFollowings((prev) => prev.filter((f) => f.user.id !== userId));
         setTotalCount((prev) => prev - 1);
-        alert("✅ 已取消关注");
+        toast.success("已取消关注");
       } else {
-        alert(`❌ ${data.message || "取消关注失败"}`);
+        toast.error(data.message || "取消关注失败");
       }
     } catch {
-      // 静默处理取消关注失败
-      alert("❌ 网络错误，请稍后重试");
+      toast.error("网络错误，请稍后重试");
     }
   };
 

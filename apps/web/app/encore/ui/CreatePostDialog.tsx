@@ -3,6 +3,7 @@
 
 import { useState, useRef } from "react";
 import { apiPost, apiUpload } from "@/lib/api";
+import { useToast } from "@/components/Toast";
 
 interface CreatePostDialogProps {
   isOpen: boolean;
@@ -23,6 +24,7 @@ export default function CreatePostDialog({
   onClose,
   onSuccess,
 }: CreatePostDialogProps) {
+  const toast = useToast();
   const [content, setContent] = useState("");
   const [location, setLocation] = useState("");
   const [images, setImages] = useState<ImagePreview[]>([]);
@@ -39,7 +41,7 @@ export default function CreatePostDialog({
     const filesToAdd = Array.from(files).slice(0, remainingSlots);
 
     if (filesToAdd.length === 0) {
-      alert("最多只能上传9张图片");
+      toast.warning("最多只能上传 9 张图片");
       return;
     }
 
@@ -112,12 +114,12 @@ export default function CreatePostDialog({
     e.preventDefault();
 
     if (!content.trim()) {
-      alert("请输入帖子内容");
+      toast.warning("请输入帖子内容");
       return;
     }
 
     if (content.length > 5000) {
-      alert("帖子内容不能超过5000字");
+      toast.warning("帖子内容不能超过 5000 字");
       return;
     }
 
@@ -136,7 +138,7 @@ export default function CreatePostDialog({
       });
 
       if (result.ok) {
-        alert("发布成功！");
+        toast.success("发布成功！");
         setContent("");
         setLocation("");
         images.forEach((img) => URL.revokeObjectURL(img.previewUrl));
@@ -144,11 +146,10 @@ export default function CreatePostDialog({
         onClose();
         onSuccess();
       } else {
-        alert(result.message || "发布失败");
+        toast.error(result.message || "发布失败");
       }
     } catch {
-      // 静默处理创建帖子失败
-      alert("发布失败，请稍后重试");
+      toast.error("发布失败，请稍后重试");
     } finally {
       setLoading(false);
     }

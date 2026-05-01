@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { apiGet, apiDelete } from "@/lib/api";
+import { useToast } from "@/components/Toast";
 
 interface Tier {
   id: number;
@@ -44,6 +45,7 @@ interface Stats {
 }
 
 export default function EventFavorites() {
+  const toast = useToast();
   const [followedEvents, setFollowedEvents] = useState<FollowedEvent[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -85,13 +87,12 @@ export default function EventFavorites() {
       if (result.ok) {
         // 从列表中移除
         setFollowedEvents((prev) => prev.filter((item) => item.event.id !== eventId));
-        alert("✅ 已取消关注");
+        toast.success("已取消关注");
       } else {
-        alert(`❌ ${result.message || "取消关注失败"}`);
+        toast.error(result.message || "取消关注失败");
       }
     } catch {
-      // 静默处理取消关注活动失败
-      alert("❌ 网络错误，请稍后重试");
+      toast.error("网络错误，请稍后重试");
     }
   };
 

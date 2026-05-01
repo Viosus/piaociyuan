@@ -6,6 +6,7 @@ import Link from "next/link";
 import FavoriteButton from "@/app/encore/ui/FavoriteButton";
 import { useSocket } from "@/hooks/useSocket";
 import { formatRelativeTime } from "@/lib/time";
+import { useToast } from "@/components/Toast";
 
 type PostDetail = {
   id: string;
@@ -65,6 +66,7 @@ type PostDetail = {
 
 export default function PostDetailClient({ postId }: { postId: string }) {
   const router = useRouter();
+  const toast = useToast();
   const [post, setPost] = useState<PostDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -201,7 +203,7 @@ export default function PostDetailClient({ postId }: { postId: string }) {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        alert('请先登录');
+        toast.warning('请先登录');
         router.push(`/auth/login?returnUrl=${encodeURIComponent(window.location.pathname)}`);
         return;
       }
@@ -230,7 +232,7 @@ export default function PostDetailClient({ postId }: { postId: string }) {
         });
       }
     } catch (error: unknown) {
-      alert(error instanceof Error ? error.message : '操作失败');
+      toast.error(error instanceof Error ? error.message : '操作失败');
     } finally {
       setIsLiking(false);
     }
@@ -247,7 +249,7 @@ export default function PostDetailClient({ postId }: { postId: string }) {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        alert('请先登录');
+        toast.warning('请先登录');
         router.push(`/auth/login?returnUrl=${encodeURIComponent(window.location.pathname)}`);
         return;
       }
@@ -270,8 +272,9 @@ export default function PostDetailClient({ postId }: { postId: string }) {
 
       // 更新关注状态
       setIsFollowing(data.data.isFollowing);
+      toast.success(data.data.isFollowing ? '已关注' : '已取消关注');
     } catch (error: unknown) {
-      alert(error instanceof Error ? error.message : '操作失败');
+      toast.error(error instanceof Error ? error.message : '操作失败');
     } finally {
       setIsFollowLoading(false);
     }
@@ -285,7 +288,7 @@ export default function PostDetailClient({ postId }: { postId: string }) {
       });
     } else {
       navigator.clipboard.writeText(window.location.href);
-      alert("链接已复制到剪贴板");
+      toast.success("链接已复制到剪贴板");
     }
   };
 
@@ -300,7 +303,7 @@ export default function PostDetailClient({ postId }: { postId: string }) {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        alert('请先登录');
+        toast.warning('请先登录');
         router.push(`/auth/login?returnUrl=${encodeURIComponent(window.location.pathname)}`);
         return;
       }
@@ -322,22 +325,22 @@ export default function PostDetailClient({ postId }: { postId: string }) {
         throw new Error(data.message || '举报失败');
       }
 
-      alert('举报成功，我们会尽快处理');
+      toast.success('举报成功，我们会尽快处理');
     } catch (error: unknown) {
-      alert(error instanceof Error ? error.message : '举报失败');
+      toast.error(error instanceof Error ? error.message : '举报失败');
     }
   };
 
   const handleSubmitComment = async () => {
     if (!commentText.trim()) {
-      alert('请输入评论内容');
+      toast.warning('请输入评论内容');
       return;
     }
 
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        alert('请先登录');
+        toast.warning('请先登录');
         router.push(`/auth/login?returnUrl=${encodeURIComponent(window.location.pathname)}`);
         return;
       }
@@ -367,9 +370,9 @@ export default function PostDetailClient({ postId }: { postId: string }) {
       // 刷新帖子数据（包括评论）
       await loadPost();
 
-      alert('评论成功');
+      toast.success('评论成功');
     } catch (error: unknown) {
-      alert(error instanceof Error ? error.message : '评论失败');
+      toast.error(error instanceof Error ? error.message : '评论失败');
     } finally {
       setIsSubmittingComment(false);
     }

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { apiGet, apiPost } from '@/lib/api';
 import Sidebar from "@/components/Sidebar";
+import { useToast } from "@/components/Toast";
 
 type VerificationRequest = {
   id: string;
@@ -19,6 +20,7 @@ type VerificationRequest = {
 
 export default function VerificationPage() {
   const router = useRouter();
+  const toast = useToast();
   const [requests, setRequests] = useState<VerificationRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -83,14 +85,14 @@ export default function VerificationPage() {
     e.preventDefault();
 
     if (!realName || !reason || !proofImageUrls) {
-      alert('请填写所有必填字段');
+      toast.warning('请填写所有必填字段');
       return;
     }
 
     // 解析图片URLs
     const proofImages = proofImageUrls.split('\n').filter(url => url.trim());
     if (proofImages.length === 0) {
-      alert('请至少提供一张证明材料');
+      toast.warning('请至少提供一张证明材料');
       return;
     }
 
@@ -106,7 +108,7 @@ export default function VerificationPage() {
       });
 
       if (res.ok) {
-        alert('认证申请已提交！');
+        toast.success('认证申请已提交！');
         setShowForm(false);
         // 重置表单
         setRealName('');
@@ -117,11 +119,10 @@ export default function VerificationPage() {
         // 重新加载
         loadRequests();
       } else {
-        alert(res.message || '提交失败');
+        toast.error(res.message || '提交失败');
       }
     } catch {
-      // 静默处理提交认证申请失败
-      alert('提交失败');
+      toast.error('提交失败');
     } finally {
       setSubmitting(false);
     }
