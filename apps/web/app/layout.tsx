@@ -5,6 +5,8 @@ import Sidebar from "@/components/Sidebar";
 import RightSidebar from "@/components/RightSidebar";
 import SearchBar from "@/components/SearchBar";
 import PrivacyConsent from "@/components/PrivacyConsent";
+import OfflineBanner from "@/components/OfflineBanner";
+import { ConfirmProvider } from "@/components/ConfirmDialog";
 import { ToastProvider } from "@/components/Toast";
 
 
@@ -69,7 +71,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-hidden`}
       >
         <ToastProvider>
-          <Sidebar />
+          <ConfirmProvider>
+            <OfflineBanner />
+            <Sidebar />
           <RightSidebar />
           {/* 搜索栏 - 固定在右上角 */}
           <div className="fixed top-6 z-40 transition-all duration-300" style={{ right: 'calc(var(--right-sidebar-width, 64px) + 1.5rem)' }}>
@@ -89,6 +93,7 @@ export default function RootLayout({
               沪ICP备2026014419号
             </a>
           </footer>
+          </ConfirmProvider>
         </ToastProvider>
       </body>
     </html>

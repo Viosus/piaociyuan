@@ -305,6 +305,10 @@ function RegisterForm() {
                 passwordError ? "border-red-400" : "border-gray-300"
               }`}
             />
+            {/* 密码强度指示器（W-F5）*/}
+            {formData.password && (
+              <PasswordStrengthBar password={formData.password} />
+            )}
             {passwordError && (
               <p id="register-password-error" className="text-xs text-red-500 mt-1">
                 {passwordError}
@@ -415,6 +419,43 @@ function RegisterForm() {
         </form>
       </div>
     </main>
+  );
+}
+
+// W-F5 密码强度指示器：基于长度 + 字符种类打分，显示弱/中/强
+function getPasswordStrength(pwd: string): { score: number; label: string; color: string; bg: string } {
+  let score = 0;
+  if (pwd.length >= 8) score++;
+  if (pwd.length >= 12) score++;
+  if (/[a-z]/.test(pwd) && /[A-Z]/.test(pwd)) score++;
+  if (/\d/.test(pwd)) score++;
+  if (/[^a-zA-Z0-9]/.test(pwd)) score++;
+
+  if (score <= 2) return { score, label: '弱', color: 'text-red-500', bg: 'bg-red-500' };
+  if (score <= 3) return { score, label: '中', color: 'text-yellow-600', bg: 'bg-yellow-500' };
+  return { score, label: '强', color: 'text-green-600', bg: 'bg-green-500' };
+}
+
+function PasswordStrengthBar({ password }: { password: string }) {
+  const { label, color, bg } = getPasswordStrength(password);
+  // 显示成 3 段进度条：弱填 1 段、中填 2 段、强填 3 段
+  const filledSegments = label === '弱' ? 1 : label === '中' ? 2 : 3;
+  return (
+    <div className="mt-1.5 flex items-center gap-2">
+      <div className="flex-1 flex gap-1" aria-hidden="true">
+        {[0, 1, 2].map((i) => (
+          <div
+            key={i}
+            className={`h-1.5 flex-1 rounded-full transition-colors ${
+              i < filledSegments ? bg : 'bg-gray-200'
+            }`}
+          />
+        ))}
+      </div>
+      <span className={`text-xs font-medium ${color}`} aria-live="polite">
+        强度：{label}
+      </span>
+    </div>
   );
 }
 

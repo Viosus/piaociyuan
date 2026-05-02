@@ -6,6 +6,7 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { apiGet } from '@/lib/api';
+import { useConfirm } from '@/components/ConfirmDialog';
 
 type User = {
   id: string;
@@ -19,6 +20,7 @@ type User = {
 export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const confirm = useConfirm();
   const [user, setUser] = useState<User | null>(null);
   const [showUserMenu, setShowUserMenu] = useState(false);
 
@@ -80,7 +82,13 @@ export default function Sidebar() {
 
   // 登出
   const handleLogout = async () => {
-    const confirmed = window.confirm("确定要退出登录吗？");
+    const confirmed = await confirm({
+      title: '退出登录',
+      message: '确定要退出登录吗？退出后需重新登录才能使用账户功能。',
+      confirmText: '退出登录',
+      cancelText: '取消',
+      danger: true,
+    });
     if (!confirmed) return;
 
     try {
