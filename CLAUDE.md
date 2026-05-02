@@ -306,20 +306,35 @@ Error response from daemon: removal of container <hash> is already in progress
 - A：docker compose 异常退出 / rename 留下带前缀的僵尸容器（前缀 `<hash>_` 是 rename 痕迹），顶占了主容器名
 - B：`docker rm -f` 是**异步触发**的，命令返回成功但 daemon 实际清理可能 1-3s 才完成。这期间 docker compose up 撞上 "removal in progress"
 
-**修复**：deploy.yml 在 `docker compose up -d` 之前完整清理 + **轮询等待删除完成**：
+**症状 C**（B 修了之后又出现的、最隐蔽的一种）：上面的轮询在 14 次后报 `✓ all piaociyuan-web containers cleaned up`，但下一秒 `docker compose up -d web` 仍报：
+```
+Conflict. The container name "/piaociyuan-web" is already in use by container "befffe1b5d2..."
+```
+而 `befffe1b5d2` 的 ID 跟 compose 当前正要 create 的 ID 一样——说明 daemon 自己在 create 过程中跟自己撞名。
+
+**根因 C**：`docker rm -f` 在 daemon 端有**两层**异步：
+- 第一层：容器对象从 `docker ps -a` 中消失（毫秒级）
+- 第二层：name reservation / namespace / cgroup / 网络栈完全释放（可能 5-30s）
+
+`docker ps -a` 只反映第一层；polling 通过后 daemon 仍可能持有 name 锁。这时 `docker compose up` 的 create 调用拿到了 ID（namespace 创建得逞），但 daemon 在写入 name → ID 映射时撞上残留的旧 reservation，错误信息把"残留 reservation 的所属 ID"误显示为新 create 的 ID（实际是 daemon 内部 race），用户看到一头雾水。
+
+**铁律**：**不要手动 `docker rm` + 自己 polling 来给 docker compose 清场**。compose 有自家工具，能跟 daemon 同步推进 service-state 与 name reservation：
 ```bash
-# 清掉所有名字含 piaociyuan-web 的容器（包括带前缀的僵尸）
-docker rm -f piaociyuan-web 2>/dev/null || true
+# 清场（compose-aware）
+docker compose stop web 2>/dev/null || true
+docker compose rm -f -s web 2>/dev/null || true
+
+# 极端情况下游离的容器（手动 rename 残留等）再清一次
 docker ps -a --filter "name=piaociyuan-web" --format "{{.ID}}" | xargs -r docker rm -f 2>/dev/null || true
 
-# 轮询等容器真消失（rm -f 异步，最多等 30s）
-for i in $(seq 1 15); do
-  if ! docker ps -a --filter "name=piaociyuan-web" --format "{{.ID}}" | grep -q .; then break; fi
-  sleep 2
-done
+# daemon 释放 namespace / cgroup / 网络栈是异步的，稍等防 race
+sleep 5
 
-docker compose up -d web
+# 强制重建 + 清孤儿
+docker compose up -d --force-recreate --remove-orphans web
 ```
+`--force-recreate` 让 compose 即使认为容器存在也强制重建；`--remove-orphans` 清理旧 service 的孤儿容器。这一套组合拳替代了原来的 polling 方案，因为它从两个维度同时下手：compose state 和 daemon name reservation 一起推进，不再有 polling 的"看上去干净了实际没"的盲区。
+
 `|| true` 兜底首次 deploy 没旧容器时 `set -e` 不误终止。
 
 ### npm workspace hoisting：peer dep 必须能被 root 包找到（2026-05-02 新增）
