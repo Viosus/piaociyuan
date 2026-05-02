@@ -290,6 +290,23 @@ docker compose build web         # ~10 min，跟 CI 100% 等价
 
 不愿意每次都跑 docker build 也无所谓——但要明白每次 push 没 docker 验证 = 概率性 CI fail + 一次 ECS deploy 周期延误（~6 min/次）。3 次 fail 的累计成本 > 一次 docker build 的成本。
 
+### Docker compose 容器名冲突（2026-05-02 新增）
+**症状**：CI deploy 阶段挂在 `docker compose up -d web`：
+```
+Conflict. The container name "/<hash>_piaociyuan-web" is already in use
+by container "<other_hash>". You have to remove (or rename) that container.
+```
+build 完全成功（image 也 built 出来了），仅 up 失败。
+
+**根因**：之前某次 docker compose 异常退出 / rename 留下带前缀的僵尸容器（前缀如 `<hash>_` 是 docker rename 痕迹），顶占了 `piaociyuan-web` 名字。docker compose up 创建同名容器时冲突。
+
+**修复**：deploy.yml 在 `docker compose up -d` 之前显式清理：
+```bash
+docker rm -f piaociyuan-web 2>/dev/null || true
+docker ps -a --filter "name=piaociyuan-web" --format "{{.ID}}" | xargs -r docker rm -f 2>/dev/null || true
+```
+`|| true` 兜底首次 deploy 没旧容器时 `set -e` 不误终止。
+
 ### npm workspace hoisting：peer dep 必须能被 root 包找到（2026-05-02 新增）
 **症状**：上面的 three 案例还有一层 hoisting 微妙：删了又加 three 后，CI 的 `npm ci` 把 `three` 装在 `apps/web/node_modules/three`，但 `@google/model-viewer` 的 transitive dep `@monogrid/gainmap-js` 被 hoist 到 root `/node_modules/@monogrid/`。从 `/node_modules/@monogrid/gainmap-js/` 走 Node 模块解析找不到 `apps/web/node_modules/three`（属于另一棵子树）。
 
