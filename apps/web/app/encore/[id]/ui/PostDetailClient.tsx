@@ -7,6 +7,7 @@ import FavoriteButton from "@/app/encore/ui/FavoriteButton";
 import { useSocket } from "@/hooks/useSocket";
 import { formatRelativeTime } from "@/lib/time";
 import { useToast } from "@/components/Toast";
+import ImageGallery from "@/components/ImageGallery";
 
 type PostDetail = {
   id: string;
@@ -70,7 +71,6 @@ export default function PostDetailClient({ postId }: { postId: string }) {
   const [post, setPost] = useState<PostDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
   const [isLiking, setIsLiking] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
@@ -497,82 +497,10 @@ export default function PostDetailClient({ postId }: { postId: string }) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
           {/* 左侧：图片区域 */}
           <div className="lg:sticky lg:top-14 lg:h-[calc(100vh-3.5rem)] bg-black flex items-center justify-center">
-            {post.images.length > 0 ? (
-              <div className="relative w-full h-full">
-                <img
-                  src={post.images[currentImageIndex].imageUrl}
-                  alt={post.content.substring(0, 50)}
-                  className="w-full h-full object-contain"
-                />
-
-                {/* 图片指示器 */}
-                {post.images.length > 1 && (
-                  <>
-                    {/* 左右切换按钮 */}
-                    {currentImageIndex > 0 && (
-                      <button
-                        onClick={() => setCurrentImageIndex(currentImageIndex - 1)}
-                        className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center text-white transition"
-                      >
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                        </svg>
-                      </button>
-                    )}
-
-                    {currentImageIndex < post.images.length - 1 && (
-                      <button
-                        onClick={() => setCurrentImageIndex(currentImageIndex + 1)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center text-white transition"
-                      >
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </button>
-                    )}
-
-                    {/* 图片计数 */}
-                    <div className="absolute top-4 right-4 px-3 py-1.5 bg-black/60 backdrop-blur-sm rounded-full text-white text-sm">
-                      {currentImageIndex + 1} / {post.images.length}
-                    </div>
-
-                    {/* 缩略图导航 */}
-                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-                      {post.images.map((_, index) => (
-                        <button
-                          key={index}
-                          onClick={() => setCurrentImageIndex(index)}
-                          className={`w-2 h-2 rounded-full transition ${
-                            index === currentImageIndex
-                              ? "bg-white w-8"
-                              : "bg-white/50 hover:bg-white/70"
-                          }`}
-                        />
-                      ))}
-                    </div>
-                  </>
-                )}
-              </div>
-            ) : (
-              <div className="flex items-center justify-center w-full h-full text-white/60">
-                <div className="text-center">
-                  <svg
-                    className="w-16 h-16 mx-auto mb-2"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                    />
-                  </svg>
-                  <p>无图片</p>
-                </div>
-              </div>
-            )}
+            <ImageGallery
+              images={post.images}
+              alt={post.content.substring(0, 50)}
+            />
           </div>
 
           {/* 右侧：内容区域 */}
