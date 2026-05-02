@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SplashScreen from 'expo-splash-screen';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider } from './src/contexts/AuthContext';
 import { SocketProvider } from './src/contexts/SocketContext';
 import AppNavigator from './src/navigation/AppNavigator';
@@ -56,15 +57,17 @@ export default function App() {
 
   // User has consented - render the full app
   return (
-    <ErrorBoundary>
-      <ToastProvider>
-        <AuthProvider>
-          <SocketProvider>
-            <AppNavigator />
-            <StatusBar style="auto" />
-          </SocketProvider>
-        </AuthProvider>
-      </ToastProvider>
-    </ErrorBoundary>
+    <SafeAreaProvider>
+      <ErrorBoundary>
+        <ToastProvider>
+          <AuthProvider>
+            <SocketProvider>
+              <AppNavigator />
+              <StatusBar style="auto" />
+            </SocketProvider>
+          </AuthProvider>
+        </ToastProvider>
+      </ErrorBoundary>
+    </SafeAreaProvider>
   );
 }
