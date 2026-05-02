@@ -88,48 +88,61 @@ export default function SettingsPage() {
               为了账户安全，请定期更换密码。修改后将自动登出，请用新密码重新登录。
             </p>
 
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-5" aria-describedby={error ? "settings-error" : undefined}>
               <div>
-                <label className="block text-sm text-white/70 mb-2">当前密码</label>
+                <label htmlFor="settings-current-password" className="block text-sm text-white/70 mb-2">当前密码</label>
                 <input
+                  id="settings-current-password"
                   type="password"
                   value={currentPassword}
                   onChange={(e) => setCurrentPassword(e.target.value)}
                   placeholder="请输入当前密码"
                   autoComplete="current-password"
+                  aria-invalid={!!error}
+                  aria-describedby={error ? "settings-error" : undefined}
                   className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder:text-white/30 focus:outline-none focus:border-[#46467A] focus:bg-white/10 transition"
                   disabled={loading || success}
                 />
               </div>
 
               <div>
-                <label className="block text-sm text-white/70 mb-2">新密码</label>
+                <label htmlFor="settings-new-password" className="block text-sm text-white/70 mb-2">新密码</label>
                 <input
+                  id="settings-new-password"
                   type="password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   placeholder="至少 8 位，需含字母和数字"
                   autoComplete="new-password"
+                  aria-invalid={!!error}
+                  aria-describedby={error ? "settings-error" : undefined}
                   className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder:text-white/30 focus:outline-none focus:border-[#46467A] focus:bg-white/10 transition"
                   disabled={loading || success}
                 />
               </div>
 
               <div>
-                <label className="block text-sm text-white/70 mb-2">确认新密码</label>
+                <label htmlFor="settings-confirm-password" className="block text-sm text-white/70 mb-2">确认新密码</label>
                 <input
+                  id="settings-confirm-password"
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="请再次输入新密码"
                   autoComplete="new-password"
+                  aria-invalid={!!error}
+                  aria-describedby={error ? "settings-error" : undefined}
                   className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder:text-white/30 focus:outline-none focus:border-[#46467A] focus:bg-white/10 transition"
                   disabled={loading || success}
                 />
               </div>
 
               {error && (
-                <div className="px-4 py-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-300 text-sm">
+                <div
+                  id="settings-error"
+                  role="alert"
+                  className="px-4 py-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-300 text-sm"
+                >
                   {error}
                 </div>
               )}
