@@ -15,6 +15,7 @@ import { colors, spacing, fontSize } from '../constants/config';
 import { getMyTickets, type Ticket } from '../services/tickets';
 import { useAuth } from '../contexts/AuthContext';
 import TicketFilterSheet, { type TicketFilters } from '../components/TicketFilterSheet';
+import { ErrorState } from '../components/ErrorState';
 
 const STATUS_FILTERS = [
   { label: '全部', value: '' },
@@ -305,11 +306,7 @@ export default function TicketsScreen() {
       </View>
 
       {error ? (
-        <View style={styles.centerContainer}>
-          <Text style={styles.errorText}>😕</Text>
-          <Text style={styles.errorMessage}>{error}</Text>
-          <Text style={styles.errorHint}>下拉刷新重试</Text>
-        </View>
+        <ErrorState message={error} onRetry={loadTickets} />
       ) : (
         <FlatList
           data={tickets}

@@ -13,6 +13,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, FONT_SIZES } from '../constants/config';
+import { ErrorState } from '../components/ErrorState';
 import { getEvents, searchEvents, type Event, type EventFilters } from '../services/events';
 import EventCard from '../components/EventCard';
 import EventFilterSheet from '../components/EventFilterSheet';
@@ -170,13 +171,7 @@ export default function EventsScreen() {
   }
 
   if (error) {
-    return (
-      <View style={styles.centerContainer}>
-        <Ionicons name="alert-circle-outline" size={64} color={COLORS.error} />
-        <Text style={styles.errorMessage}>{error}</Text>
-        <Text style={styles.errorHint}>下拉刷新重试</Text>
-      </View>
-    );
+    return <ErrorState message={error} onRetry={loadEvents} />;
   }
 
   const filterCount = getActiveFilterCount();

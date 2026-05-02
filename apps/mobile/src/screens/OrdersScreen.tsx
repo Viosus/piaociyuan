@@ -13,6 +13,7 @@ import { useNavigation } from '@react-navigation/native';
 import { colors, spacing, fontSize } from '../constants/config';
 import { getMyOrders, cancelOrder, payOrder, refundOrder, type Order } from '../services/orders';
 import OrderCard from '../components/OrderCard';
+import { ErrorState } from '../components/ErrorState';
 
 const STATUS_TABS = [
   { label: '全部', value: '' },
@@ -173,11 +174,7 @@ export default function OrdersScreen() {
       </View>
 
       {error ? (
-        <View style={styles.centerContainer}>
-          <Text style={styles.errorText}>😕</Text>
-          <Text style={styles.errorMessage}>{error}</Text>
-          <Text style={styles.errorHint}>下拉刷新重试</Text>
-        </View>
+        <ErrorState message={error} onRetry={() => loadOrders(1)} />
       ) : (
         <FlatList
           data={orders}
