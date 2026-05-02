@@ -62,22 +62,44 @@ jobs:
             echo "=== docker compose build web ==="
             docker compose build web
 
-            echo "=== compose-aware stop + remove web ==="
-            # 用 docker compose 自家工具清，让 compose 的内部 service-state 和 daemon
-            # 的容器/name reservation 同步推进。
-            # 之前手动 docker rm + 轮询 docker ps 的方式有 race：daemon 的 name
-            # reservation 比 ps 列表更新慢，polling 通过后 up 仍报 name conflict。
-            docker compose stop web 2>/dev/null || true
-            docker compose rm -f -s web 2>/dev/null || true
+            echo "=== stop + wait + remove web (block until daemon-side fully clean) ==="
+            # 之前 docker compose rm -f -s 的问题：命令返回成功 = API 调用接受，
+            # 但 daemon 实际删除是异步的。下一秒 up 撞上"removal in progress"。
+            # 这次用 docker stop + docker wait 阻塞到容器真正退出，再 rm，再 polling
+            # docker inspect 直到失败（确认对象彻底从 daemon 消失），才进入 up。
+            container_id=$(docker ps -aq --filter "name=piaociyuan-web" | head -1)
+            if [ -n "$container_id" ]; then
+              echo "Found existing container: $container_id"
+              # 30s graceful stop（允许 web 自己 SIGTERM 退出，避免数据丢失）
+              docker stop -t 30 "$container_id" 2>/dev/null || true
+              # 阻塞直到容器进入 exited 状态（daemon 端真停了）
+              docker wait "$container_id" 2>/dev/null || true
+              # 强删
+              docker rm -f "$container_id" 2>/dev/null || true
 
-            # 也清掉 compose 之外的"游离"容器（极端情况下手动 rename / 历史残留）
-            docker ps -a --filter "name=piaociyuan-web" --format "{{.ID}}" | xargs -r docker rm -f 2>/dev/null || true
+              # 轮询 inspect，直到 daemon 报"No such container"
+              # (docker inspect 失败 = 对象彻底从 daemon 状态机消失)
+              for i in $(seq 1 30); do
+                if ! docker inspect "$container_id" >/dev/null 2>&1; then
+                  echo "✓ container $container_id fully removed (took ${i}s)"
+                  break
+                fi
+                sleep 1
+              done
+            else
+              echo "No existing piaociyuan-web container, skip cleanup"
+            fi
 
-            # daemon 释放 namespace / cgroup / 网络栈是异步的，稍等防 race
-            sleep 5
+            # 还有"游离"容器（手动 rename 残留 / 异常退出留下的带前缀僵尸）也清掉
+            stragglers=$(docker ps -aq --filter "name=piaociyuan-web")
+            if [ -n "$stragglers" ]; then
+              echo "Cleaning up straggler containers: $stragglers"
+              echo "$stragglers" | xargs -r docker rm -f 2>/dev/null || true
+              sleep 3
+            fi
 
             echo "=== docker compose up -d --force-recreate web ==="
-            # --force-recreate：即使 compose 内部 state 认为容器已经存在也强制重建
+            # --force-recreate：即使 compose state 认为容器存在也强制重建
             # --remove-orphans：清理已从 compose 移除的服务的孤儿容器
             docker compose up -d --force-recreate --remove-orphans web
 

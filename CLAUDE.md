@@ -318,24 +318,45 @@ Conflict. The container name "/piaociyuan-web" is already in use by container "b
 
 `docker ps -a` 只反映第一层；polling 通过后 daemon 仍可能持有 name 锁。这时 `docker compose up` 的 create 调用拿到了 ID（namespace 创建得逞），但 daemon 在写入 name → ID 映射时撞上残留的旧 reservation，错误信息把"残留 reservation 的所属 ID"误显示为新 create 的 ID（实际是 daemon 内部 race），用户看到一头雾水。
 
-**铁律**：**不要手动 `docker rm` + 自己 polling 来给 docker compose 清场**。compose 有自家工具，能跟 daemon 同步推进 service-state 与 name reservation：
+**症状 D**（C 修了之后又出现的，第四种变种）：把"手动 rm + polling"换成 compose-aware 的 `docker compose rm -f -s web` 之后，下一秒 `docker compose up --force-recreate` 仍报：
+```
+Error response from daemon: removal of container 19c604cbad07... is already in progress
+```
+这次是 daemon 自己在异步处理 rm 还没结束就被告知"再 create 同名"。
+
+**根因 D**：`docker compose rm -f -s web` 返回的"成功"是 **"API 接受请求"** 不是 **"删除完成"**。daemon 的实际清理是异步管道（关网络 / 卸载文件系统 / 释放 cgroup / 解除名字 reservation），可能 5-30 秒。compose 自己的 `--force-recreate` 内部也是 stop → rm → create 三连，第三步触发时 daemon 还在做第二步收尾，于是撞上"removal in progress"。
+
+**最终铁律（症状 A→B→C→D 累计教训）**：用 `docker stop` + `docker wait` + `docker rm` + `docker inspect` 做四段同步等待，让 shell 真的看到 daemon 端清干净再进入 `up`：
 ```bash
-# 清场（compose-aware）
-docker compose stop web 2>/dev/null || true
-docker compose rm -f -s web 2>/dev/null || true
+container_id=$(docker ps -aq --filter "name=piaociyuan-web" | head -1)
+if [ -n "$container_id" ]; then
+  docker stop -t 30 "$container_id" 2>/dev/null || true
+  # docker wait 阻塞直到容器进入 exited 状态——daemon 端真停了，不是异步触发
+  docker wait "$container_id" 2>/dev/null || true
+  docker rm -f "$container_id" 2>/dev/null || true
 
-# 极端情况下游离的容器（手动 rename 残留等）再清一次
-docker ps -a --filter "name=piaociyuan-web" --format "{{.ID}}" | xargs -r docker rm -f 2>/dev/null || true
+  # docker inspect 失败 = 对象彻底从 daemon 状态机消失（比 docker ps 更靠谱）
+  for i in $(seq 1 30); do
+    if ! docker inspect "$container_id" >/dev/null 2>&1; then break; fi
+    sleep 1
+  done
+fi
 
-# daemon 释放 namespace / cgroup / 网络栈是异步的，稍等防 race
-sleep 5
+# 游离容器（rename 残留 / 异常退出留下的带前缀僵尸）也清
+stragglers=$(docker ps -aq --filter "name=piaociyuan-web")
+if [ -n "$stragglers" ]; then
+  echo "$stragglers" | xargs -r docker rm -f 2>/dev/null || true
+  sleep 3
+fi
 
-# 强制重建 + 清孤儿
 docker compose up -d --force-recreate --remove-orphans web
 ```
-`--force-recreate` 让 compose 即使认为容器存在也强制重建；`--remove-orphans` 清理旧 service 的孤儿容器。这一套组合拳替代了原来的 polling 方案，因为它从两个维度同时下手：compose state 和 daemon name reservation 一起推进，不再有 polling 的"看上去干净了实际没"的盲区。
 
-`|| true` 兜底首次 deploy 没旧容器时 `set -e` 不误终止。
+**关键点**：
+- `docker wait` 是阻塞调用，daemon 端容器真正进入 exited 之前不返回——这是 shell 唯一能"看到"daemon 完成停止的方式
+- `docker inspect <id>` 失败（exit != 0）= 对象在 daemon 状态机里彻底没了——这比 `docker ps -a` 更晚，因为 ps 在对象 marked-for-removal 时就已经不显示，而 inspect 会一直能查到直到清理完毕
+- `|| true` 兜底首次 deploy 没旧容器时 `set -e` 不误终止
+- **不要再相信 `docker compose rm -f -s` 单独能给后续操作让出干净状态**——它跟 `docker rm -f` 一样是异步触发，不是同步等待
 
 ### npm workspace hoisting：peer dep 必须能被 root 包找到（2026-05-02 新增）
 **症状**：上面的 three 案例还有一层 hoisting 微妙：删了又加 three 后，CI 的 `npm ci` 把 `three` 装在 `apps/web/node_modules/three`，但 `@google/model-viewer` 的 transitive dep `@monogrid/gainmap-js` 被 hoist 到 root `/node_modules/@monogrid/`。从 `/node_modules/@monogrid/gainmap-js/` 走 Node 模块解析找不到 `apps/web/node_modules/three`（属于另一棵子树）。
