@@ -27,7 +27,9 @@ export async function GET(
       return NextResponse.json({ error: '无权访问该对话' }, { status: 403 });
     }
 
-    // 获取对话信息
+    // 获取对话信息（仅取最新 50 条消息，更早的走 /messages?page= 分页接口）
+    const INITIAL_MESSAGES_LIMIT = 50;
+
     const conversation = await prisma.conversation.findUnique({
       where: { id: conversationId },
       include: {
@@ -44,7 +46,8 @@ export async function GET(
           },
         },
         messages: {
-          orderBy: { createdAt: 'asc' },
+          orderBy: { createdAt: 'desc' },
+          take: INITIAL_MESSAGES_LIMIT,
           include: {
             sender: {
               select: {
@@ -61,6 +64,9 @@ export async function GET(
     if (!conversation) {
       return NextResponse.json({ error: '对话不存在' }, { status: 404 });
     }
+
+    const messageTotal = await prisma.message.count({ where: { conversationId } });
+    const messagesAsc = conversation.messages.slice().reverse();
 
     const isGroup = conversation.type === 'group';
 
@@ -100,8 +106,10 @@ export async function GET(
       avatar: isGroup ? conversation.avatar : null,
       memberCount: isGroup ? conversation.memberCount : null,
       myRole: participant.role,
-      // 消息
-      messages: conversation.messages,
+      // 消息（仅最新 50 条，老消息走分页）
+      messages: messagesAsc,
+      messageTotal,
+      pageSize: INITIAL_MESSAGES_LIMIT,
     });
   } catch (error) {
     console.error('获取对话消息失败:', error);
