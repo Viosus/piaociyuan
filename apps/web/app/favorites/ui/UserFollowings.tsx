@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/Toast";
+import { useConfirm } from "@/components/ConfirmDialog";
 
 type User = {
   id: string;
@@ -26,6 +27,7 @@ type Following = {
 export default function UserFollowings() {
   const router = useRouter();
   const toast = useToast();
+  const confirm = useConfirm();
   const [followings, setFollowings] = useState<Following[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -70,9 +72,14 @@ export default function UserFollowings() {
   };
 
   const handleUnfollow = async (userId: string, nickname: string) => {
-    if (!confirm(`确定要取消关注「${nickname}」吗？`)) {
-      return;
-    }
+    const ok = await confirm({
+      title: "取消关注",
+      message: `确定要取消关注「${nickname}」吗？取消后将不再看到 TA 的最新动态。`,
+      confirmText: "取消关注",
+      cancelText: "再想想",
+      danger: true,
+    });
+    if (!ok) return;
 
     try {
       const token = localStorage.getItem("token");

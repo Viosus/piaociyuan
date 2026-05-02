@@ -8,6 +8,7 @@ import PrivacyConsent from "@/components/PrivacyConsent";
 import OfflineBanner from "@/components/OfflineBanner";
 import { ConfirmProvider } from "@/components/ConfirmDialog";
 import { ToastProvider } from "@/components/Toast";
+import ScrollToTop from "@/components/ScrollToTop";
 
 
 const geistSans = Geist({
@@ -82,6 +83,7 @@ export default function RootLayout({
           <div className="ml-20 h-screen overflow-y-auto transition-all duration-300 pt-20" style={{ marginRight: 'var(--right-sidebar-width, 64px)' }}>
             {children}
           </div>
+          <ScrollToTop />
           <PrivacyConsent />
           <footer className="fixed bottom-0 left-0 right-0 z-10 py-2 text-center">
             <a

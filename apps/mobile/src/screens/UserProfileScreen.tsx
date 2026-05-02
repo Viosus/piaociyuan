@@ -106,6 +106,22 @@ export default function UserProfileScreen() {
   const handleFollow = async () => {
     if (followLoading) return;
 
+    // M-S3 取消关注前需要 native confirm（防误点）
+    if (isFollowing) {
+      const confirmed = await new Promise<boolean>((resolve) => {
+        Alert.alert(
+          '取消关注',
+          `确定要取消关注「${user?.nickname || '该用户'}」吗？`,
+          [
+            { text: '再想想', style: 'cancel', onPress: () => resolve(false) },
+            { text: '取消关注', style: 'destructive', onPress: () => resolve(true) },
+          ],
+          { cancelable: true, onDismiss: () => resolve(false) }
+        );
+      });
+      if (!confirmed) return;
+    }
+
     try {
       setFollowLoading(true);
       const response = isFollowing ? await unfollowUser(userId) : await followUser(userId);

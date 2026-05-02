@@ -285,9 +285,26 @@ export default function UserProfileClient({ userId }: { userId: string }) {
             </div>
           </div>
 
-          {/* 关注按钮 */}
+          {/* 关注按钮 + W-S7 互关 badge */}
           {!isSelf && (
-            <div className="mt-5">
+            <div className="mt-5 space-y-2">
+              {user.isFollowing && user.isFollowedBy && (
+                <div className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-pink-50 border border-pink-200 rounded-full text-xs font-medium text-pink-600">
+                  <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      fillRule="evenodd"
+                      d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  互相关注
+                </div>
+              )}
+              {!user.isFollowing && user.isFollowedBy && (
+                <div className="text-center text-xs text-[#1a1a1f]/60">
+                  TA 关注了你
+                </div>
+              )}
               <button
                 onClick={handleFollowToggle}
                 disabled={followBusy}
@@ -298,7 +315,7 @@ export default function UserProfileClient({ userId }: { userId: string }) {
                 } ${followBusy ? "opacity-60 cursor-not-allowed" : ""}`}
                 style={user.isFollowing ? { background: "rgba(255, 255, 255, 0.8)" } : undefined}
               >
-                {user.isFollowing ? "已关注" : "关注"}
+                {user.isFollowing ? "已关注" : user.isFollowedBy ? "回关" : "关注"}
               </button>
             </div>
           )}
