@@ -309,6 +309,10 @@ export default function ChatScreen() {
         contentContainerStyle={messages.length === 0 ? styles.emptyList : styles.messageList}
         onEndReached={handleLoadOlder}
         onEndReachedThreshold={0.3}
+        removeClippedSubviews
+        initialNumToRender={15}
+        maxToRenderPerBatch={10}
+        windowSize={11}
       />
 
       {/* 消息输入框 */}

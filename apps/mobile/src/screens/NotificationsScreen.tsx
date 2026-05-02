@@ -321,6 +321,10 @@ export default function NotificationsScreen() {
             tintColor={COLORS.primary}
           />
         }
+        removeClippedSubviews
+        initialNumToRender={15}
+        maxToRenderPerBatch={10}
+        windowSize={11}
       />
     </View>
   );

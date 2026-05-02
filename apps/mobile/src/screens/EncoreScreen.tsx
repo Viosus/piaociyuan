@@ -544,6 +544,10 @@ export default function EncoreScreen() {
             />
           }
           contentContainerStyle={conversations.length === 0 ? styles.emptyList : undefined}
+          removeClippedSubviews
+          initialNumToRender={12}
+          maxToRenderPerBatch={10}
+          windowSize={11}
         />
       </View>
     );

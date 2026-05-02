@@ -348,13 +348,26 @@ class ApiClient {
           throw new Error('请求超时或已取消');
         }
 
+        // 永久性 4xx 不重试（除 408 超时 / 429 限流）。M-N4：避免对 401/403/404 这种业务确定的错误盲目重试浪费时间和电池
+        const status = error?.response?.status;
+        if (
+          typeof status === 'number' &&
+          status >= 400 &&
+          status < 500 &&
+          status !== 408 &&
+          status !== 429
+        ) {
+          break;
+        }
+
         // 如果是最后一次重试，抛出错误
         if (attempt === retry) {
           break;
         }
 
-        // 等待后重试
-        await new Promise((resolve) => setTimeout(resolve, retryDelay * (attempt + 1)));
+        // M-N4 指数退避：1s, 2s, 4s（最多 8s 上限）
+        const delay = Math.min(retryDelay * Math.pow(2, attempt), 8000);
+        await new Promise((resolve) => setTimeout(resolve, delay));
       }
     }
 

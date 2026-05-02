@@ -5,7 +5,8 @@
  */
 
 import React from 'react';
-import { View, Image, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { colors, spacing, shadows, GRADIENTS } from '../constants/config';
 
@@ -94,6 +95,9 @@ export const Avatar: React.FC<AvatarProps> = ({
             height: avatarSize,
             borderRadius: avatarSize / 2,
           }}
+          contentFit="cover"
+          transition={150}
+          cachePolicy="memory-disk"
         />
       ) : (
         <LinearGradient

@@ -255,6 +255,10 @@ export default function EventsScreen() {
             )}
           </View>
         }
+        removeClippedSubviews
+        initialNumToRender={8}
+        maxToRenderPerBatch={6}
+        windowSize={9}
       />
 
       <EventFilterSheet

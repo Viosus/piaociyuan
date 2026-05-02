@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { Image } from 'expo-image';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../contexts/AuthContext';
@@ -54,7 +55,15 @@ export default function ProfileScreen() {
       }
     }
 
-    return <Image source={{ uri: avatar }} style={styles.avatar} />;
+    return (
+      <Image
+        source={{ uri: avatar }}
+        style={styles.avatar}
+        contentFit="cover"
+        transition={150}
+        cachePolicy="memory-disk"
+      />
+    );
   };
 
   const menuSections = [
