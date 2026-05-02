@@ -63,6 +63,10 @@ jobs:
             docker compose build web
 
             echo "=== docker compose up -d web ==="
+            # 显式 stop + rm 旧容器，避免 'container name already in use' 冲突
+            # （之前 docker rename 残留 / 异常退出留下的僵尸容器会顶占 piaociyuan-web 名字）
+            docker rm -f piaociyuan-web 2>/dev/null || true
+            docker ps -a --filter "name=piaociyuan-web" --format "{{.ID}}" | xargs -r docker rm -f 2>/dev/null || true
             docker compose up -d web
 
             echo "=== waiting for container health ==="
