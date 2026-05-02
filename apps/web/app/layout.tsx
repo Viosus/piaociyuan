@@ -11,14 +11,24 @@ import { ToastProvider } from "@/components/Toast";
 import ScrollToTop from "@/components/ScrollToTop";
 
 
+// W-P2 字体策略：
+// - subsets ["latin"]：app 中文为主，Geist 不含中文 glyph，中文走系统字体
+//   fallback；只 subset latin 减少首次下载量
+// - display: 'swap'：先用系统字体渲染，避免 FOIT（隐字白屏）
+// - preload: true 仅给 sans（主要 UI 字体），mono 用得少不预载省连接
+// - adjustFontFallback: true（默认）会按 metrics 调系统字体大小，减少 CLS
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+  display: "swap",
+  preload: true,
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  display: "swap",
+  preload: false,
 });
 
 // Viewport 配置 - 移动端优化

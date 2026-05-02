@@ -20,6 +20,7 @@ import type { Conversation } from '../services/messages';
 import { useSocket } from '../contexts/SocketContext';
 import { useMessagingStore } from '../stores/messagingStore';
 import { Avatar } from '../components/Avatar';
+import { SkeletonList } from '../components/Skeleton';
 import { getRelativeTime } from '../utils/date';
 
 export default function ConversationsScreen() {
@@ -148,9 +149,7 @@ export default function ConversationsScreen() {
   if (conversationsLoading && conversations.length === 0) {
     return (
       <SafeAreaView style={styles.container}>
-        <View style={styles.centerContainer}>
-          <ActivityIndicator size="large" color={colors.primary} />
-        </View>
+        <SkeletonList rows={6} />
       </SafeAreaView>
     );
   }

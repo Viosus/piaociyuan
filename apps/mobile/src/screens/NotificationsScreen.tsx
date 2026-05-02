@@ -11,6 +11,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { LoadingOverlay } from '../components/LoadingOverlay';
+import { SkeletonList } from '../components/Skeleton';
 import { EmptyState } from '../components/EmptyState';
 import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS } from '../constants/config';
 import {
@@ -300,7 +301,12 @@ export default function NotificationsScreen() {
   };
 
   if (loading && !refreshing) {
-    return <LoadingOverlay visible={true} />;
+    return (
+      <View style={styles.container}>
+        {renderFilterTabs()}
+        <SkeletonList rows={8} />
+      </View>
+    );
   }
 
   return (

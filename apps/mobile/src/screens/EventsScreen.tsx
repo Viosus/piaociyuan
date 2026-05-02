@@ -19,6 +19,7 @@ import EventCard from '../components/EventCard';
 import EventFilterSheet from '../components/EventFilterSheet';
 import { SearchBar } from '../components/SearchBar';
 import { BackToTopFab, useBackToTopFab } from '../components/BackToTopFab';
+import { SkeletonCardList } from '../components/Skeleton';
 
 const CATEGORY_TABS = [
   { id: 'all', label: '全部' },
@@ -169,8 +170,8 @@ export default function EventsScreen() {
 
   if (loading) {
     return (
-      <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color={COLORS.primary} />
+      <View style={styles.container}>
+        <SkeletonCardList count={3} />
       </View>
     );
   }
