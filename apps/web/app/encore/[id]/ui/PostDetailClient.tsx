@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import FavoriteButton from "@/app/encore/ui/FavoriteButton";
@@ -8,6 +8,32 @@ import { useSocket } from "@/hooks/useSocket";
 import { formatRelativeTime } from "@/lib/time";
 import { useToast } from "@/components/Toast";
 import ImageGallery from "@/components/ImageGallery";
+
+type ReplyItem = {
+  id: string;
+  content: string;
+  likeCount: number;
+  createdAt: string;
+  user: {
+    id: string;
+    nickname: string;
+    avatar?: string | null;
+  };
+};
+
+type CommentItem = {
+  id: string;
+  content: string;
+  likeCount: number;
+  replyCount: number;
+  createdAt: string;
+  user: {
+    id: string;
+    nickname: string;
+    avatar?: string | null;
+  };
+  replies: ReplyItem[];
+};
 
 type PostDetail = {
   id: string;
@@ -41,29 +67,13 @@ type PostDetail = {
     width?: number;
     height?: number;
   }[];
-  comments: {
-    id: string;
-    content: string;
-    likeCount: number;
-    createdAt: string;
-    user: {
-      id: string;
-      nickname: string;
-      avatar?: string;
-    };
-    replies: {
-      id: string;
-      content: string;
-      likeCount: number;
-      createdAt: string;
-      user: {
-        id: string;
-        nickname: string;
-        avatar?: string;
-      };
-    }[];
-  }[];
+  comments: CommentItem[];
+  commentTotal?: number;
+  commentHasMore?: boolean;
 };
+
+const COMMENTS_PAGE_SIZE = 10;
+const REPLIES_FETCH_SIZE = 50;
 
 export default function PostDetailClient({ postId }: { postId: string }) {
   const router = useRouter();
@@ -80,6 +90,17 @@ export default function PostDetailClient({ postId }: { postId: string }) {
   const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [commentSort, setCommentSort] = useState<'newest' | 'hottest'>('newest');
 
+  // W-S3 评论分页 + 嵌套回复展开
+  const [comments, setComments] = useState<CommentItem[]>([]);
+  const [commentTotal, setCommentTotal] = useState(0);
+  const [commentPage, setCommentPage] = useState(1);
+  const [commentHasMore, setCommentHasMore] = useState(false);
+  const [commentLoadingMore, setCommentLoadingMore] = useState(false);
+  const [expandedReplies, setExpandedReplies] = useState<Map<string, ReplyItem[]>>(
+    new Map()
+  );
+  const [loadingReplies, setLoadingReplies] = useState<Set<string>>(new Set());
+
   // WebSocket 实时评论
   const { isConnected, emit, getSocket } = useSocket({ autoConnect: true });
 
@@ -95,6 +116,17 @@ export default function PostDetailClient({ postId }: { postId: string }) {
     }
   }, [post]);
 
+  // sort 切换时重拉评论；首次默认 sort='newest' 跟初始 post.comments 一致，跳过 first run
+  const isFirstSortRun = useRef(true);
+  useEffect(() => {
+    if (isFirstSortRun.current) {
+      isFirstSortRun.current = false;
+      return;
+    }
+    if (!post) return;
+    reloadComments(commentSort);
+  }, [commentSort]);
+
   // 加入帖子房间 + 监听实时评论
   useEffect(() => {
     if (!isConnected || !postId) return;
@@ -104,18 +136,70 @@ export default function PostDetailClient({ postId }: { postId: string }) {
 
     socket.emit('post:join', { postId });
 
-    const handleNewComment = (data: { postId: string; comment: PostDetail['comments'][0] }) => {
+    type IncomingComment = {
+      id: string;
+      content: string;
+      likeCount: number;
+      createdAt: string;
+      user: { id: string; nickname: string; avatar?: string | null };
+      parentComment?: { id: string; user: { id: string; nickname: string } } | null;
+    };
+
+    const handleNewComment = (data: { postId: string; comment: IncomingComment }) => {
       if (data.postId !== postId) return;
-      setPost((prev) => {
-        if (!prev) return prev;
-        const exists = prev.comments.some((c) => c.id === data.comment.id);
-        if (exists) return prev;
-        return {
-          ...prev,
-          commentCount: prev.commentCount + 1,
-          comments: [data.comment, ...prev.comments],
-        };
-      });
+
+      // 实时新评论：顶层加到列表头；回复加到对应 expandedReplies（如果该评论已展开）
+      const incoming = data.comment;
+      if (incoming.parentComment?.id) {
+        // 它是某条评论的回复
+        const parentId = incoming.parentComment.id;
+        // 如果父评论已展开 → 追加到展开列表
+        setExpandedReplies((prev) => {
+          if (!prev.has(parentId)) return prev;
+          const next = new Map(prev);
+          const list = next.get(parentId) || [];
+          if (list.some((r) => r.id === incoming.id)) return prev;
+          next.set(parentId, [
+            ...list,
+            {
+              id: incoming.id,
+              content: incoming.content,
+              likeCount: incoming.likeCount,
+              createdAt: incoming.createdAt,
+              user: incoming.user,
+            },
+          ]);
+          return next;
+        });
+        // 父评论 replyCount + 1（无论是否展开）
+        setComments((prev) =>
+          prev.map((c) =>
+            c.id === parentId ? { ...c, replyCount: c.replyCount + 1 } : c
+          )
+        );
+      } else {
+        // 顶层评论
+        setComments((prev) => {
+          if (prev.some((c) => c.id === incoming.id)) return prev;
+          return [
+            {
+              id: incoming.id,
+              content: incoming.content,
+              likeCount: incoming.likeCount,
+              replyCount: 0,
+              createdAt: incoming.createdAt,
+              user: incoming.user,
+              replies: [],
+            },
+            ...prev,
+          ];
+        });
+        setCommentTotal((t) => t + 1);
+      }
+
+      setPost((prev) =>
+        prev ? { ...prev, commentCount: prev.commentCount + 1 } : prev
+      );
     };
 
     socket.on('comment:new', handleNewComment);
@@ -142,12 +226,103 @@ export default function PostDetailClient({ postId }: { postId: string }) {
         throw new Error(data.message || "加载失败");
       }
 
-      setPost(data.data);
+      const detail: PostDetail = data.data;
+      setPost(detail);
+      // 同步评论 state（W-S3）
+      setComments(detail.comments || []);
+      setCommentTotal(detail.commentTotal ?? detail.comments?.length ?? 0);
+      setCommentHasMore(detail.commentHasMore ?? false);
+      setCommentPage(1);
+      setExpandedReplies(new Map());
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : String(error) || "加载失败");
     } finally {
       setLoading(false);
     }
+  };
+
+  // 切换 sort 时重新拉取评论（不重 reload 整个 post）
+  const reloadComments = async (sort: 'newest' | 'hottest') => {
+    try {
+      setCommentLoadingMore(true);
+      const res = await fetch(
+        `/api/posts/${postId}/comments?page=1&pageSize=${COMMENTS_PAGE_SIZE}&sort=${sort}`
+      );
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.message || '加载评论失败');
+      setComments(data.data);
+      setCommentTotal(data.pagination?.total ?? data.data.length);
+      setCommentHasMore(
+        data.pagination ? data.pagination.page < data.pagination.totalPages : false
+      );
+      setCommentPage(1);
+      setExpandedReplies(new Map());
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : '加载评论失败');
+    } finally {
+      setCommentLoadingMore(false);
+    }
+  };
+
+  const loadMoreComments = async () => {
+    if (commentLoadingMore || !commentHasMore) return;
+    try {
+      setCommentLoadingMore(true);
+      const nextPage = commentPage + 1;
+      const res = await fetch(
+        `/api/posts/${postId}/comments?page=${nextPage}&pageSize=${COMMENTS_PAGE_SIZE}&sort=${commentSort}`
+      );
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.message || '加载更多评论失败');
+      setComments((prev) => {
+        const seen = new Set(prev.map((c) => c.id));
+        const fresh = (data.data as CommentItem[]).filter((c) => !seen.has(c.id));
+        return [...prev, ...fresh];
+      });
+      setCommentPage(nextPage);
+      setCommentHasMore(
+        data.pagination ? data.pagination.page < data.pagination.totalPages : false
+      );
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : '加载更多评论失败');
+    } finally {
+      setCommentLoadingMore(false);
+    }
+  };
+
+  const expandReplies = async (commentId: string) => {
+    if (expandedReplies.has(commentId) || loadingReplies.has(commentId)) return;
+    try {
+      setLoadingReplies((prev) => new Set(prev).add(commentId));
+      const res = await fetch(
+        `/api/posts/${postId}/comments?parentId=${commentId}&page=1&pageSize=${REPLIES_FETCH_SIZE}&sort=newest`
+      );
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.message || '加载回复失败');
+      // API returns newest-first; reverse to chronological for natural conversation order
+      const replies: ReplyItem[] = (data.data as ReplyItem[]).slice().reverse();
+      setExpandedReplies((prev) => {
+        const next = new Map(prev);
+        next.set(commentId, replies);
+        return next;
+      });
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : '加载回复失败');
+    } finally {
+      setLoadingReplies((prev) => {
+        const next = new Set(prev);
+        next.delete(commentId);
+        return next;
+      });
+    }
+  };
+
+  const collapseReplies = (commentId: string) => {
+    setExpandedReplies((prev) => {
+      const next = new Map(prev);
+      next.delete(commentId);
+      return next;
+    });
   };
 
   const checkLikeStatus = async () => {
@@ -379,16 +554,6 @@ export default function PostDetailClient({ postId }: { postId: string }) {
   };
 
   const formatDate = formatRelativeTime;
-
-  // 评论排序（前端排序，配合 API sort 参数）
-  const sortedComments = post
-    ? [...post.comments].sort((a, b) => {
-        if (commentSort === 'hottest') {
-          return b.likeCount - a.likeCount || new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-        }
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-      })
-    : [];
 
   if (loading) {
     return (
@@ -714,99 +879,162 @@ export default function PostDetailClient({ postId }: { postId: string }) {
                   </div>
                 </div>
 
-                {sortedComments.length > 0 ? (
+                {comments.length > 0 ? (
                   <div className="space-y-4">
-                    {sortedComments.map((comment) => (
-                      <div key={comment.id} className="space-y-2">
-                        {/* 主评论 */}
-                        <div className="flex items-start gap-3">
-                          <Link
-                            href={`/u/${comment.user.id}`}
-                            className="flex-shrink-0 hover:opacity-80 transition"
-                          >
-                            {comment.user.avatar ? (
-                              <img
-                                src={comment.user.avatar}
-                                alt={comment.user.nickname}
-                                className="w-8 h-8 rounded-full object-cover"
-                              />
-                            ) : (
-                              <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
-                                {comment.user.nickname[0]}
+                    {comments.map((comment) => {
+                      const expanded = expandedReplies.get(comment.id);
+                      const isExpanded = !!expanded;
+                      const isLoadingThisReply = loadingReplies.has(comment.id);
+                      const visibleReplies = expanded ?? comment.replies;
+                      const remainingReplies = comment.replyCount - comment.replies.length;
+                      return (
+                        <div key={comment.id} className="space-y-2">
+                          <div className="flex items-start gap-3">
+                            <Link
+                              href={`/u/${comment.user.id}`}
+                              className="flex-shrink-0 hover:opacity-80 transition"
+                            >
+                              {comment.user.avatar ? (
+                                <img
+                                  src={comment.user.avatar}
+                                  alt={comment.user.nickname}
+                                  className="w-8 h-8 rounded-full object-cover"
+                                />
+                              ) : (
+                                <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                                  {comment.user.nickname[0]}
+                                </div>
+                              )}
+                            </Link>
+
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <Link
+                                  href={`/u/${comment.user.id}`}
+                                  className="text-sm font-medium text-gray-900 hover:text-[#46467A] transition"
+                                >
+                                  {comment.user.nickname}
+                                </Link>
+                                <span className="text-xs text-gray-400">
+                                  {formatDate(comment.createdAt)}
+                                </span>
                               </div>
-                            )}
-                          </Link>
+                              <p className="text-sm text-gray-700">{comment.content}</p>
 
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                              <Link
-                                href={`/u/${comment.user.id}`}
-                                className="text-sm font-medium text-gray-900 hover:text-[#46467A] transition"
-                              >
-                                {comment.user.nickname}
-                              </Link>
-                              <span className="text-xs text-gray-400">
-                                {formatDate(comment.createdAt)}
-                              </span>
-                            </div>
-                            <p className="text-sm text-gray-700">{comment.content}</p>
-
-                            {/* 回复 */}
-                            {comment.replies.length > 0 && (
-                              <div className="mt-2 ml-4 space-y-2">
-                                {comment.replies.map((reply) => (
-                                  <div key={reply.id} className="flex items-start gap-2">
-                                    <Link
-                                      href={`/u/${reply.user.id}`}
-                                      className="flex-shrink-0 hover:opacity-80 transition"
-                                    >
-                                      {reply.user.avatar ? (
-                                        <img
-                                          src={reply.user.avatar}
-                                          alt={reply.user.nickname}
-                                          className="w-6 h-6 rounded-full object-cover"
-                                        />
-                                      ) : (
-                                        <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
-                                          {reply.user.nickname[0]}
+                              {/* 回复列表 */}
+                              {visibleReplies.length > 0 && (
+                                <div className="mt-2 ml-4 space-y-2">
+                                  {visibleReplies.map((reply) => (
+                                    <div key={reply.id} className="flex items-start gap-2">
+                                      <Link
+                                        href={`/u/${reply.user.id}`}
+                                        className="flex-shrink-0 hover:opacity-80 transition"
+                                      >
+                                        {reply.user.avatar ? (
+                                          <img
+                                            src={reply.user.avatar}
+                                            alt={reply.user.nickname}
+                                            className="w-6 h-6 rounded-full object-cover"
+                                          />
+                                        ) : (
+                                          <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                                            {reply.user.nickname[0]}
+                                          </div>
+                                        )}
+                                      </Link>
+                                      <div className="flex-1 min-w-0">
+                                        <div className="flex items-center gap-2">
+                                          <Link
+                                            href={`/u/${reply.user.id}`}
+                                            className="text-xs font-medium text-gray-900 hover:text-[#46467A] transition"
+                                          >
+                                            {reply.user.nickname}
+                                          </Link>
+                                          <span className="text-xs text-gray-400">
+                                            {formatDate(reply.createdAt)}
+                                          </span>
                                         </div>
-                                      )}
-                                    </Link>
-                                    <div className="flex-1 min-w-0">
-                                      <div className="flex items-center gap-2">
-                                        <Link
-                                          href={`/u/${reply.user.id}`}
-                                          className="text-xs font-medium text-gray-900 hover:text-[#46467A] transition"
-                                        >
-                                          {reply.user.nickname}
-                                        </Link>
-                                        <span className="text-xs text-gray-400">
-                                          {formatDate(reply.createdAt)}
-                                        </span>
+                                        <p className="text-xs text-gray-600 mt-0.5">
+                                          {reply.content}
+                                        </p>
                                       </div>
-                                      <p className="text-xs text-gray-600 mt-0.5">
-                                        {reply.content}
-                                      </p>
                                     </div>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </div>
+                                  ))}
+                                </div>
+                              )}
 
-                          <button className="text-gray-400 hover:text-red-500 transition flex-shrink-0">
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                              />
-                            </svg>
-                          </button>
+                              {/* 展开/收起回复 toggle */}
+                              {!isExpanded && remainingReplies > 0 && (
+                                <button
+                                  type="button"
+                                  onClick={() => expandReplies(comment.id)}
+                                  disabled={isLoadingThisReply}
+                                  className="mt-2 ml-4 text-xs text-[#46467A] hover:text-[#5A5A8E] font-medium disabled:opacity-50 flex items-center gap-1"
+                                >
+                                  {isLoadingThisReply ? (
+                                    <>
+                                      <span className="w-3 h-3 border border-[#46467A] border-t-transparent rounded-full animate-spin"></span>
+                                      加载中...
+                                    </>
+                                  ) : (
+                                    <>
+                                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                      </svg>
+                                      查看全部 {comment.replyCount} 条回复
+                                    </>
+                                  )}
+                                </button>
+                              )}
+                              {isExpanded && comment.replyCount > comment.replies.length && (
+                                <button
+                                  type="button"
+                                  onClick={() => collapseReplies(comment.id)}
+                                  className="mt-2 ml-4 text-xs text-gray-500 hover:text-gray-700 flex items-center gap-1"
+                                >
+                                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                                  </svg>
+                                  收起回复
+                                </button>
+                              )}
+                            </div>
+
+                            <button className="text-gray-400 hover:text-red-500 transition flex-shrink-0">
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                                />
+                              </svg>
+                            </button>
+                          </div>
                         </div>
+                      );
+                    })}
+
+                    {/* 加载更多评论 */}
+                    {commentHasMore && (
+                      <div className="pt-2 text-center">
+                        <button
+                          type="button"
+                          onClick={loadMoreComments}
+                          disabled={commentLoadingMore}
+                          className="px-5 py-2 text-sm text-[#46467A] hover:bg-gray-100 rounded-full border border-gray-200 transition disabled:opacity-50 inline-flex items-center gap-2"
+                        >
+                          {commentLoadingMore ? (
+                            <>
+                              <span className="w-4 h-4 border-2 border-[#46467A] border-t-transparent rounded-full animate-spin"></span>
+                              加载中...
+                            </>
+                          ) : (
+                            <>加载更多评论（剩 {commentTotal - comments.length} 条）</>
+                          )}
+                        </button>
                       </div>
-                    ))}
+                    )}
                   </div>
                 ) : (
                   <div className="text-center py-8 text-gray-400">

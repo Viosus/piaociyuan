@@ -77,6 +77,12 @@ export async function GET(
               orderBy: {
                 createdAt: 'asc',
               },
+              take: 3,
+            },
+            _count: {
+              select: {
+                replies: true,
+              },
             },
           },
           orderBy: {
@@ -117,6 +123,11 @@ export async function GET(
         { status: 404 }
       );
     }
+
+    // 统计顶层评论总数（用于"加载更多"分页判断）
+    const topLevelCommentCount = await prisma.comment.count({
+      where: { postId, parentId: null },
+    });
 
     // 增加浏览量（每个用户只能增加一次）
     let viewCountIncrement = 0;
@@ -208,6 +219,7 @@ export async function GET(
         id: comment.id,
         content: comment.content,
         likeCount: comment.likeCount,
+        replyCount: comment._count.replies,
         createdAt: comment.createdAt.toISOString(),
         user: {
           id: comment.user.id,
@@ -226,6 +238,8 @@ export async function GET(
           },
         })),
       })),
+      commentTotal: topLevelCommentCount,
+      commentHasMore: topLevelCommentCount > post.comments.length,
     };
 
     return NextResponse.json({

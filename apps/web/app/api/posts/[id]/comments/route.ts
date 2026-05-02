@@ -57,6 +57,7 @@ export async function GET(req: NextRequest, { params }: Props) {
     }
 
     // 3️⃣ 查询评论列表
+    // 顶层评论自带前 3 条 replies；查 replies（parentId 指定时）则不递归
     const [comments, total] = await Promise.all([
       prisma.comment.findMany({
         where,
@@ -78,6 +79,19 @@ export async function GET(req: NextRequest, { params }: Props) {
                 },
               },
             },
+          },
+          replies: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  nickname: true,
+                  avatar: true,
+                },
+              },
+            },
+            orderBy: { createdAt: 'asc' as const },
+            take: parentId ? 0 : 3,
           },
           _count: {
             select: {
@@ -107,6 +121,17 @@ export async function GET(req: NextRequest, { params }: Props) {
         nickname: comment.user.nickname || '匿名用户',
         avatar: comment.user.avatar || null,
       },
+      replies: comment.replies.map((reply) => ({
+        id: reply.id,
+        content: reply.content,
+        likeCount: reply.likeCount,
+        createdAt: reply.createdAt.toISOString(),
+        user: {
+          id: reply.user.id,
+          nickname: reply.user.nickname || '匿名用户',
+          avatar: reply.user.avatar || null,
+        },
+      })),
       parentComment: comment.parent
         ? {
             id: comment.parent.id,
