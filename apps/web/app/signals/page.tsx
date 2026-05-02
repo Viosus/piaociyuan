@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { getSaleStatusInfo, EVENT_CATEGORY_LABELS, EVENT_CATEGORY_ICONS, EVENT_CATEGORY_COLORS, EventCategory, SALE_STATUS_LABELS, SALE_STATUS_COLORS, SaleStatus } from "@/lib/eventUtils";
+import EmptyState from "@/components/EmptyState";
 
 type Event = {
   id: number;
@@ -126,12 +127,28 @@ export default function SignalsPage() {
       </div>
 
       {filteredEvents.length === 0 ? (
-        <div className="max-w-6xl mx-auto text-center py-12">
-          <p className="text-gray-500 text-lg">
-            {selectedCategory === "all"
-              ? "暂无进行中的活动"
-              : `暂无${EVENT_CATEGORY_LABELS[selectedCategory as EventCategory]}类活动`}
-          </p>
+        <div className="max-w-6xl mx-auto">
+          <EmptyState
+            icon="🎫"
+            title={
+              selectedCategory === "all"
+                ? "暂无进行中的活动"
+                : `暂无${EVENT_CATEGORY_LABELS[selectedCategory as EventCategory]}类活动`
+            }
+            description={
+              selectedCategory === "all"
+                ? "活动正在筹备中，刷新看看后续上线"
+                : "试试切换其他分类看看"
+            }
+            action={
+              selectedCategory !== "all"
+                ? {
+                    label: "查看全部活动",
+                    onClick: () => setSelectedCategory("all"),
+                  }
+                : undefined
+            }
+          />
         </div>
       ) : (
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">

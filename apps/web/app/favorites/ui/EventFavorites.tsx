@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { apiGet, apiDelete } from "@/lib/api";
 import { useToast } from "@/components/Toast";
+import EmptyState from "@/components/EmptyState";
 
 interface Tier {
   id: number;
@@ -199,20 +200,16 @@ export default function EventFavorites() {
 
       {/* 活动列表 */}
       {!loading && followedEvents.length === 0 && (
-        <div className="text-center py-12 bg-white rounded-lg border border-[#FFEBF5]">
-          <div className="text-6xl mb-4">🔍</div>
-          <p className="text-gray-600 mb-4">
-            {filter === "all"
+        <EmptyState
+          icon="🔍"
+          title={
+            filter === "all"
               ? "你还没有关注任何活动"
-              : `没有找到${getStatusLabel(filter).text}的活动`}
-          </p>
-          <Link
-            href="/events"
-            className="inline-block px-6 py-2 bg-purple-500 text-white rounded-full hover:bg-purple-600 transition"
-          >
-            去看看活动
-          </Link>
-        </div>
+              : `没有找到${getStatusLabel(filter).text}的活动`
+          }
+          description="关注感兴趣的活动，第一时间获取开票提醒"
+          action={{ label: "去看看活动", href: "/events" }}
+        />
       )}
 
       {!loading && followedEvents.length > 0 && (

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import EmptyState from "@/components/EmptyState";
 
 type Post = {
   id: string;
@@ -127,16 +128,12 @@ export default function PostFavorites() {
   return (
     <>
       {favorites.length === 0 ? (
-        <div className="text-center py-12 bg-white rounded-lg border border-[#FFEBF5]">
-          <div className="text-6xl mb-4">📌</div>
-          <p className="text-gray-600 mb-4">还没有收藏任何帖子</p>
-          <Link
-            href="/encore"
-            className="inline-block px-6 py-2 bg-purple-500 text-white rounded-full hover:bg-purple-600 transition"
-          >
-            去安可区看看
-          </Link>
-        </div>
+        <EmptyState
+          icon="📌"
+          title="还没有收藏任何帖子"
+          description="收藏喜欢的演出动态，方便回头再看"
+          action={{ label: "去安可区看看", href: "/encore" }}
+        />
       ) : (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
