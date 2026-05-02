@@ -32,6 +32,29 @@ export default function LoginScreen({ navigation }: any) {
     try {
       await login(phone, password, rememberMe);
     } catch (error: any) {
+      // 账号被锁（5 次错密码触发）— 显示倒计时
+      if (error.code === 'ACCOUNT_LOCKED') {
+        const sec = error.retryAfterSec ?? 60;
+        const minutes = Math.ceil(sec / 60);
+        Alert.alert(
+          '账号已被锁定',
+          `连续输入错误密码次数过多，请 ${
+            sec >= 60 ? `${minutes} 分钟` : `${sec} 秒`
+          }后再试。`
+        );
+        return;
+      }
+
+      // 普通密码错 / 账号不存在 — 显示剩余尝试次数（如有）
+      if (typeof error.attemptsLeft === 'number') {
+        Alert.alert(
+          '登录失败',
+          `${error.message || '账号或密码错误'}\n剩余尝试次数：${error.attemptsLeft}`
+        );
+        return;
+      }
+
+      // 其他错误（网络挂、第三方登录等）
       Alert.alert('登录失败', error.message || '请检查手机号和密码');
     } finally {
       setLoading(false);

@@ -102,25 +102,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const login = async (phone: string, password: string, rememberMe: boolean = false) => {
-    try {
-      const response = await apiLogin({ phone, password, rememberMe });
+    const response = await apiLogin({ phone, password, rememberMe });
 
-      if (response.ok && response.data) {
-        const { accessToken, refreshToken, user: userData } = response.data;
+    if (response.ok && response.data) {
+      const { accessToken, refreshToken, user: userData } = response.data;
 
-        await saveAccessToken(accessToken);
-        await saveRefreshToken(refreshToken);
-        await saveUser(userData);
+      await saveAccessToken(accessToken);
+      await saveRefreshToken(refreshToken);
+      await saveUser(userData);
 
-        apiClient.setAccessToken(accessToken);
-        apiClient.setRefreshToken(refreshToken);
-        setUser(userData);
-      } else {
-        throw new Error(response.error || '登录失败');
-      }
-    } catch (error) {
-      throw error;
+      apiClient.setAccessToken(accessToken);
+      apiClient.setRefreshToken(refreshToken);
+      setUser(userData);
+      return;
     }
+
+    // 失败：抛带 code / retryAfterSec / attemptsLeft 的 error，UI 据此显示细化文案
+    const err = new Error(response.error || '登录失败') as Error & {
+      code?: string;
+      retryAfterSec?: number;
+      attemptsLeft?: number;
+    };
+    err.code = response.code;
+    err.retryAfterSec = response.retryAfterSec;
+    err.attemptsLeft = response.attemptsLeft;
+    throw err;
   };
 
   const register = async (

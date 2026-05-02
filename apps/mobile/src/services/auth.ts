@@ -1,5 +1,6 @@
 import { apiClient } from './api';
 import { getRefreshToken, clearAuth } from './storage';
+import { APP_CONFIG } from '../constants/config';
 import type { ApiResponse, User, UserAuthSummary } from '@piaociyuan/shared';
 
 /**
@@ -19,6 +20,13 @@ interface LoginResponse {
   user: UserAuthSummary;
 }
 
+// 登录响应除了标准 ApiResponse 字段外，可能含账号级退避相关元数据
+export interface LoginApiResponse extends ApiResponse<LoginResponse> {
+  code?: string; // e.g. 'ACCOUNT_LOCKED'
+  retryAfterSec?: number;
+  attemptsLeft?: number;
+}
+
 interface RegisterRequest {
   phone?: string;
   email?: string;
@@ -29,16 +37,24 @@ interface RegisterRequest {
 
 /**
  * 用户登录
+ *
+ * 注意：不走 apiClient.post —— apiClient 在非 2xx 时会把 error 拍扁成
+ * 字符串 throw，丢失 code / retryAfterSec / attemptsLeft 等关键元数据。
+ * 登录场景这些字段是 UI 必需的（区分账号被锁 vs 密码错 vs 剩余尝试次数），
+ * 所以直接 fetch 返回原始 response.json()。
  */
-export async function login(data: LoginRequest): Promise<ApiResponse<LoginResponse>> {
+export async function login(data: LoginRequest): Promise<LoginApiResponse> {
   const { phone, email, password, rememberMe = false } = data;
   const account = phone || email;
 
-  return apiClient.post<LoginResponse>('/api/auth/login', {
-    account,
-    password,
-    rememberMe,
+  const url = `${APP_CONFIG.API_URL}/api/auth/login`;
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ account, password, rememberMe, loginMethod: 'password' }),
   });
+
+  return (await response.json()) as LoginApiResponse;
 }
 
 /**
