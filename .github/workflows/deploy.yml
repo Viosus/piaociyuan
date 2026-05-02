@@ -62,11 +62,25 @@ jobs:
             echo "=== docker compose build web ==="
             docker compose build web
 
-            echo "=== docker compose up -d web ==="
-            # 显式 stop + rm 旧容器，避免 'container name already in use' 冲突
+            echo "=== cleanup old/zombie piaociyuan-web containers ==="
+            # 显式清理旧/僵尸容器，避免 'container name already in use' 冲突
             # （之前 docker rename 残留 / 异常退出留下的僵尸容器会顶占 piaociyuan-web 名字）
             docker rm -f piaociyuan-web 2>/dev/null || true
             docker ps -a --filter "name=piaociyuan-web" --format "{{.ID}}" | xargs -r docker rm -f 2>/dev/null || true
+
+            # docker rm -f 异步触发删除，daemon 实际清理可能 1-3s 才完成。
+            # 这期间 docker compose up 会撞上 'removal in progress' 错。
+            # 轮询等待容器真正消失，最多 30s。
+            for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15; do
+              if ! docker ps -a --filter "name=piaociyuan-web" --format "{{.ID}}" | grep -q .; then
+                echo "✓ all piaociyuan-web containers cleaned up (took ${i}*2 seconds)"
+                break
+              fi
+              echo "Waiting for container removal to complete... (attempt $i)"
+              sleep 2
+            done
+
+            echo "=== docker compose up -d web ==="
             docker compose up -d web
 
             echo "=== waiting for container health ==="

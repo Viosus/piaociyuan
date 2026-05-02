@@ -290,20 +290,35 @@ docker compose build web         # ~10 min，跟 CI 100% 等价
 
 不愿意每次都跑 docker build 也无所谓——但要明白每次 push 没 docker 验证 = 概率性 CI fail + 一次 ECS deploy 周期延误（~6 min/次）。3 次 fail 的累计成本 > 一次 docker build 的成本。
 
-### Docker compose 容器名冲突（2026-05-02 新增）
-**症状**：CI deploy 阶段挂在 `docker compose up -d web`：
+### Docker compose 容器名冲突 + 异步删除 race（2026-05-02 新增）
+**症状 A**：CI deploy 阶段挂在 `docker compose up -d web`：
 ```
 Conflict. The container name "/<hash>_piaociyuan-web" is already in use
 by container "<other_hash>". You have to remove (or rename) that container.
 ```
-build 完全成功（image 也 built 出来了），仅 up 失败。
 
-**根因**：之前某次 docker compose 异常退出 / rename 留下带前缀的僵尸容器（前缀如 `<hash>_` 是 docker rename 痕迹），顶占了 `piaociyuan-web` 名字。docker compose up 创建同名容器时冲突。
+**症状 B**（先修了 A 但又出现的）：
+```
+Error response from daemon: removal of container <hash> is already in progress
+```
 
-**修复**：deploy.yml 在 `docker compose up -d` 之前显式清理：
+**根因**：
+- A：docker compose 异常退出 / rename 留下带前缀的僵尸容器（前缀 `<hash>_` 是 rename 痕迹），顶占了主容器名
+- B：`docker rm -f` 是**异步触发**的，命令返回成功但 daemon 实际清理可能 1-3s 才完成。这期间 docker compose up 撞上 "removal in progress"
+
+**修复**：deploy.yml 在 `docker compose up -d` 之前完整清理 + **轮询等待删除完成**：
 ```bash
+# 清掉所有名字含 piaociyuan-web 的容器（包括带前缀的僵尸）
 docker rm -f piaociyuan-web 2>/dev/null || true
 docker ps -a --filter "name=piaociyuan-web" --format "{{.ID}}" | xargs -r docker rm -f 2>/dev/null || true
+
+# 轮询等容器真消失（rm -f 异步，最多等 30s）
+for i in $(seq 1 15); do
+  if ! docker ps -a --filter "name=piaociyuan-web" --format "{{.ID}}" | grep -q .; then break; fi
+  sleep 2
+done
+
+docker compose up -d web
 ```
 `|| true` 兜底首次 deploy 没旧容器时 `set -e` 不误终止。
 
