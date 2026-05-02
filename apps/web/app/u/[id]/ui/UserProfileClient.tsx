@@ -2,7 +2,9 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useToast } from "@/components/Toast";
+import Breadcrumb from "@/components/Breadcrumb";
 
 interface UserProfile {
   id: string;
@@ -52,6 +54,7 @@ function authHeaders(): HeadersInit {
 
 export default function UserProfileClient({ userId }: { userId: string }) {
   const toast = useToast();
+  const router = useRouter();
   const [user, setUser] = useState<UserProfile | null>(null);
   const [profileLoading, setProfileLoading] = useState(true);
   const [profileError, setProfileError] = useState<string | null>(null);
@@ -61,6 +64,7 @@ export default function UserProfileClient({ userId }: { userId: string }) {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [followBusy, setFollowBusy] = useState(false);
+  const [dmBusy, setDmBusy] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   const observerRef = useRef<IntersectionObserver | null>(null);
@@ -140,6 +144,35 @@ export default function UserProfileClient({ userId }: { userId: string }) {
     return () => observerRef.current?.disconnect();
   }, [page, hasMore, postsLoading, loadPosts]);
 
+  // W-S2 进入私聊：复用已存在的对话或创建新对话，跳到 /messages/[id]
+  const handleSendMessage = async () => {
+    if (!user || dmBusy) return;
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.warning("请先登录");
+      router.push(`/auth/login?returnUrl=${encodeURIComponent(`/u/${userId}`)}`);
+      return;
+    }
+    setDmBusy(true);
+    try {
+      const res = await fetch("/api/messages/conversations", {
+        method: "POST",
+        headers: { ...authHeaders(), "Content-Type": "application/json" },
+        body: JSON.stringify({ otherUserId: userId }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.error || "无法开启对话");
+        return;
+      }
+      router.push(`/messages/${data.id}`);
+    } catch {
+      toast.error("网络错误，请稍后再试");
+    } finally {
+      setDmBusy(false);
+    }
+  };
+
   const handleFollowToggle = async () => {
     if (!user || followBusy) return;
     const token = localStorage.getItem("token");
@@ -208,6 +241,12 @@ export default function UserProfileClient({ userId }: { userId: string }) {
   return (
     <div className="min-h-screen pb-12 px-4">
       <div className="max-w-3xl mx-auto pt-6">
+        <Breadcrumb
+          items={[
+            { label: "安可区", href: "/encore" },
+            { label: user.nickname || "个人主页" },
+          ]}
+        />
         {/* 用户卡片 */}
         <div
           className="rounded-2xl p-6 mb-6 shadow"
@@ -305,18 +344,29 @@ export default function UserProfileClient({ userId }: { userId: string }) {
                   TA 关注了你
                 </div>
               )}
-              <button
-                onClick={handleFollowToggle}
-                disabled={followBusy}
-                className={`w-full py-2.5 rounded-xl font-medium transition ${
-                  user.isFollowing
-                    ? "border border-[#46467A]/30 text-[#46467A] hover:bg-[#46467A]/10"
-                    : "bg-[#46467A] text-white hover:opacity-90"
-                } ${followBusy ? "opacity-60 cursor-not-allowed" : ""}`}
-                style={user.isFollowing ? { background: "rgba(255, 255, 255, 0.8)" } : undefined}
-              >
-                {user.isFollowing ? "已关注" : user.isFollowedBy ? "回关" : "关注"}
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleFollowToggle}
+                  disabled={followBusy}
+                  className={`flex-1 py-2.5 rounded-xl font-medium transition ${
+                    user.isFollowing
+                      ? "border border-[#46467A]/30 text-[#46467A] hover:bg-[#46467A]/10"
+                      : "bg-[#46467A] text-white hover:opacity-90"
+                  } ${followBusy ? "opacity-60 cursor-not-allowed" : ""}`}
+                  style={user.isFollowing ? { background: "rgba(255, 255, 255, 0.8)" } : undefined}
+                >
+                  {user.isFollowing ? "已关注" : user.isFollowedBy ? "回关" : "关注"}
+                </button>
+                <button
+                  onClick={handleSendMessage}
+                  disabled={dmBusy}
+                  className="flex-1 py-2.5 rounded-xl font-medium border border-[#46467A]/30 text-[#46467A] hover:bg-[#46467A]/10 transition disabled:opacity-60 disabled:cursor-not-allowed"
+                  style={{ background: "rgba(255, 255, 255, 0.8)" }}
+                  title="发送私信"
+                >
+                  {dmBusy ? "..." : "发私信"}
+                </button>
+              </div>
             </div>
           )}
         </div>

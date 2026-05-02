@@ -9,6 +9,7 @@ import { useSocket } from "@/hooks/useSocket";
 import { formatRelativeTime } from "@/lib/time";
 import { useToast } from "@/components/Toast";
 import ImageGallery from "@/components/ImageGallery";
+import Breadcrumb from "@/components/Breadcrumb";
 
 type ReplyItem = {
   id: string;
@@ -660,6 +661,18 @@ export default function PostDetailClient({ postId }: { postId: string }) {
 
       {/* 主内容区 */}
       <div className="max-w-7xl mx-auto">
+        <div className="px-4 pt-3">
+          <Breadcrumb
+            items={[
+              { label: "安可区", href: "/encore" },
+              {
+                label: post.user.nickname
+                  ? `${post.user.nickname} 的动态`
+                  : "动态详情",
+              },
+            ]}
+          />
+        </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
           {/* 左侧：图片区域 */}
           <div className="lg:sticky lg:top-14 lg:h-[calc(100vh-3.5rem)] bg-black flex items-center justify-center">

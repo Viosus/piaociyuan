@@ -2,7 +2,7 @@
  * 安可区页面 - 包含私聊群聊和帖子专区两个 Tab
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -15,10 +15,11 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import { FlashList } from '@shopify/flash-list';
+import { FlashList, type FlashListRef } from '@shopify/flash-list';
 import { colors, spacing, fontSize } from '../constants/config';
 import { PostCard } from '../components/PostCard';
 import { Avatar } from '../components/Avatar';
+import { BackToTopFab, useBackToTopFab } from '../components/BackToTopFab';
 import { getPosts, likePost, unlikePost, type Post } from '../services/posts';
 import { favoritePost, unfavoritePost } from '../services/favorites';
 import type { Conversation } from '../services/messages';
@@ -66,6 +67,10 @@ export default function EncoreScreen() {
   const [page, setPage] = useState(1);
   const [selectedSort, setSelectedSort] = useState<'latest' | 'hot' | 'following'>('latest');
   const [postsError, setPostsError] = useState<string | null>(null);
+
+  // M-L5 帖子流回顶
+  const postsListRef = useRef<FlashListRef<Post>>(null);
+  const postsFab = useBackToTopFab(postsListRef);
 
   // 初始化时根据未读数决定默认 Tab
   useEffect(() => {
@@ -474,6 +479,7 @@ export default function EncoreScreen() {
       <View style={styles.tabContent}>
         {renderPostsSortTabs()}
         <FlashList
+          ref={postsListRef}
           data={posts}
           keyExtractor={(item: Post) => item.id.toString()}
           renderItem={({ item }: { item: Post }) => (
@@ -499,6 +505,14 @@ export default function EncoreScreen() {
           }
           onEndReached={handleLoadMore}
           onEndReachedThreshold={0.3}
+          onScroll={postsFab.handleScroll}
+          scrollEventThrottle={64}
+        />
+        {/* M-L5 回顶 FAB（在创建按钮上方） */}
+        <BackToTopFab
+          visible={postsFab.visible}
+          onPress={postsFab.scrollToTop}
+          bottom={140}
         />
         {/* 发帖按钮 */}
         <TouchableOpacity

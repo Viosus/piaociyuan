@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { getEventById, getTiersByEventId } from "@/lib/database";
 import FollowButton from "./components/FollowButton";
+import Breadcrumb from "@/components/Breadcrumb";
 import { getSaleStatusInfo, formatEventDateTime, getEventCountdown, EVENT_CATEGORY_LABELS, EVENT_CATEGORY_ICONS, EVENT_CATEGORY_COLORS, EventCategory } from "@/lib/eventUtils";
 
 type Props = { params: Promise<{ id: string }> };
@@ -46,6 +47,14 @@ export default async function EventDetailPage({ params }: Props) {
 
   return (
     <main className="min-h-screen">
+      <div className="max-w-6xl mx-auto px-4 pt-2">
+        <Breadcrumb
+          items={[
+            { label: "宇宙信号", href: "/signals" },
+            { label: event.name },
+          ]}
+        />
+      </div>
       <section className="relative">
         <img
           src={event.cover}

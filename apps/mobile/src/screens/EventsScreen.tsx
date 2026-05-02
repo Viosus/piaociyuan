@@ -18,6 +18,7 @@ import { getEvents, searchEvents, type Event, type EventFilters } from '../servi
 import EventCard from '../components/EventCard';
 import EventFilterSheet from '../components/EventFilterSheet';
 import { SearchBar } from '../components/SearchBar';
+import { BackToTopFab, useBackToTopFab } from '../components/BackToTopFab';
 
 const CATEGORY_TABS = [
   { id: 'all', label: '全部' },
@@ -45,6 +46,10 @@ export default function EventsScreen() {
   const [filters, setFilters] = useState<EventFilters>({ status: 'upcoming' });
   const [activeCategory, setActiveCategory] = useState('all');
   const underlineAnim = useRef(new Animated.Value(0)).current;
+
+  // M-L5 长列表回顶
+  const eventsListRef = useRef<FlatList<Event>>(null);
+  const eventsFab = useBackToTopFab(eventsListRef);
 
   useEffect(() => {
     loadEvents();
@@ -225,11 +230,14 @@ export default function EventsScreen() {
       </View>
 
       <FlatList
+        ref={eventsListRef}
         data={events}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <EventCard event={item} onPress={() => handleEventPress(item)} />
         )}
+        onScroll={eventsFab.handleScroll}
+        scrollEventThrottle={64}
         contentContainerStyle={styles.listContent}
         refreshControl={
           <RefreshControl
@@ -267,6 +275,8 @@ export default function EventsScreen() {
         filters={filters}
         onApply={handleApplyFilters}
       />
+
+      <BackToTopFab visible={eventsFab.visible} onPress={eventsFab.scrollToTop} />
     </View>
   );
 }
