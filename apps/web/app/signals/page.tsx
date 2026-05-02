@@ -2,6 +2,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState, useEffect } from "react";
 import { getSaleStatusInfo, EVENT_CATEGORY_LABELS, EVENT_CATEGORY_ICONS, EVENT_CATEGORY_COLORS, EventCategory, SALE_STATUS_LABELS, SALE_STATUS_COLORS, SaleStatus } from "@/lib/eventUtils";
 
@@ -134,7 +135,7 @@ export default function SignalsPage() {
         </div>
       ) : (
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
-          {filteredEvents.map((event) => {
+          {filteredEvents.map((event, eventIndex) => {
             // 格式化日期时间
             const startDate = event.startTime ? new Date(event.startTime) : null;
             const dateStr = startDate ? startDate.toLocaleDateString('zh-CN', { month: 'long', day: 'numeric' }) : '';
@@ -161,11 +162,16 @@ export default function SignalsPage() {
                   </div>
                 )}
 
-                <img
-                  src={event.coverImage}
-                  alt={event.name}
-                  className="rounded-lg w-full h-48 object-cover mb-3 group-hover:scale-105 transition-transform"
-                />
+                <div className="relative w-full h-48 mb-3 rounded-lg overflow-hidden">
+                  <Image
+                    src={event.coverImage}
+                    alt={event.name}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                    priority={eventIndex < 3}
+                    className="object-cover group-hover:scale-105 transition-transform"
+                  />
+                </div>
 
                 {/* 活动类型标签 */}
                 <div className="mb-2">

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 type Post = {
@@ -148,10 +149,12 @@ export default function PostFavorites() {
                 {/* 图片 */}
                 {favorite.post.images.length > 0 ? (
                   <div className="relative aspect-square overflow-hidden bg-gray-100">
-                    <img
+                    <Image
                       src={favorite.post.images[0].imageUrl}
                       alt={favorite.post.content.substring(0, 50)}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      fill
+                      sizes="(max-width: 768px) 50vw, (max-width: 1280px) 33vw, 25vw"
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                     {favorite.post.images.length > 1 && (
                       <div className="absolute top-2 right-2 px-2 py-1 bg-black/60 backdrop-blur-sm rounded-full text-white text-xs">
@@ -198,9 +201,11 @@ export default function PostFavorites() {
                     className="flex items-center gap-2 mb-2 cursor-pointer hover:opacity-80 transition"
                   >
                     {favorite.post.user.avatar ? (
-                      <img
+                      <Image
                         src={favorite.post.user.avatar}
                         alt={favorite.post.user.nickname}
+                        width={24}
+                        height={24}
                         className="w-6 h-6 rounded-full object-cover"
                       />
                     ) : (

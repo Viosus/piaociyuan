@@ -194,9 +194,11 @@ export default function Sidebar() {
               {/* 头像容器 - 收起时居中，展开时靠左 */}
               <span className="w-14 shrink-0 flex items-center justify-center group-hover:w-10 group-hover:ml-4 transition-all duration-300">
                 {user.avatar ? (
-                  <img
+                  <Image
                     src={user.avatar}
                     alt="头像"
+                    width={40}
+                    height={40}
                     className="w-10 h-10 rounded-full object-cover ring-2 ring-white/10"
                   />
                 ) : (

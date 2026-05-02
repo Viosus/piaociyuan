@@ -122,6 +122,7 @@ export default async function EventsPage() {
                     event={event}
                     showRank={sectionIndex === 0 && index < 3}
                     rank={index + 1}
+                    priority={sectionIndex === 0 && index < 3}
                   />
                 ))}
               </div>

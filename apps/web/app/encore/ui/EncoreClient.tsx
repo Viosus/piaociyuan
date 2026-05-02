@@ -3,6 +3,7 @@
 
 import { useEffect, useState, useRef, useCallback } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import CreatePostDialog from "./CreatePostDialog";
 import FavoriteButton from "./FavoriteButton";
@@ -259,7 +260,7 @@ export default function EncoreClient() {
       {renderSortTabs()}
       {/* 瀑布流网格 */}
       <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4 space-y-4">
-        {posts.map((post) => (
+        {posts.map((post, postIndex) => (
           <div
             key={post.id}
             className="break-inside-avoid mb-4"
@@ -271,11 +272,14 @@ export default function EncoreClient() {
               {/* 图片 */}
               {post.images.length > 0 && (
                 <div className="relative overflow-hidden">
-                  <img
+                  <Image
                     src={post.images[0].imageUrl}
                     alt={post.content.substring(0, 50)}
+                    width={post.images[0].width || 800}
+                    height={post.images[0].height || 1067}
+                    sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
+                    priority={postIndex < 4}
                     className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-300"
-                    loading="lazy"
                   />
                   {/* 多图标识 */}
                   {post.images.length > 1 && (
@@ -328,9 +332,11 @@ export default function EncoreClient() {
                   className="flex items-center gap-2 mb-3 cursor-pointer hover:opacity-80 transition"
                 >
                   {post.user.avatar ? (
-                    <img
+                    <Image
                       src={post.user.avatar}
                       alt={post.user.nickname}
+                      width={24}
+                      height={24}
                       className="w-6 h-6 rounded-full object-cover"
                     />
                   ) : (

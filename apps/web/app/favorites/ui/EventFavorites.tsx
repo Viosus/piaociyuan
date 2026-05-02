@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { apiGet, apiDelete } from "@/lib/api";
 import { useToast } from "@/components/Toast";
 
@@ -225,11 +226,13 @@ export default function EventFavorites() {
               >
                 {/* 活动封面 */}
                 <Link href={`/events/${item.event.id}`}>
-                  <div className="relative">
-                    <img
+                  <div className="relative w-full h-48">
+                    <Image
                       src={item.event.cover}
                       alt={item.event.name}
-                      className="w-full h-48 object-cover"
+                      fill
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                      className="object-cover"
                     />
                     <div className="absolute top-2 right-2">
                       <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusLabel.color}`}>

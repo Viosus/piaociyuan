@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { getSaleStatusInfo, EVENT_CATEGORY_LABELS, EVENT_CATEGORY_ICONS, EVENT_CATEGORY_COLORS, EventCategory } from "@/lib/eventUtils";
 
 interface EventCardProps {
@@ -18,9 +19,11 @@ interface EventCardProps {
   };
   showRank?: boolean;
   rank?: number;
+  /** W-P1: 首屏 above-fold 卡片设 priority 优化 LCP */
+  priority?: boolean;
 }
 
-export default function EventCard({ event, showRank, rank }: EventCardProps) {
+export default function EventCard({ event, showRank, rank, priority }: EventCardProps) {
   const saleInfo = getSaleStatusInfo(event.saleStatus, event.saleStartTime, event.saleEndTime);
 
   // 计算最低价格
@@ -61,10 +64,13 @@ export default function EventCard({ event, showRank, rank }: EventCardProps) {
 
       {/* 封面图片 */}
       <div className="relative h-48 overflow-hidden">
-        <img
+        <Image
           src={event.cover}
           alt={event.name}
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+          fill
+          sizes="(max-width: 768px) 100vw, (max-width: 1280px) 33vw, 25vw"
+          priority={priority}
+          className="object-cover group-hover:scale-110 transition-transform duration-500"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
       </div>

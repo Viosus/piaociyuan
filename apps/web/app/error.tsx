@@ -17,18 +17,22 @@ export default function Error({
     <div className="min-h-screen flex items-center justify-center px-6">
       <div className="text-center max-w-md">
         <div className="text-6xl mb-6">😵</div>
-        <h1 className="text-2xl font-bold text-[var(--foreground)] mb-4">
+        <h1 className="text-2xl font-bold text-[var(--foreground)] mb-2">
           页面出错了
         </h1>
-        <p className="text-gray-500 mb-8">
-          很抱歉，页面遇到了一些问题。请尝试刷新页面或返回首页。
+        <p className="text-sm text-gray-600 mb-2 whitespace-pre-line break-words">
+          {error.message || '很抱歉，页面遇到了一些问题。'}
         </p>
+        {error.digest && (
+          <p className="text-xs text-gray-400 mb-6 font-mono">错误代码：{error.digest}</p>
+        )}
+        {!error.digest && <div className="mb-6" />}
         <div className="flex gap-4 justify-center">
           <button
             onClick={reset}
             className="px-6 py-3 bg-[#46467A] text-white rounded-lg font-medium hover:bg-[#3a3a6a] transition-colors"
           >
-            重新加载
+            重试
           </button>
           <a
             href="/"

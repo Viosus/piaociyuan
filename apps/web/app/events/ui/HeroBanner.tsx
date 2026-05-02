@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 
 type Banner = {
   id: string;
@@ -66,10 +67,14 @@ export default function HeroBanner() {
             index === currentIndex ? "opacity-100 z-10" : "opacity-0 z-0"
           }`}
         >
-          {/* 背景图片 */}
-          <div
-            className="absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: `url(${banner.image})` }}
+          {/* 背景图片（W-P1：首屏 banner 走 next/image + priority 优化 LCP） */}
+          <Image
+            src={banner.image}
+            alt={banner.title}
+            fill
+            sizes="100vw"
+            priority={index === 0}
+            className="object-cover"
           />
 
           {/* 渐变遮罩 */}

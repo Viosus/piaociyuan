@@ -4,11 +4,19 @@
  * 显示用户的认证状态和认证类型
  */
 
+import Image from 'next/image';
+
 type VerificationBadgeProps = {
   isVerified: boolean;
   verifiedType?: string | null;
   verificationBadge?: string | null;
   size?: 'sm' | 'md' | 'lg';
+};
+
+const SIZE_PX: Record<'sm' | 'md' | 'lg', number> = {
+  sm: 16,
+  md: 20,
+  lg: 24,
 };
 
 export default function VerificationBadge({
@@ -67,9 +75,11 @@ export default function VerificationBadge({
   // 如果有自定义徽章URL，使用图片
   if (verificationBadge) {
     return (
-      <img
+      <Image
         src={verificationBadge}
         alt="认证徽章"
+        width={SIZE_PX[size]}
+        height={SIZE_PX[size]}
         className={sizeClasses[size]}
         title={`${verifiedType ? `认证${verifiedType}` : '已认证用户'}`}
       />

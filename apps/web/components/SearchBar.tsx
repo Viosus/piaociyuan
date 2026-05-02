@@ -3,6 +3,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { apiGet } from "@/lib/api";
 import { EVENT_CATEGORY_LABELS, EVENT_CATEGORY_ICONS, EventCategory } from "@/lib/eventUtils";
 
@@ -175,9 +176,11 @@ export default function SearchBar() {
                       }`}
                     >
                       <div className="flex gap-3">
-                        <img
+                        <Image
                           src={result.cover}
                           alt={result.name}
+                          width={64}
+                          height={64}
                           className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
                         />
                         <div className="flex-1 min-w-0">

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import FavoriteButton from "@/app/encore/ui/FavoriteButton";
 import { useSocket } from "@/hooks/useSocket";
 import { formatRelativeTime } from "@/lib/time";
@@ -678,9 +679,11 @@ export default function PostDetailClient({ postId }: { postId: string }) {
                   className="flex items-center gap-3 hover:opacity-80 transition"
                 >
                   {post.user.avatar ? (
-                    <img
+                    <Image
                       src={post.user.avatar}
                       alt={post.user.nickname}
+                      width={48}
+                      height={48}
                       className="w-12 h-12 rounded-full object-cover"
                     />
                   ) : (
@@ -773,9 +776,11 @@ export default function PostDetailClient({ postId }: { postId: string }) {
                 className="block p-4 border-b border-gray-200 hover:bg-gray-50 transition"
               >
                 <div className="flex items-center gap-3">
-                  <img
+                  <Image
                     src={post.event.cover}
                     alt={post.event.name}
+                    width={64}
+                    height={64}
                     className="w-16 h-16 rounded-lg object-cover"
                   />
                   <div className="flex-1 min-w-0">
@@ -895,9 +900,11 @@ export default function PostDetailClient({ postId }: { postId: string }) {
                               className="flex-shrink-0 hover:opacity-80 transition"
                             >
                               {comment.user.avatar ? (
-                                <img
+                                <Image
                                   src={comment.user.avatar}
                                   alt={comment.user.nickname}
+                                  width={32}
+                                  height={32}
                                   className="w-8 h-8 rounded-full object-cover"
                                 />
                               ) : (
@@ -931,9 +938,11 @@ export default function PostDetailClient({ postId }: { postId: string }) {
                                         className="flex-shrink-0 hover:opacity-80 transition"
                                       >
                                         {reply.user.avatar ? (
-                                          <img
+                                          <Image
                                             src={reply.user.avatar}
                                             alt={reply.user.nickname}
+                                            width={24}
+                                            height={24}
                                             className="w-6 h-6 rounded-full object-cover"
                                           />
                                         ) : (

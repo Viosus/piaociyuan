@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/Toast";
 
@@ -162,9 +163,11 @@ export default function UserFollowings() {
                 <div className="flex items-start gap-3 mb-3">
                   <Link href={`/u/${following.user.id}`}>
                     {following.user.avatar ? (
-                      <img
+                      <Image
                         src={following.user.avatar}
                         alt={following.user.nickname}
+                        width={48}
+                        height={48}
                         className="w-12 h-12 rounded-full object-cover ring-2 ring-gray-100"
                       />
                     ) : (
