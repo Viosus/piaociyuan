@@ -395,6 +395,21 @@ fi
 
 A→E 五种变种走完，至此 deploy 链路对 docker / compose 的所有已知 race 都有兜底。
 
+**症状 E 续**（在 ff6012c 兜底前的最后一个故障案例）：ace060a 的 deploy 看到 `No existing piaociyuan-web container, skip cleanup`（`docker ps -aq --filter name=piaociyuan-web` 返回空），但下一秒 compose up 仍报 ID `3de92db41f1a` 占用 name——这个 ID 正是上一次 failed deploy（e00ae70）创建后没清理留下的 **ghost container**。daemon 的 name registry 持有 → ID 映射，但 container 对象在某种部分初始化态下不在 `docker ps -a` 里显示。
+
+**新增兜底（彻底）**：在 cleanup 流程开头加一个 idempotent 的 `docker rm -f piaociyuan-web`（按 name 而非 ID）。daemon 会自己按 name 解析到 ghost ID 并清掉；没 ghost 就 silent no-op：
+```bash
+# Pre-emptive name-based force rm（ghost cleanup）
+docker rm -f piaociyuan-web 2>/dev/null || true
+sleep 2
+
+# 然后才走正常 ps -a 查找 + stop + wait + rm + inspect 流程
+container_id=$(docker ps -aq --filter "name=piaociyuan-web" | head -1)
+...
+```
+
+**铁律**：`docker ps -a` ≠ daemon name registry。要清干净一个名字，按 name 强删比按 ID 强删更可靠（ID 强删要求你能列出 ID，name 强删交给 daemon 自己解析）。
+
 ### npm workspace hoisting：peer dep 必须能被 root 包找到（2026-05-02 新增）
 **症状**：上面的 three 案例还有一层 hoisting 微妙：删了又加 three 后，CI 的 `npm ci` 把 `three` 装在 `apps/web/node_modules/three`，但 `@google/model-viewer` 的 transitive dep `@monogrid/gainmap-js` 被 hoist 到 root `/node_modules/@monogrid/`。从 `/node_modules/@monogrid/gainmap-js/` 走 Node 模块解析找不到 `apps/web/node_modules/three`（属于另一棵子树）。
 

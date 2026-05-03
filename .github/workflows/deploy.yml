@@ -63,6 +63,14 @@ jobs:
             docker compose build web
 
             echo "=== stop + wait + remove web (block until daemon-side fully clean) ==="
+            # 预防性按 name 强删——即使 docker ps -a 看不到 piaociyuan-web，
+            # daemon 的 name registry 也可能留 ghost reservation（之前 failed
+            # deploy 的残留）。docker rm -f <name> 会让 daemon 按 name 解析
+            # 找到 ghost 并清掉；没有 ghost 就 silent no-op || true 兜底。
+            # 这是 idempotent 的，对正常情况无影响。
+            docker rm -f piaociyuan-web 2>/dev/null || true
+            sleep 2
+
             # 之前 docker compose rm -f -s 的问题：命令返回成功 = API 调用接受，
             # 但 daemon 实际删除是异步的。下一秒 up 撞上"removal in progress"。
             # 这次用 docker stop + docker wait 阻塞到容器真正退出，再 rm，再 polling
