@@ -98,10 +98,38 @@ jobs:
               sleep 3
             fi
 
-            echo "=== docker compose up -d --force-recreate web ==="
-            # --force-recreate：即使 compose state 认为容器存在也强制重建
-            # --remove-orphans：清理已从 compose 移除的服务的孤儿容器
-            docker compose up -d --force-recreate --remove-orphans web
+            echo "=== pre-up state check ==="
+            docker ps -a --filter "name=piaociyuan-web" --format "table {{.ID}}\t{{.Names}}\t{{.Status}}" || true
+
+            # docker compose up 在某些 compose v2 版本里有内部 race：create 调用
+            # 在 daemon 端创建成功（容器 ID 已分配），但 compose CLI 返回非零并
+            # 报"name in use by <new-id>"。实际 daemon 端 container 已经在跑。
+            # 解法：先 try compose up；若 exit 非零，看 daemon 端是不是其实在跑；
+            # 在跑就当成功，没在跑就按名字暴力删 + 重试一次。
+            echo "=== docker compose up -d --force-recreate web (with race-resilient retry) ==="
+            compose_up() {
+              docker compose up -d --force-recreate --remove-orphans web
+            }
+
+            if ! compose_up; then
+              echo "⚠ compose up exit non-zero; checking daemon side..."
+              docker ps -a --filter "name=piaociyuan-web" --format "table {{.ID}}\t{{.Names}}\t{{.Status}}" || true
+
+              if docker ps --filter "name=piaociyuan-web" --filter "status=running" -q | grep -q .; then
+                echo "✓ container is actually running on daemon side—compose CLI false-alarm, continuing"
+              else
+                echo "✗ container truly not running; brute-force rm by name + retry"
+                docker rm -f piaociyuan-web 2>/dev/null || true
+                # 等 daemon 端 namespace 释放
+                sleep 8
+                if ! compose_up; then
+                  echo "::error::compose up still fails after brute-force retry"
+                  docker ps -a --filter "name=piaociyuan-web" || true
+                  exit 1
+                fi
+                echo "✓ compose up succeeded on retry"
+              fi
+            fi
 
             echo "=== waiting for container health ==="
             sleep 15

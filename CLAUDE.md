@@ -358,6 +358,43 @@ docker compose up -d --force-recreate --remove-orphans web
 - `|| true` 兜底首次 deploy 没旧容器时 `set -e` 不误终止
 - **不要再相信 `docker compose rm -f -s` 单独能给后续操作让出干净状态**——它跟 `docker rm -f` 一样是异步触发，不是同步等待
 
+**症状 E**（A→B→C→D 全都解决了之后还有的最后一个变种）：cleanup 完美——`docker stop` + `docker wait` + `docker rm` + `docker inspect` 轮询确认容器消失（实测 19s）——下一秒 `docker compose up -d --force-recreate web` 仍报：
+```
+Container piaociyuan-web Creating
+Error response from daemon: Conflict. The container name "/piaociyuan-web" is already in use by container "3de92db41f1a..."
+```
+而 `3de92db41f1a` 这个 ID 在 cleanup 时还不存在（cleanup 删的是另一个 ID）。
+
+**根因 E**：docker compose v2 的内部 race。compose CLI 在 `up --force-recreate` 时大致流程：
+1. 检查 service 是否存在
+2. 调 daemon API 创建容器，daemon 给新 ID 例如 `3de92db41f1a`
+3. compose CLI 自己再做"recreate"分支：尝试再创建一次 / rename 一次 → 撞上自己刚创建的 → daemon 报"name in use by 3de92db41f1a"
+4. compose CLI exit 非零，但 daemon 端容器其实已经创建成功，甚至 running
+
+这是 compose 自己跟 daemon 状态同步的 bug，不是我们脚本错。
+
+**解法（最终）**：把 compose up 失败当成可能是 false-alarm，校验 daemon 端实际状态：
+```bash
+compose_up() {
+  docker compose up -d --force-recreate --remove-orphans web
+}
+
+if ! compose_up; then
+  # 看 daemon 端实际有没有跑
+  if docker ps --filter "name=piaociyuan-web" --filter "status=running" -q | grep -q .; then
+    echo "✓ compose CLI 误报，daemon 端 container 已在跑，继续"
+  else
+    # 真没跑：按 container_name 暴力删 + 重试一次
+    docker rm -f piaociyuan-web 2>/dev/null || true
+    sleep 8
+    compose_up || exit 1
+  fi
+fi
+```
+关键洞见：**`docker compose up` 的 exit code 不可信**。判定 deploy 是否成功要看 daemon 端容器是否在 running 状态，再加后续 health check。
+
+A→E 五种变种走完，至此 deploy 链路对 docker / compose 的所有已知 race 都有兜底。
+
 ### npm workspace hoisting：peer dep 必须能被 root 包找到（2026-05-02 新增）
 **症状**：上面的 three 案例还有一层 hoisting 微妙：删了又加 three 后，CI 的 `npm ci` 把 `three` 装在 `apps/web/node_modules/three`，但 `@google/model-viewer` 的 transitive dep `@monogrid/gainmap-js` 被 hoist 到 root `/node_modules/@monogrid/`。从 `/node_modules/@monogrid/gainmap-js/` 走 Node 模块解析找不到 `apps/web/node_modules/three`（属于另一棵子树）。
 
