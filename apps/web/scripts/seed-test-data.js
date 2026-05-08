@@ -10,8 +10,11 @@
  *   - Post / Comment / Message: content 以 [TEST] 开头
  *
  * 用法（在 ECS 上）：
- *   docker cp apps/web/scripts/seed-test-data.js piaociyuan-web:/tmp/
- *   docker compose exec web node /tmp/seed-test-data.js
+ *   docker cp apps/web/scripts/seed-test-data.js piaociyuan-web:/app/
+ *   docker compose exec web node /app/seed-test-data.js
+ *
+ * 注：必须 cp 到 /app/（而非 /tmp/），因为 Node require('@prisma/client')
+ * 从脚本所在目录往上查 node_modules，@prisma/client 装在 /app/node_modules
  *
  * 详见 docs/测试数据使用说明.md
  */
@@ -425,8 +428,8 @@ async function main() {
     console.log(`  · ${u.nickname.padEnd(18)} phone=${u.phone}  role=${u.role}${u.isVerified ? '  ⭐ verified' : ''}`);
   }
   console.log('\n清理命令（在 ECS 上）：');
-  console.log('  docker cp apps/web/scripts/cleanup-test-data.js piaociyuan-web:/tmp/');
-  console.log('  docker compose exec web node /tmp/cleanup-test-data.js');
+  console.log('  docker cp apps/web/scripts/cleanup-test-data.js piaociyuan-web:/app/');
+  console.log('  docker compose exec web node /app/cleanup-test-data.js');
   console.log('');
 }
 
