@@ -76,9 +76,9 @@ export default function MessagesPage() {
   );
 
   return (
-    <div className="min-h-screen">
-      {/* Header */}
-      <div className="bg-white/80 backdrop-blur-sm border-b border-[#FFEBF5] sticky top-0 z-10">
+    <div className="min-h-screen -mt-20">
+      {/* Header - fixed 占满 layout 主区顶部，跟 /messages/[id] 一致 */}
+      <div className="bg-white/80 backdrop-blur-sm border-b border-[#FFEBF5] fixed top-0 left-20 right-[var(--right-sidebar-width,64px)] z-50">
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-2xl font-bold bg-gradient-to-r from-[#46467A] via-[#FFE3F0] to-blue-400 bg-clip-text text-transparent flex items-center gap-2">
@@ -108,8 +108,8 @@ export default function MessagesPage() {
         </div>
       </div>
 
-      {/* Conversations List */}
-      <div className="max-w-4xl mx-auto px-4 py-4">
+      {/* Conversations List - pt 给上面 fixed header 让位（约 132px）*/}
+      <div className="max-w-4xl mx-auto px-4 pt-36 pb-4">
         {loading ? (
           <div className="text-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#46467A] mx-auto mb-4"></div>

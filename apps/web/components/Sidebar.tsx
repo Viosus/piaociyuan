@@ -141,7 +141,12 @@ export default function Sidebar() {
       {/* 导航菜单 */}
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
         {navItems.map((item) => {
-          const isActive = pathname === item.href || pathname?.startsWith(item.href + "/");
+          // 主页（href=/events）特殊处理：根路径 / 也算主页 active
+          const isHome = item.href === "/events";
+          const isActive =
+            pathname === item.href ||
+            pathname?.startsWith(item.href + "/") ||
+            (isHome && pathname === "/");
           return (
             <Link
               key={item.href}

@@ -239,8 +239,8 @@ export default function UserProfileClient({ userId }: { userId: string }) {
   const isSelf = currentUserId !== null && currentUserId === user.id;
 
   return (
-    <div className="min-h-screen pb-12 px-4">
-      <div className="max-w-3xl mx-auto pt-6">
+    <div className="min-h-screen pb-12 px-4 -mt-20">
+      <div className="max-w-3xl mx-auto pt-24">
         <Breadcrumb
           items={[
             { label: "安可区", href: "/encore" },

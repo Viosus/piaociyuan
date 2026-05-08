@@ -65,9 +65,9 @@ export default function NewConversationPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#E0DFFD]">
-      {/* Header */}
-      <div className="bg-white/80 backdrop-blur-sm border-b border-[#FFEBF5] sticky top-0 z-10">
+    <div className="min-h-screen bg-[#E0DFFD] -mt-20">
+      {/* Header - fixed 占满 layout 主区顶部 */}
+      <div className="bg-white/80 backdrop-blur-sm border-b border-[#FFEBF5] fixed top-0 left-20 right-[var(--right-sidebar-width,64px)] z-50">
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center gap-3 mb-4">
             <button
@@ -95,8 +95,8 @@ export default function NewConversationPage() {
         </div>
       </div>
 
-      {/* Search Results */}
-      <div className="max-w-4xl mx-auto px-4 py-4">
+      {/* Search Results - pt 给 fixed header 让位 */}
+      <div className="max-w-4xl mx-auto px-4 pt-36 pb-4">
         {searching ? (
           <div className="text-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#46467A] mx-auto mb-4"></div>

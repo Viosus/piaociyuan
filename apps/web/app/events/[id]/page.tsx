@@ -46,7 +46,7 @@ export default async function EventDetailPage({ params }: Props) {
   const countdown = getEventCountdown(event.date, event.time);
 
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen -mt-20">
       <div className="max-w-6xl mx-auto px-4 pt-2">
         <Breadcrumb
           items={[
@@ -59,11 +59,11 @@ export default async function EventDetailPage({ params }: Props) {
         <img
           src={event.cover}
           alt={event.name}
-          className={`w-full h-64 md:h-96 object-cover ${
+          className={`w-full h-48 md:h-64 object-cover ${
             saleInfo.saleStatus === 'ended' ? 'grayscale' : ''
           }`}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
 
         {/* 活动类型标签 */}
         <div className="absolute top-4 left-4">
@@ -80,9 +80,9 @@ export default async function EventDetailPage({ params }: Props) {
           </span>
         </div>
 
-        <div className="absolute bottom-4 left-4 md:left-8 right-4 md:right-8 flex items-end justify-between">
+        <div className="absolute bottom-3 left-4 md:left-8 right-4 md:right-8 flex items-end justify-between">
           <div className="text-white">
-            <h1 className="text-3xl md:text-4xl font-extrabold drop-shadow item-name">
+            <h1 className="text-2xl md:text-3xl font-extrabold drop-shadow item-name">
               {event.name}
             </h1>
             <p className="mt-1 text-sm md:text-base opacity-90">

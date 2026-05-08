@@ -18,6 +18,15 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'piaociyuan.com',
       },
+      {
+        // 测试数据占位图（稳定可访问，国内 CDN）
+        protocol: 'https',
+        hostname: 'placehold.co',
+      },
+      {
+        protocol: 'https',
+        hostname: 'picsum.photos',
+      },
     ],
     dangerouslyAllowSVG: true,
     contentDispositionType: 'attachment',

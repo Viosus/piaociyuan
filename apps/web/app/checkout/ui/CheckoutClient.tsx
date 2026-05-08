@@ -322,6 +322,30 @@ export default function CheckoutClient({ event, tier, initialQty, urlLimit }: Pr
 
   return (
     <main className="min-h-screen p-8">
+      <div className="max-w-3xl mx-auto mb-3 flex items-center gap-3 text-sm">
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className="inline-flex items-center gap-1 px-3 py-1.5 bg-white/80 hover:bg-white rounded-full text-[#46467A] hover:text-[#5A5A8E] transition shadow-sm"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          返回上页
+        </button>
+        <a
+          href={`/events/${event.id}`}
+          className="inline-flex items-center gap-1 px-3 py-1.5 bg-white/60 hover:bg-white/80 rounded-full text-[#46467A] transition"
+        >
+          回到活动详情
+        </a>
+        <a
+          href="/events"
+          className="inline-flex items-center gap-1 px-3 py-1.5 bg-white/60 hover:bg-white/80 rounded-full text-[#46467A] transition"
+        >
+          回主页
+        </a>
+      </div>
       <div className="max-w-3xl mx-auto bg-white/80 backdrop-blur-sm rounded-2xl shadow p-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
           <h1 className="text-2xl font-bold text-[#46467A]">确认订单</h1>

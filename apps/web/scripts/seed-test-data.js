@@ -146,7 +146,7 @@ async function main() {
       saleStartTime: new Date(Date.now() - 7 * 86400000),
       saleEndTime: new Date(Date.now() + 90 * 86400000),
       cover:
-        'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=1200',
+        'https://placehold.co/1200x800/46467A/ffffff/svg?text=%E5%91%A8%E6%9D%B0%E4%BC%A6%E6%BC%94%E5%94%B1%E4%BC%9A',
       artist: '周杰伦',
       desc: EVENT_DESC_PREFIX + '测试演唱会，售票中状态',
     },
@@ -161,7 +161,7 @@ async function main() {
       saleStartTime: new Date(Date.now() + 7 * 86400000),
       saleEndTime: new Date(Date.now() + 60 * 86400000),
       cover:
-        'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=1200',
+        'https://placehold.co/1200x800/E91E63/ffffff/svg?text=%E8%8D%89%E8%8E%93%E9%9F%B3%E4%B9%90%E8%8A%82',
       artist: '草东没有派对、五条人、Faye 飞、痛仰',
       desc: EVENT_DESC_PREFIX + '即将开售测试',
     },
@@ -176,7 +176,7 @@ async function main() {
       saleStartTime: new Date(Date.now() - 30 * 86400000),
       saleEndTime: new Date(Date.now() + 30 * 86400000),
       cover:
-        'https://images.unsplash.com/photo-1544967082-d9d25d867d66?w=1200',
+        'https://placehold.co/1200x800/4CAF50/ffffff/svg?text=%E8%8E%AB%E5%A5%88%E5%B1%95%E8%A7%88',
       artist: '莫奈基金会',
       desc: EVENT_DESC_PREFIX + '已售罄测试',
     },
@@ -191,7 +191,7 @@ async function main() {
       saleStartTime: new Date(Date.now() - 90 * 86400000),
       saleEndTime: new Date(Date.now() - 5 * 86400000),
       cover:
-        'https://images.unsplash.com/photo-1503095396549-807759245b35?w=1200',
+        'https://placehold.co/1200x800/795548/ffffff/svg?text=%E8%AF%9D%E5%89%A7%E9%9B%B7%E9%9B%A8',
       artist: '上海话剧艺术中心',
       desc: EVENT_DESC_PREFIX + '已结束测试',
     },
@@ -231,11 +231,11 @@ async function main() {
         location: '上海·虹口足球场',
         images: {
           create: [
-            { imageUrl: 'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=1600', width: 1600, height: 1067, order: 0 },
-            { imageUrl: 'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=1600', width: 1600, height: 1067, order: 1 },
-            { imageUrl: 'https://images.unsplash.com/photo-1534670007418-fbb7f6cf32c3?w=1600', width: 1600, height: 1067, order: 2 },
-            { imageUrl: 'https://images.unsplash.com/photo-1485119502052-3a35c2dbe614?w=1600', width: 1600, height: 1067, order: 3 },
-            { imageUrl: 'https://images.unsplash.com/photo-1571266028243-0bda9d8a25e4?w=1600', width: 1600, height: 1067, order: 4 },
+            { imageUrl: 'https://placehold.co/1600x1067/46467A/ffffff/svg?text=Live+Photo+1', width: 1600, height: 1067, order: 0 },
+            { imageUrl: 'https://placehold.co/1600x1067/E91E63/ffffff/svg?text=Live+Photo+2', width: 1600, height: 1067, order: 1 },
+            { imageUrl: 'https://placehold.co/1600x1067/4CAF50/ffffff/svg?text=Live+Photo+3', width: 1600, height: 1067, order: 2 },
+            { imageUrl: 'https://placehold.co/1600x1067/FF9800/ffffff/svg?text=Live+Photo+4', width: 1600, height: 1067, order: 3 },
+            { imageUrl: 'https://placehold.co/1600x1067/795548/ffffff/svg?text=Live+Photo+5', width: 1600, height: 1067, order: 4 },
           ],
         },
       },
@@ -259,7 +259,7 @@ async function main() {
         location: '北京',
         images: {
           create: [
-            { imageUrl: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=1600', width: 1600, height: 1067, order: 0 },
+            { imageUrl: 'https://placehold.co/1600x1067/E91E63/ffffff/svg?text=Strawberry+Festival', width: 1600, height: 1067, order: 0 },
           ],
         },
       },

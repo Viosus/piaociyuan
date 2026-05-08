@@ -191,24 +191,25 @@ export default function ImageGallery({
           className="fixed inset-0 z-[300] bg-black/95 flex items-center justify-center"
           onClick={() => setIsLightboxOpen(false)}
         >
-          {/* 关闭按钮 */}
+          {/* 关闭按钮 - 显眼版（带文字 + 高对比） */}
           <button
             type="button"
             onClick={(e) => {
               e.stopPropagation();
               setIsLightboxOpen(false);
             }}
-            className="absolute top-4 right-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition z-10"
+            className="absolute top-4 right-4 px-4 py-2 bg-white/90 hover:bg-white rounded-full flex items-center gap-1.5 text-[#1a1a1f] font-medium transition z-10 shadow-lg"
             aria-label="关闭"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
             </svg>
+            <span className="text-sm">关闭</span>
           </button>
 
           {/* 计数 */}
           {total > 1 && (
-            <div className="absolute top-4 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-white/10 backdrop-blur-sm rounded-full text-white text-sm pointer-events-none">
+            <div className="absolute top-6 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-white/15 backdrop-blur-sm rounded-full text-white text-sm pointer-events-none">
               {currentIndex + 1} / {total}
             </div>
           )}
@@ -264,8 +265,8 @@ export default function ImageGallery({
           )}
 
           {/* 提示文案 */}
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-white/50 text-xs select-none pointer-events-none">
-            ← → 切换  ·  ESC 关闭
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-white/15 backdrop-blur-sm rounded-full text-white/80 text-xs select-none pointer-events-none">
+            ← → 切换  ·  ESC / 点空白 / 右上角 ✕ 关闭
           </div>
         </div>
       )}

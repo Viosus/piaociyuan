@@ -93,8 +93,22 @@ async function getHomepageSections() {
   return processedSections.filter(section => section.events.length > 0);
 }
 
+// 兜底：admin 没配 homepage_sections 时，直接拉所有 on_sale / not_started 活动
+async function getFallbackEvents(): Promise<Event[]> {
+  const all = await prisma.event.findMany({
+    orderBy: { createdAt: 'desc' },
+    take: 24,
+  });
+  return all.filter((event) => {
+    const saleInfo = getSaleStatusInfo(event.saleStatus, event.saleStartTime, event.saleEndTime);
+    return saleInfo.saleStatus === 'not_started' || saleInfo.saleStatus === 'on_sale';
+  });
+}
+
 export default async function EventsPage() {
   const sections = await getHomepageSections();
+  // 没 sections 时拉 fallback
+  const fallbackEvents = sections.length === 0 ? await getFallbackEvents() : [];
 
   return (
     <div className="min-h-screen pb-8">
@@ -128,8 +142,26 @@ export default async function EventsPage() {
               </div>
             </SectionContainer>
           ))
+        ) : fallbackEvents.length > 0 ? (
+          /* 没配 sections 但有可售活动：fallback 显示全部 */
+          <SectionContainer
+            title="全部可售活动"
+            subtitle="管理员尚未配置首页栏目，先看看这些"
+            icon="🎫"
+            bgGradient="from-purple-50 to-pink-50"
+          >
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {fallbackEvents.map((event, index) => (
+                <EventCard
+                  key={event.id}
+                  event={event}
+                  priority={index < 3}
+                />
+              ))}
+            </div>
+          </SectionContainer>
         ) : (
-          /* 空状态 */
+          /* 真完全空 */
           <div className="text-center py-20">
             <div className="text-6xl mb-6">🎫</div>
             <h2 className="text-2xl font-bold text-[#46467A] mb-4">暂无可售活动</h2>
