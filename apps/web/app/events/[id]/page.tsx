@@ -55,19 +55,20 @@ export default async function EventDetailPage({ params }: Props) {
           ]}
         />
       </div>
-      <section className="relative">
+      {/* Banner: 装饰图，固定 16:6 宽高比，无论原图多大裁剪到这个比例 */}
+      <section className="relative aspect-[16/6] max-h-72 overflow-hidden">
         <img
           src={event.cover}
           alt={event.name}
-          className={`w-full h-48 md:h-64 object-cover ${
+          className={`w-full h-full object-cover ${
             saleInfo.saleStatus === 'ended' ? 'grayscale' : ''
           }`}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
 
         {/* 活动类型标签 */}
         <div className="absolute top-4 left-4">
-          <span className={`inline-flex items-center gap-1 px-3 py-2 text-sm font-semibold rounded-full ${EVENT_CATEGORY_COLORS[event.category as EventCategory]}`}>
+          <span className={`inline-flex items-center gap-1 px-3 py-1.5 text-xs md:text-sm font-semibold rounded-full ${EVENT_CATEGORY_COLORS[event.category as EventCategory]}`}>
             <span>{EVENT_CATEGORY_ICONS[event.category as EventCategory]}</span>
             <span>{EVENT_CATEGORY_LABELS[event.category as EventCategory]}</span>
           </span>
@@ -75,31 +76,32 @@ export default async function EventDetailPage({ params }: Props) {
 
         {/* 售票状态标签 */}
         <div className="absolute top-4 right-4">
-          <span className={`px-4 py-2 rounded-full text-sm font-semibold ${saleInfo.color}`}>
+          <span className={`px-3 py-1.5 rounded-full text-xs md:text-sm font-semibold ${saleInfo.color}`}>
             {saleInfo.label}
           </span>
         </div>
+      </section>
 
-        <div className="absolute bottom-3 left-4 md:left-8 right-4 md:right-8 flex items-end justify-between">
-          <div className="text-white">
-            <h1 className="text-2xl md:text-3xl font-extrabold drop-shadow item-name">
-              {event.name}
-            </h1>
-            <p className="mt-1 text-sm md:text-base opacity-90">
-              {event.city} · {event.venue}
+      {/* Title 移出 banner —— 永不被遮挡，始终在视口里 */}
+      <section className="max-w-6xl mx-auto px-4 md:px-8 py-4 flex items-start justify-between gap-4">
+        <div className="flex-1 min-w-0">
+          <h1 className="text-2xl md:text-3xl font-extrabold text-[#46467A] item-name">
+            {event.name}
+          </h1>
+          <p className="mt-2 text-sm md:text-base text-[#1a1a1f]">
+            {event.city} · {event.venue}
+          </p>
+          <p className="mt-1 text-sm md:text-base text-[#1a1a1f]/80">
+            {formattedDateTime}
+          </p>
+          {countdown && saleInfo.canPurchase && (
+            <p className="mt-2 text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded inline-block">
+              {countdown}
             </p>
-            <p className="mt-1 text-sm md:text-base opacity-90">
-              {formattedDateTime}
-            </p>
-            {countdown && saleInfo.canPurchase && (
-              <p className="mt-1 text-xs bg-blue-500/80 px-2 py-1 rounded inline-block">
-                {countdown}
-              </p>
-            )}
-          </div>
-          <div className="flex-shrink-0">
-            <FollowButton eventId={event.id} eventName={event.name} />
-          </div>
+          )}
+        </div>
+        <div className="flex-shrink-0">
+          <FollowButton eventId={event.id} eventName={event.name} />
         </div>
       </section>
 

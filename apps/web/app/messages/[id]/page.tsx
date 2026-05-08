@@ -61,6 +61,8 @@ export default function ConversationPage() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const isAtBottomRef = useRef(true);
+  // state 形式：用于驱动 input bar 实心/半透明（ref 不会触发 re-render）
+  const [isAtBottom, setIsAtBottom] = useState(true);
 
   const { isConnected, getSocket } = useSocket({ autoConnect: true });
 
@@ -105,7 +107,9 @@ export default function ConversationPage() {
 
     const handleScroll = () => {
       const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
-      isAtBottomRef.current = distanceFromBottom < SCROLL_BOTTOM_THRESHOLD;
+      const atBottom = distanceFromBottom < SCROLL_BOTTOM_THRESHOLD;
+      isAtBottomRef.current = atBottom;
+      setIsAtBottom(atBottom);
     };
 
     el.addEventListener('scroll', handleScroll);
@@ -382,8 +386,8 @@ export default function ConversationPage() {
         </Link>
       </div>
 
-      {/* 消息列表 */}
-      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto px-4 py-6 mt-16">
+      {/* 消息列表 - pb 给底部 fixed 输入栏让位 */}
+      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto px-4 pt-6 pb-32 mt-16">
         <div className="max-w-4xl mx-auto space-y-4">
           {/* 加载更早消息按钮 */}
           {hasMoreOlder && (
@@ -504,8 +508,14 @@ export default function ConversationPage() {
         </div>
       </div>
 
-      {/* 输入区 */}
-      <div className="bg-white/80 backdrop-blur-sm border-t border-[#FFEBF5] px-4 py-4">
+      {/* 输入区 - fixed 在视口底，不在底部时半透明（不挡历史消息），到底变实心（聚焦操作） */}
+      <div
+        className={`fixed bottom-0 left-20 right-[var(--right-sidebar-width,64px)] z-40 border-t px-4 py-4 transition-all duration-200 ${
+          isAtBottom
+            ? 'bg-white border-[#FFEBF5] shadow-lg'
+            : 'bg-white/40 backdrop-blur-md border-[#FFEBF5]/50 hover:bg-white/80'
+        }`}
+      >
         <form onSubmit={sendMessage} className="max-w-4xl mx-auto flex gap-3 items-end">
           <textarea
             ref={textareaRef}

@@ -145,8 +145,7 @@ async function main() {
       saleStatus: 'on_sale',
       saleStartTime: new Date(Date.now() - 7 * 86400000),
       saleEndTime: new Date(Date.now() + 90 * 86400000),
-      cover:
-        'https://placehold.co/1200x800/46467A/ffffff/svg?text=%E5%91%A8%E6%9D%B0%E4%BC%A6%E6%BC%94%E5%94%B1%E4%BC%9A',
+      cover: '/api/placeholder?w=1200&h=800&bg=46467A&text=' + encodeURIComponent('周杰伦演唱会'),
       artist: '周杰伦',
       desc: EVENT_DESC_PREFIX + '测试演唱会，售票中状态',
     },
@@ -160,8 +159,7 @@ async function main() {
       saleStatus: 'not_started',
       saleStartTime: new Date(Date.now() + 7 * 86400000),
       saleEndTime: new Date(Date.now() + 60 * 86400000),
-      cover:
-        'https://placehold.co/1200x800/E91E63/ffffff/svg?text=%E8%8D%89%E8%8E%93%E9%9F%B3%E4%B9%90%E8%8A%82',
+      cover: '/api/placeholder?w=1200&h=800&bg=E91E63&text=' + encodeURIComponent('草莓音乐节'),
       artist: '草东没有派对、五条人、Faye 飞、痛仰',
       desc: EVENT_DESC_PREFIX + '即将开售测试',
     },
@@ -175,8 +173,7 @@ async function main() {
       saleStatus: 'sold_out',
       saleStartTime: new Date(Date.now() - 30 * 86400000),
       saleEndTime: new Date(Date.now() + 30 * 86400000),
-      cover:
-        'https://placehold.co/1200x800/4CAF50/ffffff/svg?text=%E8%8E%AB%E5%A5%88%E5%B1%95%E8%A7%88',
+      cover: '/api/placeholder?w=1200&h=800&bg=4CAF50&text=' + encodeURIComponent('莫奈展览'),
       artist: '莫奈基金会',
       desc: EVENT_DESC_PREFIX + '已售罄测试',
     },
@@ -190,8 +187,7 @@ async function main() {
       saleStatus: 'ended',
       saleStartTime: new Date(Date.now() - 90 * 86400000),
       saleEndTime: new Date(Date.now() - 5 * 86400000),
-      cover:
-        'https://placehold.co/1200x800/795548/ffffff/svg?text=%E8%AF%9D%E5%89%A7%E9%9B%B7%E9%9B%A8',
+      cover: '/api/placeholder?w=1200&h=800&bg=795548&text=' + encodeURIComponent('话剧《雷雨》'),
       artist: '上海话剧艺术中心',
       desc: EVENT_DESC_PREFIX + '已结束测试',
     },
@@ -231,11 +227,11 @@ async function main() {
         location: '上海·虹口足球场',
         images: {
           create: [
-            { imageUrl: 'https://placehold.co/1600x1067/46467A/ffffff/svg?text=Live+Photo+1', width: 1600, height: 1067, order: 0 },
-            { imageUrl: 'https://placehold.co/1600x1067/E91E63/ffffff/svg?text=Live+Photo+2', width: 1600, height: 1067, order: 1 },
-            { imageUrl: 'https://placehold.co/1600x1067/4CAF50/ffffff/svg?text=Live+Photo+3', width: 1600, height: 1067, order: 2 },
-            { imageUrl: 'https://placehold.co/1600x1067/FF9800/ffffff/svg?text=Live+Photo+4', width: 1600, height: 1067, order: 3 },
-            { imageUrl: 'https://placehold.co/1600x1067/795548/ffffff/svg?text=Live+Photo+5', width: 1600, height: 1067, order: 4 },
+            { imageUrl: '/api/placeholder?w=1600&h=1067&bg=46467A&text=Live+1', width: 1600, height: 1067, order: 0 },
+            { imageUrl: '/api/placeholder?w=1600&h=1067&bg=E91E63&text=Live+2', width: 1600, height: 1067, order: 1 },
+            { imageUrl: '/api/placeholder?w=1600&h=1067&bg=4CAF50&text=Live+3', width: 1600, height: 1067, order: 2 },
+            { imageUrl: '/api/placeholder?w=1600&h=1067&bg=FF9800&text=Live+4', width: 1600, height: 1067, order: 3 },
+            { imageUrl: '/api/placeholder?w=1600&h=1067&bg=795548&text=Live+5', width: 1600, height: 1067, order: 4 },
           ],
         },
       },
@@ -259,7 +255,7 @@ async function main() {
         location: '北京',
         images: {
           create: [
-            { imageUrl: 'https://placehold.co/1600x1067/E91E63/ffffff/svg?text=Strawberry+Festival', width: 1600, height: 1067, order: 0 },
+            { imageUrl: '/api/placeholder?w=1600&h=1067&bg=E91E63&text=' + encodeURIComponent('草莓音乐节'), width: 1600, height: 1067, order: 0 },
           ],
         },
       },

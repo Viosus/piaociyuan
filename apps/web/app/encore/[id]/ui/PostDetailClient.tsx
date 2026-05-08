@@ -90,6 +90,8 @@ export default function PostDetailClient({ postId }: { postId: string }) {
   const [commentText, setCommentText] = useState('');
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
+  // 底部评论栏：是否滚到底（控制实心/半透明）
+  const [isAtBottom, setIsAtBottom] = useState(false);
   const [commentSort, setCommentSort] = useState<'newest' | 'hottest'>('newest');
 
   // W-S3 评论分页 + 嵌套回复展开
@@ -117,6 +119,21 @@ export default function PostDetailClient({ postId }: { postId: string }) {
       checkFollowStatus();
     }
   }, [post]);
+
+  // 监听 layout 主 scroll container 滚动，决定底部评论栏是实心还是半透明
+  useEffect(() => {
+    const el = document.querySelector<HTMLElement>(
+      'div.ml-20.overflow-y-auto, div.overflow-y-auto.ml-20'
+    );
+    if (!el) return;
+    const handle = () => {
+      const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+      setIsAtBottom(distanceFromBottom < 100);
+    };
+    handle();
+    el.addEventListener('scroll', handle, { passive: true });
+    return () => el.removeEventListener('scroll', handle);
+  }, []);
 
   // sort 切换时重拉评论；首次默认 sort='newest' 跟初始 post.comments 一致，跳过 first run
   const isFirstSortRun = useRef(true);
@@ -659,8 +676,8 @@ export default function PostDetailClient({ postId }: { postId: string }) {
         </div>
       </div>
 
-      {/* 主内容区 */}
-      <div className="max-w-7xl mx-auto">
+      {/* 主内容区 - pb 给底部 fixed 评论栏让位 */}
+      <div className="max-w-7xl mx-auto pb-24">
         <div className="px-4 pt-3">
           <Breadcrumb
             items={[
@@ -1069,8 +1086,14 @@ export default function PostDetailClient({ postId }: { postId: string }) {
         </div>
       </div>
 
-      {/* 底部互动栏（固定） */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-40">
+      {/* 底部互动栏：滚到底变实心，不在底时半透明（让用户能"看穿"看下面内容） */}
+      <div
+        className={`fixed bottom-0 left-0 right-0 border-t z-40 transition-all duration-200 ${
+          isAtBottom
+            ? 'bg-white border-gray-200 shadow-lg'
+            : 'bg-white/40 backdrop-blur-md border-gray-200/50 hover:bg-white/80'
+        }`}
+      >
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-4">
           <input
             type="text"
