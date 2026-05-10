@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { apiGet } from "@/lib/api";
+import CreateCollectibleDialog from "./ui/CreateCollectibleDialog";
 
 type Collectible = {
   id: string;
@@ -26,8 +27,9 @@ export default function AdminCollectiblesPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [category, setCategory] = useState("");
   const [search, setSearch] = useState("");
+  const [showCreate, setShowCreate] = useState(false);
 
-  useEffect(() => {
+  const loadCollectibles = useCallback(() => {
     setLoading(true);
     const params = new URLSearchParams({ page: String(page), limit: "20" });
     if (category) params.set("category", category);
@@ -44,6 +46,16 @@ export default function AdminCollectiblesPage() {
       .finally(() => setLoading(false));
   }, [page, category, search]);
 
+  useEffect(() => {
+    loadCollectibles();
+  }, [loadCollectibles]);
+
+  const handleCreateSuccess = () => {
+    setShowCreate(false);
+    setPage(1);
+    loadCollectibles();
+  };
+
   const categoryLabels: Record<string, string> = {
     badge: "徽章",
     ticket_stub: "票根",
@@ -54,7 +66,26 @@ export default function AdminCollectiblesPage() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold text-[#46467A] mb-6">收藏品管理</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold text-[#46467A]">收藏品管理</h1>
+        <button
+          type="button"
+          onClick={() => setShowCreate(true)}
+          className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition shadow-sm"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          </svg>
+          添加收藏品
+        </button>
+      </div>
+
+      {showCreate && (
+        <CreateCollectibleDialog
+          onClose={() => setShowCreate(false)}
+          onSuccess={handleCreateSuccess}
+        />
+      )}
 
       {/* 筛选 */}
       <div className="flex gap-3 mb-6">

@@ -148,7 +148,7 @@ export default function ChatScreen() {
     }
   }, [conversationId, storeLoadOlderMessages]);
 
-  const handleSendMessage = async (content: string) => {
+  const handleSendMessage = async (content: string, messageType: 'text' | 'image' = 'text') => {
     if (!conversationId || sending || currentUserId === null) return;
 
     try {
@@ -159,7 +159,8 @@ export default function ChatScreen() {
         conversationId,
         content,
         currentUserId,
-        currentUserName
+        currentUserName,
+        messageType
       );
 
       // 滚动到底部
@@ -168,7 +169,7 @@ export default function ChatScreen() {
       }, 100);
 
       // 2. 通过 store 的 sendMessage（API 调用）发送
-      const realMessage = await storeSendMessage(conversationId, content);
+      const realMessage = await storeSendMessage(conversationId, content, messageType);
 
       if (realMessage) {
         // 3. 用真实消息替换临时消息
@@ -317,7 +318,8 @@ export default function ChatScreen() {
 
       {/* 消息输入框 */}
       <MessageInput
-        onSend={handleSendMessage}
+        onSend={(content) => handleSendMessage(content, 'text')}
+        onSendImage={(imageUrl) => handleSendMessage(imageUrl, 'image')}
         onTyping={handleTyping}
         onStopTyping={handleStopTyping}
         disabled={sending}

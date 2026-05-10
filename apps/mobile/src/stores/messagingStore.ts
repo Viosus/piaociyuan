@@ -48,7 +48,13 @@ interface MessagingState {
   loadOlderMessages: (conversationId: string) => Promise<void>;
 
   addMessage: (conversationId: string, message: Message) => void;
-  addOptimisticMessage: (conversationId: string, content: string, senderId: number, senderName: string) => string;
+  addOptimisticMessage: (
+    conversationId: string,
+    content: string,
+    senderId: number,
+    senderName: string,
+    messageType?: 'text' | 'image' | 'file'
+  ) => string;
   replaceOptimisticMessage: (conversationId: string, tempId: string, realMessage: Message) => void;
 
   updateConversationWithMessage: (message: Message) => void;
@@ -63,7 +69,11 @@ interface MessagingState {
   updateConversation: (conversation: Conversation) => void;
   syncAfterReconnect: () => Promise<void>;
 
-  sendMessage: (conversationId: string, content: string) => Promise<Message | null>;
+  sendMessage: (
+    conversationId: string,
+    content: string,
+    messageType?: 'text' | 'image' | 'file'
+  ) => Promise<Message | null>;
 }
 
 let tempIdCounter = 0;
@@ -197,13 +207,14 @@ export const useMessagingStore = create<MessagingState>((set, get) => ({
     });
   },
 
-  addOptimisticMessage: (conversationId: string, content: string, senderId: number, senderName: string) => {
+  addOptimisticMessage: (conversationId, content, senderId, senderName, messageType = 'text') => {
     const tempId = `temp_${Date.now()}_${++tempIdCounter}`;
     const optimisticMessage: Message = {
       id: tempId,
       conversationId,
       senderId,
       content,
+      messageType,
       isRead: false,
       createdAt: new Date().toISOString(),
       sender: { id: senderId, nickname: senderName },
@@ -365,10 +376,10 @@ export const useMessagingStore = create<MessagingState>((set, get) => ({
     }
   },
 
-  sendMessage: async (conversationId: string, content: string) => {
+  sendMessage: async (conversationId, content, messageType = 'text') => {
     try {
       // 仅通过 API 发送（不通过 Socket 直发，避免重复）
-      const response = await apiSendMessage(conversationId, content);
+      const response = await apiSendMessage(conversationId, content, messageType);
       if (response.ok && response.data) {
         return response.data;
       }

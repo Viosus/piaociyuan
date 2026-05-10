@@ -4,8 +4,8 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowLeft, Send, RefreshCw } from 'lucide-react';
-import { apiGet } from '@/lib/api';
+import { ArrowLeft, Send, RefreshCw, ImagePlus } from 'lucide-react';
+import { apiGet, apiUpload } from '@/lib/api';
 import { useSocket } from '@/hooks/useSocket';
 import { formatMessageTime, shouldShowTimeDivider } from '@/lib/time';
 import { useToast } from '@/components/Toast';
@@ -19,6 +19,7 @@ interface User {
 interface Message {
   id: string;
   content: string;
+  messageType?: string; // 'text' | 'image' | 'file'，默认 text
   createdAt: string;
   senderId: string;
   sender: User;
@@ -52,14 +53,18 @@ export default function ConversationPage() {
   const [loading, setLoading] = useState(true);
   const [draft, setDraft] = useState('');
   const [sending, setSending] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [hasMoreOlder, setHasMoreOlder] = useState(false);
   const [loadingOlder, setLoadingOlder] = useState(false);
   const [olderPageLoaded, setOlderPageLoaded] = useState(1);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  // 大图查看（点击图片消息打开）
+  const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const isAtBottomRef = useRef(true);
   // state 形式：用于驱动 input bar 实心/半透明（ref 不会触发 re-render）
   const [isAtBottom, setIsAtBottom] = useState(true);
@@ -227,17 +232,18 @@ export default function ConversationPage() {
     }
   }, [loadingOlder, hasMoreOlder, olderPageLoaded, conversationId, conversation, messages.length, toast]);
 
-  const sendMessage = async (e?: React.FormEvent) => {
-    e?.preventDefault();
-    const content = draft.trim();
-    if (!content || !conversation || sending) return;
-
-    setSending(true);
+  // 通用发送（text 或 image），抽出乐观+POST+回滚逻辑
+  const postMessage = async (
+    content: string,
+    messageType: 'text' | 'image'
+  ) => {
+    if (!conversation) return;
     const tempId = `temp-${Date.now()}`;
     const optimistic: LocalMessage = {
       id: tempId,
       tempId,
       content,
+      messageType,
       createdAt: new Date().toISOString(),
       senderId: currentUserId ?? '',
       sender: {
@@ -248,7 +254,6 @@ export default function ConversationPage() {
       status: 'sending',
     };
     setMessages((prev) => [...prev, optimistic]);
-    setDraft('');
     isAtBottomRef.current = true;
 
     try {
@@ -259,7 +264,7 @@ export default function ConversationPage() {
           'Content-Type': 'application/json',
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify({ content }),
+        body: JSON.stringify({ content, messageType }),
       });
       if (!res.ok) throw new Error('发送失败');
       const real: Message = await res.json();
@@ -275,8 +280,41 @@ export default function ConversationPage() {
         )
       );
       toast.error('发送失败，点击 ↻ 重试');
+    }
+  };
+
+  const sendMessage = async (e?: React.FormEvent) => {
+    e?.preventDefault();
+    const content = draft.trim();
+    if (!content || !conversation || sending) return;
+
+    setSending(true);
+    setDraft('');
+    try {
+      await postMessage(content, 'text');
     } finally {
       setSending(false);
+    }
+  };
+
+  const handleImagePick = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    // 清空 input 让同一文件可再次选择
+    if (fileInputRef.current) fileInputRef.current.value = '';
+    if (!file || !conversation || uploading) return;
+
+    setUploading(true);
+    try {
+      const res = await apiUpload('/api/upload', file);
+      if (!res.ok || !res.data?.imageUrl) {
+        toast.error(`上传失败：${res.message || '未知错误'}`);
+        return;
+      }
+      await postMessage(res.data.imageUrl, 'image');
+    } catch {
+      toast.error('上传失败，请检查网络');
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -295,7 +333,10 @@ export default function ConversationPage() {
           'Content-Type': 'application/json',
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify({ content: failed.content }),
+        body: JSON.stringify({
+          content: failed.content,
+          messageType: failed.messageType || 'text',
+        }),
       });
       if (!res.ok) throw new Error('重试失败');
       const real: Message = await res.json();
@@ -465,17 +506,38 @@ export default function ConversationPage() {
                           {isCurrentUser ? '我' : msg.sender.nickname}
                         </div>
                       )}
-                      <div
-                        className={`relative rounded-lg px-4 py-2 break-words whitespace-pre-wrap ${
-                          isCurrentUser
-                            ? 'bg-[#46467A] text-white ml-auto'
-                            : 'bg-white/80 backdrop-blur-sm text-[#1a1a1f] border border-[#FFEBF5]'
-                        } ${msg.status === 'sending' ? 'opacity-60' : ''} ${
-                          msg.status === 'failed' ? 'ring-1 ring-red-400' : ''
-                        }`}
-                      >
-                        {msg.content}
-                      </div>
+                      {msg.messageType === 'image' ? (
+                        // 图片消息：点击放大
+                        <button
+                          type="button"
+                          onClick={() => setLightboxUrl(msg.content)}
+                          className={`relative block max-w-[240px] rounded-lg overflow-hidden ${
+                            isCurrentUser ? 'ml-auto' : ''
+                          } ${msg.status === 'sending' ? 'opacity-60' : ''} ${
+                            msg.status === 'failed' ? 'ring-1 ring-red-400' : ''
+                          }`}
+                          aria-label="查看大图"
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={msg.content}
+                            alt="图片消息"
+                            className="block w-full h-auto"
+                          />
+                        </button>
+                      ) : (
+                        <div
+                          className={`relative rounded-lg px-4 py-2 break-words whitespace-pre-wrap ${
+                            isCurrentUser
+                              ? 'bg-[#46467A] text-white ml-auto'
+                              : 'bg-white/80 backdrop-blur-sm text-[#1a1a1f] border border-[#FFEBF5]'
+                          } ${msg.status === 'sending' ? 'opacity-60' : ''} ${
+                            msg.status === 'failed' ? 'ring-1 ring-red-400' : ''
+                          }`}
+                        >
+                          {msg.content}
+                        </div>
+                      )}
 
                       {/* 状态指示 */}
                       {isCurrentUser && msg.status === 'sending' && (
@@ -517,6 +579,29 @@ export default function ConversationPage() {
         }`}
       >
         <form onSubmit={sendMessage} className="max-w-4xl mx-auto flex gap-3 items-end">
+          {/* 图片选择 */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleImagePick}
+            className="hidden"
+          />
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading || sending}
+            title="发送图片"
+            aria-label="发送图片"
+            className="self-end p-2 text-[#46467A] hover:bg-[#46467A]/10 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {uploading ? (
+              <span className="w-5 h-5 inline-block border-2 border-[#46467A] border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <ImagePlus className="w-5 h-5" />
+            )}
+          </button>
+
           <textarea
             ref={textareaRef}
             value={draft}
@@ -538,6 +623,37 @@ export default function ConversationPage() {
           </button>
         </form>
       </div>
+
+      {/* 大图查看 */}
+      {lightboxUrl && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-[300] bg-black/95 flex items-center justify-center p-4"
+          onClick={() => setLightboxUrl(null)}
+        >
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setLightboxUrl(null);
+            }}
+            className="absolute top-4 right-4 px-4 py-2 bg-white/90 hover:bg-white rounded-full flex items-center gap-1.5 text-[#1a1a1f] font-medium shadow-lg"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+            <span className="text-sm">关闭</span>
+          </button>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={lightboxUrl}
+            alt="图片大图"
+            className="max-w-[95vw] max-h-[95vh] object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </div>
   );
 }

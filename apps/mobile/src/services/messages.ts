@@ -79,6 +79,8 @@ export interface Message {
   conversationId: string;
   senderId: number;
   content: string;
+  // 'text'(默认) / 'image' / 'file' / 'system'
+  messageType?: string;
   isRead: boolean;
   createdAt: string;
   sender?: {
@@ -125,11 +127,16 @@ export async function getMessages(conversationId: string, page: number = 1, limi
 }
 
 /**
- * 发送消息
+ * 发送消息（默认 text；image 时 content 是上传后的图片 URL）
  */
-export async function sendMessage(conversationId: string, content: string) {
+export async function sendMessage(
+  conversationId: string,
+  content: string,
+  messageType: 'text' | 'image' | 'file' = 'text'
+) {
   return apiClient.post<Message>(`/api/messages/conversations/${conversationId}/messages`, {
     content,
+    messageType,
   });
 }
 

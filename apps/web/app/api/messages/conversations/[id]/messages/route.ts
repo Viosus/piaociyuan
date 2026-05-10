@@ -67,10 +67,27 @@ export async function POST(
     }
 
     const { id: conversationId } = await params;
-    const { content } = await request.json();
+    const body = await request.json();
+    const { content } = body;
+    // messageType: text(默认) / image / file / system；只有 image / text 在 web 客户端发出
+    const messageType: string = (body.messageType as string) || 'text';
 
     if (!content) {
       return NextResponse.json({ error: '消息内容不能为空' }, { status: 400 });
+    }
+    // 白名单校验，避免客户端塞奇怪的 type
+    if (!['text', 'image', 'file'].includes(messageType)) {
+      return NextResponse.json({ error: '不支持的消息类型' }, { status: 400 });
+    }
+    // image 类型时 content 必须是上传后的相对路径或同源 URL（防 SSRF / 外链滥用）
+    if (messageType === 'image') {
+      const isAllowed =
+        content.startsWith('/uploads/') ||
+        content.startsWith('/test-covers/') ||
+        content.startsWith('https://piaociyuan.com/');
+      if (!isAllowed) {
+        return NextResponse.json({ error: '图片必须先通过 /api/upload 上传' }, { status: 400 });
+      }
     }
 
     // 检查用户是否是该对话的参与者
@@ -113,7 +130,7 @@ export async function POST(
         senderId: user.id,
         receiverId: isGroup ? null : otherParticipant?.userId,
         content,
-        messageType: 'text',
+        messageType,
       },
       include: {
         sender: {
