@@ -55,8 +55,8 @@ export default async function EventDetailPage({ params }: Props) {
           ]}
         />
       </div>
-      {/* Banner: 装饰图，固定 16:6 宽高比，无论原图多大裁剪到这个比例 */}
-      <section className="relative aspect-[16/6] max-h-72 overflow-hidden">
+      {/* Banner: 全宽装饰图，固定高度，title 浮在左下角 */}
+      <section className="relative w-full h-72 md:h-80 overflow-hidden">
         <img
           src={event.cover}
           alt={event.name}
@@ -64,7 +64,8 @@ export default async function EventDetailPage({ params }: Props) {
             saleInfo.saleStatus === 'ended' ? 'grayscale' : ''
           }`}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
+        {/* 渐变遮罩，让左下角文字可读 */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent pointer-events-none" />
 
         {/* 活动类型标签 */}
         <div className="absolute top-4 left-4">
@@ -80,28 +81,28 @@ export default async function EventDetailPage({ params }: Props) {
             {saleInfo.label}
           </span>
         </div>
-      </section>
 
-      {/* Title 移出 banner —— 永不被遮挡，始终在视口里 */}
-      <section className="max-w-6xl mx-auto px-4 md:px-8 py-4 flex items-start justify-between gap-4">
-        <div className="flex-1 min-w-0">
-          <h1 className="text-2xl md:text-3xl font-extrabold text-[#46467A] item-name">
-            {event.name}
-          </h1>
-          <p className="mt-2 text-sm md:text-base text-[#1a1a1f]">
-            {event.city} · {event.venue}
-          </p>
-          <p className="mt-1 text-sm md:text-base text-[#1a1a1f]/80">
-            {formattedDateTime}
-          </p>
-          {countdown && saleInfo.canPurchase && (
-            <p className="mt-2 text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded inline-block">
-              {countdown}
+        {/* Title + 信息 + 关注按钮浮在左下角 */}
+        <div className="absolute bottom-4 left-4 md:left-8 right-4 md:right-8 flex items-end justify-between gap-4">
+          <div className="text-white flex-1 min-w-0">
+            <h1 className="text-2xl md:text-3xl font-extrabold drop-shadow-lg item-name">
+              {event.name}
+            </h1>
+            <p className="mt-1.5 text-sm md:text-base opacity-95 drop-shadow">
+              {event.city} · {event.venue}
             </p>
-          )}
-        </div>
-        <div className="flex-shrink-0">
-          <FollowButton eventId={event.id} eventName={event.name} />
+            <p className="mt-0.5 text-sm md:text-base opacity-90 drop-shadow">
+              {formattedDateTime}
+            </p>
+            {countdown && saleInfo.canPurchase && (
+              <p className="mt-2 text-xs bg-blue-500/80 px-2 py-1 rounded inline-block">
+                {countdown}
+              </p>
+            )}
+          </div>
+          <div className="flex-shrink-0">
+            <FollowButton eventId={event.id} eventName={event.name} />
+          </div>
         </div>
       </section>
 

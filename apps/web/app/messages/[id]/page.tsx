@@ -525,7 +525,7 @@ export default function ConversationPage() {
             placeholder="输入消息（Shift+Enter 换行）"
             rows={1}
             disabled={sending}
-            className="flex-1 px-4 py-2 bg-white border border-[#FFEBF5] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#46467A] disabled:bg-gray-100 text-[#1a1a1f] resize-none leading-6 max-h-40"
+            className="flex-1 px-4 py-2 bg-white border border-[#46467A]/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#46467A] focus:border-[#46467A] disabled:bg-gray-100 text-[#1a1a1f] placeholder:text-gray-500 resize-none leading-6 max-h-40"
             style={{ minHeight: 40 }}
           />
           <button

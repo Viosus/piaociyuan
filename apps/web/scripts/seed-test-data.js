@@ -44,7 +44,7 @@ async function main() {
       phone: '13900000001',
       email: 'test-a@piaociyuan.test',
       nickname: '[TEST] 测试明星A',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=test-a',
+      avatar: '/test-covers/avatar-a.svg',
       isVerified: true,
       verifiedType: 'celebrity',
       bio: '认证测试账号 / 主测试账号 / 用 phone 登录',
@@ -54,7 +54,7 @@ async function main() {
       phone: '13900000002',
       email: 'test-b@piaociyuan.test',
       nickname: '[TEST] 测试粉丝B',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=test-b',
+      avatar: '/test-covers/avatar-b.svg',
       bio: '与 A 互相关注 / 与 A 有私信会话',
       role: 'user',
     },
@@ -70,7 +70,7 @@ async function main() {
       phone: '13900000004',
       email: 'test-d@piaociyuan.test',
       nickname: '[TEST] 测试用户D',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=test-d',
+      avatar: '/test-covers/avatar-d.svg',
       bio: '普通测试用户 / A 关注了 D',
       role: 'user',
     },
@@ -78,7 +78,7 @@ async function main() {
       phone: '13900000099',
       email: 'test-admin@piaociyuan.test',
       nickname: '[TEST] 测试管理员',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=test-admin',
+      avatar: '/test-covers/avatar-admin.svg',
       bio: '管理员测试账号',
       role: 'admin',
     },
@@ -145,7 +145,7 @@ async function main() {
       saleStatus: 'on_sale',
       saleStartTime: new Date(Date.now() - 7 * 86400000),
       saleEndTime: new Date(Date.now() + 90 * 86400000),
-      cover: '/api/placeholder?w=1200&h=800&bg=46467A&text=' + encodeURIComponent('周杰伦演唱会'),
+      cover: '/test-covers/concert.svg',
       artist: '周杰伦',
       desc: EVENT_DESC_PREFIX + '测试演唱会，售票中状态',
     },
@@ -159,7 +159,7 @@ async function main() {
       saleStatus: 'not_started',
       saleStartTime: new Date(Date.now() + 7 * 86400000),
       saleEndTime: new Date(Date.now() + 60 * 86400000),
-      cover: '/api/placeholder?w=1200&h=800&bg=E91E63&text=' + encodeURIComponent('草莓音乐节'),
+      cover: '/test-covers/festival.svg',
       artist: '草东没有派对、五条人、Faye 飞、痛仰',
       desc: EVENT_DESC_PREFIX + '即将开售测试',
     },
@@ -173,7 +173,7 @@ async function main() {
       saleStatus: 'sold_out',
       saleStartTime: new Date(Date.now() - 30 * 86400000),
       saleEndTime: new Date(Date.now() + 30 * 86400000),
-      cover: '/api/placeholder?w=1200&h=800&bg=4CAF50&text=' + encodeURIComponent('莫奈展览'),
+      cover: '/test-covers/exhibition.svg',
       artist: '莫奈基金会',
       desc: EVENT_DESC_PREFIX + '已售罄测试',
     },
@@ -187,7 +187,7 @@ async function main() {
       saleStatus: 'ended',
       saleStartTime: new Date(Date.now() - 90 * 86400000),
       saleEndTime: new Date(Date.now() - 5 * 86400000),
-      cover: '/api/placeholder?w=1200&h=800&bg=795548&text=' + encodeURIComponent('话剧《雷雨》'),
+      cover: '/test-covers/show.svg',
       artist: '上海话剧艺术中心',
       desc: EVENT_DESC_PREFIX + '已结束测试',
     },
@@ -195,22 +195,46 @@ async function main() {
 
   const events = [];
   for (const e of eventSpec) {
-    const existing = await prisma.event.findFirst({ where: { name: e.name } });
-    if (existing) {
-      console.log(`  · Event "${e.name}" already exists, skip`);
-      events.push(existing);
-      continue;
+    let event = await prisma.event.findFirst({ where: { name: e.name } });
+    if (event) {
+      console.log(`  · Event "${e.name}" already exists, ensuring tiers...`);
+    } else {
+      event = await prisma.event.create({ data: e });
+      console.log(`  ✓ Event: ${e.name} (${e.saleStatus})`);
     }
-    const created = await prisma.event.create({ data: e });
-    await prisma.tier.createMany({
-      data: [
-        { eventId: created.id, name: 'VIP', price: 2880, capacity: 100, remaining: 50, sold: 50 },
-        { eventId: created.id, name: '普通票', price: 880, capacity: 500, remaining: 380, sold: 120 },
-      ],
-    });
-    console.log(`  ✓ Event: ${e.name} (${e.saleStatus}) + 2 tiers`);
-    events.push(created);
+
+    // 即使 event 已存在也确保 tier 存在（之前 seed 可能跳过了 tier 创建）
+    const tierCount = await prisma.tier.count({ where: { eventId: event.id } });
+    if (tierCount === 0) {
+      await prisma.tier.createMany({
+        data: [
+          { eventId: event.id, name: 'VIP', price: 2880, capacity: 100, remaining: 50, sold: 50 },
+          { eventId: event.id, name: '普通票', price: 880, capacity: 500, remaining: 380, sold: 120 },
+        ],
+      });
+      console.log(`    ✓ Created 2 tiers (VIP 50/100 + 普通 380/500)`);
+    } else {
+      console.log(`    · ${tierCount} tiers already exist`);
+    }
+    events.push(event);
   }
+
+  // 诊断：列出所有测试 event 的 tier 状况，方便排查"票数 0"问题
+  console.log('\n  === Tier 状况诊断 ===');
+  for (const ev of events) {
+    const tiers = await prisma.tier.findMany({
+      where: { eventId: ev.id },
+      select: { name: true, price: true, capacity: true, remaining: true, sold: true },
+    });
+    console.log(`  · ${ev.name}:`);
+    if (tiers.length === 0) {
+      console.log('      ⚠ NO TIERS!');
+    }
+    for (const t of tiers) {
+      console.log(`      - ${t.name}: 价格 ¥${t.price}, 库存 ${t.remaining}/${t.capacity} (已售 ${t.sold})`);
+    }
+  }
+  console.log('  ====================\n');
 
   // ==================== 4. Posts ====================
   // post 1: 5 张图（测 W-S4 lightbox 多图导航）
@@ -227,11 +251,11 @@ async function main() {
         location: '上海·虹口足球场',
         images: {
           create: [
-            { imageUrl: '/api/placeholder?w=1600&h=1067&bg=46467A&text=Live+1', width: 1600, height: 1067, order: 0 },
-            { imageUrl: '/api/placeholder?w=1600&h=1067&bg=E91E63&text=Live+2', width: 1600, height: 1067, order: 1 },
-            { imageUrl: '/api/placeholder?w=1600&h=1067&bg=4CAF50&text=Live+3', width: 1600, height: 1067, order: 2 },
-            { imageUrl: '/api/placeholder?w=1600&h=1067&bg=FF9800&text=Live+4', width: 1600, height: 1067, order: 3 },
-            { imageUrl: '/api/placeholder?w=1600&h=1067&bg=795548&text=Live+5', width: 1600, height: 1067, order: 4 },
+            { imageUrl: '/test-covers/post-1.svg', width: 1600, height: 1067, order: 0 },
+            { imageUrl: '/test-covers/post-2.svg', width: 1600, height: 1067, order: 1 },
+            { imageUrl: '/test-covers/post-3.svg', width: 1600, height: 1067, order: 2 },
+            { imageUrl: '/test-covers/post-4.svg', width: 1600, height: 1067, order: 3 },
+            { imageUrl: '/test-covers/post-5.svg', width: 1600, height: 1067, order: 4 },
           ],
         },
       },
@@ -255,7 +279,7 @@ async function main() {
         location: '北京',
         images: {
           create: [
-            { imageUrl: '/api/placeholder?w=1600&h=1067&bg=E91E63&text=' + encodeURIComponent('草莓音乐节'), width: 1600, height: 1067, order: 0 },
+            { imageUrl: '/test-covers/festival.svg', width: 1600, height: 1067, order: 0 },
           ],
         },
       },
