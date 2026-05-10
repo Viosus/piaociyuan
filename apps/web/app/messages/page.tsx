@@ -17,11 +17,18 @@ interface LastMessage {
   createdAt: string;
   senderId: string;
   isRead: boolean;
+  messageType?: string;
 }
 
 interface Conversation {
   id: string;
-  otherUser: User;
+  type?: 'private' | 'group';
+  // 私聊
+  otherUser?: User;
+  // 群聊
+  name?: string | null;
+  avatar?: string | null;
+  memberCount?: number | null;
   lastMessage?: LastMessage;
   unreadCount: number;
   lastMessageAt: string;
@@ -71,9 +78,14 @@ export default function MessagesPage() {
     }
   };
 
-  const filteredConversations = conversations.filter((conv) =>
-    conv.otherUser?.nickname?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredConversations = conversations.filter((conv) => {
+    const term = searchQuery.toLowerCase();
+    if (!term) return true;
+    if (conv.type === 'group') {
+      return (conv.name || '').toLowerCase().includes(term);
+    }
+    return (conv.otherUser?.nickname || '').toLowerCase().includes(term);
+  });
 
   return (
     <div className="min-h-screen -mt-20">
@@ -143,78 +155,122 @@ export default function MessagesPage() {
           </div>
         ) : (
           <div className="space-y-2">
-            {filteredConversations.map((conversation) => (
-              <div
-                key={conversation.id}
-                onClick={() => router.push(`/messages/${conversation.id}`)}
-                className="bg-white/80 backdrop-blur-sm rounded-lg p-4 hover:bg-white hover:shadow-lg cursor-pointer transition border border-[#FFEBF5] hover:border-[#FFE3F0]"
-              >
-                <div className="flex items-center gap-3">
-                  {/* Avatar */}
-                  <div
-                    role="link"
-                    tabIndex={0}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (conversation.otherUser?.id) {
-                        router.push(`/u/${conversation.otherUser.id}`);
-                      }
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        if (conversation.otherUser?.id) {
-                          router.push(`/u/${conversation.otherUser.id}`);
-                        }
-                      }
-                    }}
-                    className="relative flex-shrink-0 cursor-pointer hover:opacity-80 transition"
-                  >
-                    {conversation.otherUser?.avatar ? (
-                      <Image
-                        src={conversation.otherUser.avatar}
-                        alt={conversation.otherUser.nickname || '用户'}
-                        width={48}
-                        height={48}
-                        className="rounded-full"
-                      />
-                    ) : (
-                      <div className="w-12 h-12 bg-gradient-to-br from-[#46467A] to-[#E0DFFD] rounded-full flex items-center justify-center text-white font-bold">
-                        {conversation.otherUser?.nickname?.charAt(0) || '?'}
-                      </div>
-                    )}
-                    {/* Unread badge */}
-                    {conversation.unreadCount > 0 && (
-                      <div className="absolute -top-1 -right-1 bg-[#46467A] text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                        {conversation.unreadCount > 99 ? '99+' : conversation.unreadCount}
-                      </div>
-                    )}
-                  </div>
+            {filteredConversations.map((conversation) => {
+              const isGroup = conversation.type === 'group';
+              const lastMsg = conversation.lastMessage;
+              // image 消息预览：直接显示"[图片]"，content 是 URL 不应展示
+              const lastMsgPreview = lastMsg
+                ? lastMsg.messageType === 'image'
+                  ? '[图片]'
+                  : lastMsg.content
+                : '开始对话...';
 
-                  {/* Content */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-1">
-                      <h3 className="font-semibold text-[#1a1a1f] truncate">
-                        {conversation.otherUser?.nickname || '未知用户'}
-                      </h3>
-                      <span className="text-xs text-[#1a1a1f]/60 flex-shrink-0 ml-2">
-                        {conversation.lastMessage && formatTime(conversation.lastMessage.createdAt)}
-                      </span>
+              return (
+                <div
+                  key={conversation.id}
+                  onClick={() => router.push(`/messages/${conversation.id}`)}
+                  className="bg-white/80 backdrop-blur-sm rounded-lg p-4 hover:bg-white hover:shadow-lg cursor-pointer transition border border-[#FFEBF5] hover:border-[#FFE3F0]"
+                >
+                  <div className="flex items-center gap-3">
+                    {/* Avatar */}
+                    {isGroup ? (
+                      // 群聊头像：默认占位 / 自定义头像；点击不跳用户主页
+                      <div className="relative flex-shrink-0">
+                        {conversation.avatar ? (
+                          <Image
+                            src={conversation.avatar}
+                            alt={conversation.name || '群聊'}
+                            width={48}
+                            height={48}
+                            className="rounded-xl"
+                          />
+                        ) : (
+                          <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-white text-xl">
+                            👥
+                          </div>
+                        )}
+                        {conversation.unreadCount > 0 && (
+                          <div className="absolute -top-1 -right-1 bg-[#46467A] text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                            {conversation.unreadCount > 99 ? '99+' : conversation.unreadCount}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      // 私聊头像：点击跳对方主页
+                      <div
+                        role="link"
+                        tabIndex={0}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (conversation.otherUser?.id) {
+                            router.push(`/u/${conversation.otherUser.id}`);
+                          }
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            if (conversation.otherUser?.id) {
+                              router.push(`/u/${conversation.otherUser.id}`);
+                            }
+                          }
+                        }}
+                        className="relative flex-shrink-0 cursor-pointer hover:opacity-80 transition"
+                      >
+                        {conversation.otherUser?.avatar ? (
+                          <Image
+                            src={conversation.otherUser.avatar}
+                            alt={conversation.otherUser.nickname || '用户'}
+                            width={48}
+                            height={48}
+                            className="rounded-full"
+                          />
+                        ) : (
+                          <div className="w-12 h-12 bg-gradient-to-br from-[#46467A] to-[#E0DFFD] rounded-full flex items-center justify-center text-white font-bold">
+                            {conversation.otherUser?.nickname?.charAt(0) || '?'}
+                          </div>
+                        )}
+                        {conversation.unreadCount > 0 && (
+                          <div className="absolute -top-1 -right-1 bg-[#46467A] text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                            {conversation.unreadCount > 99 ? '99+' : conversation.unreadCount}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between mb-1">
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <h3 className="font-semibold text-[#1a1a1f] truncate">
+                            {isGroup
+                              ? conversation.name || '群聊'
+                              : conversation.otherUser?.nickname || '未知用户'}
+                          </h3>
+                          {isGroup && (
+                            <span className="flex-shrink-0 text-xs px-1.5 py-0.5 bg-purple-50 text-purple-600 rounded">
+                              {conversation.memberCount || 0} 人
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-xs text-[#1a1a1f]/60 flex-shrink-0 ml-2">
+                          {lastMsg && formatTime(lastMsg.createdAt)}
+                        </span>
+                      </div>
+                      <p
+                        className={`text-sm truncate ${
+                          conversation.unreadCount > 0
+                            ? 'text-[#1a1a1f] font-medium'
+                            : 'text-[#1a1a1f]/60'
+                        }`}
+                      >
+                        {lastMsgPreview}
+                      </p>
                     </div>
-                    <p
-                      className={`text-sm truncate ${
-                        conversation.unreadCount > 0
-                          ? 'text-[#1a1a1f] font-medium'
-                          : 'text-[#1a1a1f]/60'
-                      }`}
-                    >
-                      {conversation.lastMessage?.content || '开始对话...'}
-                    </p>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
