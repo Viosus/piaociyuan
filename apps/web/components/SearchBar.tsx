@@ -64,6 +64,16 @@ export default function SearchBar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const goToFullSearch = () => {
+    const trimmed = query.trim();
+    if (trimmed.length < 2) return;
+    router.push(`/search?q=${encodeURIComponent(trimmed)}`);
+    setIsOpen(false);
+    setQuery("");
+    setResults([]);
+    setSelectedIndex(-1);
+  };
+
   // 键盘导航
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "ArrowDown") {
@@ -72,9 +82,14 @@ export default function SearchBar() {
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
       setSelectedIndex((prev) => (prev > 0 ? prev - 1 : -1));
-    } else if (e.key === "Enter" && selectedIndex >= 0 && results[selectedIndex]) {
+    } else if (e.key === "Enter") {
       e.preventDefault();
-      handleSelectResult(results[selectedIndex]);
+      // 选中具体结果优先；否则跳综合搜索页
+      if (selectedIndex >= 0 && results[selectedIndex]) {
+        handleSelectResult(results[selectedIndex]);
+      } else if (query.trim().length >= 2) {
+        goToFullSearch();
+      }
     } else if (e.key === "Escape") {
       setIsOpen(false);
       inputRef.current?.blur();
@@ -215,6 +230,17 @@ export default function SearchBar() {
                   <p className="text-gray-400 text-xs mt-1">试试其他关键词</p>
                 </div>
               )}
+
+              {/* 综合搜索入口（搜用户、帖子、活动） */}
+              {query.trim().length >= 2 && (
+                <button
+                  type="button"
+                  onClick={goToFullSearch}
+                  className="w-full mt-2 py-2 text-center text-sm text-[#46467A] hover:bg-[#46467A]/5 rounded-lg transition border-t border-gray-100"
+                >
+                  搜索全部（用户/帖子/活动）→
+                </button>
+              )}
             </div>
           )}
 
@@ -223,6 +249,7 @@ export default function SearchBar() {
             <div className="p-8 text-center">
               <div className="text-4xl mb-2">🔍</div>
               <p className="text-gray-400 text-sm">输入关键词开始搜索</p>
+              <p className="text-gray-400 text-xs mt-1">回车跳转到全部结果</p>
             </div>
           )}
         </div>

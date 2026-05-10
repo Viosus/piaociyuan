@@ -33,7 +33,14 @@ type LocalMessage = Message & {
 
 interface ConversationData {
   id: string;
-  otherUser: User;
+  type?: "private" | "group";
+  // 私聊
+  otherUser: User | null;
+  // 群聊
+  name?: string | null;
+  avatar?: string | null;
+  memberCount?: number | null;
+  myRole?: "owner" | "admin" | "member";
   messages: Message[];
   messageTotal: number;
   pageSize: number;
@@ -401,30 +408,61 @@ export default function ConversationPage() {
           <ArrowLeft className="w-5 h-5 text-[#1a1a1f]" />
         </button>
 
-        <Link
-          href={`/u/${conversation.otherUser?.id}`}
-          className="flex items-center gap-3 hover:opacity-80 transition"
-        >
-          {conversation.otherUser?.avatar ? (
-            <Image
-              src={conversation.otherUser.avatar}
-              alt={conversation.otherUser.nickname || '用户'}
-              width={40}
-              height={40}
-              className="rounded-full"
-            />
-          ) : (
-            <div className="w-10 h-10 bg-gradient-to-br from-[#46467A] to-[#E0DFFD] rounded-full flex items-center justify-center text-white font-bold">
-              {conversation.otherUser?.nickname?.charAt(0) || '?'}
+        {conversation.type === 'group' ? (
+          // 群聊：标题进群详情
+          <Link
+            href={`/messages/groups/${conversation.id}`}
+            className="flex items-center gap-3 hover:opacity-80 transition flex-1 min-w-0"
+          >
+            {conversation.avatar ? (
+              <Image
+                src={conversation.avatar}
+                alt={conversation.name || '群聊'}
+                width={40}
+                height={40}
+                className="rounded-xl"
+              />
+            ) : (
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white text-xl">
+                👥
+              </div>
+            )}
+            <div className="min-w-0">
+              <h1 className="font-semibold text-[#1a1a1f] truncate">
+                {conversation.name || '群聊'}
+              </h1>
+              <p className="text-xs text-[#1a1a1f]/60">
+                {conversation.memberCount || 0} 成员 · 点击查看详情
+              </p>
             </div>
-          )}
+          </Link>
+        ) : (
+          // 私聊：标题进对方主页
+          <Link
+            href={`/u/${conversation.otherUser?.id}`}
+            className="flex items-center gap-3 hover:opacity-80 transition flex-1 min-w-0"
+          >
+            {conversation.otherUser?.avatar ? (
+              <Image
+                src={conversation.otherUser.avatar}
+                alt={conversation.otherUser.nickname || '用户'}
+                width={40}
+                height={40}
+                className="rounded-full"
+              />
+            ) : (
+              <div className="w-10 h-10 bg-gradient-to-br from-[#46467A] to-[#E0DFFD] rounded-full flex items-center justify-center text-white font-bold">
+                {conversation.otherUser?.nickname?.charAt(0) || '?'}
+              </div>
+            )}
 
-          <div>
-            <h1 className="font-semibold text-[#1a1a1f]">
-              {conversation.otherUser?.nickname || '未知用户'}
-            </h1>
-          </div>
-        </Link>
+            <div className="min-w-0">
+              <h1 className="font-semibold text-[#1a1a1f] truncate">
+                {conversation.otherUser?.nickname || '未知用户'}
+              </h1>
+            </div>
+          </Link>
+        )}
       </div>
 
       {/* 消息列表 - pb 给底部 fixed 输入栏让位 */}

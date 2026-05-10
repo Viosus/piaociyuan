@@ -80,18 +80,29 @@ export default function MessagesPage() {
       {/* Header - fixed 占满 layout 主区顶部，跟 /messages/[id] 一致 */}
       <div className="bg-white/80 backdrop-blur-sm border-b border-[#FFEBF5] fixed top-0 left-20 right-[var(--right-sidebar-width,64px)] z-50">
         <div className="max-w-4xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-4 gap-2">
             <h1 className="text-2xl font-bold bg-gradient-to-r from-[#46467A] via-[#FFE3F0] to-blue-400 bg-clip-text text-transparent flex items-center gap-2">
               <MessageSquare className="w-6 h-6 text-[#46467A]" />
               私信
             </h1>
-            <button
-              onClick={() => router.push('/messages/new')}
-              className="flex items-center gap-2 px-4 py-2 bg-[#46467A] text-white rounded-lg hover:bg-[#5A5A8E] transition"
-            >
-              <Plus className="w-4 h-4" />
-              新建对话
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => router.push('/messages/new')}
+                className="flex items-center gap-1 px-3 py-2 bg-[#46467A] text-white rounded-lg hover:bg-[#5A5A8E] transition text-sm"
+                title="新建私聊"
+              >
+                <Plus className="w-4 h-4" />
+                私聊
+              </button>
+              <button
+                onClick={() => router.push('/messages/groups/new')}
+                className="flex items-center gap-1 px-3 py-2 bg-white border border-[#46467A]/30 text-[#46467A] rounded-lg hover:bg-[#46467A]/5 transition text-sm"
+                title="创建群聊"
+              >
+                <Plus className="w-4 h-4" />
+                群聊
+              </button>
+            </div>
           </div>
 
           {/* Search */}
