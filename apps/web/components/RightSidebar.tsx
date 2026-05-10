@@ -375,6 +375,14 @@ export default function RightSidebar() {
                       </div>
                     </div>
                   ))}
+                  {/* 查看全部通知链接 */}
+                  <button
+                    type="button"
+                    onClick={() => router.push('/notifications')}
+                    className="w-full mt-2 py-2 text-center text-sm text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition"
+                  >
+                    查看全部通知 →
+                  </button>
                 </div>
               )
             ) : (
