@@ -310,18 +310,24 @@ export default function UserProfileClient({ userId }: { userId: string }) {
               </div>
               <div className="text-xs text-[#1a1a1f]/60">动态</div>
             </div>
-            <div>
+            <Link
+              href={`/u/${userId}/followers`}
+              className="block hover:opacity-80 transition"
+            >
               <div className="text-lg font-bold text-[#46467A]">
                 {user.stats.followerCount}
               </div>
-              <div className="text-xs text-[#1a1a1f]/60">粉丝</div>
-            </div>
-            <div>
+              <div className="text-xs text-[#1a1a1f]/60 hover:underline">粉丝</div>
+            </Link>
+            <Link
+              href={`/u/${userId}/following`}
+              className="block hover:opacity-80 transition"
+            >
               <div className="text-lg font-bold text-[#46467A]">
                 {user.stats.followingCount}
               </div>
-              <div className="text-xs text-[#1a1a1f]/60">关注</div>
-            </div>
+              <div className="text-xs text-[#1a1a1f]/60 hover:underline">关注</div>
+            </Link>
           </div>
 
           {/* 关注按钮 + W-S7 互关 badge */}
