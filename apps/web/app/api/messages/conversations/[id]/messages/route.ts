@@ -116,6 +116,14 @@ export async function POST(
       return NextResponse.json({ error: '对话不存在' }, { status: 404 });
     }
 
+    // 群聊场景：禁言成员不能发消息（私聊不涉及禁言）
+    if (conversation.type === 'group' && participant.isMuted) {
+      return NextResponse.json(
+        { error: '您已被群主或管理员禁言，无法在该群内发送消息' },
+        { status: 403 }
+      );
+    }
+
     const isGroup = conversation.type === 'group';
 
     // 单聊场景下，从所有参与者中选出"非发送者"作为接收方

@@ -17,8 +17,8 @@ piaociyuan/
 ## 技术栈版本 (必须遵守)
 
 ### 运行环境
-- **Node.js**: >= 18.0.0 (当前 22.x)
-- **npm**: >= 9.0.0 (当前 10.x)
+- **Node.js**: >= 22.0.0（CI workflow `setup-node@v5` 用 22 + Dockerfile `FROM node:22-alpine` 都对齐）
+- **npm**: >= 10.0.0（Node 22 自带 npm 10）
 - **包管理**: npm workspaces
 
 ### 核心依赖版本 (已锁定，勿随意更改)
@@ -29,8 +29,9 @@ piaociyuan/
 | react-native | 0.81.5 | Mobile |
 | next | ^16.1.1 | Web 框架 |
 | expo | ~54.0.30 | Mobile 框架 |
-| three | ^0.172.0 | 3D 渲染 |
+| three | ^0.182.0 | 3D 渲染（Web 直用 + Mobile 留作 @google/model-viewer 的 peer dep） |
 | @google/model-viewer | ^4.1.0 | 3D 模型查看器 |
+| @types/react | ~19.1.10 | Web / Mobile 统一类型版本（不要写 `^19`，会和 mobile drift） |
 | typescript | ~5.9.2 | 类型检查 |
 
 ### 数据库
@@ -123,6 +124,18 @@ Web API 路径: `apps/web/app/api/`
 - **导航**: @react-navigation v7
 - **状态管理**: zustand
 - **存储**: expo-secure-store (敏感数据), @react-native-async-storage (普通数据)
+
+## 📱 Mobile 启动 / 登录排查铁律（2026-05-11）
+
+详见 [`docs/Mobile-排查指南.md`](docs/Mobile-排查指南.md)。**必读 5 条**：
+
+1. **API_URL 必须显式 .env**：`apps/mobile/.env` 必须含 `EXPO_PUBLIC_API_URL`，否则静默用 prod。`cp .env.example .env` 是首次启动必做
+2. **Expo Go 版本必须匹配 SDK**：扫码闪退多半是 Expo Go 跟 `app.json` 的 expo SDK 不对齐 → 卸载 Expo Go 重装最新
+3. **改 mobile 代码 + 看不到效果 → 必须 `expo start --clear`**：Metro cache 污染极常见
+4. **登录态自动登出 = SecureStore 权限问题**：检查 app.json android.permissions / iOS Info.plist
+5. **`npx tsc --noEmit` 必须先过**：本地 `npm start` 不查类型，EAS build 才查，build 挂会浪费 30 分钟
+
+新 mobile 启动/登录/build 错误**必须**同步写进 `docs/Mobile-排查指南.md` 第 3 章常见问题清单。
 
 ## 注意事项
 

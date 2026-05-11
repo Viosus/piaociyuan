@@ -428,6 +428,21 @@ class ApiClient {
   ): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, { ...options, method: 'DELETE' });
   }
+
+  /**
+   * PATCH 请求
+   */
+  async patch<T>(
+    endpoint: string,
+    body?: any,
+    options?: Omit<RequestOptions, 'method' | 'body'>
+  ): Promise<ApiResponse<T>> {
+    return this.request<T>(endpoint, {
+      ...options,
+      method: 'PATCH',
+      body: JSON.stringify(body),
+    });
+  }
 }
 
 // 导出单例

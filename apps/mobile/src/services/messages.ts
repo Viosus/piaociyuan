@@ -254,3 +254,56 @@ export async function disbandGroup(groupId: string) {
     `/api/messages/groups/${groupId}`
   );
 }
+
+/**
+ * 提升管理员 / 撤销管理员（仅 owner 可调用）
+ */
+export async function setMemberRole(
+  groupId: string,
+  memberId: string,
+  role: 'admin' | 'member'
+) {
+  return apiClient.patch<{ ok: boolean; role: string }>(
+    `/api/messages/groups/${groupId}/members/${memberId}/role`,
+    { role }
+  );
+}
+
+/**
+ * 禁言 / 取消禁言（owner/admin 可调用；admin 不能禁言 admin/owner）
+ */
+export async function setMemberMute(
+  groupId: string,
+  memberId: string,
+  isMuted: boolean
+) {
+  return apiClient.patch<{ ok: boolean; isMuted: boolean }>(
+    `/api/messages/groups/${groupId}/members/${memberId}/mute`,
+    { isMuted }
+  );
+}
+
+/**
+ * 设置群昵称（自己 / owner / admin 可调）
+ * nickname = null 或空字符串 = 清除
+ */
+export async function setMemberNickname(
+  groupId: string,
+  memberId: string,
+  nickname: string | null
+) {
+  return apiClient.patch<{ ok: boolean; nickname: string | null }>(
+    `/api/messages/groups/${groupId}/members/${memberId}/nickname`,
+    { nickname }
+  );
+}
+
+/**
+ * 转让群主（仅 owner 可调用，且只能转给非自己的成员）
+ */
+export async function transferGroupOwner(groupId: string, toUserId: string) {
+  return apiClient.patch<{ ok: boolean; newOwnerId: string }>(
+    `/api/messages/groups/${groupId}/transfer-owner`,
+    { toUserId }
+  );
+}

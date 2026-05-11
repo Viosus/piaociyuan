@@ -13,6 +13,8 @@ import {
   Alert,
   Image,
   TextInput,
+  Modal,
+  Pressable,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute, useNavigation } from '@react-navigation/native';
@@ -24,6 +26,10 @@ import {
   removeGroupMember,
   leaveGroup,
   disbandGroup,
+  setMemberRole,
+  setMemberMute,
+  setMemberNickname,
+  transferGroupOwner,
   type GroupDetail,
   type GroupMember,
 } from '../services/messages';
@@ -39,6 +45,12 @@ export default function GroupDetailScreen() {
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
   const [editing, setEditing] = useState(false);
   const [newName, setNewName] = useState('');
+  // 成员操作 modal
+  const [actionTarget, setActionTarget] = useState<GroupMember | null>(null);
+  // 群昵称编辑 modal
+  const [nicknameTarget, setNicknameTarget] = useState<GroupMember | null>(null);
+  const [nicknameDraft, setNicknameDraft] = useState('');
+  const [nicknameSaving, setNicknameSaving] = useState(false);
 
   useEffect(() => {
     loadCurrentUser();
@@ -188,6 +200,131 @@ export default function GroupDetailScreen() {
     });
   };
 
+  // 通用：调用 API 并 reload
+  const runAction = async (
+    promise: Promise<{ ok: boolean; error?: string; data?: any }>,
+    successMsg: string
+  ) => {
+    try {
+      const res = await promise;
+      if (res.ok) {
+        Alert.alert('成功', successMsg);
+        loadGroupDetail();
+      } else {
+        Alert.alert('错误', res.error || '操作失败');
+      }
+    } catch (error: any) {
+      Alert.alert('错误', error?.message || '网络错误');
+    }
+  };
+
+  const handleSetRole = (member: GroupMember, role: 'admin' | 'member') => {
+    setActionTarget(null);
+    const verb = role === 'admin' ? '设为管理员' : '撤销管理员身份';
+    if (role === 'member') {
+      Alert.alert(
+        '撤销管理员',
+        `确定撤销 ${member.nickname} 的管理员身份吗？`,
+        [
+          { text: '取消', style: 'cancel' },
+          {
+            text: '撤销',
+            style: 'destructive',
+            onPress: () =>
+              runAction(
+                setMemberRole(groupId, member.id.toString(), role),
+                `已${verb} ${member.nickname}`
+              ),
+          },
+        ]
+      );
+    } else {
+      runAction(
+        setMemberRole(groupId, member.id.toString(), role),
+        `已${verb} ${member.nickname}`
+      );
+    }
+  };
+
+  const handleToggleMute = (member: GroupMember) => {
+    setActionTarget(null);
+    const willMute = !member.isMuted;
+    if (willMute) {
+      Alert.alert(
+        '禁言成员',
+        `确定禁言 ${member.nickname} 吗？被禁言后该成员无法在群内发送消息。`,
+        [
+          { text: '取消', style: 'cancel' },
+          {
+            text: '禁言',
+            style: 'destructive',
+            onPress: () =>
+              runAction(
+                setMemberMute(groupId, member.id.toString(), true),
+                `已禁言 ${member.nickname}`
+              ),
+          },
+        ]
+      );
+    } else {
+      runAction(
+        setMemberMute(groupId, member.id.toString(), false),
+        `已解除 ${member.nickname} 的禁言`
+      );
+    }
+  };
+
+  const handleTransferOwner = (member: GroupMember) => {
+    setActionTarget(null);
+    Alert.alert(
+      '转让群主',
+      `确定将群主转让给 ${member.nickname} 吗？\n转让后您将变为普通管理员，无法再解散群聊。此操作不可撤销。`,
+      [
+        { text: '取消', style: 'cancel' },
+        {
+          text: '确认转让',
+          style: 'destructive',
+          onPress: () =>
+            runAction(
+              transferGroupOwner(groupId, member.id.toString()),
+              `群主已转让给 ${member.nickname}`
+            ),
+        },
+      ]
+    );
+  };
+
+  const openNicknameModal = (member: GroupMember) => {
+    setActionTarget(null);
+    setNicknameTarget(member);
+    setNicknameDraft(member.nickname_in_group || '');
+  };
+
+  const handleSaveNickname = async () => {
+    if (!nicknameTarget) return;
+    setNicknameSaving(true);
+    const trimmed = nicknameDraft.trim();
+    try {
+      const res = await setMemberNickname(
+        groupId,
+        nicknameTarget.id.toString(),
+        trimmed || null
+      );
+      if (res.ok) {
+        Alert.alert('成功', trimmed ? '已设置群昵称' : '已清除群昵称');
+        setNicknameTarget(null);
+        setNicknameDraft('');
+        loadGroupDetail();
+      } else {
+        Alert.alert('错误', res.error || '保存失败');
+      }
+    } catch (error: any) {
+      Alert.alert('错误', error?.message || '网络错误');
+    } finally {
+      setNicknameSaving(false);
+    }
+  };
+
   const getRoleText = (role: string) => {
     switch (role) {
       case 'owner':
@@ -202,41 +339,102 @@ export default function GroupDetailScreen() {
   const isOwner = group?.myRole === 'owner';
   const isAdmin = group?.myRole === 'admin' || isOwner;
 
-  const renderMember = ({ item }: { item: GroupMember }) => (
-    <View style={styles.memberItem}>
-      {item.avatar ? (
-        <Image source={{ uri: item.avatar }} style={styles.memberAvatar} />
-      ) : (
-        <View style={[styles.memberAvatar, styles.defaultAvatar]}>
-          <Text style={styles.defaultAvatarText}>
-            {(item.nickname || '?')[0]}
-          </Text>
-        </View>
-      )}
-      <View style={styles.memberInfo}>
-        <View style={styles.nameRow}>
-          <Text style={styles.memberName}>{item.nickname}</Text>
-          {item.isVerified && <Text style={styles.verifiedBadge}>V</Text>}
-          {item.role !== 'member' && (
-            <View style={[styles.roleBadge, item.role === 'owner' && styles.ownerBadge]}>
-              <Text style={styles.roleText}>{getRoleText(item.role)}</Text>
-            </View>
+  // 计算成员可见的操作集合
+  const getAvailableActions = (m: GroupMember): Array<{
+    label: string;
+    danger?: boolean;
+    onPress: () => void;
+  }> => {
+    if (!group) return [];
+    const isSelf = m.id === currentUserId;
+    const myRole = group.myRole;
+    const ownerView = myRole === 'owner';
+    const adminView = myRole === 'admin';
+    const actions: Array<{ label: string; danger?: boolean; onPress: () => void }> = [];
+
+    if (isSelf) {
+      actions.push({ label: '设置我的群昵称', onPress: () => openNicknameModal(m) });
+      return actions;
+    }
+
+    // owner 看其他人
+    if (ownerView) {
+      if (m.role === 'member') {
+        actions.push({ label: '设为管理员', onPress: () => handleSetRole(m, 'admin') });
+      }
+      if (m.role === 'admin') {
+        actions.push({ label: '撤销管理员', danger: true, onPress: () => handleSetRole(m, 'member') });
+      }
+      if (m.role !== 'owner') {
+        actions.push({
+          label: m.isMuted ? '取消禁言' : '禁言',
+          danger: !m.isMuted,
+          onPress: () => handleToggleMute(m),
+        });
+        actions.push({ label: '设置群昵称', onPress: () => openNicknameModal(m) });
+        actions.push({ label: '转让群主', danger: true, onPress: () => handleTransferOwner(m) });
+        actions.push({ label: '移除成员', danger: true, onPress: () => { setActionTarget(null); handleRemoveMember(m); } });
+      }
+      return actions;
+    }
+
+    // admin 看其他人：只能管理 member
+    if (adminView && m.role === 'member') {
+      actions.push({
+        label: m.isMuted ? '取消禁言' : '禁言',
+        danger: !m.isMuted,
+        onPress: () => handleToggleMute(m),
+      });
+      actions.push({ label: '设置群昵称', onPress: () => openNicknameModal(m) });
+      actions.push({ label: '移除成员', danger: true, onPress: () => { setActionTarget(null); handleRemoveMember(m); } });
+      return actions;
+    }
+
+    // member 看其他人 / admin 看 admin or owner：无操作
+    return actions;
+  };
+
+  const renderMember = ({ item }: { item: GroupMember }) => {
+    const actions = getAvailableActions(item);
+    const hasActions = actions.length > 0;
+    return (
+      <TouchableOpacity
+        style={styles.memberItem}
+        onPress={() => hasActions && setActionTarget(item)}
+        onLongPress={() => hasActions && setActionTarget(item)}
+        activeOpacity={hasActions ? 0.6 : 1}
+        disabled={!hasActions}
+      >
+        {item.avatar ? (
+          <Image source={{ uri: item.avatar }} style={styles.memberAvatar} />
+        ) : (
+          <View style={[styles.memberAvatar, styles.defaultAvatar]}>
+            <Text style={styles.defaultAvatarText}>
+              {(item.nickname || '?')[0]}
+            </Text>
+          </View>
+        )}
+        <View style={styles.memberInfo}>
+          <View style={styles.nameRow}>
+            <Text style={styles.memberName}>
+              {item.nickname_in_group || item.nickname}
+            </Text>
+            {item.isVerified && <Text style={styles.verifiedBadge}>V</Text>}
+            {item.isMuted && <Text style={styles.mutedBadge}>🔇</Text>}
+            {item.role !== 'member' && (
+              <View style={[styles.roleBadge, item.role === 'owner' && styles.ownerBadge]}>
+                <Text style={styles.roleText}>{getRoleText(item.role)}</Text>
+              </View>
+            )}
+          </View>
+          {item.nickname_in_group && (
+            <Text style={styles.groupNickname}>主昵称: {item.nickname}</Text>
           )}
         </View>
-        {item.nickname_in_group && (
-          <Text style={styles.groupNickname}>群昵称: {item.nickname_in_group}</Text>
-        )}
-      </View>
-      {isAdmin && item.role !== 'owner' && item.id !== currentUserId && (
-        <TouchableOpacity
-          style={styles.removeButton}
-          onPress={() => handleRemoveMember(item)}
-        >
-          <Text style={styles.removeButtonText}>移除</Text>
-        </TouchableOpacity>
-      )}
-    </View>
-  );
+        {hasActions && <Text style={styles.menuDots}>⋮</Text>}
+      </TouchableOpacity>
+    );
+  };
 
   if (loading) {
     return (
@@ -340,6 +538,106 @@ export default function GroupDetailScreen() {
           </TouchableOpacity>
         )}
       </View>
+
+      {/* 成员操作 Modal（ActionSheet 样式） */}
+      <Modal
+        visible={!!actionTarget}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setActionTarget(null)}
+      >
+        <Pressable
+          style={styles.modalBackdrop}
+          onPress={() => setActionTarget(null)}
+        >
+          <Pressable
+            style={styles.actionSheet}
+            onPress={(e) => e.stopPropagation()}
+          >
+            <Text style={styles.actionSheetTitle}>
+              {actionTarget?.nickname_in_group || actionTarget?.nickname}
+            </Text>
+            {actionTarget &&
+              getAvailableActions(actionTarget).map((a, i) => (
+                <TouchableOpacity
+                  key={i}
+                  style={styles.actionSheetItem}
+                  onPress={a.onPress}
+                >
+                  <Text
+                    style={[
+                      styles.actionSheetItemText,
+                      a.danger && styles.actionSheetItemDanger,
+                    ]}
+                  >
+                    {a.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            <TouchableOpacity
+              style={[styles.actionSheetItem, styles.actionSheetCancel]}
+              onPress={() => setActionTarget(null)}
+            >
+              <Text style={styles.actionSheetCancelText}>取消</Text>
+            </TouchableOpacity>
+          </Pressable>
+        </Pressable>
+      </Modal>
+
+      {/* 群昵称编辑 Modal */}
+      <Modal
+        visible={!!nicknameTarget}
+        transparent
+        animationType="fade"
+        onRequestClose={() => !nicknameSaving && setNicknameTarget(null)}
+      >
+        <Pressable
+          style={styles.modalBackdrop}
+          onPress={() => !nicknameSaving && setNicknameTarget(null)}
+        >
+          <Pressable
+            style={styles.nicknameModal}
+            onPress={(e) => e.stopPropagation()}
+          >
+            <Text style={styles.nicknameModalTitle}>
+              {nicknameTarget?.id === currentUserId
+                ? '设置我的群昵称'
+                : `设置 ${nicknameTarget?.nickname} 的群昵称`}
+            </Text>
+            <TextInput
+              style={styles.nicknameInput}
+              value={nicknameDraft}
+              onChangeText={setNicknameDraft}
+              placeholder="输入群昵称（最长 20，留空清除）"
+              placeholderTextColor={colors.textSecondary}
+              maxLength={20}
+              editable={!nicknameSaving}
+              autoFocus
+            />
+            <Text style={styles.nicknameHelper}>
+              {nicknameDraft.length} / 20 字符。群昵称只在本群显示，不影响主昵称。
+            </Text>
+            <View style={styles.nicknameButtons}>
+              <TouchableOpacity
+                style={[styles.nicknameBtn, styles.nicknameBtnCancel]}
+                onPress={() => setNicknameTarget(null)}
+                disabled={nicknameSaving}
+              >
+                <Text style={styles.nicknameBtnCancelText}>取消</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.nicknameBtn, styles.nicknameBtnSave]}
+                onPress={handleSaveNickname}
+                disabled={nicknameSaving}
+              >
+                <Text style={styles.nicknameBtnSaveText}>
+                  {nicknameSaving ? '保存中...' : '保存'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -544,6 +842,118 @@ const styles = StyleSheet.create({
   removeButtonText: {
     fontSize: fontSize.sm,
     color: colors.error,
+  },
+  mutedBadge: {
+    fontSize: fontSize.sm,
+    marginLeft: 2,
+  },
+  menuDots: {
+    fontSize: fontSize.xl,
+    color: colors.textSecondary,
+    paddingHorizontal: spacing.sm,
+  },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: spacing.md,
+  },
+  actionSheet: {
+    backgroundColor: colors.surface,
+    borderRadius: 16,
+    width: '100%',
+    maxWidth: 360,
+    paddingVertical: spacing.sm,
+  },
+  actionSheetTitle: {
+    fontSize: fontSize.md,
+    fontWeight: '600',
+    color: colors.text,
+    textAlign: 'center',
+    paddingVertical: spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  actionSheetItem: {
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  actionSheetItemText: {
+    fontSize: fontSize.md,
+    color: colors.text,
+    textAlign: 'center',
+  },
+  actionSheetItemDanger: {
+    color: colors.error,
+  },
+  actionSheetCancel: {
+    marginTop: spacing.xs,
+    borderTopWidth: 0,
+    borderBottomWidth: 0,
+  },
+  actionSheetCancelText: {
+    fontSize: fontSize.md,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    fontWeight: '500',
+  },
+  nicknameModal: {
+    backgroundColor: colors.surface,
+    borderRadius: 16,
+    width: '100%',
+    maxWidth: 360,
+    padding: spacing.lg,
+  },
+  nicknameModalTitle: {
+    fontSize: fontSize.lg,
+    fontWeight: '600',
+    color: colors.primary,
+    marginBottom: spacing.md,
+  },
+  nicknameInput: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 8,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    fontSize: fontSize.md,
+    color: colors.text,
+  },
+  nicknameHelper: {
+    fontSize: fontSize.sm,
+    color: colors.textSecondary,
+    marginTop: spacing.xs,
+    marginBottom: spacing.md,
+  },
+  nicknameButtons: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  nicknameBtn: {
+    flex: 1,
+    paddingVertical: spacing.sm,
+    borderRadius: 24,
+    alignItems: 'center',
+  },
+  nicknameBtnCancel: {
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  nicknameBtnCancelText: {
+    fontSize: fontSize.md,
+    color: colors.textSecondary,
+  },
+  nicknameBtnSave: {
+    backgroundColor: colors.primary,
+  },
+  nicknameBtnSaveText: {
+    fontSize: fontSize.md,
+    color: colors.textOnPrimary,
+    fontWeight: '600',
   },
   footer: {
     padding: spacing.md,

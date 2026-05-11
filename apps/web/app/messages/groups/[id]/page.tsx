@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowLeft, LogOut, Pencil, Save, X, UserPlus, Search, UserMinus } from "lucide-react";
+import { ArrowLeft, LogOut, Pencil, Save, X, UserPlus, Search, UserMinus, MoreVertical, Crown, Shield, ShieldOff, VolumeX, Volume2, Tag } from "lucide-react";
 import { apiGet, apiUpload } from "@/lib/api";
 import { useToast } from "@/components/Toast";
 import { useConfirm } from "@/components/ConfirmDialog";
@@ -64,6 +64,12 @@ export default function GroupDetailPage() {
   const [addSearching, setAddSearching] = useState(false);
   const [addSubmitting, setAddSubmitting] = useState(false);
   const [removingId, setRemovingId] = useState<string | null>(null);
+  // 成员操作菜单
+  const [menuOpenForId, setMenuOpenForId] = useState<string | null>(null);
+  // 群昵称编辑 modal
+  const [nicknameTarget, setNicknameTarget] = useState<GroupMember | null>(null);
+  const [nicknameDraft, setNicknameDraft] = useState("");
+  const [nicknameSaving, setNicknameSaving] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -104,6 +110,19 @@ export default function GroupDetailPage() {
     }
     load();
   }, [groupId, load, router]);
+
+  // 点击外部关闭操作菜单
+  useEffect(() => {
+    if (!menuOpenForId) return;
+    const onClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest("[data-member-menu]")) {
+        setMenuOpenForId(null);
+      }
+    };
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
+  }, [menuOpenForId]);
 
   // 搜成员 debounce（添加成员 modal）
   useEffect(() => {
@@ -226,6 +245,123 @@ export default function GroupDetailPage() {
       toast.error("网络错误");
     } finally {
       setRemovingId(null);
+    }
+  };
+
+  // 通用 PATCH helper：调用 API + 错误处理 + 重新加载
+  const patchMember = async (
+    path: string,
+    body: Record<string, unknown>,
+    successMsg: string
+  ): Promise<boolean> => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(path, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (res.ok && data.ok) {
+        toast.success(successMsg);
+        load();
+        return true;
+      } else {
+        toast.error(data.error || "操作失败");
+        return false;
+      }
+    } catch {
+      toast.error("网络错误");
+      return false;
+    }
+  };
+
+  // ===== 提升 / 撤销管理员 =====
+  const handleSetRole = async (member: GroupMember, role: "admin" | "member") => {
+    setMenuOpenForId(null);
+    const verb = role === "admin" ? "设为管理员" : "撤销管理员身份";
+    if (role === "member") {
+      const ok = await confirm({
+        title: "撤销管理员",
+        message: `确定撤销「${member.nickname}」的管理员身份吗？`,
+        confirmText: "撤销",
+        cancelText: "再想想",
+        danger: true,
+      });
+      if (!ok) return;
+    }
+    await patchMember(
+      `/api/messages/groups/${groupId}/members/${member.id}/role`,
+      { role },
+      `已${verb} ${member.nickname}`
+    );
+  };
+
+  // ===== 禁言 / 取消禁言 =====
+  const handleToggleMute = async (member: GroupMember) => {
+    setMenuOpenForId(null);
+    const willMute = !member.isMuted;
+    if (willMute) {
+      const ok = await confirm({
+        title: "禁言成员",
+        message: `确定禁言「${member.nickname}」吗？被禁言后该成员无法在群内发送消息。`,
+        confirmText: "禁言",
+        cancelText: "取消",
+        danger: true,
+      });
+      if (!ok) return;
+    }
+    await patchMember(
+      `/api/messages/groups/${groupId}/members/${member.id}/mute`,
+      { isMuted: willMute },
+      willMute ? `已禁言 ${member.nickname}` : `已解除 ${member.nickname} 的禁言`
+    );
+  };
+
+  // ===== 转让群主 =====
+  const handleTransferOwner = async (member: GroupMember) => {
+    setMenuOpenForId(null);
+    const ok = await confirm({
+      title: "转让群主",
+      message: `确定将群主转让给「${member.nickname}」吗？\n转让后您将变为普通管理员，无法再解散群聊。此操作不可撤销。`,
+      confirmText: "确认转让",
+      cancelText: "再想想",
+      danger: true,
+    });
+    if (!ok) return;
+    const success = await patchMember(
+      `/api/messages/groups/${groupId}/transfer-owner`,
+      { toUserId: member.id },
+      `群主已转让给 ${member.nickname}`
+    );
+    if (success) {
+      // 转让后自己已不是 owner，刷新页面让 UI 跟随权限
+    }
+  };
+
+  // ===== 群昵称：打开 modal =====
+  const openNicknameModal = (member: GroupMember) => {
+    setMenuOpenForId(null);
+    setNicknameTarget(member);
+    setNicknameDraft(member.nickname_in_group || "");
+  };
+
+  const handleSaveNickname = async () => {
+    if (!nicknameTarget) return;
+    setNicknameSaving(true);
+    const trimmed = nicknameDraft.trim();
+    const success = await patchMember(
+      `/api/messages/groups/${groupId}/members/${nicknameTarget.id}/nickname`,
+      { nickname: trimmed || null },
+      trimmed ? `已设置群昵称` : `已清除群昵称`
+    );
+    setNicknameSaving(false);
+    if (success) {
+      setNicknameTarget(null);
+      setNicknameDraft("");
     }
   };
 
@@ -444,11 +580,37 @@ export default function GroupDetailPage() {
         </div>
         <ul className="divide-y divide-gray-100">
           {group.participants.map((m) => {
+            const isSelf = m.id === currentUserId;
+            const myRole = group.myRole;
+            const isOwner = myRole === "owner";
+            const isAdmin = myRole === "admin";
+
+            // 计算菜单项可见性
+            const canPromote = isOwner && !isSelf && m.role === "member";
+            const canDemote = isOwner && !isSelf && m.role === "admin";
+            const canToggleMute =
+              !isSelf && m.role !== "owner" && (isOwner || (isAdmin && m.role === "member"));
+            const canSetOtherNickname =
+              !isSelf && (isOwner || (isAdmin && m.role === "member"));
+            const canTransferOwner = isOwner && !isSelf && m.role !== "owner";
             const canRemove =
-              canEdit && m.role !== "owner" && m.id !== currentUserId;
+              !isSelf && m.role !== "owner" && (isOwner || (isAdmin && m.role === "member"));
+            const canSetSelfNickname = isSelf;
+
+            const hasAnyAction =
+              canPromote ||
+              canDemote ||
+              canToggleMute ||
+              canSetOtherNickname ||
+              canTransferOwner ||
+              canRemove ||
+              canSetSelfNickname;
+
             const removing = removingId === m.id;
+            const isMenuOpen = menuOpenForId === m.id;
+
             return (
-            <li key={m.id} className="flex items-center gap-2 p-2">
+            <li key={m.id} className="flex items-center gap-2 p-2 relative">
               <Link
                 href={`/u/${m.id}`}
                 className="flex items-center gap-3 flex-1 min-w-0 hover:bg-gray-50 rounded-lg transition px-1"
@@ -471,7 +633,18 @@ export default function GroupDetailPage() {
                     <span className="font-medium text-[#1a1a1f] truncate">
                       {m.nickname_in_group || m.nickname}
                     </span>
+                    {m.nickname_in_group && (
+                      <span className="text-xs text-[#1a1a1f]/40 truncate">
+                        ({m.nickname})
+                      </span>
+                    )}
                     {m.isVerified && <span className="text-blue-500 text-xs">✓</span>}
+                    {m.isMuted && (
+                      <VolumeX
+                        className="w-3.5 h-3.5 text-orange-500 flex-shrink-0"
+                        aria-label="已禁言"
+                      />
+                    )}
                   </div>
                 </div>
                 <span
@@ -486,16 +659,96 @@ export default function GroupDetailPage() {
                   {ROLE_LABEL[m.role] || m.role}
                 </span>
               </Link>
-              {canRemove && (
-                <button
-                  type="button"
-                  onClick={() => handleRemoveMember(m)}
-                  disabled={removing}
-                  title={`移除 ${m.nickname}`}
-                  className="flex-shrink-0 p-2 text-red-500 hover:bg-red-50 rounded-lg transition disabled:opacity-50"
-                >
-                  <UserMinus className="w-4 h-4" />
-                </button>
+              {hasAnyAction && (
+                <div className="relative flex-shrink-0" data-member-menu>
+                  <button
+                    type="button"
+                    onClick={() => setMenuOpenForId(isMenuOpen ? null : m.id)}
+                    disabled={removing}
+                    title="更多操作"
+                    aria-label="更多操作"
+                    className="p-2 text-[#1a1a1f]/50 hover:text-[#46467A] hover:bg-[#46467A]/10 rounded-lg transition disabled:opacity-50"
+                  >
+                    <MoreVertical className="w-4 h-4" />
+                  </button>
+                  {isMenuOpen && (
+                    <div className="absolute right-0 top-full mt-1 z-50 bg-white border border-gray-200 rounded-xl shadow-lg min-w-[180px] py-1 text-sm">
+                      {canPromote && (
+                        <button
+                          type="button"
+                          onClick={() => handleSetRole(m, "admin")}
+                          className="w-full text-left px-3 py-2 hover:bg-gray-50 inline-flex items-center gap-2"
+                        >
+                          <Shield className="w-4 h-4 text-blue-600" />
+                          设为管理员
+                        </button>
+                      )}
+                      {canDemote && (
+                        <button
+                          type="button"
+                          onClick={() => handleSetRole(m, "member")}
+                          className="w-full text-left px-3 py-2 hover:bg-gray-50 inline-flex items-center gap-2"
+                        >
+                          <ShieldOff className="w-4 h-4 text-gray-500" />
+                          撤销管理员
+                        </button>
+                      )}
+                      {canToggleMute && (
+                        <button
+                          type="button"
+                          onClick={() => handleToggleMute(m)}
+                          className="w-full text-left px-3 py-2 hover:bg-gray-50 inline-flex items-center gap-2"
+                        >
+                          {m.isMuted ? (
+                            <>
+                              <Volume2 className="w-4 h-4 text-green-600" />
+                              取消禁言
+                            </>
+                          ) : (
+                            <>
+                              <VolumeX className="w-4 h-4 text-orange-600" />
+                              禁言
+                            </>
+                          )}
+                        </button>
+                      )}
+                      {(canSetOtherNickname || canSetSelfNickname) && (
+                        <button
+                          type="button"
+                          onClick={() => openNicknameModal(m)}
+                          className="w-full text-left px-3 py-2 hover:bg-gray-50 inline-flex items-center gap-2"
+                        >
+                          <Tag className="w-4 h-4 text-[#46467A]" />
+                          {isSelf ? "设置我的群昵称" : "设置群昵称"}
+                        </button>
+                      )}
+                      {canTransferOwner && (
+                        <button
+                          type="button"
+                          onClick={() => handleTransferOwner(m)}
+                          className="w-full text-left px-3 py-2 hover:bg-yellow-50 inline-flex items-center gap-2 text-yellow-700 border-t border-gray-100"
+                        >
+                          <Crown className="w-4 h-4" />
+                          转让群主
+                        </button>
+                      )}
+                      {canRemove && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setMenuOpenForId(null);
+                            handleRemoveMember(m);
+                          }}
+                          disabled={removing}
+                          className="w-full text-left px-3 py-2 hover:bg-red-50 inline-flex items-center gap-2 text-red-600 border-t border-gray-100 disabled:opacity-50"
+                        >
+                          <UserMinus className="w-4 h-4" />
+                          移除成员
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
               )}
             </li>
             );
@@ -652,6 +905,69 @@ export default function GroupDetailPage() {
                 className="flex-1 px-4 py-2 bg-[#46467A] text-white rounded-xl hover:bg-[#5A5A8E] disabled:opacity-50 transition"
               >
                 {addSubmitting ? "添加中..." : `添加 ${addSelected.length} 人`}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 群昵称编辑 Modal */}
+      {nicknameTarget && (
+        <div
+          className="fixed inset-0 z-[200] bg-black/50 flex items-center justify-center p-4"
+          onClick={() => !nicknameSaving && setNicknameTarget(null)}
+        >
+          <div
+            className="bg-white rounded-2xl max-w-sm w-full overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between p-4 border-b border-gray-100">
+              <h2 className="text-lg font-bold text-[#46467A]">
+                {nicknameTarget.id === currentUserId
+                  ? "设置我的群昵称"
+                  : `设置 ${nicknameTarget.nickname} 的群昵称`}
+              </h2>
+              <button
+                type="button"
+                onClick={() => !nicknameSaving && setNicknameTarget(null)}
+                disabled={nicknameSaving}
+                className="p-1 text-[#1a1a1f]/40 hover:text-[#1a1a1f] transition disabled:opacity-50"
+                aria-label="关闭"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-4 space-y-3">
+              <input
+                type="text"
+                value={nicknameDraft}
+                onChange={(e) => setNicknameDraft(e.target.value)}
+                placeholder="输入群昵称（最长 20 字符，留空清除）"
+                maxLength={20}
+                disabled={nicknameSaving}
+                autoFocus
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#46467A] disabled:opacity-50"
+              />
+              <p className="text-xs text-[#1a1a1f]/40">
+                {nicknameDraft.length} / 20 字符。群昵称只在本群显示，不影响主昵称。
+              </p>
+            </div>
+            <div className="p-4 border-t border-gray-100 flex gap-2">
+              <button
+                type="button"
+                onClick={() => setNicknameTarget(null)}
+                disabled={nicknameSaving}
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 disabled:opacity-50"
+              >
+                取消
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveNickname}
+                disabled={nicknameSaving}
+                className="flex-1 px-4 py-2 bg-[#46467A] text-white rounded-xl hover:bg-[#5A5A8E] disabled:opacity-50 transition"
+              >
+                {nicknameSaving ? "保存中..." : "保存"}
               </button>
             </div>
           </div>
