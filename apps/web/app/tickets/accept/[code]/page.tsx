@@ -94,7 +94,7 @@ export default function AcceptTransferPage() {
 
         {!transferInfo ? (
           <>
-            <p className="text-sm text-[#1a1a1f]/60 mb-6">
+            <p className="text-sm text-foreground-soft mb-6">
               转赠码 <code className="font-mono">{transferCode}</code> 无效或已过期
             </p>
             <Link
@@ -118,7 +118,7 @@ export default function AcceptTransferPage() {
           </>
         ) : done === "rejected" ? (
           <>
-            <p className="text-sm text-[#1a1a1f]/60 mb-6">已拒绝此次转赠</p>
+            <p className="text-sm text-foreground-soft mb-6">已拒绝此次转赠</p>
             <Link
               href="/events"
               className="inline-block px-6 py-2.5 bg-[#46467A] text-white rounded-xl hover:bg-[#5A5A8E] transition"
@@ -128,7 +128,7 @@ export default function AcceptTransferPage() {
           </>
         ) : (
           <>
-            <p className="text-base font-medium text-[#1a1a1f] mb-1">
+            <p className="text-base font-medium text-foreground mb-1">
               {transferInfo.fromUser || "对方"} 给你转赠了一张票
             </p>
             {transferInfo.ticketName && (
@@ -137,12 +137,12 @@ export default function AcceptTransferPage() {
               </p>
             )}
             {transferInfo.message && (
-              <p className="text-sm bg-[#46467A]/5 text-[#1a1a1f] p-3 rounded-lg mb-4 border border-[#46467A]/10">
+              <p className="text-sm bg-[#46467A]/5 text-foreground p-3 rounded-lg mb-4 border border-[#46467A]/10">
                 💬 {transferInfo.message}
               </p>
             )}
             {transferInfo.expiresAt && (
-              <p className="text-xs text-[#1a1a1f]/40 mb-6">
+              <p className="text-xs text-foreground-faint mb-6">
                 有效期至 {new Date(transferInfo.expiresAt).toLocaleString("zh-CN")}
               </p>
             )}

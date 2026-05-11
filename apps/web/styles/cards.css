@@ -145,20 +145,20 @@
 .card-title {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #282828;
+  color: var(--foreground);
   margin: 0;
 }
 
 /* 卡片副标题 */
 .card-subtitle {
   font-size: 0.875rem;
-  color: rgba(40, 40, 40, 0.6);
+  color: var(--foreground-soft);
   margin-top: 0.25rem;
 }
 
 /* 卡片内容 */
 .card-body {
-  color: #282828;
+  color: var(--foreground);
 }
 
 /* 卡片底部 */

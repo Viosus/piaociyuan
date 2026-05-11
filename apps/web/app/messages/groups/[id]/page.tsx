@@ -484,7 +484,7 @@ export default function GroupDetailPage() {
                   className="text-xs w-full"
                 />
                 {uploadingAvatar && (
-                  <span className="text-xs text-[#1a1a1f]/40">上传中...</span>
+                  <span className="text-xs text-foreground-faint">上传中...</span>
                 )}
               </label>
             )}
@@ -535,23 +535,23 @@ export default function GroupDetailPage() {
             ) : (
               <>
                 <div className="flex items-center gap-2 mb-1">
-                  <h1 className="text-xl font-bold text-[#1a1a1f]">{group.name}</h1>
+                  <h1 className="text-xl font-bold text-foreground">{group.name}</h1>
                   {canEdit && (
                     <button
                       type="button"
                       onClick={() => setEditing(true)}
-                      className="p-1 text-[#1a1a1f]/40 hover:text-[#46467A] transition"
+                      className="p-1 text-foreground-faint hover:text-[#46467A] transition"
                       aria-label="编辑群信息"
                     >
                       <Pencil className="w-4 h-4" />
                     </button>
                   )}
                 </div>
-                <p className="text-sm text-[#1a1a1f]/60 mb-2">
+                <p className="text-sm text-foreground-soft mb-2">
                   {group.memberCount} / {group.maxMembers} 成员
                 </p>
                 {group.description && (
-                  <p className="text-sm text-[#1a1a1f]/80 whitespace-pre-wrap">
+                  <p className="text-sm text-foreground-soft whitespace-pre-wrap">
                     {group.description}
                   </p>
                 )}
@@ -630,11 +630,11 @@ export default function GroupDetailPage() {
                 )}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="font-medium text-[#1a1a1f] truncate">
+                    <span className="font-medium text-foreground truncate">
                       {m.nickname_in_group || m.nickname}
                     </span>
                     {m.nickname_in_group && (
-                      <span className="text-xs text-[#1a1a1f]/40 truncate">
+                      <span className="text-xs text-foreground-faint truncate">
                         ({m.nickname})
                       </span>
                     )}
@@ -667,7 +667,7 @@ export default function GroupDetailPage() {
                     disabled={removing}
                     title="更多操作"
                     aria-label="更多操作"
-                    className="p-2 text-[#1a1a1f]/50 hover:text-[#46467A] hover:bg-[#46467A]/10 rounded-lg transition disabled:opacity-50"
+                    className="p-2 text-foreground-faint hover:text-[#46467A] hover:bg-[#46467A]/10 rounded-lg transition disabled:opacity-50"
                   >
                     <MoreVertical className="w-4 h-4" />
                   </button>
@@ -781,7 +781,7 @@ export default function GroupDetailPage() {
               <button
                 type="button"
                 onClick={closeAddModal}
-                className="p-1 text-[#1a1a1f]/40 hover:text-[#1a1a1f] transition"
+                className="p-1 text-foreground-faint hover:text-foreground transition"
                 aria-label="关闭"
               >
                 <X className="w-5 h-5" />
@@ -790,7 +790,7 @@ export default function GroupDetailPage() {
 
             <div className="p-4 border-b border-gray-100">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#1a1a1f]/40" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground-faint" />
                 <input
                   type="text"
                   value={addQuery}
@@ -824,13 +824,13 @@ export default function GroupDetailPage() {
 
             <div className="flex-1 overflow-y-auto p-2">
               {addQuery.trim().length < 2 ? (
-                <p className="text-sm text-[#1a1a1f]/40 text-center py-6">
+                <p className="text-sm text-foreground-faint text-center py-6">
                   输入至少 2 个字符开始搜索
                 </p>
               ) : addSearching ? (
-                <p className="text-sm text-[#1a1a1f]/60 text-center py-6">搜索中...</p>
+                <p className="text-sm text-foreground-soft text-center py-6">搜索中...</p>
               ) : addResults.length === 0 ? (
-                <p className="text-sm text-[#1a1a1f]/60 text-center py-6">
+                <p className="text-sm text-foreground-soft text-center py-6">
                   没找到匹配的用户
                 </p>
               ) : (
@@ -862,13 +862,13 @@ export default function GroupDetailPage() {
                             </div>
                           )}
                           <div className="flex-1 min-w-0">
-                            <p className="font-medium text-[#1a1a1f]">{u.nickname}</p>
+                            <p className="font-medium text-foreground">{u.nickname}</p>
                             {u.phone && (
-                              <p className="text-xs text-[#1a1a1f]/40">{u.phone}</p>
+                              <p className="text-xs text-foreground-faint">{u.phone}</p>
                             )}
                           </div>
                           {isAlreadyMember ? (
-                            <span className="text-xs text-[#1a1a1f]/40">已在群</span>
+                            <span className="text-xs text-foreground-faint">已在群</span>
                           ) : (
                             <div
                               className={`w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center ${
@@ -931,7 +931,7 @@ export default function GroupDetailPage() {
                 type="button"
                 onClick={() => !nicknameSaving && setNicknameTarget(null)}
                 disabled={nicknameSaving}
-                className="p-1 text-[#1a1a1f]/40 hover:text-[#1a1a1f] transition disabled:opacity-50"
+                className="p-1 text-foreground-faint hover:text-foreground transition disabled:opacity-50"
                 aria-label="关闭"
               >
                 <X className="w-5 h-5" />
@@ -948,7 +948,7 @@ export default function GroupDetailPage() {
                 autoFocus
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#46467A] disabled:opacity-50"
               />
-              <p className="text-xs text-[#1a1a1f]/40">
+              <p className="text-xs text-foreground-faint">
                 {nicknameDraft.length} / 20 字符。群昵称只在本群显示，不影响主昵称。
               </p>
             </div>

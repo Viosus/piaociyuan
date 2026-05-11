@@ -79,7 +79,7 @@ export default function RootLayout({
   return (
     <html lang="zh-CN" className="dark">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-hidden`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-hidden text-foreground`}
       >
         <ToastProvider>
           <ConfirmProvider>

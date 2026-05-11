@@ -70,7 +70,7 @@ export function ConfirmDialog({
         className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 id="confirm-dialog-title" className="text-lg font-bold text-[#1a1a1f] mb-3">
+        <h2 id="confirm-dialog-title" className="text-lg font-bold text-foreground mb-3">
           {title}
         </h2>
         <p className="text-sm text-gray-700 mb-6 whitespace-pre-line">{message}</p>

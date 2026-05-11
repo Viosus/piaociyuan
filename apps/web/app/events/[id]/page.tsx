@@ -109,7 +109,7 @@ export default async function EventDetailPage({ params }: Props) {
       <section className="max-w-5xl mx-auto px-4 py-8 grid md:grid-cols-3 gap-6">
         <div className="md:col-span-2">
           <h2 className="text-xl font-semibold mb-3 text-[#46467A]">演出简介</h2>
-          <p className="text-[#1a1a1f] leading-relaxed">{event.desc}</p>
+          <p className="text-foreground leading-relaxed">{event.desc}</p>
           <div className="mt-6 p-4 bg-[#FFFAFD] rounded-lg text-[#FFA8CC] text-sm">
             温馨提示：本场支持实名电子票入场；每个手机号限购 2 张；锁票 10 分钟未支付将自动释放。
           </div>
@@ -136,7 +136,7 @@ export default async function EventDetailPage({ params }: Props) {
           )}
 
           {tiers.length === 0 ? (
-            <div className="border rounded-lg p-4 text-[#1a1a1f]">
+            <div className="border rounded-lg p-4 text-foreground">
               暂无票档可售，请稍后再试。
             </div>
           ) : (
@@ -150,7 +150,7 @@ export default async function EventDetailPage({ params }: Props) {
                 >
                   <div>
                     <div className="font-medium">{t.name}</div>
-                    <div className="text-sm text-[#1a1a1f]">剩余 {t.remaining} 张</div>
+                    <div className="text-sm text-foreground">剩余 {t.remaining} 张</div>
                   </div>
                   <div className="text-right">
                     <div className="text-lg font-bold text-[#46467A]">¥ {t.price}</div>

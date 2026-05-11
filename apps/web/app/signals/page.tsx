@@ -199,10 +199,10 @@ export default function SignalsPage() {
                 </div>
 
                 <h2 className="text-lg font-bold item-name">{event.name}</h2>
-                <p className="text-[#1a1a1f]">
+                <p className="text-foreground">
                   {event.city || ''} {dateStr} {timeStr}
                 </p>
-                <p className="mt-2 text-sm text-[#1a1a1f] opacity-80">{event.venue}</p>
+                <p className="mt-2 text-sm text-foreground opacity-80">{event.venue}</p>
               </Link>
             );
           })}

@@ -74,20 +74,20 @@ export default function NewConversationPage() {
               onClick={() => router.push('/messages')}
               className="p-2 hover:bg-white/90 rounded-lg transition"
             >
-              <ArrowLeft className="w-5 h-5 text-[#1a1a1f]" />
+              <ArrowLeft className="w-5 h-5 text-foreground" />
             </button>
             <h1 className="text-2xl font-bold bg-gradient-to-r from-[#46467A] via-[#FFE3F0] to-blue-400 bg-clip-text text-transparent">新建对话</h1>
           </div>
 
           {/* Search */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-[#1a1a1f]/60" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-foreground-soft" />
             <input
               type="text"
               placeholder="搜索用户（昵称或手机号）..."
               value={searchQuery}
               onChange={(e) => handleSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-white border border-[#FFEBF5] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#46467A] text-[#1a1a1f]"
+              className="w-full pl-10 pr-4 py-2 bg-white border border-[#FFEBF5] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#46467A] text-foreground"
               autoFocus
               maxLength={50}
             />
@@ -105,12 +105,12 @@ export default function NewConversationPage() {
         ) : searchQuery.length < 2 ? (
           <div className="text-center py-12 bg-white/80 backdrop-blur-sm rounded-lg border border-[#FFEBF5] p-8">
             <MessageSquare className="w-16 h-16 mx-auto text-[#46467A]/60 mb-4" />
-            <p className="text-[#1a1a1f]/60">输入至少2个字符开始搜索</p>
+            <p className="text-foreground-soft">输入至少2个字符开始搜索</p>
           </div>
         ) : searchResults.length === 0 ? (
           <div className="text-center py-12 bg-white/80 backdrop-blur-sm rounded-lg border border-[#FFEBF5] p-8">
             <MessageSquare className="w-16 h-16 mx-auto text-[#46467A]/60 mb-4" />
-            <p className="text-[#1a1a1f]/60">没有找到匹配的用户</p>
+            <p className="text-foreground-soft">没有找到匹配的用户</p>
           </div>
         ) : (
           <div className="space-y-2">
@@ -136,8 +136,8 @@ export default function NewConversationPage() {
                     )}
 
                     <div>
-                      <h3 className="font-semibold text-[#1a1a1f]">{user.nickname || '未知用户'}</h3>
-                      <p className="text-sm text-[#1a1a1f]/60">{user.phone}</p>
+                      <h3 className="font-semibold text-foreground">{user.nickname || '未知用户'}</h3>
+                      <p className="text-sm text-foreground-soft">{user.phone}</p>
                     </div>
                   </div>
 

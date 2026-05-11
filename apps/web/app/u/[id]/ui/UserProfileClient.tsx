@@ -214,7 +214,7 @@ export default function UserProfileClient({ userId }: { userId: string }) {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#46467A] mx-auto mb-4"></div>
-          <p className="text-[#1a1a1f]/60">加载中...</p>
+          <p className="text-foreground-soft">加载中...</p>
         </div>
       </div>
     );
@@ -281,12 +281,12 @@ export default function UserProfileClient({ userId }: { userId: string }) {
               </div>
 
               {user.bio && (
-                <p className="text-sm text-[#1a1a1f] mb-2 whitespace-pre-wrap">
+                <p className="text-sm text-foreground mb-2 whitespace-pre-wrap">
                   {user.bio}
                 </p>
               )}
 
-              <div className="flex items-center gap-3 text-xs text-[#1a1a1f]/60 flex-wrap">
+              <div className="flex items-center gap-3 text-xs text-foreground-soft flex-wrap">
                 {user.location && <span>📍 {user.location}</span>}
                 {user.website && (
                   <a
@@ -308,7 +308,7 @@ export default function UserProfileClient({ userId }: { userId: string }) {
               <div className="text-lg font-bold text-[#46467A]">
                 {user.stats.postCount}
               </div>
-              <div className="text-xs text-[#1a1a1f]/60">动态</div>
+              <div className="text-xs text-foreground-soft">动态</div>
             </div>
             <Link
               href={`/u/${userId}/followers`}
@@ -317,7 +317,7 @@ export default function UserProfileClient({ userId }: { userId: string }) {
               <div className="text-lg font-bold text-[#46467A]">
                 {user.stats.followerCount}
               </div>
-              <div className="text-xs text-[#1a1a1f]/60 hover:underline">粉丝</div>
+              <div className="text-xs text-foreground-soft hover:underline">粉丝</div>
             </Link>
             <Link
               href={`/u/${userId}/following`}
@@ -326,7 +326,7 @@ export default function UserProfileClient({ userId }: { userId: string }) {
               <div className="text-lg font-bold text-[#46467A]">
                 {user.stats.followingCount}
               </div>
-              <div className="text-xs text-[#1a1a1f]/60 hover:underline">关注</div>
+              <div className="text-xs text-foreground-soft hover:underline">关注</div>
             </Link>
           </div>
 
@@ -346,7 +346,7 @@ export default function UserProfileClient({ userId }: { userId: string }) {
                 </div>
               )}
               {!user.isFollowing && user.isFollowedBy && (
-                <div className="text-center text-xs text-[#1a1a1f]/60">
+                <div className="text-center text-xs text-foreground-soft">
                   TA 关注了你
                 </div>
               )}
@@ -385,7 +385,7 @@ export default function UserProfileClient({ userId }: { userId: string }) {
             style={{ background: "rgba(255, 255, 255, 0.8)" }}
           >
             <div className="text-4xl mb-2">📭</div>
-            <p className="text-[#1a1a1f]/60">还没有发布动态</p>
+            <p className="text-foreground-soft">还没有发布动态</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -396,7 +396,7 @@ export default function UserProfileClient({ userId }: { userId: string }) {
                 className="block rounded-2xl p-4 shadow hover:shadow-lg transition"
                 style={{ background: "rgba(255, 255, 255, 0.8)" }}
               >
-                <p className="text-sm text-[#1a1a1f] whitespace-pre-wrap line-clamp-3 mb-2">
+                <p className="text-sm text-foreground whitespace-pre-wrap line-clamp-3 mb-2">
                   {p.content}
                 </p>
                 {p.images?.length > 0 && (
@@ -412,7 +412,7 @@ export default function UserProfileClient({ userId }: { userId: string }) {
                     ))}
                   </div>
                 )}
-                <div className="flex items-center gap-3 text-xs text-[#1a1a1f]/60">
+                <div className="flex items-center gap-3 text-xs text-foreground-soft">
                   <span>👁 {p.viewCount}</span>
                   <span>❤ {p.likeCount}</span>
                   <span>💬 {p.commentCount}</span>
@@ -431,7 +431,7 @@ export default function UserProfileClient({ userId }: { userId: string }) {
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#46467A]"></div>
           )}
           {!hasMore && posts.length > 0 && (
-            <span className="text-xs text-[#1a1a1f]/40">没有更多了</span>
+            <span className="text-xs text-foreground-faint">没有更多了</span>
           )}
         </div>
       </div>

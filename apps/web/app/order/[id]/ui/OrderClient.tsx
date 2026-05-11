@@ -207,7 +207,7 @@ export default function OrderClient({ id }: { id: string }) {
     return (
       <main className="min-h-screen p-8 bg-gray-50">
         <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow p-6">
-          <div className="animate-pulse text-[#1a1a1f] opacity-60">加载中...</div>
+          <div className="animate-pulse text-foreground opacity-60">加载中...</div>
         </div>
       </main>
     );
@@ -218,7 +218,7 @@ export default function OrderClient({ id }: { id: string }) {
       <main className="min-h-screen p-8 bg-gray-50">
         <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow p-6 text-center">
           <h1 className="text-2xl font-bold mb-2 text-[#46467A]">订单不存在</h1>
-          <p className="text-[#1a1a1f]">{err || "请返回重试"}</p>
+          <p className="text-foreground">{err || "请返回重试"}</p>
           <Link href="/events" className="mt-6 inline-block text-[#46467A] underline">
             返回活动列表
           </Link>
@@ -236,8 +236,8 @@ export default function OrderClient({ id }: { id: string }) {
         <div className="flex items-start justify-between gap-3">
           <div>
             <h1 className="text-2xl font-bold text-[#46467A]">订单详情</h1>
-            <div className="mt-1 text-[#1a1a1f] text-sm">订单号：{order.id}</div>
-            <div className="mt-1 text-[#1a1a1f] text-sm">下单时间：{createdAtText}</div>
+            <div className="mt-1 text-foreground text-sm">订单号：{order.id}</div>
+            <div className="mt-1 text-foreground text-sm">下单时间：{createdAtText}</div>
           </div>
           <StatusBadge status={order.status} />
         </div>
@@ -245,21 +245,21 @@ export default function OrderClient({ id }: { id: string }) {
         {/* 占位二维码区域 */}
         <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="border rounded-xl p-4">
-            <div className="text-sm text-[#1a1a1f] mb-3">入场二维码（占位）</div>
+            <div className="text-sm text-foreground mb-3">入场二维码（占位）</div>
             <div className="aspect-square border rounded-lg flex items-center justify-center bg-gray-50">
               <div className="text-center">
-                <div className="font-mono text-xs text-[#1a1a1f] opacity-60 mb-2">ORDER</div>
+                <div className="font-mono text-xs text-foreground opacity-60 mb-2">ORDER</div>
                 <div className="font-mono text-sm break-all px-4">{order.id}</div>
               </div>
             </div>
-            <div className="mt-2 text-xs text-[#1a1a1f] opacity-60">
+            <div className="mt-2 text-xs text-foreground opacity-60">
               * 支付成功后二维码才会生效（当前为占位图）
             </div>
           </div>
 
           {/* 操作区 */}
           <div className="border rounded-xl p-4">
-            <div className="text-sm text-[#1a1a1f] mb-3">支付与票务</div>
+            <div className="text-sm text-foreground mb-3">支付与票务</div>
             {!isPaid && !allTicketsRefunded ? (
               <>
                 <div className="p-3 rounded bg-amber-50 text-amber-800 text-sm mb-3">
@@ -272,13 +272,13 @@ export default function OrderClient({ id }: { id: string }) {
                 >
                   {paying ? "支付中..." : "去支付（模拟）"}
                 </button>
-                <div className="mt-3 text-xs text-[#1a1a1f]">
+                <div className="mt-3 text-xs text-foreground">
                   支付成功后，页面会自动更新为"已支付"状态。
                 </div>
               </>
             ) : allTicketsRefunded ? (
               <>
-                <div className="p-3 rounded bg-gray-100 text-[#1a1a1f] text-sm mb-3">
+                <div className="p-3 rounded bg-gray-100 text-foreground text-sm mb-3">
                   所有票已退票，订单已失效。
                 </div>
                 <Link
@@ -307,7 +307,7 @@ export default function OrderClient({ id }: { id: string }) {
                     退票
                   </button>
                 )}
-                <div className="mt-3 text-xs text-[#1a1a1f]">
+                <div className="mt-3 text-xs text-foreground">
                   你可以在电子纪念品页保存 PNG 图片作为留念。
                 </div>
               </>
@@ -334,7 +334,7 @@ export default function OrderClient({ id }: { id: string }) {
                         <div className="font-mono text-sm font-semibold">
                           {ticket.ticketCode}
                         </div>
-                        <div className="text-xs text-[#1a1a1f] mt-1">
+                        <div className="text-xs text-foreground mt-1">
                           状态: {
                             isRefunded ? '🔄 已退票' :
                             ticket.status === 'sold' ? '✅ 已售出' :
@@ -386,7 +386,7 @@ export default function OrderClient({ id }: { id: string }) {
                       <div className="font-mono text-sm font-semibold">
                         {ticket.ticketCode}
                       </div>
-                      <div className="text-xs text-[#1a1a1f]">
+                      <div className="text-xs text-foreground">
                         ¥{ticket.price}
                       </div>
                     </div>
@@ -409,7 +409,7 @@ export default function OrderClient({ id }: { id: string }) {
                 </button>
               </div>
 
-              <div className="text-sm text-[#1a1a1f] mb-4">
+              <div className="text-sm text-foreground mb-4">
                 已选择 {selectedTickets.size} / {soldTickets.length} 张票
               </div>
 

@@ -81,7 +81,7 @@ export default function FollowButton({ eventId, eventName }: FollowButtonProps) 
     return (
       <button
         onClick={() => (window.location.href = '/auth/login')}
-        className="inline-flex items-center gap-2 px-4 py-2 bg-[#46467A] text-[#1a1a1f] rounded-full hover:bg-[#5A5A8E] transition"
+        className="inline-flex items-center gap-2 px-4 py-2 bg-[#46467A] text-foreground rounded-full hover:bg-[#5A5A8E] transition"
       >
         <span>⭐</span>
         <span>登录后关注</span>
@@ -94,7 +94,7 @@ export default function FollowButton({ eventId, eventName }: FollowButtonProps) 
     return (
       <button
         disabled
-        className="inline-flex items-center gap-2 px-4 py-2 bg-gray-200 text-[#1a1a1f] rounded-full cursor-not-allowed"
+        className="inline-flex items-center gap-2 px-4 py-2 bg-gray-200 text-foreground rounded-full cursor-not-allowed"
       >
         <span>⏳</span>
         <span>加载中...</span>

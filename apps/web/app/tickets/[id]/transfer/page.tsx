@@ -78,7 +78,7 @@ export default function TransferTicketPage() {
 
       <div className="bg-white rounded-2xl shadow border border-[#FFEBF5] p-6">
         <h1 className="text-xl font-bold text-[#46467A] mb-2">转赠门票</h1>
-        <p className="text-sm text-[#1a1a1f]/60 mb-6">
+        <p className="text-sm text-foreground-soft mb-6">
           可指定对方手机号定向转赠，也可以留空生成转赠链接分享给任意人。链接 48 小时内有效。
         </p>
 
@@ -90,7 +90,7 @@ export default function TransferTicketPage() {
               <p className="text-xs text-green-600">把下面链接发给对方，对方登录后打开即可接收</p>
             </div>
             <div className="bg-gray-50 rounded-xl p-3 flex items-center gap-2">
-              <code className="flex-1 text-xs text-[#1a1a1f] truncate">{transferLink}</code>
+              <code className="flex-1 text-xs text-foreground truncate">{transferLink}</code>
               <button
                 type="button"
                 onClick={handleCopy}
@@ -113,7 +113,7 @@ export default function TransferTicketPage() {
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-[#1a1a1f] mb-1">
+              <label className="block text-sm font-medium text-foreground mb-1">
                 对方手机号（可选）
               </label>
               <input
@@ -125,11 +125,11 @@ export default function TransferTicketPage() {
                 maxLength={11}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#46467A]"
               />
-              <p className="text-xs text-[#1a1a1f]/40 mt-1">指定后只有该手机号注册的账号能接收</p>
+              <p className="text-xs text-foreground-faint mt-1">指定后只有该手机号注册的账号能接收</p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-[#1a1a1f] mb-1">
+              <label className="block text-sm font-medium text-foreground mb-1">
                 留言（可选）
               </label>
               <textarea

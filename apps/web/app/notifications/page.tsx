@@ -162,7 +162,7 @@ export default function NotificationsPage() {
             className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition ${
               filter === tab.key
                 ? "bg-[#46467A] text-white"
-                : "bg-white/80 text-[#1a1a1f] hover:bg-white border border-[#FFEBF5]"
+                : "bg-white/80 text-foreground hover:bg-white border border-[#FFEBF5]"
             }`}
           >
             {tab.label}
@@ -198,15 +198,15 @@ export default function NotificationsPage() {
                 </span>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <h3 className={`text-sm ${n.isRead ? "font-normal text-[#1a1a1f]/80" : "font-semibold text-[#1a1a1f]"}`}>
+                    <h3 className={`text-sm ${n.isRead ? "font-normal text-foreground-soft" : "font-semibold text-foreground"}`}>
                       {n.title}
                     </h3>
                     {!n.isRead && (
                       <span className="w-1.5 h-1.5 bg-red-500 rounded-full flex-shrink-0" aria-label="未读" />
                     )}
                   </div>
-                  <p className="text-sm text-[#1a1a1f]/60 mb-1 break-words">{n.content}</p>
-                  <p className="text-xs text-[#1a1a1f]/40">{formatTime(n.createdAt)}</p>
+                  <p className="text-sm text-foreground-soft mb-1 break-words">{n.content}</p>
+                  <p className="text-xs text-foreground-faint">{formatTime(n.createdAt)}</p>
                 </div>
               </button>
             </li>
@@ -214,7 +214,7 @@ export default function NotificationsPage() {
         </ul>
       )}
 
-      <p className="text-center text-xs text-[#1a1a1f]/40 mt-6">
+      <p className="text-center text-xs text-foreground-faint mt-6">
         <Link href="/account/settings" className="hover:underline">通知偏好设置</Link>
       </p>
     </div>

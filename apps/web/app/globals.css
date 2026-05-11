@@ -3,7 +3,13 @@
 @import "../styles/cards.css";
 
 :root {
-  --foreground: #1a1a1f;
+  /* === 文字颜色 3 级语义 === */
+  --foreground: #1a1a1f;                       /* 主文字：标题 / 正文 */
+  --foreground-soft: rgba(26, 26, 31, 0.72);   /* 次要文字：描述 / 副标题 / 时间 */
+  --foreground-faint: rgba(26, 26, 31, 0.48);  /* 辅助文字：placeholder / disabled hint */
+
+  /* === 容器 / 边框 === */
+  /* 注：实际卡片背景由 cards.css 重写为 rgba(255,255,255,0.85)；此处保留是 .card-dark 用 */
   --card-bg: #46467A;
   --border: rgba(70, 70, 122, 0.5);
   --primary: #46467A;
@@ -18,6 +24,9 @@
 @theme inline {
   --color-background: var(--app-bg-color);
   --color-foreground: var(--foreground);
+  --color-foreground-soft: var(--foreground-soft);
+  --color-foreground-faint: var(--foreground-faint);
+  --color-primary: var(--primary);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }

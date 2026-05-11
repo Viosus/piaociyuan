@@ -45,9 +45,9 @@ export default function EmptyState({
       <div className="text-5xl mb-3" aria-hidden>
         {icon}
       </div>
-      <h3 className="text-base font-semibold text-[#1a1a1f] mb-1">{title}</h3>
+      <h3 className="text-base font-semibold text-foreground mb-1">{title}</h3>
       {description && (
-        <p className="text-sm text-[#1a1a1f]/60 mb-4 whitespace-pre-line">
+        <p className="text-sm text-foreground-soft mb-4 whitespace-pre-line">
           {description}
         </p>
       )}

@@ -125,19 +125,19 @@ export default function AccountPage() {
           <div className="mb-8 p-4 bg-[#FFF9FC] rounded-xl border border-[#FFEBF5]">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
               <div>
-                <span className="text-[#1a1a1f]/60">账号ID：</span>
-                <span className="text-[#1a1a1f] font-mono">{user?.id}</span>
+                <span className="text-foreground-soft">账号ID：</span>
+                <span className="text-foreground font-mono">{user?.id}</span>
               </div>
               {user?.phone && (
                 <div>
-                  <span className="text-[#1a1a1f]/60">手机号：</span>
-                  <span className="text-[#1a1a1f]">{user.phone}</span>
+                  <span className="text-foreground-soft">手机号：</span>
+                  <span className="text-foreground">{user.phone}</span>
                 </div>
               )}
               {user?.email && (
                 <div>
-                  <span className="text-[#1a1a1f]/60">邮箱：</span>
-                  <span className="text-[#1a1a1f]">{user.email}</span>
+                  <span className="text-foreground-soft">邮箱：</span>
+                  <span className="text-foreground">{user.email}</span>
                 </div>
               )}
             </div>
@@ -145,7 +145,7 @@ export default function AccountPage() {
 
           {/* 当前头像预览 */}
           <div className="mb-8">
-            <label className="block text-sm font-medium text-[#1a1a1f] mb-3">
+            <label className="block text-sm font-medium text-foreground mb-3">
               当前头像
             </label>
             <div className="flex items-center gap-4">
@@ -160,7 +160,7 @@ export default function AccountPage() {
                   {user?.nickname?.[0] || user?.email?.[0] || "U"}
                 </div>
               )}
-              <div className="text-sm text-[#1a1a1f]/60">
+              <div className="text-sm text-foreground-soft">
                 {avatarUrl ? "已设置头像" : "未设置头像"}
               </div>
             </div>
@@ -168,7 +168,7 @@ export default function AccountPage() {
 
           {/* 昵称 */}
           <div className="mb-8">
-            <label className="block text-sm font-medium text-[#1a1a1f] mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               昵称
             </label>
             <input
@@ -176,13 +176,13 @@ export default function AccountPage() {
               value={nickname}
               onChange={(e) => setNickname(e.target.value)}
               placeholder="输入你的昵称"
-              className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#46467A] focus:border-transparent text-[#1a1a1f]"
+              className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#46467A] focus:border-transparent text-foreground"
             />
           </div>
 
           {/* 预设头像选择 */}
           <div className="mb-8">
-            <label className="block text-sm font-medium text-[#1a1a1f] mb-3">
+            <label className="block text-sm font-medium text-foreground mb-3">
               选择预设头像
             </label>
             <div className="grid grid-cols-6 gap-4">
@@ -208,7 +208,7 @@ export default function AccountPage() {
 
           {/* 自定义头像 URL */}
           <div className="mb-8">
-            <label className="block text-sm font-medium text-[#1a1a1f] mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               或输入头像 URL
             </label>
             <input
@@ -219,9 +219,9 @@ export default function AccountPage() {
                 setSelectedPreset("");
               }}
               placeholder="https://example.com/avatar.jpg"
-              className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#46467A] focus:border-transparent text-[#1a1a1f]"
+              className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#46467A] focus:border-transparent text-foreground"
             />
-            <p className="mt-2 text-xs text-[#1a1a1f]/60">
+            <p className="mt-2 text-xs text-foreground-soft">
               提示：可以使用任何公开的图片链接作为头像
             </p>
           </div>
@@ -251,7 +251,7 @@ export default function AccountPage() {
             </button>
             <button
               onClick={() => router.back()}
-              className="px-8 py-3 border border-gray-300 text-[#1a1a1f] rounded-lg font-medium hover:bg-gray-50 transition"
+              className="px-8 py-3 border border-gray-300 text-foreground rounded-lg font-medium hover:bg-gray-50 transition"
             >
               取消
             </button>

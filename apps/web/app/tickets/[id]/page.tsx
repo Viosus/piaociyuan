@@ -186,22 +186,22 @@ export default function TicketDetailPage() {
         <div className="p-6">
           <div className="grid grid-cols-2 gap-3 text-sm mb-6">
             <div>
-              <p className="text-[#1a1a1f]/60 text-xs">票档</p>
+              <p className="text-foreground-soft text-xs">票档</p>
               <p className="font-medium">{ticket.tier?.name || "—"}</p>
             </div>
             <div>
-              <p className="text-[#1a1a1f]/60 text-xs">价格</p>
+              <p className="text-foreground-soft text-xs">价格</p>
               <p className="font-medium">¥ {ticket.price}</p>
             </div>
             <div>
-              <p className="text-[#1a1a1f]/60 text-xs">日期 / 时间</p>
+              <p className="text-foreground-soft text-xs">日期 / 时间</p>
               <p className="font-medium">
                 {ticket.event?.date} {ticket.event?.time}
               </p>
             </div>
             {ticket.seatNumber && (
               <div>
-                <p className="text-[#1a1a1f]/60 text-xs">座位</p>
+                <p className="text-foreground-soft text-xs">座位</p>
                 <p className="font-medium">{ticket.seatNumber}</p>
               </div>
             )}
@@ -216,8 +216,8 @@ export default function TicketDetailPage() {
               ) : (
                 <div className="w-64 h-64 bg-gray-100 rounded animate-pulse" />
               )}
-              <p className="text-xs text-[#1a1a1f]/60 mt-2 font-mono">{ticket.ticketCode}</p>
-              <p className="text-sm text-[#1a1a1f]/60 mt-1">现场出示此二维码入场</p>
+              <p className="text-xs text-foreground-soft mt-2 font-mono">{ticket.ticketCode}</p>
+              <p className="text-sm text-foreground-soft mt-1">现场出示此二维码入场</p>
             </div>
           )}
           {ticket.status === "used" && ticket.usedAt && (

@@ -170,7 +170,7 @@ function RegisterForm() {
         <h1 className="text-3xl font-bold text-center text-[#46467A] mb-2">
           欢迎注册
         </h1>
-        <p className="text-center text-[#1a1a1f] mb-8">
+        <p className="text-center text-foreground mb-8">
           创建你的票次元账号
         </p>
 
@@ -186,7 +186,7 @@ function RegisterForm() {
               className={`flex-1 py-2 rounded-lg transition ${
                 formData.accountType === "email"
                   ? "bg-[#46467A] text-white"
-                  : "bg-gray-100 text-[#1a1a1f]"
+                  : "bg-gray-100 text-foreground"
               }`}
             >
               邮箱注册
@@ -200,7 +200,7 @@ function RegisterForm() {
               className={`flex-1 py-2 rounded-lg transition ${
                 formData.accountType === "phone"
                   ? "bg-[#46467A] text-white"
-                  : "bg-gray-100 text-[#1a1a1f]"
+                  : "bg-gray-100 text-foreground"
               }`}
             >
               手机注册
@@ -209,7 +209,7 @@ function RegisterForm() {
 
           {/* 账号输入 */}
           <div>
-            <label className="block text-sm font-medium text-[#1a1a1f] mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               {formData.accountType === "email" ? "邮箱" : "手机号"}
             </label>
             <input
@@ -237,7 +237,7 @@ function RegisterForm() {
 
           {/* 验证码 */}
           <div>
-            <label className="block text-sm font-medium text-[#1a1a1f] mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               {formData.accountType === "email" ? "邮箱验证码" : "短信验证码"}
             </label>
             <div className="flex gap-2">
@@ -267,7 +267,7 @@ function RegisterForm() {
 
           {/* 昵称（可选） */}
           <div>
-            <label className="block text-sm font-medium text-[#1a1a1f] mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               昵称（可选）
             </label>
             <input
@@ -281,7 +281,7 @@ function RegisterForm() {
 
           {/* 密码 */}
           <div>
-            <label className="block text-sm font-medium text-[#1a1a1f] mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               密码
             </label>
             <input
@@ -318,7 +318,7 @@ function RegisterForm() {
 
           {/* 确认密码 */}
           <div>
-            <label className="block text-sm font-medium text-[#1a1a1f] mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               确认密码
             </label>
             <input
@@ -353,7 +353,7 @@ function RegisterForm() {
               onChange={(e) => setAgreedToTerms(e.target.checked)}
               className="w-4 h-4 mt-0.5 text-[#46467A] border-gray-300 rounded focus:ring-[#46467A] cursor-pointer"
             />
-            <label htmlFor="agreeTerms" className="ml-2 text-sm text-[#1a1a1f] cursor-pointer select-none">
+            <label htmlFor="agreeTerms" className="ml-2 text-sm text-foreground cursor-pointer select-none">
               我已阅读并同意
               <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-[#46467A] underline mx-0.5 hover:text-[#3a3a6a]">隐私政策</a>
               和
@@ -384,7 +384,7 @@ function RegisterForm() {
                 <div className="w-full border-t border-gray-300"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-[#1a1a1f]">或使用第三方登录</span>
+                <span className="px-2 bg-white text-foreground">或使用第三方登录</span>
               </div>
             </div>
 
@@ -392,14 +392,14 @@ function RegisterForm() {
               <button
                 type="button"
                 disabled
-                className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg text-sm font-medium text-[#1a1a1f] bg-gray-50 cursor-not-allowed"
+                className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg text-sm font-medium text-foreground bg-gray-50 cursor-not-allowed"
               >
                 微信登录（待接入）
               </button>
               <button
                 type="button"
                 disabled
-                className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg text-sm font-medium text-[#1a1a1f] bg-gray-50 cursor-not-allowed"
+                className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg text-sm font-medium text-foreground bg-gray-50 cursor-not-allowed"
               >
                 QQ登录（待接入）
               </button>
@@ -407,7 +407,7 @@ function RegisterForm() {
           </div>
 
           {/* 登录链接 */}
-          <p className="text-center text-sm text-[#1a1a1f]">
+          <p className="text-center text-sm text-foreground">
             已有账号？
             <Link
               href={returnUrl ? `/auth/login?returnUrl=${encodeURIComponent(returnUrl)}` : "/auth/login"}

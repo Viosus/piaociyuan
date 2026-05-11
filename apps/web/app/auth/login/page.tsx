@@ -72,14 +72,14 @@ function LoginForm() {
         <h1 className="text-3xl font-bold text-center text-[#46467A] mb-2">
           欢迎回来
         </h1>
-        <p className="text-center text-[#1a1a1f] mb-8">
+        <p className="text-center text-foreground mb-8">
           登录你的票次元账号
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* 账号输入 */}
           <div>
-            <label className="block text-sm font-medium text-[#1a1a1f] mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               邮箱 / 手机号
             </label>
             <input
@@ -107,7 +107,7 @@ function LoginForm() {
 
           {/* 密码 */}
           <div>
-            <label className="block text-sm font-medium text-[#1a1a1f] mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               密码
             </label>
             <div className="relative">
@@ -160,7 +160,7 @@ function LoginForm() {
               onChange={(e) => setRememberMe(e.target.checked)}
               className="w-4 h-4 text-[#46467A] border-gray-300 rounded focus:ring-[#46467A] cursor-pointer"
             />
-            <label htmlFor="rememberMe" className="ml-2 text-sm text-[#1a1a1f] cursor-pointer select-none">
+            <label htmlFor="rememberMe" className="ml-2 text-sm text-foreground cursor-pointer select-none">
               30天内免登录
             </label>
           </div>
@@ -188,7 +188,7 @@ function LoginForm() {
                 <div className="w-full border-t border-gray-300"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-[#1a1a1f]">或使用第三方登录</span>
+                <span className="px-2 bg-white text-foreground">或使用第三方登录</span>
               </div>
             </div>
 
@@ -196,14 +196,14 @@ function LoginForm() {
               <button
                 type="button"
                 disabled
-                className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg text-sm font-medium text-[#1a1a1f] bg-gray-50 cursor-not-allowed"
+                className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg text-sm font-medium text-foreground bg-gray-50 cursor-not-allowed"
               >
                 微信登录（待接入）
               </button>
               <button
                 type="button"
                 disabled
-                className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg text-sm font-medium text-[#1a1a1f] bg-gray-50 cursor-not-allowed"
+                className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg text-sm font-medium text-foreground bg-gray-50 cursor-not-allowed"
               >
                 QQ登录（待接入）
               </button>
@@ -211,7 +211,7 @@ function LoginForm() {
           </div>
 
           {/* 注册链接 */}
-          <p className="text-center text-sm text-[#1a1a1f]">
+          <p className="text-center text-sm text-foreground">
             还没有账号？
             <Link
               href={returnUrl ? `/auth/register?returnUrl=${encodeURIComponent(returnUrl)}` : "/auth/register"}

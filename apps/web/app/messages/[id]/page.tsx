@@ -386,7 +386,7 @@ export default function ConversationPage() {
       <div className="min-h-screen bg-[#E0DFFD] flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#46467A] mx-auto mb-4"></div>
-          <p className="text-[#1a1a1f]/60">加载中...</p>
+          <p className="text-foreground-soft">加载中...</p>
         </div>
       </div>
     );
@@ -405,7 +405,7 @@ export default function ConversationPage() {
           className="p-2 hover:bg-white/90 rounded-lg transition"
           aria-label="返回"
         >
-          <ArrowLeft className="w-5 h-5 text-[#1a1a1f]" />
+          <ArrowLeft className="w-5 h-5 text-foreground" />
         </button>
 
         {conversation.type === 'group' ? (
@@ -428,10 +428,10 @@ export default function ConversationPage() {
               </div>
             )}
             <div className="min-w-0">
-              <h1 className="font-semibold text-[#1a1a1f] truncate">
+              <h1 className="font-semibold text-foreground truncate">
                 {conversation.name || '群聊'}
               </h1>
-              <p className="text-xs text-[#1a1a1f]/60">
+              <p className="text-xs text-foreground-soft">
                 {conversation.memberCount || 0} 成员 · 点击查看详情
               </p>
             </div>
@@ -457,7 +457,7 @@ export default function ConversationPage() {
             )}
 
             <div className="min-w-0">
-              <h1 className="font-semibold text-[#1a1a1f] truncate">
+              <h1 className="font-semibold text-foreground truncate">
                 {conversation.otherUser?.nickname || '未知用户'}
               </h1>
             </div>
@@ -491,7 +491,7 @@ export default function ConversationPage() {
 
           {messages.length === 0 ? (
             <div className="text-center py-12 bg-white/80 backdrop-blur-sm rounded-lg border border-[#FFEBF5] p-8">
-              <p className="text-[#1a1a1f]/60">还没有消息，发送第一条消息开始对话吧</p>
+              <p className="text-foreground-soft">还没有消息，发送第一条消息开始对话吧</p>
             </div>
           ) : (
             messages.map((msg, index) => {
@@ -507,7 +507,7 @@ export default function ConversationPage() {
                 <div key={msg.id}>
                   {showTimeDivider && (
                     <div className="text-center my-3">
-                      <span className="text-xs text-[#1a1a1f]/40 bg-white/40 px-3 py-1 rounded-full">
+                      <span className="text-xs text-foreground-faint bg-white/40 px-3 py-1 rounded-full">
                         {formatMessageTime(msg.createdAt)}
                       </span>
                     </div>
@@ -537,7 +537,7 @@ export default function ConversationPage() {
                     <div className={`flex-1 max-w-[70%] ${isCurrentUser ? 'items-end' : ''}`}>
                       {showAvatar && (
                         <div
-                          className={`text-xs text-[#1a1a1f]/60 mb-1 ${
+                          className={`text-xs text-foreground-soft mb-1 ${
                             isCurrentUser ? 'text-right' : ''
                           }`}
                         >
@@ -568,7 +568,7 @@ export default function ConversationPage() {
                           className={`relative rounded-lg px-4 py-2 break-words whitespace-pre-wrap ${
                             isCurrentUser
                               ? 'bg-[#46467A] text-white ml-auto'
-                              : 'bg-white/80 backdrop-blur-sm text-[#1a1a1f] border border-[#FFEBF5]'
+                              : 'bg-white/80 backdrop-blur-sm text-foreground border border-[#FFEBF5]'
                           } ${msg.status === 'sending' ? 'opacity-60' : ''} ${
                             msg.status === 'failed' ? 'ring-1 ring-red-400' : ''
                           }`}
@@ -579,7 +579,7 @@ export default function ConversationPage() {
 
                       {/* 状态指示 */}
                       {isCurrentUser && msg.status === 'sending' && (
-                        <div className="text-[10px] text-[#1a1a1f]/40 text-right mt-0.5">
+                        <div className="text-[10px] text-foreground-faint text-right mt-0.5">
                           发送中...
                         </div>
                       )}
@@ -648,7 +648,7 @@ export default function ConversationPage() {
             placeholder="输入消息（Shift+Enter 换行）"
             rows={1}
             disabled={sending}
-            className="flex-1 px-4 py-2 bg-white border border-[#46467A]/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#46467A] focus:border-[#46467A] disabled:bg-gray-100 text-[#1a1a1f] placeholder:text-gray-500 resize-none leading-6 max-h-40"
+            className="flex-1 px-4 py-2 bg-white border border-[#46467A]/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#46467A] focus:border-[#46467A] disabled:bg-gray-100 text-foreground placeholder:text-gray-500 resize-none leading-6 max-h-40"
             style={{ minHeight: 40 }}
           />
           <button
@@ -676,7 +676,7 @@ export default function ConversationPage() {
               e.stopPropagation();
               setLightboxUrl(null);
             }}
-            className="absolute top-4 right-4 px-4 py-2 bg-white/90 hover:bg-white rounded-full flex items-center gap-1.5 text-[#1a1a1f] font-medium shadow-lg"
+            className="absolute top-4 right-4 px-4 py-2 bg-white/90 hover:bg-white rounded-full flex items-center gap-1.5 text-foreground font-medium shadow-lg"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />

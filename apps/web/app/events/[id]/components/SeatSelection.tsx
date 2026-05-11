@@ -166,7 +166,7 @@ export default function SeatSelection({ eventId, tierId, tierName, tierPrice }: 
                   transition-all duration-200
                   ${isAvailable ? 'bg-green-500/20 hover:bg-green-500/40 text-green-400 border border-green-500/50' : ''}
                   ${isLocked ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/50 cursor-not-allowed' : ''}
-                  ${isSold ? 'bg-gray-500/20 text-[#1a1a1f] opacity-50 border border-gray-500/30 cursor-not-allowed' : ''}
+                  ${isSold ? 'bg-gray-500/20 text-foreground opacity-50 border border-gray-500/30 cursor-not-allowed' : ''}
                   ${isSelected ? 'bg-blue-500 text-white border-2 border-blue-400 scale-110' : ''}
                 `}
                 title={

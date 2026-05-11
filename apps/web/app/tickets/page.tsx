@@ -88,7 +88,7 @@ export default function TicketsPage() {
             className={`px-3 py-1.5 rounded-full text-xs font-medium transition ${
               filter === tab.key
                 ? "bg-[#46467A] text-white"
-                : "bg-white/80 text-[#1a1a1f] hover:bg-white border border-[#FFEBF5]"
+                : "bg-white/80 text-foreground hover:bg-white border border-[#FFEBF5]"
             }`}
           >
             {tab.label}
@@ -125,17 +125,17 @@ export default function TicketsPage() {
                   )}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2 mb-1">
-                      <h3 className="font-semibold text-[#1a1a1f] truncate">
+                      <h3 className="font-semibold text-foreground truncate">
                         {t.event?.name || "未知活动"}
                       </h3>
                       <span className={`px-2 py-0.5 rounded-full text-xs ${status.cls} flex-shrink-0`}>
                         {status.text}
                       </span>
                     </div>
-                    <p className="text-sm text-[#1a1a1f]/60 truncate">
+                    <p className="text-sm text-foreground-soft truncate">
                       {t.event?.city} · {t.event?.venue}
                     </p>
-                    <p className="text-sm text-[#1a1a1f]/60">
+                    <p className="text-sm text-foreground-soft">
                       {t.event?.date} {t.event?.time}
                     </p>
                     <div className="flex items-center justify-between mt-2">

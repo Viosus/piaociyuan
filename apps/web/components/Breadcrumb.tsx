@@ -22,7 +22,7 @@ export default function Breadcrumb({ items }: { items: BreadcrumbItem[] }) {
   if (items.length === 0) return null;
 
   return (
-    <nav aria-label="面包屑导航" className="text-xs text-[#1a1a1f]/60 mb-3 flex flex-wrap items-center gap-1">
+    <nav aria-label="面包屑导航" className="text-xs text-foreground-soft mb-3 flex flex-wrap items-center gap-1">
       {items.map((item, idx) => {
         const isLast = idx === items.length - 1;
         return (
@@ -44,7 +44,7 @@ export default function Breadcrumb({ items }: { items: BreadcrumbItem[] }) {
             )}
             {!isLast && (
               <svg
-                className="w-3 h-3 flex-shrink-0 text-[#1a1a1f]/30"
+                className="w-3 h-3 flex-shrink-0 text-foreground-faint"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"

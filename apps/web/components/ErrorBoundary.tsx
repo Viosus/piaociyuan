@@ -77,8 +77,8 @@ function DefaultFallback({ error, onRetry }: { error: Error; onRetry: () => void
             />
           </svg>
         </div>
-        <h2 className="text-base font-semibold text-[#1a1a1f] mb-1">页面出错了</h2>
-        <p className="text-sm text-[#1a1a1f]/60 mb-4">
+        <h2 className="text-base font-semibold text-foreground mb-1">页面出错了</h2>
+        <p className="text-sm text-foreground-soft mb-4">
           {error.message || "发生未知错误"}
         </p>
         <div className="flex gap-2 justify-center">

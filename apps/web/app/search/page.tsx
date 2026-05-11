@@ -121,13 +121,13 @@ function SearchPageInner() {
       {/* 搜索框 */}
       <form onSubmit={handleSubmit} className="flex gap-2 mb-4">
         <div className="flex-1 relative">
-          <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#1a1a1f]/40" />
+          <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-foreground-faint" />
           <input
             type="text"
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="搜用户、帖子、活动..."
-            className="w-full pl-10 pr-4 py-2.5 bg-white border border-[#46467A]/30 rounded-full focus:outline-none focus:ring-2 focus:ring-[#46467A] text-[#1a1a1f]"
+            className="w-full pl-10 pr-4 py-2.5 bg-white border border-[#46467A]/30 rounded-full focus:outline-none focus:ring-2 focus:ring-[#46467A] text-foreground"
             autoFocus
           />
         </div>
@@ -149,7 +149,7 @@ function SearchPageInner() {
             className={`px-4 py-2 text-sm font-medium transition border-b-2 -mb-px ${
               activeType === t.key
                 ? "border-[#46467A] text-[#46467A]"
-                : "border-transparent text-[#1a1a1f]/60 hover:text-[#1a1a1f]"
+                : "border-transparent text-foreground-soft hover:text-foreground"
             }`}
           >
             {t.label}
@@ -201,11 +201,11 @@ function SearchPageInner() {
                       )}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1">
-                          <h3 className="font-medium text-[#1a1a1f] truncate">{u.nickname}</h3>
+                          <h3 className="font-medium text-foreground truncate">{u.nickname}</h3>
                           {u.isVerified && <span className="text-blue-500 text-sm">✓</span>}
                         </div>
-                        {u.bio && <p className="text-xs text-[#1a1a1f]/60 truncate">{u.bio}</p>}
-                        <p className="text-xs text-[#1a1a1f]/40">{u.followerCount} 粉丝</p>
+                        {u.bio && <p className="text-xs text-foreground-soft truncate">{u.bio}</p>}
+                        <p className="text-xs text-foreground-faint">{u.followerCount} 粉丝</p>
                       </div>
                     </Link>
                   </li>
@@ -237,8 +237,8 @@ function SearchPageInner() {
                         />
                       )}
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm text-[#1a1a1f] line-clamp-2">{p.content}</p>
-                        <p className="text-xs text-[#1a1a1f]/40 mt-1">
+                        <p className="text-sm text-foreground line-clamp-2">{p.content}</p>
+                        <p className="text-xs text-foreground-faint mt-1">
                           {p.user.nickname} · ❤️ {p.likeCount} · 💬 {p.commentCount}
                         </p>
                       </div>
@@ -270,11 +270,11 @@ function SearchPageInner() {
                         className="w-20 h-20 rounded-lg object-cover flex-shrink-0"
                       />
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-medium text-[#1a1a1f] truncate">{ev.name}</h3>
-                        <p className="text-xs text-[#1a1a1f]/60 truncate">
+                        <h3 className="font-medium text-foreground truncate">{ev.name}</h3>
+                        <p className="text-xs text-foreground-soft truncate">
                           {ev.city} · {ev.venue}
                         </p>
-                        <p className="text-xs text-[#1a1a1f]/40">
+                        <p className="text-xs text-foreground-faint">
                           {ev.date} {ev.time}
                         </p>
                       </div>

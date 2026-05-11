@@ -119,13 +119,13 @@ export default function MessagesPage() {
 
           {/* Search */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-[#1a1a1f]/60" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-foreground-soft" />
             <input
               type="text"
               placeholder="搜索对话..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-white border border-[#FFEBF5] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#46467A] text-[#1a1a1f]"
+              className="w-full pl-10 pr-4 py-2 bg-white border border-[#FFEBF5] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#46467A] text-foreground"
             />
           </div>
         </div>
@@ -141,7 +141,7 @@ export default function MessagesPage() {
         ) : filteredConversations.length === 0 ? (
           <div className="text-center py-12 bg-white/80 backdrop-blur-sm rounded-lg border border-[#FFEBF5] p-8">
             <MessageSquare className="w-16 h-16 mx-auto text-[#46467A]/60 mb-4" />
-            <p className="text-[#1a1a1f] mb-4">
+            <p className="text-foreground mb-4">
               {searchQuery ? '没有找到匹配的对话' : '还没有对话'}
             </p>
             {!searchQuery && (
@@ -242,7 +242,7 @@ export default function MessagesPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-1">
                         <div className="flex items-center gap-1.5 min-w-0">
-                          <h3 className="font-semibold text-[#1a1a1f] truncate">
+                          <h3 className="font-semibold text-foreground truncate">
                             {isGroup
                               ? conversation.name || '群聊'
                               : conversation.otherUser?.nickname || '未知用户'}
@@ -253,15 +253,15 @@ export default function MessagesPage() {
                             </span>
                           )}
                         </div>
-                        <span className="text-xs text-[#1a1a1f]/60 flex-shrink-0 ml-2">
+                        <span className="text-xs text-foreground-soft flex-shrink-0 ml-2">
                           {lastMsg && formatTime(lastMsg.createdAt)}
                         </span>
                       </div>
                       <p
                         className={`text-sm truncate ${
                           conversation.unreadCount > 0
-                            ? 'text-[#1a1a1f] font-medium'
-                            : 'text-[#1a1a1f]/60'
+                            ? 'text-foreground font-medium'
+                            : 'text-foreground-soft'
                         }`}
                       >
                         {lastMsgPreview}

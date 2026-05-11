@@ -120,22 +120,24 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="group fixed left-0 top-0 h-screen w-20 hover:w-64 bg-[#46467A] border-r border-[#46467A]/30 flex flex-col z-50 transition-all duration-300 ease-in-out">
+    <aside className="group fixed left-0 top-0 h-screen w-20 hover:w-64 bg-[#46467A] border-r border-[#46467A]/30 flex flex-col z-[150] transition-all duration-300 ease-in-out">
       {/* Logo */}
       <Link
         href="/events"
-        className="h-20 border-b border-white/20 flex items-center justify-center transition-all duration-300 relative overflow-hidden px-2"
+        className="h-20 border-b border-white/20 flex items-center gap-3 px-3 transition-all duration-300 relative overflow-hidden"
       >
-        {/* Logo图标 - 收起时小，展开时大 */}
-        <div className="transition-all duration-300 flex justify-center w-full">
-          <Image
-            src="/icons/logo-gradient.png"
-            alt="票次元"
-            width={200}
-            height={60}
-            className="object-contain w-14 h-14 group-hover:w-48 group-hover:h-16 transition-all duration-300"
-          />
-        </div>
+        {/* Logo 图标：始终 56×56 方形，保持比例不变形 */}
+        <Image
+          src="/icons/logo-gradient.png"
+          alt="票次元"
+          width={56}
+          height={56}
+          className="w-14 h-14 rounded-xl object-contain flex-shrink-0"
+        />
+        {/* 站名文字：仅展开时渐显 */}
+        <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-lg font-bold text-white whitespace-nowrap">
+          票次元
+        </span>
       </Link>
 
       {/* 导航菜单 */}

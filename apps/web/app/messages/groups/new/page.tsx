@@ -133,7 +133,7 @@ export default function NewGroupPage() {
 
         {/* 群头像 */}
         <div className="mb-4">
-          <label className="block text-sm font-medium text-[#1a1a1f] mb-1">
+          <label className="block text-sm font-medium text-foreground mb-1">
             群头像（可选）
           </label>
           <div className="flex items-center gap-3">
@@ -156,13 +156,13 @@ export default function NewGroupPage() {
               disabled={uploadingAvatar}
               className="text-sm"
             />
-            {uploadingAvatar && <span className="text-xs text-[#1a1a1f]/40">上传中...</span>}
+            {uploadingAvatar && <span className="text-xs text-foreground-faint">上传中...</span>}
           </div>
         </div>
 
         {/* 群名称 */}
         <div className="mb-4">
-          <label className="block text-sm font-medium text-[#1a1a1f] mb-1">
+          <label className="block text-sm font-medium text-foreground mb-1">
             群名称 <span className="text-red-500">*</span>
           </label>
           <input
@@ -177,7 +177,7 @@ export default function NewGroupPage() {
 
         {/* 群简介 */}
         <div className="mb-4">
-          <label className="block text-sm font-medium text-[#1a1a1f] mb-1">
+          <label className="block text-sm font-medium text-foreground mb-1">
             群简介（可选）
           </label>
           <textarea
@@ -193,7 +193,7 @@ export default function NewGroupPage() {
         {/* 已选成员 */}
         {selected.length > 0 && (
           <div className="mb-4">
-            <p className="text-sm font-medium text-[#1a1a1f] mb-2">
+            <p className="text-sm font-medium text-foreground mb-2">
               已选 {selected.length} 个成员
             </p>
             <div className="flex flex-wrap gap-2">
@@ -218,11 +218,11 @@ export default function NewGroupPage() {
 
         {/* 搜成员 */}
         <div className="mb-4">
-          <label className="block text-sm font-medium text-[#1a1a1f] mb-1">
+          <label className="block text-sm font-medium text-foreground mb-1">
             添加成员 <span className="text-red-500">*</span>
           </label>
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#1a1a1f]/40" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground-faint" />
             <input
               type="text"
               value={query}
@@ -235,9 +235,9 @@ export default function NewGroupPage() {
           {query.trim().length >= 2 && (
             <div className="mt-2 max-h-64 overflow-y-auto border border-gray-200 rounded-lg divide-y divide-gray-100">
               {searching ? (
-                <div className="p-4 text-center text-sm text-[#1a1a1f]/60">搜索中...</div>
+                <div className="p-4 text-center text-sm text-foreground-soft">搜索中...</div>
               ) : searchResults.length === 0 ? (
-                <div className="p-4 text-center text-sm text-[#1a1a1f]/60">没找到匹配的用户</div>
+                <div className="p-4 text-center text-sm text-foreground-soft">没找到匹配的用户</div>
               ) : (
                 searchResults.map((u) => {
                   const isSelected = selected.some((s) => s.id === u.id);
@@ -262,8 +262,8 @@ export default function NewGroupPage() {
                         </div>
                       )}
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-[#1a1a1f]">{u.nickname}</p>
-                        {u.phone && <p className="text-xs text-[#1a1a1f]/40">{u.phone}</p>}
+                        <p className="font-medium text-foreground">{u.nickname}</p>
+                        {u.phone && <p className="text-xs text-foreground-faint">{u.phone}</p>}
                       </div>
                       <div
                         className={`w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center ${

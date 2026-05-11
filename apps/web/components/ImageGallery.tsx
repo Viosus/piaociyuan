@@ -198,7 +198,7 @@ export default function ImageGallery({
               e.stopPropagation();
               setIsLightboxOpen(false);
             }}
-            className="absolute top-4 right-4 px-4 py-2 bg-white/90 hover:bg-white rounded-full flex items-center gap-1.5 text-[#1a1a1f] font-medium transition z-10 shadow-lg"
+            className="absolute top-4 right-4 px-4 py-2 bg-white/90 hover:bg-white rounded-full flex items-center gap-1.5 text-foreground font-medium transition z-10 shadow-lg"
             aria-label="关闭"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

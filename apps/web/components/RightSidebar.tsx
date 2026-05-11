@@ -18,11 +18,17 @@ interface Notification {
 
 interface Conversation {
   id: string;
-  otherUser: {
+  type?: 'private' | 'group';
+  // 私聊场景
+  otherUser?: {
     id: string;
     nickname: string;
     avatar: string | null;
   };
+  // 群聊场景（RightSidebar 不显示群聊，但定义保留以便类型兼容）
+  name?: string;
+  avatar?: string | null;
+  memberCount?: number;
   lastMessage?: {
     content: string;
     createdAt: string;
@@ -81,8 +87,12 @@ export default function RightSidebar() {
       });
       if (res.ok) {
         const data = await res.json();
-        setConversations(data.slice(0, 10)); // 只显示最近10个
-        const unread = data.reduce((sum: number, conv: Conversation) => sum + conv.unreadCount, 0);
+        // RightSidebar 是"私信"快捷栏，只显示私聊；群聊去 /messages 看
+        const privateOnly = (Array.isArray(data) ? data : []).filter(
+          (c: Conversation) => c.type !== 'group' && c.otherUser
+        );
+        setConversations(privateOnly.slice(0, 10));
+        const unread = privateOnly.reduce((sum: number, conv: Conversation) => sum + conv.unreadCount, 0);
         setUnreadMessages(unread);
       }
     } catch {
@@ -211,7 +221,7 @@ export default function RightSidebar() {
 
   return (
     <aside
-      className={`fixed right-0 top-0 h-screen bg-[#46467A] border-l border-[#46467A]/30 flex flex-col z-50 transition-all duration-300 ease-in-out ${
+      className={`fixed right-0 top-0 h-screen bg-[#46467A] border-l border-[#46467A]/30 flex flex-col z-[150] transition-all duration-300 ease-in-out ${
         isExpanded ? 'w-80' : 'w-16'
       }`}
     >
@@ -404,21 +414,21 @@ export default function RightSidebar() {
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        {conv.otherUser.avatar ? (
+                        {conv.otherUser?.avatar ? (
                           <img
                             src={conv.otherUser.avatar}
-                            alt={conv.otherUser.nickname}
+                            alt={conv.otherUser?.nickname || '用户'}
                             className="w-10 h-10 rounded-full object-cover flex-shrink-0"
                           />
                         ) : (
                           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-white font-bold flex-shrink-0">
-                            {conv.otherUser.nickname[0]}
+                            {conv.otherUser?.nickname?.[0] || '?'}
                           </div>
                         )}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between mb-1">
                             <h4 className="text-white text-sm font-medium truncate">
-                              {conv.otherUser.nickname}
+                              {conv.otherUser?.nickname || '用户'}
                             </h4>
                             {conv.unreadCount > 0 && (
                               <span className="ml-2 min-w-[18px] h-[18px] flex items-center justify-center bg-red-500 text-white text-xs font-bold rounded-full px-1 flex-shrink-0">

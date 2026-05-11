@@ -156,11 +156,11 @@ export default function FollowList({ userId, listType }: Props) {
                     )}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1">
-                        <h3 className="font-medium text-[#1a1a1f] truncate">{u.nickname}</h3>
+                        <h3 className="font-medium text-foreground truncate">{u.nickname}</h3>
                         {u.isVerified && <span className="text-blue-500 text-sm">✓</span>}
                       </div>
                       {u.bio && (
-                        <p className="text-xs text-[#1a1a1f]/60 truncate">{u.bio}</p>
+                        <p className="text-xs text-foreground-soft truncate">{u.bio}</p>
                       )}
                     </div>
                   </Link>

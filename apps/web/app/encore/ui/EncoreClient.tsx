@@ -155,7 +155,7 @@ export default function EncoreClient() {
             className={`flex-1 px-4 py-2 rounded-xl text-sm font-medium transition-all flex items-center justify-center gap-1.5 ${
               active
                 ? "bg-[#46467A] text-white shadow"
-                : "text-[#1a1a1f]/70 hover:text-[#46467A] hover:bg-white/60"
+                : "text-foreground-soft hover:text-[#46467A] hover:bg-white/60"
             }`}
           >
             <span>{tab.icon}</span>
@@ -193,7 +193,7 @@ export default function EncoreClient() {
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#46467A] mx-auto mb-4"></div>
-            <p className="text-[#1a1a1f]/60">加载中...</p>
+            <p className="text-foreground-soft">加载中...</p>
           </div>
         </div>
       </div>
@@ -211,7 +211,7 @@ export default function EncoreClient() {
             <h2 className="text-xl font-semibold text-[#46467A] mb-2">
               {isLoggedIn ? "还没有关注的人" : "登录后查看关注"}
             </h2>
-            <p className="text-[#1a1a1f]/60 mb-6">
+            <p className="text-foreground-soft mb-6">
               {isLoggedIn
                 ? "去发现更多有趣的人，关注他们后可以在这里看到他们的动态"
                 : "登录账号后，关注感兴趣的用户即可在这里看到他们的动态"}
@@ -233,7 +233,7 @@ export default function EncoreClient() {
         <div className="text-center py-12">
           <div className="text-6xl mb-4">📭</div>
           <h2 className="text-xl font-semibold text-[#46467A] mb-2">还没有内容</h2>
-          <p className="text-[#1a1a1f]/60 mb-6">成为第一个分享演出时刻的人吧！</p>
+          <p className="text-foreground-soft mb-6">成为第一个分享演出时刻的人吧！</p>
           <button
             onClick={() => setIsCreateDialogOpen(true)}
             className="px-6 py-3 bg-[#46467A] text-white rounded-xl font-medium hover:bg-[#5A5A8E] transition"
@@ -293,7 +293,7 @@ export default function EncoreClient() {
               {/* 内容 */}
               <div className="p-4">
                 {/* 标题/内容 */}
-                <p className="text-[#1a1a1f] text-sm line-clamp-2 mb-3">
+                <p className="text-foreground text-sm line-clamp-2 mb-3">
                   {post.content}
                 </p>
 
@@ -307,7 +307,7 @@ export default function EncoreClient() {
 
                 {/* 地点标签 */}
                 {post.location && (
-                  <div className="mb-3 flex items-center gap-1 text-xs text-[#1a1a1f]/60">
+                  <div className="mb-3 flex items-center gap-1 text-xs text-foreground-soft">
                     <span>📍</span>
                     <span className="truncate">{post.location}</span>
                   </div>
@@ -344,7 +344,7 @@ export default function EncoreClient() {
                       {post.user.nickname[0]}
                     </div>
                   )}
-                  <span className="text-xs text-[#1a1a1f]/80 truncate hover:text-[#46467A]">
+                  <span className="text-xs text-foreground-soft truncate hover:text-[#46467A]">
                     {post.user.nickname}
                   </span>
                 </div>
@@ -352,7 +352,7 @@ export default function EncoreClient() {
                 {/* 底部操作栏 */}
                 <div className="flex items-center justify-between">
                   {/* 统计信息 */}
-                  <div className="flex items-center gap-4 text-xs text-[#1a1a1f]/60">
+                  <div className="flex items-center gap-4 text-xs text-foreground-soft">
                     <div className="flex items-center gap-1">
                       <span>❤️</span>
                       <span>{post.likeCount > 0 ? post.likeCount : ''}</span>

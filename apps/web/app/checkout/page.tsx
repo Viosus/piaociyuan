@@ -19,7 +19,7 @@ export default async function CheckoutPage({ searchParams }: Props) {
       <div className="min-h-screen bg-[#E0DFFD] flex items-center justify-center p-8">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-2 text-[#46467A]">订单信息不完整</h1>
-          <p className="text-[#1a1a1f]">请从活动详情页重新选择票档。</p>
+          <p className="text-foreground">请从活动详情页重新选择票档。</p>
           <Link href="/events" className="mt-4 inline-block text-[#46467A] underline">
             返回活动列表
           </Link>
@@ -37,7 +37,7 @@ export default async function CheckoutPage({ searchParams }: Props) {
       <div className="min-h-screen bg-[#E0DFFD] flex items-center justify-center p-8">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-2 text-[#46467A]">订单信息不完整</h1>
-          <p className="text-[#1a1a1f]">请从活动详情页重新选择票档。</p>
+          <p className="text-foreground">请从活动详情页重新选择票档。</p>
           <Link href="/events" className="mt-4 inline-block text-[#46467A] underline">
             返回活动列表
           </Link>
