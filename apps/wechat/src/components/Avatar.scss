@@ -1,0 +1,16 @@
+.avatar {
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.avatar-fallback {
+  background: linear-gradient(135deg, #46467A, #FFE3F0);
+}
+.avatar-letter {
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 32rpx;
+}

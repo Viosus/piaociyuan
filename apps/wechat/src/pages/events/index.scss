@@ -1,0 +1,70 @@
+.events-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.cat-bar {
+  white-space: nowrap;
+  background: #ffffff;
+  padding: 16rpx 12rpx;
+  border-bottom: 2rpx solid rgba(70, 70, 122, 0.1);
+}
+
+.cat-tab {
+  display: inline-block;
+  padding: 12rpx 28rpx;
+  margin-right: 12rpx;
+  border-radius: 32rpx;
+  background: rgba(70, 70, 122, 0.08);
+  color: var(--foreground-soft);
+  font-size: 26rpx;
+
+  &.active {
+    background: var(--primary);
+    color: #ffffff;
+    font-weight: 500;
+  }
+}
+
+.events-list {
+  flex: 1;
+  padding: 16rpx 24rpx 32rpx;
+}
+
+.loading {
+  text-align: center;
+  padding: 80rpx 0;
+  color: var(--foreground-soft);
+}
+
+.event-row {
+  display: flex;
+  gap: 20rpx;
+}
+.event-cover {
+  width: 180rpx;
+  height: 180rpx;
+  border-radius: 16rpx;
+  flex-shrink: 0;
+}
+.event-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8rpx;
+}
+.event-name {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: var(--foreground);
+}
+.event-artist {
+  font-size: 26rpx;
+  color: var(--primary);
+}
+.event-meta {
+  font-size: 22rpx;
+  color: var(--foreground-soft);
+}

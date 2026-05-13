@@ -1,0 +1,22 @@
+# Taro 编译产物
+dist/
+
+# 依赖
+node_modules/
+
+# 缓存
+.cache/
+.temp/
+
+# 日志
+*.log
+npm-debug.log*
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# 系统
+.DS_Store
+Thumbs.db

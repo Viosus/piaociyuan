@@ -1,0 +1,71 @@
+.notif-page {
+  min-height: 100vh;
+}
+
+.notif-list {
+  padding: 24rpx;
+}
+
+.loading {
+  text-align: center;
+  padding: 80rpx 0;
+  color: var(--foreground-soft);
+}
+
+.notif-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 20rpx;
+  position: relative;
+}
+
+.notif-icon {
+  font-size: 44rpx;
+  margin-top: 4rpx;
+}
+
+.notif-body {
+  flex: 1;
+}
+
+.notif-title {
+  display: block;
+  font-size: 28rpx;
+  color: var(--foreground);
+  margin-bottom: 8rpx;
+
+  &.unread {
+    font-weight: 700;
+  }
+}
+
+.notif-content {
+  display: block;
+  font-size: 26rpx;
+  color: var(--foreground-soft);
+  margin-bottom: 8rpx;
+  line-height: 1.5;
+}
+
+.notif-time {
+  display: block;
+  font-size: 22rpx;
+  color: var(--foreground-faint);
+}
+
+.notif-dot {
+  position: absolute;
+  top: 8rpx;
+  right: 0;
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: 50%;
+  background: var(--danger);
+}
+
+.notif-unread {
+  background: rgba(255, 255, 255, 0.95);
+}
+.notif-read {
+  background: rgba(255, 255, 255, 0.7);
+}

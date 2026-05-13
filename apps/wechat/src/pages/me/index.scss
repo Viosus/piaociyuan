@@ -1,0 +1,86 @@
+.me-page {
+  min-height: 100vh;
+  padding: 32rpx 24rpx 60rpx;
+}
+
+.loading {
+  text-align: center;
+  padding: 80rpx 0;
+  color: var(--foreground-soft);
+}
+
+.profile-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32rpx 0 48rpx;
+}
+
+.profile-name {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin-top: 24rpx;
+}
+
+.nickname {
+  font-size: 40rpx;
+  font-weight: 700;
+  color: var(--foreground);
+}
+
+.verified-badge {
+  background: var(--primary);
+  color: #ffffff;
+  font-size: 20rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 10rpx;
+}
+
+.bio {
+  margin-top: 16rpx;
+  color: var(--foreground-soft);
+  font-size: 26rpx;
+  text-align: center;
+  padding: 0 32rpx;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16rpx 0;
+
+  &:not(:last-child) {
+    border-bottom: 2rpx solid rgba(70, 70, 122, 0.08);
+  }
+}
+
+.info-label {
+  color: var(--foreground);
+  font-size: 28rpx;
+  &.faint { color: var(--foreground-faint); }
+}
+
+.info-value {
+  color: var(--foreground-soft);
+  font-size: 26rpx;
+}
+
+.info-arrow {
+  color: var(--foreground-faint);
+  font-size: 28rpx;
+  &.faint { font-size: 24rpx; }
+}
+
+.logout-btn {
+  margin-top: 48rpx;
+  background: rgba(239, 68, 68, 0.1) !important;
+  color: var(--danger) !important;
+  border-radius: 48rpx;
+  font-size: 30rpx;
+
+  &::after {
+    border: none;
+  }
+}

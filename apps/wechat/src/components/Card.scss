@@ -1,0 +1,13 @@
+.card {
+  background: var(--card-bg);
+  border: 2rpx solid rgba(255, 235, 245, 1);
+  border-radius: 24rpx;
+  padding: 24rpx;
+  box-shadow: 0 4rpx 12rpx rgba(70, 70, 122, 0.12);
+  margin-bottom: 16rpx;
+}
+.card-clickable:active {
+  opacity: 0.8;
+  transform: scale(0.99);
+  transition: all 0.15s ease;
+}

@@ -1,0 +1,39 @@
+/* 全局变量 + 主题 — 对齐 apps/web/app/globals.css 的语义 */
+page {
+  --foreground: #1a1a1f;
+  --foreground-soft: rgba(26, 26, 31, 0.72);
+  --foreground-faint: rgba(26, 26, 31, 0.48);
+  --primary: #46467A;
+  --primary-hover: #5A5A8E;
+  --bg: #E0DFFD;
+  --card-bg: rgba(255, 255, 255, 0.85);
+  --border: rgba(70, 70, 122, 0.5);
+  --danger: #ef4444;
+  --success: #10b981;
+
+  background: var(--bg);
+  color: var(--foreground);
+  font-size: 28rpx;
+  line-height: 1.5;
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+}
+
+/* 文字辅助类 */
+.text-foreground { color: var(--foreground); }
+.text-soft { color: var(--foreground-soft); }
+.text-faint { color: var(--foreground-faint); }
+.text-primary { color: var(--primary); }
+.text-danger { color: var(--danger); }
+.text-success { color: var(--success); }
+.text-white { color: #ffffff; }
+
+/* 字号 */
+.text-xs { font-size: 22rpx; }
+.text-sm { font-size: 26rpx; }
+.text-md { font-size: 28rpx; }
+.text-lg { font-size: 32rpx; }
+.text-xl { font-size: 36rpx; }
+.text-2xl { font-size: 44rpx; }
+
+.font-bold { font-weight: 700; }
+.font-medium { font-weight: 500; }

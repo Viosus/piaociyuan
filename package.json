@@ -17,7 +17,9 @@
     "install-all": "npm install",
     "mobile": "cd apps/mobile && npm start",
     "mobile:android": "cd apps/mobile && npm run android",
-    "mobile:ios": "cd apps/mobile && npm run ios"
+    "mobile:ios": "cd apps/mobile && npm run ios",
+    "dev:wechat": "cd apps/wechat && npm run dev:weapp",
+    "build:wechat": "cd apps/wechat && npm run build:weapp"
   },
   "dependencies": {
     "three": "^0.182.0"

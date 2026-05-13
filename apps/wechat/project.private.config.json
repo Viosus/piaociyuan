@@ -1,0 +1,8 @@
+{
+  "description": "项目私有配置文件。此文件中的内容只在开发者工具中生效，不会被打包到小程序中。",
+  "projectname": "piaociyuan-wechat",
+  "setting": {
+    "compileHotReLoad": true,
+    "urlCheck": false
+  }
+}

@@ -7,12 +7,15 @@
 ```
 piaociyuan/
 ├── apps/
-│   ├── web/          # Next.js Web 应用
-│   └── mobile/       # Expo React Native 应用
+│   ├── web/          # Next.js Web 应用（含所有 API routes，对所有端共用）
+│   ├── mobile/       # Expo React Native（Android + iOS）
+│   └── wechat/       # Taro 微信小程序（Phase 0+1 已 ship，路线图见 plan）
 ├── packages/
 │   └── shared/       # 共享代码包
 └── package.json      # 根 monorepo 配置
 ```
+
+**四端并存**：apps/web / apps/mobile / apps/wechat 都是独立 workspace，共用 apps/web 后端 API。
 
 ## 技术栈版本 (必须遵守)
 
@@ -124,6 +127,19 @@ Web API 路径: `apps/web/app/api/`
 - **导航**: @react-navigation v7
 - **状态管理**: zustand
 - **存储**: expo-secure-store (敏感数据), @react-native-async-storage (普通数据)
+
+## 🟢 微信小程序（apps/wechat，2026-05-11 Phase 0+1 ship）
+
+详见 [`apps/wechat/README.md`](apps/wechat/README.md)。**必读 4 条**：
+
+1. **AppID 必须先配**：`apps/wechat/project.config.json` 里把 `wx_TODO_REPLACE_APPID` 改为真实 AppID
+2. **后端必须配 WX_APPID / WX_SECRET**：`apps/web/.env` 加这两个，否则 `/api/auth/wechat-login` 直接 500
+3. **业务域名白名单**：mp.weixin.qq.com → 开发管理 → 服务器域名 → request 加 `https://piaociyuan.com`（开发期可在工具里勾"不校验合法域名"）
+4. **改代码后必须重新 build**：`cd apps/wechat && npm run dev:weapp`（watch 模式）。WeChat DevTools 打开 `apps/wechat/` 根目录（不是 dist/）
+
+技术栈：Taro 4.0.9 + React 19.1.0 + TypeScript 5.9.2。Phase 路线图见 `~/.claude/plans/terminal-docs-scalable-meadow.md`：Phase 2 = 用户社交，Phase 3 = 消息系统，Phase 4 = 票务+支付，Phase 5 = 收尾上架。
+
+**铁律**：不要在 apps/wechat 引用 next/* 或 react-native/*；不要复用 apps/web/lib/* 客户端代码（含 `localStorage` / `window`）。复用范围仅限：后端 API endpoint + 业务逻辑参考。
 
 ## 📱 Mobile 启动 / 登录排查铁律（2026-05-11）
 

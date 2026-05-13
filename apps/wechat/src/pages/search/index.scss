@@ -1,0 +1,124 @@
+.search-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.search-bar {
+  padding: 24rpx;
+  background: #ffffff;
+  border-bottom: 2rpx solid rgba(70, 70, 122, 0.1);
+}
+
+.search-input {
+  background: rgba(255, 255, 255, 0.8);
+  border: 2rpx solid rgba(70, 70, 122, 0.3);
+  border-radius: 32rpx;
+  padding: 16rpx 28rpx;
+  font-size: 28rpx;
+  color: var(--foreground);
+}
+
+.tab-bar {
+  display: flex;
+  background: #ffffff;
+  border-bottom: 2rpx solid rgba(70, 70, 122, 0.1);
+}
+
+.tab {
+  flex: 1;
+  text-align: center;
+  padding: 24rpx 0;
+  font-size: 28rpx;
+  color: var(--foreground-soft);
+  border-bottom: 4rpx solid transparent;
+
+  &.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+    font-weight: 600;
+  }
+}
+
+.search-list {
+  flex: 1;
+  padding: 24rpx;
+}
+
+.loading {
+  text-align: center;
+  padding: 80rpx 0;
+  color: var(--foreground-soft);
+}
+
+.user-row {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+.user-info {
+  flex: 1;
+}
+.user-name {
+  display: block;
+  font-size: 30rpx;
+  font-weight: 700;
+  color: var(--foreground);
+}
+.user-bio {
+  display: block;
+  font-size: 24rpx;
+  color: var(--foreground-soft);
+  margin-top: 4rpx;
+}
+.user-meta {
+  display: block;
+  font-size: 22rpx;
+  color: var(--foreground-faint);
+  margin-top: 4rpx;
+}
+
+.post-head {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  margin-bottom: 12rpx;
+}
+.post-author {
+  color: var(--foreground);
+  font-size: 28rpx;
+  font-weight: 500;
+}
+.post-content {
+  color: var(--foreground);
+  font-size: 28rpx;
+  line-height: 1.6;
+}
+
+.event-row {
+  display: flex;
+  gap: 16rpx;
+}
+.event-cover {
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: 12rpx;
+}
+.event-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.event-name {
+  display: block;
+  font-size: 30rpx;
+  font-weight: 700;
+  color: var(--foreground);
+  margin-bottom: 8rpx;
+}
+.event-meta {
+  display: block;
+  font-size: 24rpx;
+  color: var(--foreground-soft);
+}
