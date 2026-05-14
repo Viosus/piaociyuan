@@ -94,7 +94,7 @@ export default function SearchPage() {
         ) : tab === 'user' ? (
           users.length === 0 ? <Empty icon="🔍" title="未找到用户" /> :
           users.map((u) => (
-            <Card key={u.id}>
+            <Card key={u.id} onClick={() => Taro.navigateTo({ url: `/pages/user-profile/index?id=${u.id}` })}>
               <View className="user-row">
                 <Avatar src={u.avatar} name={u.nickname} size={80} />
                 <View className="user-info">
@@ -121,7 +121,7 @@ export default function SearchPage() {
         ) : (
           events.length === 0 ? <Empty icon="🎫" title="未找到活动" /> :
           events.map((e) => (
-            <Card key={e.id}>
+            <Card key={e.id} onClick={() => Taro.navigateTo({ url: `/pages/event-detail/index?id=${e.id}` })}>
               <View className="event-row">
                 {e.cover && <Image className="event-cover" src={e.cover} mode="aspectFill" />}
                 <View className="event-info">

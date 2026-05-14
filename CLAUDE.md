@@ -137,7 +137,9 @@ Web API 路径: `apps/web/app/api/`
 3. **业务域名白名单**：mp.weixin.qq.com → 开发管理 → 服务器域名 → request 加 `https://piaociyuan.com`（开发期可在工具里勾"不校验合法域名"）
 4. **改代码后必须重新 build**：`cd apps/wechat && npm run dev:weapp`（watch 模式）。WeChat DevTools 打开 `apps/wechat/` 根目录（不是 dist/）
 
-技术栈：Taro 4.0.9 + React 19.1.0 + TypeScript 5.9.2。Phase 路线图见 `~/.claude/plans/terminal-docs-scalable-meadow.md`：Phase 2 = 用户社交，Phase 3 = 消息系统，Phase 4 = 票务+支付，Phase 5 = 收尾上架。
+技术栈：Taro 4.0.9 + React 19.1.0 + TypeScript 5.9.2。
+
+**完整 Phase 路线图 + 设计决定 + 上架准备**见 [docs/wechat-小程序路线图.md](docs/wechat-小程序路线图.md)（6 phase / 10 周完整计划，每 phase ship 后必须更新本文）。
 
 **铁律**：不要在 apps/wechat 引用 next/* 或 react-native/*；不要复用 apps/web/lib/* 客户端代码（含 `localStorage` / `window`）。复用范围仅限：后端 API endpoint + 业务逻辑参考。
 

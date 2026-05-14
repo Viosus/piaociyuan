@@ -1,0 +1,106 @@
+.event-detail-page {
+  min-height: 100vh;
+  padding-bottom: 60rpx;
+}
+
+.loading {
+  text-align: center;
+  padding: 80rpx 24rpx;
+  color: var(--foreground-soft);
+}
+
+.section-title {
+  display: block;
+  font-size: 30rpx;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 16rpx;
+}
+
+.event-desc {
+  display: block;
+  font-size: 28rpx;
+  line-height: 1.7;
+  color: var(--foreground);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.no-tier {
+  display: block;
+  color: var(--foreground-soft);
+  font-size: 26rpx;
+  padding: 32rpx 0;
+  text-align: center;
+}
+
+.tier-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.tier-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16rpx 0;
+  border-bottom: 2rpx solid rgba(70, 70, 122, 0.08);
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.tier-info {
+  flex: 1;
+}
+
+.tier-name {
+  display: block;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.tier-stock {
+  display: block;
+  font-size: 22rpx;
+  color: var(--foreground-soft);
+  margin-top: 4rpx;
+}
+
+.tier-action {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.tier-price {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.tier-btn {
+  background: var(--primary);
+  color: #ffffff;
+  padding: 12rpx 28rpx;
+  border-radius: 32rpx;
+  font-size: 24rpx;
+  font-weight: 500;
+
+  &:active { opacity: 0.7; }
+}
+
+.tier-btn-disabled {
+  background: rgba(70, 70, 122, 0.2);
+  color: var(--foreground-faint);
+}
+
+.phase-hint {
+  text-align: center;
+  font-size: 22rpx;
+  color: var(--foreground-faint);
+  padding: 32rpx 24rpx 0;
+}

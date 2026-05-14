@@ -77,7 +77,7 @@ export default function EventsPage() {
           <Empty icon="🎫" title="该分类下暂无活动" />
         ) : (
           events.map((e) => (
-            <Card key={e.id} onClick={() => Taro.showToast({ title: `活动 #${e.id} 详情页 Phase 2`, icon: 'none' })}>
+            <Card key={e.id} onClick={() => Taro.navigateTo({ url: `/pages/event-detail/index?id=${e.id}` })}>
               <View className="event-row">
                 {e.cover && (
                   <Image className="event-cover" src={e.cover} mode="aspectFill" />

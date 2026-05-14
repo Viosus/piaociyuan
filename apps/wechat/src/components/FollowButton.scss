@@ -1,0 +1,32 @@
+.follow-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 32rpx;
+  padding: 12rpx 28rpx;
+  font-size: 26rpx;
+  font-weight: 500;
+  line-height: 1.2;
+  transition: opacity 0.15s ease;
+  user-select: none;
+
+  &.follow {
+    background: var(--primary);
+    color: #ffffff;
+  }
+
+  &.followed {
+    background: rgba(70, 70, 122, 0.12);
+    color: var(--primary);
+    border: 2rpx solid rgba(70, 70, 122, 0.3);
+  }
+
+  &:active {
+    opacity: 0.7;
+  }
+
+  &.size-sm {
+    padding: 8rpx 20rpx;
+    font-size: 22rpx;
+  }
+}

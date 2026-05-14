@@ -41,8 +41,7 @@ export default function HomePage() {
   };
 
   const goDetail = (id: number) => {
-    // Phase 2 才有 event-detail 页；先 toast 提示
-    Taro.showToast({ title: `活动 #${id} 详情页 Phase 2 上线`, icon: 'none' });
+    Taro.navigateTo({ url: `/pages/event-detail/index?id=${id}` });
   };
 
   return (

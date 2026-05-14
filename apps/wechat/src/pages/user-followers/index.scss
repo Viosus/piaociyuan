@@ -1,0 +1,39 @@
+.followers-page {
+  min-height: 100vh;
+  padding: 24rpx;
+}
+
+.followers-header {
+  padding: 8rpx 12rpx 16rpx;
+}
+
+.header-title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.loading {
+  text-align: center;
+  padding: 80rpx 0;
+  color: var(--foreground-soft);
+}
+
+.user-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.loading-more {
+  text-align: center;
+  padding: 24rpx 0;
+  font-size: 24rpx;
+  color: var(--foreground-soft);
+}
+
+.end-hint {
+  text-align: center;
+  padding: 24rpx 0;
+  font-size: 22rpx;
+  color: var(--foreground-faint);
+}

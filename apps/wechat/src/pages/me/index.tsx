@@ -91,6 +91,13 @@ export default function MePage() {
             )}
           </Card>
 
+          <Card onClick={() => Taro.navigateTo({ url: `/pages/user-profile/index?id=${user.id}` })}>
+            <View className="info-row">
+              <Text className="info-label">👤 查看我的主页</Text>
+              <Text className="info-arrow">›</Text>
+            </View>
+          </Card>
+
           <Card onClick={() => Taro.navigateTo({ url: '/pages/notifications/index' })}>
             <View className="info-row">
               <Text className="info-label">🔔 通知</Text>

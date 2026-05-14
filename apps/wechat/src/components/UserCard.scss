@@ -1,0 +1,49 @@
+.user-card {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  padding: 20rpx 24rpx;
+  background: var(--card-bg);
+  border-radius: 20rpx;
+  margin-bottom: 12rpx;
+  border: 2rpx solid rgba(255, 235, 245, 1);
+
+  &:active {
+    opacity: 0.85;
+  }
+}
+
+.user-card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.user-card-name {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.nickname {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.verified-dot {
+  font-size: 20rpx;
+  color: #ffffff;
+  background: var(--primary);
+  padding: 2rpx 8rpx;
+  border-radius: 10rpx;
+}
+
+.bio {
+  display: block;
+  font-size: 24rpx;
+  color: var(--foreground-soft);
+  margin-top: 4rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

@@ -7,6 +7,10 @@ export default defineAppConfig({
     'pages/search/index',
     'pages/login/index',
     'pages/notifications/index',
+    // Phase 2a：详情 / 主页 / 关注列表
+    'pages/event-detail/index',
+    'pages/user-profile/index',
+    'pages/user-followers/index',
   ],
   window: {
     backgroundTextStyle: 'light',
