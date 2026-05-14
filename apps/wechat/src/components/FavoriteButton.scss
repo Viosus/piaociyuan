@@ -1,0 +1,26 @@
+.fav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 12rpx 24rpx;
+  border-radius: 32rpx;
+  background: rgba(70, 70, 122, 0.08);
+
+  &.favorited {
+    background: rgba(245, 158, 11, 0.15);
+  }
+
+  &:active { opacity: 0.7; }
+}
+
+.fav-icon { font-size: 26rpx; }
+
+.fav-label {
+  font-size: 24rpx;
+  color: var(--foreground-soft);
+
+  .favorited & {
+    color: #c2410c;
+    font-weight: 500;
+  }
+}

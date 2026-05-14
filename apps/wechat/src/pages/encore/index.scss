@@ -1,0 +1,48 @@
+.encore-page {
+  min-height: 100vh;
+  padding-bottom: 32rpx;
+}
+
+.sort-bar {
+  display: flex;
+  background: #ffffff;
+  padding: 16rpx 24rpx;
+  border-bottom: 2rpx solid rgba(70, 70, 122, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  gap: 16rpx;
+}
+
+.sort-tab {
+  padding: 12rpx 28rpx;
+  border-radius: 28rpx;
+  background: rgba(70, 70, 122, 0.08);
+  color: var(--foreground-soft);
+  font-size: 26rpx;
+
+  &.active {
+    background: var(--primary);
+    color: #ffffff;
+    font-weight: 500;
+  }
+}
+
+.post-list {
+  padding: 24rpx;
+}
+
+.loading,
+.loading-more {
+  text-align: center;
+  padding: 32rpx 0;
+  color: var(--foreground-soft);
+  font-size: 24rpx;
+}
+
+.end-hint {
+  text-align: center;
+  padding: 24rpx 0;
+  font-size: 22rpx;
+  color: var(--foreground-faint);
+}

@@ -38,8 +38,9 @@
 |---|---|---|---|---|
 | **0** | Taro 脚手架 + project.config.json + hello world | 0.5 周 | ✅ | `4ace5a7` |
 | **1** | wx.login + API/Storage adapter + tab 导航 + 5 个只读 tab 页 | 2 周 | ✅ | `4ace5a7` |
-| **2a** | 活动详情 + 用户主页 + 关注/粉丝列表 + 路线图文档 | 1 周 | ✅ | _（本批，见 git log）_ |
-| **2b** | Encore（帖子+评论+点赞）+ Signals 分类广场 + 收藏 + 设置 | 1.5 周 | ⏳ | — |
+| **2a** | 活动详情 + 用户主页 + 关注/粉丝列表 + 路线图文档 | 1 周 | ✅ | `cba42f9` |
+| **2b-i** | Encore 帖子流 + 帖子详情 + 评论 + 点赞 + 收藏 | 0.75 周 | ✅ | _（本批，见 git log）_ |
+| **2b-ii** | Signals 分类广场 + 收藏列表页 + 设置（含头像上传） | 0.75 周 | ⏳ | — |
 | **3** | 消息：私聊会话 + 群聊 + Taro.connectSocket + 图片消息 | 2 周 | ⏳ | — |
 | **4** | 票务 + 支付：票列表 / 详情 / QR / 转赠 / wx.requestPayment V3 | 2 周 | ⏳ | — |
 | **5** | 收藏品 / 分享 / 扫码核销 / 分包优化 / 提交审核 | 1 周 | ⏳ | — |
@@ -127,27 +128,45 @@
 
 ---
 
-## 6. Phase 2b ⏳ — Encore + Signals + 收藏 + 设置
+## 6. Phase 2b ⏳ — 拆为 2b-i + 2b-ii
 
-### 6.1 范围（约 1.5 周）
-- **Encore 帖子流** `pages/encore/index`：信息流 + `useReachBottom` 分页
-- **帖子详情** `pages/post-detail/index?id=`：帖子内容 + 图片轮播 + 评论 + 嵌套回复
-- **评论交互**：发评论 / 回复 / 点赞评论
-- **帖子点赞 / 收藏 / 分享** 按钮（点赞用 `POST /api/posts/[id]/like` toggle）
-- **Signals 广场** `pages/signals/index`：分类筛选 chip + 活动卡片瀑布
-- **收藏** `pages/favorites/index`：三 tab（帖子 / 活动 / 关注），调 `/api/user/favorites` + `/api/user/following`
-- **设置** `pages/settings/index`：改昵称 / 改头像（`wx.chooseMedia` + `wx.uploadFile` → `POST /api/upload` → `POST /api/user/update`）
+为了维持 2a 节奏（每批 1 周左右），把 2b 进一步拆为两批。2b-i 已 ship 本批；2b-ii 留下批。
 
-### 6.2 新组件
-- `PostCard`：帖子卡片（用户头条 + 文字 + 图片轮播 + 计数行）
-- `CommentItem`：评论行 + 嵌套回复
-- `ImageSwiper`：Taro `<Swiper>` 多图轮播
-- `TagChip`：分类筛选 chip
+### 6a. Phase 2b-i ✅（本批）— Encore 帖子流 + 帖子详情 + 评论 + 点赞/收藏
 
-### 6.3 风险
-- 评论嵌套回复 → 用 collapsible "查看更多回复" UI
-- 多图帖子 → `Taro.Swiper`
-- 改头像 → `wx.chooseMedia` 拿临时文件 → `Taro.uploadFile` 到 `/api/upload`
+**新页（2 个）**
+- `pages/encore/index` — 帖子流，3 个 sort tab（latest/hot/following）+ 下拉刷新 + 上拉加载
+- `pages/post-detail/index?id=` — 帖子详情（作者 + 内容 + 图片轮播 + 关联活动 + 评论区 + 底部互动栏 + 评论输入栏）
+
+**新组件（5 个）**
+- `PostCard` — 帖子卡片（list 用）
+- `ImageSwiper` — 多图 Swiper + Taro.previewImage 大图查看
+- `CommentItem` — 评论 + 嵌套前 3 条回复 + "查看全部 N 条回复"占位
+- `LikeButton` — POST /api/posts/[id]/like 幂等 toggle，乐观更新 + 后端校正
+- `FavoriteButton` — POST 加 / DELETE 减（非幂等），乐观切换
+
+**接线**
+- me 页加"📝 帖子广场"行 → encore
+- search 页 post 卡片可点 → post-detail
+- encore PostCard 点击 → post-detail
+- post-detail 关联活动卡片点击 → event-detail
+
+**已知留 2b-ii**：完整嵌套回复展开（目前只显示前 3 条 + 占位 toast）
+
+### 6b. Phase 2b-ii ⏳（下批）— Signals + 收藏列表 + 设置
+
+**新页（3 个）**
+- `pages/signals/index` — 分类广场，复用 events API + 分类 chip 筛选
+- `pages/favorites/index` — 我的收藏，三 tab（帖子 / 活动 / 关注）
+- `pages/settings/index` — 设置（昵称 / 头像 / bio）
+
+**新功能**
+- 改头像：`wx.chooseMedia` 选图 → `Taro.uploadFile` 调 `/api/upload` → `POST /api/user/update` 改 avatar
+- 完整嵌套回复加载：从 CommentItem 的占位 toast 升级为真分页加载
+
+**新组件**
+- `TagChip` — 分类筛选 chip（signals 用）
+- `AvatarUpload` — 头像上传（settings 用，集成 wx.chooseMedia）
 
 ---
 

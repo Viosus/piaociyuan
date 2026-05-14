@@ -110,7 +110,7 @@ export default function SearchPage() {
         ) : tab === 'post' ? (
           posts.length === 0 ? <Empty icon="📝" title="未找到帖子" /> :
           posts.map((p) => (
-            <Card key={p.id}>
+            <Card key={p.id} onClick={() => Taro.navigateTo({ url: `/pages/post-detail/index?id=${p.id}` })}>
               <View className="post-head">
                 <Avatar src={p.user.avatar} name={p.user.nickname} size={60} />
                 <Text className="post-author">{p.user.nickname}</Text>

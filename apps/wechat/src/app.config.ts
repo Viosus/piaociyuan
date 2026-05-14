@@ -11,6 +11,9 @@ export default defineAppConfig({
     'pages/event-detail/index',
     'pages/user-profile/index',
     'pages/user-followers/index',
+    // Phase 2b-i：帖子流 + 帖子详情
+    'pages/encore/index',
+    'pages/post-detail/index',
   ],
   window: {
     backgroundTextStyle: 'light',

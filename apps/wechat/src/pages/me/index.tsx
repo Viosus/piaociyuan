@@ -98,6 +98,13 @@ export default function MePage() {
             </View>
           </Card>
 
+          <Card onClick={() => Taro.navigateTo({ url: '/pages/encore/index' })}>
+            <View className="info-row">
+              <Text className="info-label">📝 帖子广场</Text>
+              <Text className="info-arrow">›</Text>
+            </View>
+          </Card>
+
           <Card onClick={() => Taro.navigateTo({ url: '/pages/notifications/index' })}>
             <View className="info-row">
               <Text className="info-label">🔔 通知</Text>

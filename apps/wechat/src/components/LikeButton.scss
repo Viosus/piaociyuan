@@ -1,0 +1,28 @@
+.like-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 12rpx 24rpx;
+  border-radius: 32rpx;
+  background: rgba(70, 70, 122, 0.08);
+
+  &.liked {
+    background: rgba(239, 68, 68, 0.1);
+  }
+
+  &:active { opacity: 0.7; }
+}
+
+.like-icon {
+  font-size: 28rpx;
+}
+
+.like-count {
+  font-size: 24rpx;
+  color: var(--foreground-soft);
+
+  .liked & {
+    color: var(--danger);
+    font-weight: 500;
+  }
+}
